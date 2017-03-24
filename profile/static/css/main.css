@@ -16,13 +16,18 @@
     display: inline;
     list-style-type: none;
     padding-right: 20px;
-    padding: 20px;
 }
 
 .sso-profile-tab-container li.active {
     padding: 20px;
     background-color: white;
     border-top: 5px solid #E41F13;
+}
+
+.sso-profile-tab-container li a {
+    font-weight: bold;
+    color: #363636;
+    padding: 20px;
 }
 
 .sso-profile-toolbar-labels-container {
@@ -34,6 +39,6 @@
     text-align: right;
 }
 
-.sso-profile-toolbar-buttons-container button {
+.sso-profile-toolbar-buttons-container .button {
     margin-right: 20px;
 }

@@ -10,10 +10,10 @@
         </ul>
         <ul class="list-inline list-separators float--right">
           {% if not sso_is_logged_in %}
-            <li class="float--left soft--right"><a href="{{ sso_login_url }}" target="_self" title="Login"  class="link--grey">Login</a></li>
+            <li class="float--left soft--right"><a href="{{ sso_login_url }}" target="_self" title="Sign in"  class="link--grey">Sign in</a></li>
           {% else %}
             <li class="float--left soft--right"><a href="{% url 'index' %}" target="_self" title="Profile" class="link--grey">Profile</a></li>
-            <li class="float--left soft--left"><a href="{{ sso_logout_url }}" target="_self" title="Logout" class="link--grey">Logout</a></li>
+            <li class="float--left soft--left"><a href="{{ sso_logout_url }}" target="_self" title="Logout" class="link--grey">Sign out</a></li>
           {% endif %}
         </ul>
       </div>
