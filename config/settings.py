@@ -34,11 +34,12 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.staticfiles',
-    'django.contrib.humanize',
+    "django.contrib.staticfiles",
+    "django.contrib.humanize",
     "raven.contrib.django.raven_compat",
     "django.contrib.sessions",
     "directory_constants",
+    "profile",
 ]
 
 MIDDLEWARE_CLASSES = [

@@ -1,0 +1,47 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html class="lte-ie8" lang="en"><![endif]-->
+<!--[if gt IE 8]><!--><html lang="en-us"><!--<![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en" class="ie8"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8" />
+        <title>{% block head_title %}Exporting is Great Profile - GREAT.gov.uk{% endblock %}</title>
+
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900" rel="stylesheet">
+
+        <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon" />
+        <link rel="mask-icon" href="{% static 'images/gov.uk_logotype_crown.svg' %}" color="#0b0c0c">
+        <link rel="apple-touch-icon-precomposed" sizes="152x152" href="{% static 'images/apple-touch-icon-152x152.png' %}">
+        <link rel="apple-touch-icon-precomposed" sizes="120x120" href="{% static 'images/apple-touch-icon-120x120.png' %}">
+        <link rel="apple-touch-icon-precomposed" sizes="76x76" href="{% static 'images/apple-touch-icon-76x76.png' %}">
+        <link rel="apple-touch-icon-precomposed" href="{% static 'images/apple-touch-icon-60x60.png' %}">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta property="og:image" content="{% static 'images/opengraph-image.png' %}">
+        <link href="{% static 'Dit-Pattern-Styling/public/css/main.css' %}" media="all" rel="stylesheet" />
+        <link href="{% static 'css/bootstrap/css/bootstrap-grid-only.css' %}" media="all" rel="stylesheet" />
+        <link href="{% static 'css/bootstrap/css/bootstrap-responsive.css' %}" media="all" rel="stylesheet" />
+
+        {% block css %}
+        {% endblock %}
+    </head>
+
+    <body>
+        <script>document.body.className = ((document.body.className) ? document.body.className + ' js-enabled' : 'js-enabled');</script>
+
+        {% include 'header.html' %}
+
+        <div id="content" class="enrolment-content">
+            {% block content %}
+            {% endblock content %}
+        </div>
+        {% include 'footer.html' %}
+
+        <script src="{% static 'Dit-Pattern-Styling/public/js/jquery.js' %}"></script>
+        <!--[if IE 8]><script src="{% static 'Dit-Pattern-Styling/public/js/ie8.js' }"></script><![endif]-->
+        <!--[if IE 8]><script type="text/javascript" src="Dit-Pattern-Styling/public/js/selectivizr.js"></script><![endif]-->
+        <script type="text/javascript" src="{% static 'Dit-Pattern-Styling/public/js/navigation.js' %}"></script>
+        {% block bodyScripts %}{% endblock bodyScripts %}
+    </body>
+</html>
