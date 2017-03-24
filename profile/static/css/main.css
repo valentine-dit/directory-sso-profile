@@ -1,0 +1,39 @@
+.icon-menu{
+  background-image:url("icons/menu.svg")
+}
+
+.sso-profile-tab-container {
+    margin-top: 30px;
+    background-color: #F0F3F2;
+}
+
+.sso-profile-tab-container ul {
+    padding: 20px;
+    padding-left: 0;
+}
+
+.sso-profile-tab-container li {
+    display: inline;
+    list-style-type: none;
+    padding-right: 20px;
+    padding: 20px;
+}
+
+.sso-profile-tab-container li.active {
+    padding: 20px;
+    background-color: white;
+    border-top: 5px solid #E41F13;
+}
+
+.sso-profile-toolbar-labels-container {
+    margin-top: 10px;
+}
+
+.sso-profile-toolbar-buttons-container {
+    margin-top: 30px;
+    text-align: right;
+}
+
+.sso-profile-toolbar-buttons-container button {
+    margin-right: 20px;
+}

@@ -2,5 +2,26 @@
 
 {% block content %}
 <div class="container">
+    <div class="row-fluid">
+        <div class="span8 sso-profile-toolbar-labels-container">
+            <h1 class="h1">Profile</h1>
+            <div>You are signed in as {{ sso_user_email }}.</div>
+        </div>
+        <div class="span4 sso-profile-toolbar-buttons-container">
+            <button class="button button-border">Sign out</button>
+            <a href="#" class="link">Reset password</a>
+        </div>
+    </div>
+</div>
+<div class="sso-profile-tab-container">
+    <div class="container">
+        <div class="row-fluid">
+            <ul>
+                <li class="active">Export opportunities</li>
+                <li>Find a buyer</li>
+                <li>Selling online overseas</li>
+            </ul>
+        </div>
+    </div>
 </div>
 {% endblock content %}
