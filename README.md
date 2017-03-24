@@ -1,10 +1,10 @@
-# directory-sso-dashboard
+# directory-sso-profile
 
 This is the repository for EIG Single User Dashboard (SUD) - the Department for International Trade (DIT) service for managing EIG profiles.
 
 ## Build status
 
-[![CircleCI](https://circleci.com/gh/uktrade/directory-sso-dashboard/tree/master.svg?style=svg)](https://circleci.com/gh/uktrade/directory-sso-dashboard/tree/master)
+[![CircleCI](https://circleci.com/gh/uktrade/directory-sso-profile/tree/master.svg?style=svg)](https://circleci.com/gh/uktrade/directory-sso-profile/tree/master)
 
 ## Development 
 
@@ -48,8 +48,8 @@ This requires all host environment variables to be set.
 ## Running locally without Docker
 
 ### Installing
-    $ git clone https://github.com/uktrade/directory-sso-dashboard
-    $ cd directory-sso-dashboard
+    $ git clone https://github.com/uktrade/directory-sso-profile
+    $ cd directory-sso-profile
     $ virtualenv .venv -p python3.5
     $ source .venv/bin/activate
     $ pip install -r requirements_test.txt
@@ -86,10 +86,10 @@ To make sso work locally add the following to your `/etc/hosts`:
 127.0.0.1 sso.trade.great.
 127.0.0.1 api.trade.great.dev
 
-Then log into `directory-sso` via `sso.trade.great.dev:8001`, and use `directory-sso-dashboard` on `ui.trade.great.dev:8001`
+Then log into `directory-sso` via `sso.trade.great.dev:8001`, and use `directory-sso-profile` on `ui.trade.great.dev:8001`
 
 Note in production, the `directory-sso` session cookie is shared with all subdomains that are on the same parent domain as `directory-sso`. However in development we cannot share cookies between subdomains using `localhost` - that would be like trying to set a cookie for `.com`, which is not supported any any RFC.
 
 Therefore to make cookie sharing work in development we need the apps to ne running on subdomains. Some stipulations:
- - `directory-sso-dashboard` and `directory-sso` must both be running on sibling subdomains (with same parent domain)
+ - `directory-sso-profile` and `directory-sso` must both be running on sibling subdomains (with same parent domain)
  - `directory-sso` must be told to target cookies at the parent domain.

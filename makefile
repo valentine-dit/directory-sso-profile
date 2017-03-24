@@ -73,7 +73,7 @@ docker_test: docker_remove_all
 	docker-compose -f docker-compose-test.yml run sut
 
 docker_build:
-	docker build -t ukti/directory-sso-dashboard:latest .
+	docker build -t ukti/directory-sso-profile:latest .
 
 DEBUG_SET_ENV_VARS := \
 	export PORT=8006; \
@@ -111,8 +111,8 @@ debug_shell:
 debug: test_requirements debug_test
 
 heroku_deploy_dev:
-	docker build -t registry.heroku.com/directory-sso-dashboard-dev/web .
-	docker push registry.heroku.com/directory-sso-dashboard-dev/web
+	docker build -t registry.heroku.com/directory-sso-profile-dev/web .
+	docker push registry.heroku.com/directory-sso-profile-dev/web
 
 smoke_tests:
 	cd $(mktemp -d) && \
