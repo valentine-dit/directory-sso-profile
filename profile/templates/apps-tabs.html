@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row-fluid">
+            <div class="span8 sso-profile-toolbar-labels-container">
+                <h1 class="h1">Profile</h1>
+                <div>You are signed in as {{ sso_user_email }}.</div>
+            </div>
+            <div class="span4 sso-profile-toolbar-buttons-container">
+                <a class="button button-border" hre="{{ sso_logout_url }}">Sign out</button>
+                <a href="#" class="link">Reset password</a>
+            </div>
+        </div>
+    </div>
+    <div class="sso-profile-tab-container">
+        <div class="container">
+            <div class="row-fluid">
+                <ul>
+                    <li class="{{ exops_tab_classes }}"><a href="{% url 'export-opportunities' %}">Export opportunities</a></li>
+                    <li class="{{ fab_tab_classes }}"><a href="{% url 'find-a-buyer' %}">Find a buyer</a></li>
+                    <li class="{{ soo_tab_classes }}"><a href="{% url 'selling-online-overseas' %}">Selling online overseas</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        {% block tab_content %}
+        {% endblock tab_content %}
+    </div>
+{% endblock content %}
