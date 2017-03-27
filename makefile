@@ -44,9 +44,9 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_UTM_COOKIE_DOMAIN=.great.dev; \
 	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
 	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
-	export SSO_PROFILE_API_CLIENT_BUYER_BASE_URL=http://buyer.trade.great.dev:8001; \
-	export SSO_PROFILE_API_CLIENT_KEY=debug; \
-	export SSO_PROFILE_API_CLIENT_CLASS_NAME = 'unit-test'
+	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001; \
+	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_KEY=debug; \
+	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_CLASS_NAME='unit-test'
 
 DOCKER_REMOVE_ALL := \
 	docker ps -a | \
@@ -78,7 +78,7 @@ docker_build:
 	docker build -t ukti/directory-sso-profile:latest .
 
 DEBUG_TEST_SET_ENV_VARS := \
-	export API_CLIENT_CLASS_NAME='unit-test'
+	export DIRECTORY_API_EXTERNAL_CLIENT_CLASS_NAME='unit-test'
 
 DEBUG_SET_ENV_VARS := \
 	export PORT=8006; \
@@ -96,8 +96,8 @@ DEBUG_SET_ENV_VARS := \
 	export UTM_COOKIE_DOMAIN=.great.dev; \
 	export GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
 	export GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
-	export API_CLIENT_BUYER_BASE_URL=http://buyer.trade.great.dev:8001; \
-	export API_CLIENT_KEY=debug
+	export DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001; \
+	export DIRECTORY_API_EXTERNAL_CLIENT_KEY=debug
 
 debug_webserver:
 	$(DEBUG_SET_ENV_VARS) && $(DJANGO_WEBSERVER)
