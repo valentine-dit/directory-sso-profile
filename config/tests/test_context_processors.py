@@ -36,17 +36,3 @@ def test_analytics_installed(settings):
     processors = settings.TEMPLATES[0]['OPTIONS']['context_processors']
 
     assert 'config.context_processors.analytics' in processors
-
-
-def test_sso_user_installed(settings):
-    processors = settings.TEMPLATES[0]['OPTIONS']['context_processors']
-
-    assert 'config.context_processors.sso_user' in processors
-
-
-def test_sso_user_exposes_sso_user(sso_request, sso_user):
-    actual = context_processors.sso_user(sso_request)
-
-    assert actual == {
-        'sso_user': sso_user
-    }

@@ -64,7 +64,6 @@ TEMPLATES = [
                 'sso.context_processors.sso_user_processor',
                 'config.context_processors.feature_flags',
                 'config.context_processors.analytics',
-                'config.context_processors.sso_user',
             ],
         },
     },
@@ -195,6 +194,7 @@ SSO_API_CLIENT_KEY = os.environ["SSO_API_CLIENT_KEY"]
 SSO_LOGIN_URL = os.environ["SSO_LOGIN_URL"]
 SSO_LOGOUT_URL = os.environ["SSO_LOGOUT_URL"]
 SSO_SIGNUP_URL = os.environ["SSO_SIGNUP_URL"]
+SSO_PASSWORD_RESET_URL = os.environ["SSO_PASSWORD_RESET_URL"]
 SSO_REDIRECT_FIELD_NAME = os.environ["SSO_REDIRECT_FIELD_NAME"]
 SSO_SESSION_COOKIE = os.environ["SSO_SESSION_COOKIE"]
 

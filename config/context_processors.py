@@ -16,9 +16,3 @@ def analytics(request):
             'UTM_COOKIE_DOMAIN': settings.UTM_COOKIE_DOMAIN,
         }
     }
-
-
-def sso_user(request):
-    return {
-        'sso_user': request.sso_user,
-    }

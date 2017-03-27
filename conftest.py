@@ -14,9 +14,16 @@ def sso_user():
 
 
 @pytest.fixture
-def sso_request(sso_user, rf):
+def request_logged_in(rf, sso_user):
     request = rf.get('/')
     request.sso_user = sso_user
+    return request
+
+
+@pytest.fixture
+def request_logged_out(rf):
+    request = rf.get('/')
+    request.sso_user = None
     return request
 
 

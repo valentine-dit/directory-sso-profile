@@ -1,7 +1,4 @@
 from django.conf import settings
-from django.http import HttpResponseRedirect, QueryDict
-from django.utils.six.moves.urllib.parse import urlparse, urlunparse
-from django.shortcuts import resolve_url
 
 from directory_sso_api_client.client import DirectorySSOAPIClient
 
