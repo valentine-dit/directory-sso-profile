@@ -8,7 +8,7 @@ test_requirements:
 	pip install -r requirements_test.txt
 
 FLAKE8 := flake8 . --exclude=.venv
-PYTEST := pytest . --cov=. --cov-config=.coveragerc --capture=no $(pytest_args)
+PYTEST := pytest . --cov=. --cov-config=.coveragerc --cov-report=html --cov-report=term --capture=no $(pytest_args)
 COLLECT_STATIC := python manage.py collectstatic --noinput
 
 test:
@@ -38,6 +38,7 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/api/v1/; \
 	export SSO_PROFILE_SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/; \
 	export SSO_PROFILE_SSO_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://ui.trade.great.dev:8001; \
+	export SSO_PROFILE_SSO_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
 	export SSO_PROFILE_SSO_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/; \
 	export SSO_PROFILE_SSO_REDIRECT_FIELD_NAME=next; \
 	export SSO_PROFILE_SSO_SESSION_COOKIE=debug_sso_session_cookie; \
@@ -85,6 +86,7 @@ DEBUG_SET_ENV_VARS := \
 	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/api/v1/; \
 	export SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/; \
 	export SSO_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://ui.trade.great.dev:8001; \
+	export SSO_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
 	export SSO_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/; \
 	export SSO_REDIRECT_FIELD_NAME=next; \
 	export SSO_SESSION_COOKIE=debug_sso_session_cookie; \

@@ -6,6 +6,5 @@ class ExportOpportunitiesView(TemplateView):
 
     def get_context_data(self):
         return {
-            'sso_user_email': self.request.sso_user.email,
             'exops_tab_classes': 'active',
         }
