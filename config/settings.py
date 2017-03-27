@@ -64,6 +64,7 @@ TEMPLATES = [
                 'sso.context_processors.sso_user_processor',
                 'config.context_processors.feature_flags',
                 'config.context_processors.analytics',
+                'config.context_processors.sso_user',
             ],
         },
     },
