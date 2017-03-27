@@ -184,9 +184,19 @@ else:
     }
 
 
-# directory-api
-DIRECTORY_API_CLIENT_BASE_URL = os.environ["DIRECTORY_API_CLIENT_BASE_URL"]
-DIRECTORY_API_CLIENT_KEY = os.environ["DIRECTORY_API_CLIENT_KEY"]
+# directory-external-api
+API_CLIENT_CLASSES = {
+    'default': 'directory_api_external.client.DirectoryAPIExternalClient',
+    'unit-test': (
+        'directory_api_external.dummy_client.DummyDirectoryAPIExternalClient'
+    ),
+}
+API_CLIENT_CLASS_NAME = os.getenv(
+    'API_CLIENT_CLASS_NAME', 'default'
+)
+API_CLIENT_CLASS = API_CLIENT_CLASSES[API_CLIENT_CLASS_NAME]
+API_CLIENT_KEY = os.environ['API_CLIENT_KEY']
+API_CLIENT_BUYER_BASE_URL = os.environ['API_CLIENT_BUYER_BASE_URL']
 
 # directory-sso
 SSO_API_CLIENT_BASE_URL = os.environ["SSO_API_CLIENT_BASE_URL"]
