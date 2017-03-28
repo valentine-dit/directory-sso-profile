@@ -32,8 +32,6 @@ docker_run:
 DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_SECRET_KEY=debug; \
 	export SSO_PROFILE_DEBUG=true ;\
-	export SSO_PROFILE_DIRECTORY_API_CLIENT_KEY=debug; \
-	export SSO_PROFILE_DIRECTORY_API_CLIENT_BASE_URL=http://api.trade.great.dev:8000; \
 	export SSO_PROFILE_SSO_API_CLIENT_KEY=api_signature_debug; \
 	export SSO_PROFILE_SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/api/v1/; \
 	export SSO_PROFILE_SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/; \
@@ -45,7 +43,10 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_SESSION_COOKIE_SECURE=false; \
 	export SSO_PROFILE_UTM_COOKIE_DOMAIN=.great.dev; \
 	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
-	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x
+	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
+	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001; \
+	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_KEY=debug; \
+	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_CLASS_NAME='unit-test'
 
 DOCKER_REMOVE_ALL := \
 	docker ps -a | \
@@ -76,12 +77,13 @@ docker_test: docker_remove_all
 docker_build:
 	docker build -t ukti/directory-sso-profile:latest .
 
+DEBUG_TEST_SET_ENV_VARS := \
+	export DIRECTORY_API_EXTERNAL_CLIENT_CLASS_NAME='unit-test'
+
 DEBUG_SET_ENV_VARS := \
 	export PORT=8006; \
 	export SECRET_KEY=debug; \
 	export DEBUG=true ;\
-	export DIRECTORY_API_CLIENT_KEY=debug; \
-	export DIRECTORY_API_CLIENT_BASE_URL=http://api.trade.great.dev:8000; \
 	export SSO_API_CLIENT_KEY=api_signature_debug; \
 	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/api/v1/; \
 	export SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/; \
@@ -93,16 +95,25 @@ DEBUG_SET_ENV_VARS := \
 	export SESSION_COOKIE_SECURE=false; \
 	export UTM_COOKIE_DOMAIN=.great.dev; \
 	export GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
-	export GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x
+	export GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
+	export DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001; \
+	export DIRECTORY_API_EXTERNAL_CLIENT_KEY=debug
 
 debug_webserver:
 	$(DEBUG_SET_ENV_VARS) && $(DJANGO_WEBSERVER)
 
 debug_pytest:
-	$(DEBUG_SET_ENV_VARS) && $(COLLECT_STATIC) && $(PYTEST)
+	$(DEBUG_SET_ENV_VARS) && \
+	$(DEBUG_TEST_SET_ENV_VARS) && \
+	$(COLLECT_STATIC) && \
+	$(PYTEST)
 
 debug_test:
-	$(DEBUG_SET_ENV_VARS) && $(COLLECT_STATIC) && $(FLAKE8) && $(PYTEST) --cov-report=html
+	$(DEBUG_SET_ENV_VARS) && \
+	$(DEBUG_TEST_SET_ENV_VARS) && \
+	$(COLLECT_STATIC) && \
+	$(FLAKE8) && \
+	$(PYTEST)
 
 debug_manage:
 	$(DEBUG_SET_ENV_VARS) && ./manage.py $(cmd)
