@@ -44,9 +44,13 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_UTM_COOKIE_DOMAIN=.great.dev; \
 	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
 	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
-	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001; \
+	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001/api/external/; \
 	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_KEY=debug; \
-	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_CLASS_NAME='unit-test'
+	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_CLASS_NAME='unit-test'; \
+	export SSO_PROFILE_EXPORTING_IS_GREAT_API_BASIC_AUTH_USERNAME=debug; \
+	export SSO_PROFILE_EXPORTING_IS_GREAT_API_BASIC_AUTH_PASSWORD=debug; \
+	export SSO_PROFILE_EXPORTING_IS_GREAT_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \
+	export SSO_PROFILE_EXPORTING_IS_GREAT_API_SECRET=debug
 
 DOCKER_REMOVE_ALL := \
 	docker ps -a | \
@@ -96,8 +100,12 @@ DEBUG_SET_ENV_VARS := \
 	export UTM_COOKIE_DOMAIN=.great.dev; \
 	export GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
 	export GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
-	export DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001; \
-	export DIRECTORY_API_EXTERNAL_CLIENT_KEY=debug
+	export DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001/api/external/; \
+	export DIRECTORY_API_EXTERNAL_CLIENT_KEY=debug; \
+	export EXPORTING_IS_GREAT_API_BASIC_AUTH_USERNAME=debug; \
+	export EXPORTING_IS_GREAT_API_BASIC_AUTH_PASSWORD=debug; \
+	export EXPORTING_IS_GREAT_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \
+	export EXPORTING_IS_GREAT_API_SECRET=debug
 
 debug_webserver:
 	$(DEBUG_SET_ENV_VARS) && $(DJANGO_WEBSERVER)

@@ -39,6 +39,13 @@ def api_response_200():
 
 
 @pytest.fixture
+def api_response_403():
+    response = requests.Response()
+    response.status_code = http.client.FORBIDDEN
+    return response
+
+
+@pytest.fixture
 def api_response_404():
     response = requests.Response()
     response.status_code = http.client.NOT_FOUND
