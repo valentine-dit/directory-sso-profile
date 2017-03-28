@@ -3,9 +3,10 @@ from requests.exceptions import HTTPError
 from django.views.generic import TemplateView
 
 from profile.fab import helpers
+from sso.utils import SSOLoginRequiredMixin
 
 
-class FindABuyerView(TemplateView):
+class FindABuyerView(SSOLoginRequiredMixin, TemplateView):
     template_name_fab_user = 'fab/is-fab-user.html'
     template_name_not_fab_user = 'fab/is-not-fab-user.html'
     template_name_error = 'fab/supplier-company-retrieve-error.html'
