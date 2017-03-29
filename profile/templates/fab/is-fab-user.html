@@ -1,7 +1,22 @@
 {% extends 'fab/base.html' %}
 {% block tab_content_main %}
-	<div>You're a FAB user.</div>
-	<div>
-		{{ company }}
+	<div class="row-fluid sso-profile-fab-container">
+		<div class="span3 sso-profile-fab-logo-container">
+			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}"><img src="{{company.logo}}" width="200" class="sso-profile-fab-logo" /></a>
+			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}" class="sso-profile-fab-logo-edit-button">
+				<span class="icon-white icon-pencil"></span>
+				<span>Edit</span>
+			</a>
+		</div>
+		<div class="span9">
+			<div>
+				<h1 class="sso-profile-fab-company-name">{{ company.name }}</h1>
+			</div>
+			<div class="sso-profile-fab-company-links">
+				<a href="{{ FAB_EDIT_PROFILE_URL }}">Edit profile</a>
+				<span class="sso-profile-fab-company-links-seperator">|</span>
+				<a href="{{ FAB_ADD_CASE_STUDY_URL }}">Add case study</a>
+			</div>
+		</div>
 	</div>
 {% endblock tab_content_main %}

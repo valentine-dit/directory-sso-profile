@@ -1,6 +1,7 @@
 from requests.exceptions import HTTPError
 
 from django.views.generic import TemplateView
+from django.conf import settings
 
 from profile.fab import helpers
 from sso.utils import SSOLoginRequiredMixin
@@ -35,4 +36,7 @@ class FindABuyerView(SSOLoginRequiredMixin, TemplateView):
         return {
             'fab_tab_classes': 'active',
             'company': self.company,
+            'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
+            'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
+            'FAB_ADD_CASE_STUDY_URL': settings.FAB_ADD_CASE_STUDY_URL,
         }
