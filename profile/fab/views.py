@@ -15,8 +15,8 @@ class FindABuyerView(SSOLoginRequiredMixin, TemplateView):
     company_retrieve_error = False
 
     def dispatch(self, request, *args, **kwargs):
+        sso_id = request.sso_user.id
         try:
-            sso_id = request.sso_user.id
             self.company = helpers.get_supplier_company_profile(sso_id)
         except HTTPError:
             self.company_retrieve_error = True
