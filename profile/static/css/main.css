@@ -1,15 +1,24 @@
+body {
+  background-color: #ffffff;
+}
+
+.button-primary {
+  background-color: #e41f13;
+  color: #ffffff;
+  font-size: 24px;
+}
+
 .sso-profile-tab-container {
     margin-top: 30px;
     background-color: #F0F3F2;
 }
 
 .sso-profile-tab-container ul {
-    padding: 20px;
     padding-left: 0;
 }
 
 .sso-profile-tab-container li {
-    display: inline;
+    display: inline-block;
     list-style-type: none;
     padding-right: 20px;
 }
@@ -37,4 +46,24 @@
 
 .sso-profile-toolbar-buttons-container .button {
     margin-right: 20px;
+}
+
+#profile-required {
+  padding: 40px 20px 20px 20px;  
+  margin-bottom: 156px;
+}
+
+#profile-required h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+#profile-required li {
+  list-style-type: disc;
+  margin: 0 0 10px 20px;
+  padding-left: 15px;
+}
+
+#profile-required ul {
+  margin-bottom: 30px;
 }
