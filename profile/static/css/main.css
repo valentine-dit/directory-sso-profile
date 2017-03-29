@@ -43,8 +43,10 @@ body {
     text-align: right;
 }
 
-.sso-profile-toolbar-buttons-container .button {
-    margin-right: 20px;
+.sso-profile-toolbar-buttons-container .button,
+.sso-profile-toolbar-buttons-container .link {
+  font-size: 16px;
+  margin-left: 20px;
 }
 
 #profile-required {
@@ -76,6 +78,10 @@ body {
     font-size: 18px;
   }
   
+  .h1 {
+    font-size: 30px;
+  }
+    
   .sso-profile-tab-container li.active{
     background-color: transparent;
     border-bottom: 5px solid #E41F13;
@@ -84,5 +90,9 @@ body {
   
   .sso-profile-toolbar-buttons-container {
     text-align: left;
+  }
+  
+  .sso-profile-toolbar-buttons-container .button {
+    margin-left: 0;
   }
 }
