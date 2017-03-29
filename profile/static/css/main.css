@@ -20,19 +20,18 @@ body {
 .sso-profile-tab-container li {
     display: inline-block;
     list-style-type: none;
-    padding-right: 20px;
 }
 
 .sso-profile-tab-container li.active {
-    padding: 20px;
     background-color: white;
     border-top: 5px solid #E41F13;
 }
 
 .sso-profile-tab-container li a {
-    font-weight: bold;
-    color: #363636;
-    padding: 20px;
+  display: block;
+  font-weight: bold;
+  color: #363636;
+  padding: 20px;
 }
 
 .sso-profile-toolbar-labels-container {
@@ -66,4 +65,24 @@ body {
 
 #profile-required ul {
   margin-bottom: 30px;
+}
+
+
+/*********
+  Mobile 
+ *********/
+@media (max-width: 767px) {
+  .button-primary {
+    font-size: 18px;
+  }
+  
+  .sso-profile-tab-container li.active{
+    background-color: transparent;
+    border-bottom: 5px solid #E41F13;
+    border-top: none;
+  }
+  
+  .sso-profile-toolbar-buttons-container {
+    text-align: left;
+  }
 }
