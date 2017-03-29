@@ -82,7 +82,7 @@ body {
     font-size: 30px;
   }
     
-  .sso-profile-tab-container li.active{
+  .sso-profile-tab-container li.active {
     background-color: transparent;
     border-bottom: 5px solid #E41F13;
     border-top: none;
@@ -92,7 +92,8 @@ body {
     text-align: left;
   }
   
-  .sso-profile-toolbar-buttons-container .button {
-    margin-left: 0;
+  .sso-profile-toolbar-labels-container {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }
