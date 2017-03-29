@@ -6,8 +6,7 @@ from profile.exops import helpers
 from sso.utils import SSOLoginRequiredMixin
 
 
-class ExportOpportunitiesView(SSOLoginRequiredMixin, TemplateView):
-    template_name_exops_user = 'exops/is-exops-user.html'
+class ExportOpportunitiesBaseView(SSOLoginRequiredMixin, TemplateView):
     template_name_not_exops_user = 'exops/is-not-exops-user.html'
     template_name_error = 'exops/opportunities-retrieve-error.html'
 
@@ -36,3 +35,11 @@ class ExportOpportunitiesView(SSOLoginRequiredMixin, TemplateView):
             'exops_tab_classes': 'active',
             'opportunities': self.opportunities,
         }
+
+
+class ExportOpportunitiesApplicationsView(ExportOpportunitiesBaseView):
+    template_name_exops_user = 'exops/is-exops-user-applications.html'
+
+
+class ExportOpportunitiesEmailAlertsView(ExportOpportunitiesBaseView):
+    template_name_exops_user = 'exops/is-exops-user-email-alerts.html'

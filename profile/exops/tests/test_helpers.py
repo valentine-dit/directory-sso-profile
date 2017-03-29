@@ -5,11 +5,12 @@ from profile.exops import helpers
 
 @patch('requests.get')
 def test_exporting_is_great_handles_auth(mock_get, settings):
-    client = helpers.ExportinIsGreatClient()
+    client = helpers.ExportingIsGreatClient()
     client.base_url = 'http://b.co'
     client.secret = 123
     expected_username = settings.EXPORTING_IS_GREAT_API_BASIC_AUTH_USERNAME
     expected_password = settings.EXPORTING_IS_GREAT_API_BASIC_AUTH_PASSWORD
+
     client.get_opportunities(2)
 
     mock_get.assert_called_once_with(

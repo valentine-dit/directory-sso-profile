@@ -15,7 +15,7 @@ def get_opportunities(sso_id):
     raise response.raise_for_status()
 
 
-class ExportinIsGreatClient:
+class ExportingIsGreatClient:
     auth = requests.auth.HTTPBasicAuth(
         settings.EXPORTING_IS_GREAT_API_BASIC_AUTH_USERNAME,
         settings.EXPORTING_IS_GREAT_API_BASIC_AUTH_PASSWORD,
@@ -36,4 +36,4 @@ class ExportinIsGreatClient:
         return self.get(self.endpoints['opportunities'], params)
 
 
-exporting_is_great_client = ExportinIsGreatClient()
+exporting_is_great_client = ExportingIsGreatClient()
