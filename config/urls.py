@@ -23,8 +23,13 @@ urlpatterns = [
         name='selling-online-overseas'
     ),
     url(
-        r'^export-opportunities/$',
-        exops_views.ExportOpportunitiesView.as_view(),
-        name='export-opportunities'
+        r'^export-opportunities/applications/$',
+        exops_views.ExportOpportunitiesApplicationsView.as_view(),
+        name='export-opportunities-applications'
+    ),
+    url(
+        r'^export-opportunities/email-alerts/$',
+        exops_views.ExportOpportunitiesEmailAlertsView.as_view(),
+        name='export-opportunities-email-alerts'
     ),
 ]

@@ -1,3 +1,5 @@
+import http
+
 from unittest.mock import patch, Mock
 
 
@@ -20,12 +22,15 @@ def test_sso_middleware_installed(settings):
 
 
 @patch('sso.utils.sso_api_client.user.get_session_user')
-def test_sso_middleware_no_cookie(mock_get_session_user, settings, client):
+def test_sso_middleware_no_cookie(
+    mock_get_session_user, settings, client
+):
     settings.MIDDLEWARE_CLASSES = ['sso.middleware.SSOUserMiddleware']
     response = client.get('/')
 
     mock_get_session_user.assert_not_called()
-    assert response._request.sso_user is None
+
+    assert response.status_code == http.client.FOUND
 
 
 @patch('sso.utils.sso_api_client.user.get_session_user')
@@ -47,4 +52,4 @@ def test_sso_middleware_bad_response(settings, client):
     settings.MIDDLEWARE_CLASSES = ['sso.middleware.SSOUserMiddleware']
     response = client.get('/')
 
-    assert response._request.sso_user is None
+    assert response.status_code == http.client.FOUND

@@ -1,0 +1,9 @@
+{% extends 'exops/base.html' %}
+{% block tab_content_main %}
+	<a href="{% url 'export-opportunities-applications' %}">goto applications</a>
+	<div>You're a Exops user.</div>
+	<div>
+		<p>Email alerts:</p>
+		{{ opportunities.email_alerts }}
+	</div>
+{% endblock tab_content_main %}

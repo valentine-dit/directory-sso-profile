@@ -1,6 +1,9 @@
+from copy import deepcopy
+import http
 from unittest.mock import patch
 
 import pytest
+import requests
 
 from sso.utils import SSOUser
 
@@ -25,6 +28,35 @@ def request_logged_out(rf):
     request = rf.get('/')
     request.sso_user = None
     return request
+
+
+@pytest.fixture
+def api_response_200():
+    response = requests.Response()
+    response.status_code = http.client.OK
+    response.json = lambda: deepcopy({})
+    return response
+
+
+@pytest.fixture
+def api_response_403():
+    response = requests.Response()
+    response.status_code = http.client.FORBIDDEN
+    return response
+
+
+@pytest.fixture
+def api_response_404():
+    response = requests.Response()
+    response.status_code = http.client.NOT_FOUND
+    return response
+
+
+@pytest.fixture
+def api_response_500():
+    response = requests.Response()
+    response.status_code = http.client.INTERNAL_SERVER_ERROR
+    return response
 
 
 @pytest.fixture
