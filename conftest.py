@@ -71,3 +71,17 @@ def sso_user_middleware(sso_user):
     stub.start()
     yield
     stub.stop()
+
+
+@pytest.fixture
+def sso_user_middleware_unauthenticated():
+    def process_request(self, request):
+        request.sso_user = None
+
+    stub = patch(
+        'sso.middleware.SSOUserMiddleware.process_request',
+        process_request
+    )
+    stub.start()
+    yield
+    stub.stop()

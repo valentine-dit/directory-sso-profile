@@ -38,7 +38,7 @@ class SSOLoginRequiredMixin:
         """
         Redirects the user to the sso signup page, passing the 'next' page
         """
-        resolved_url = resolve_url(settings.SSO_SIGNUP_URL)
+        resolved_url = resolve_url(settings.SSO_LOGIN_URL)
         login_url_parts = list(urlparse(resolved_url))
         querystring = QueryDict(login_url_parts[4], mutable=True)
         querystring[settings.SSO_REDIRECT_FIELD_NAME] = next_url

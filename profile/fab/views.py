@@ -16,6 +16,8 @@ class FindABuyerView(SSOLoginRequiredMixin, TemplateView):
     company_retrieve_error = False
 
     def dispatch(self, request, *args, **kwargs):
+        if request.sso_user is None:
+            return self.handle_no_permission()
         sso_id = request.sso_user.id
         try:
             self.company = helpers.get_supplier_company_profile(sso_id)

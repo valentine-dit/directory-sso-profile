@@ -1,3 +1,4 @@
+import http
 from unittest.mock import patch
 
 from django.core.urlresolvers import reverse
@@ -16,6 +17,14 @@ def test_find_a_buyer_exposes_context(client, sso_user_middleware, settings):
     assert response.context_data['FAB_EDIT_COMPANY_LOGO_URL'] == 'http://logo'
     assert response.context_data['FAB_EDIT_PROFILE_URL'] == 'http://profile'
     assert response.context_data['FAB_ADD_CASE_STUDY_URL'] == 'http://case'
+
+
+def test_find_a_buyer_unauthenticated(
+    sso_user_middleware_unauthenticated, client
+):
+    response = client.get(reverse('find-a-buyer'))
+
+    assert response.status_code == http.client.FOUND
 
 
 @patch('profile.fab.helpers.api_client.buyer.retrieve_supplier_company')

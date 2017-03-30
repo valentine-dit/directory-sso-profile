@@ -15,6 +15,8 @@ class ExportOpportunitiesBaseView(SSOLoginRequiredMixin, TemplateView):
     opportunities_retrieve_error = False
 
     def dispatch(self, request, *args, **kwargs):
+        if request.sso_user is None:
+            return self.handle_no_permission()
         sso_id = request.sso_user.id
         try:
             self.opportunities = helpers.get_opportunities(sso_id)
