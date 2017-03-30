@@ -1,9 +1,9 @@
 {% extends 'apps-tabs.html' %}
-
+{% load static from staticfiles %}
 {% block tab_content %}
 	<div class="row-fluid" id="tab-content">
 		<div class="span3">
-			<img src="{{image}}" width="200" class="soo-startpage-image" />
+			<img src="{% static 'images/soo-screen.png' %}" width="200" class="soo-startpage-image" />
 		</div>
 		<div class="span9">
 			<section>
@@ -16,7 +16,7 @@
 					<li>understand what marketplaces need from new applicants to be able to join</li>
 					<li>understand if a marketplace is a good match for your business</li>
 				</ul>
-				<a class="button button-primary" href="{{url}}">Find marketplaces</a>
+				<a class="button button-primary" href="http://https://selling-online-overseas.export.great.gov.uk/markets/filter/">Find marketplaces</a>
 			</section>
 		</div>
 	</div>
