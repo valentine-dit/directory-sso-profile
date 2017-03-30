@@ -1,9 +1,9 @@
 {% extends 'exops/base.html' %}
 {% load parse_date from profile_tags %}
 {% block tab_content_main %}
-	<div class="row-fluid sso-profile-eig-container">
-		<div class="span2 sso-profile-eig-buttons">
-			<div class="sso-profile-eig-button-inactive sso-profile-eig-button-applications">
+	<div class="row-fluid" id="sso-profile-eig-container">
+		<div class="span2" id="sso-profile-eig-buttons">
+			<div class="sso-profile-eig-button-inactive" id="sso-profile-eig-button-applications">
 				<a href="{% url 'export-opportunities-applications' %}">
 					Applications
 				</a>

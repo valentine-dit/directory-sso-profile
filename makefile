@@ -51,7 +51,7 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_API_BASIC_AUTH_PASSWORD=debug; \
 	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \
 	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_API_SECRET=debug; \
-	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_SEARCH_URL=https://opportunities.export.great.gov.uk/opportunities?suppress_subscription_block=true&s=; \
+	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_SEARCH_URL=https://opportunities.export.great.gov.uk/opportunities; \
 	export SSO_PROFILE_FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great.dev:8001/company-profile/edit/logo; \
 	export SSO_PROFILE_FAB_EDIT_PROFILE_URL=http://buyer.trade.great.dev:8001/company-profile; \
 	export SSO_PROFILE_FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/
