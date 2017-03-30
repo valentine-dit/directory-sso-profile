@@ -1,9 +1,39 @@
 {% extends 'exops/base.html' %}
+{% load parse_date from profile_tags %}
 {% block tab_content_main %}
-	<a href="{% url 'export-opportunities-applications' %}">goto applications</a>
-	<div>You're a Exops user.</div>
-	<div>
-		<p>Email alerts:</p>
-		{{ opportunities.email_alerts }}
+	<div class="row-fluid sso-profile-eig-container">
+		<div class="span2 sso-profile-eig-buttons">
+			<div class="sso-profile-eig-button-inactive sso-profile-eig-button-applications">
+				<a href="{% url 'export-opportunities-applications' %}">
+					Applications
+				</a>
+			</div>
+			<div class="sso-profile-eig-button-active">
+				<span>
+					Email alerts
+				</span>
+			</div>
+		</div>
+		<div class="span10">
+			<h1 class="sso-profile-eig-title">Email alerts</h1>
+			<div>
+				{% for alert in opportunities.email_alerts %}
+				<div class="sso-profile-eig-email-alert-item">
+					<div class="sso-profile-eig-email-alert-item-search-term-label" >Search term:</div>
+					<div class="sso-profile-eig-email-alert-item-search-term">
+						<span class="sso-profile-pill-button">{{ alert.term }}</span>
+					</div>
+					<div>
+						<strong>Alert created on: </strong><span>{{ alert.created_on|parse_date:"%Y-%m-%dT%H:%M:%S.%fZ"|date:"d F Y" }}</span>
+					</div>
+					<div class="sso-profile-external-links">
+						<a href="{{ EXPORTING_OPPORTUNITIES_SEARCH_URL }}?suppress_subscription_block=true&s={{ alert.term }}">See matching opportunities</a>
+						<span class="sso-profile-external-links-seperator">|</span>
+						<a href="{{ alert.unsubscribe_url }}">Unsubscribe from this alert</a>
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+		</div>
 	</div>
 {% endblock tab_content_main %}

@@ -1,5 +1,6 @@
 from requests.exceptions import HTTPError
 
+from django.conf import settings
 from django.views.generic import TemplateView
 
 from profile.exops import helpers
@@ -30,10 +31,11 @@ class ExportOpportunitiesBaseView(SSOLoginRequiredMixin, TemplateView):
             template_name = self.template_name_not_exops_user
         return [template_name]
 
-    def get_context_data(self):
+    def get_context_data(self, **kwargs):
         return {
             'exops_tab_classes': 'active',
             'opportunities': self.opportunities,
+            **kwargs
         }
 
 
@@ -43,3 +45,7 @@ class ExportOpportunitiesApplicationsView(ExportOpportunitiesBaseView):
 
 class ExportOpportunitiesEmailAlertsView(ExportOpportunitiesBaseView):
     template_name_exops_user = 'exops/is-exops-user-email-alerts.html'
+
+    def get_context_data(self):
+        url = settings.EXPORTING_OPPORTUNITIES_SEARCH_URL
+        return super().get_context_data(EXPORTING_OPPORTUNITIES_SEARCH_URL=url)

@@ -17,14 +17,14 @@ def get_opportunities(sso_id):
 
 class ExportingIsGreatClient:
     auth = requests.auth.HTTPBasicAuth(
-        settings.EXPORTING_IS_GREAT_API_BASIC_AUTH_USERNAME,
-        settings.EXPORTING_IS_GREAT_API_BASIC_AUTH_PASSWORD,
+        settings.EXPORTING_OPPORTUNITIES_API_BASIC_AUTH_USERNAME,
+        settings.EXPORTING_OPPORTUNITIES_API_BASIC_AUTH_PASSWORD,
     )
-    base_url = settings.EXPORTING_IS_GREAT_API_BASE_URL
+    base_url = settings.EXPORTING_OPPORTUNITIES_API_BASE_URL
     endpoints = {
         'opportunities': 'api/profile_dashboard'
     }
-    secret = settings.EXPORTING_IS_GREAT_API_SECRET
+    secret = settings.EXPORTING_OPPORTUNITIES_API_SECRET
 
     def get(self, partial_url, params):
         params['shared_secret'] = self.secret
