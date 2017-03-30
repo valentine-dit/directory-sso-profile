@@ -1,9 +1,40 @@
 {% extends 'exops/base.html' %}
 {% block tab_content_main %}
-	<a href="{% url 'export-opportunities-email-alerts' %}">goto email alerts</a>
-	<div>You're a Exops user.</div>
-	<div>
-		<p>Applications</p>
-		{{ opportunities.enquiries }}
+	<div class="row-fluid sso-profile-eig-container">
+		<div class="span2 sso-profile-eig-buttons">
+			<div class="sso-profile-eig-button-active sso-profile-eig-button-applications">
+				<span>
+					Applications
+				</span>
+			</div>
+			<div class="sso-profile-eig-button-inactive">
+				<a href="{% url 'export-opportunities-email-alerts' %}">
+					Email alerts
+				</a>
+			</div>
+		</div>
+		<div class="span10">
+			<h1 class="sso-profile-eig-title">Applications</h1>
+			<div>
+				{% for enquiry in opportunities.enquiries %}
+				<div class="sso-profile-eig-opportunity-item">
+					<div class="sso-profile-eig-opportunity-item-title">
+						<a class="link" href="{{ enquiry.enquiry_url }}">{{ enquiry.title }}</a>
+					</div>
+					<div class="sso-profile-eig-opportunity-item-description">
+						<span>{{ enquiry.description|linebreaks }}</span>
+					</div>
+					<div class="sso-profile-eig-opportunity-item-expires">
+						<span>Opportunity expires on {{ enquiry.expiration_date }}</span>
+					</div>
+					<div class="sso-profile-eig-opportunity-item-application-link">
+						<a class="link" href="{{ enquiry.opportunity_url }}">
+							View your application
+						</a>
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+		</div>
 	</div>
 {% endblock tab_content_main %}
