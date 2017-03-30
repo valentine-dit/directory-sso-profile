@@ -50,7 +50,10 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_EXPORTING_IS_GREAT_API_BASIC_AUTH_USERNAME=debug; \
 	export SSO_PROFILE_EXPORTING_IS_GREAT_API_BASIC_AUTH_PASSWORD=debug; \
 	export SSO_PROFILE_EXPORTING_IS_GREAT_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \
-	export SSO_PROFILE_EXPORTING_IS_GREAT_API_SECRET=debug
+	export SSO_PROFILE_EXPORTING_IS_GREAT_API_SECRET=debug; \
+	export SSO_PROFILE_FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great.dev:8001/company-profile/edit/logo; \
+	export SSO_PROFILE_FAB_EDIT_PROFILE_URL=http://buyer.trade.great.dev:8001/company-profile; \
+	export SSO_PROFILE_FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/
 
 DOCKER_REMOVE_ALL := \
 	docker ps -a | \
@@ -105,7 +108,10 @@ DEBUG_SET_ENV_VARS := \
 	export EXPORTING_IS_GREAT_API_BASIC_AUTH_USERNAME=debug; \
 	export EXPORTING_IS_GREAT_API_BASIC_AUTH_PASSWORD=debug; \
 	export EXPORTING_IS_GREAT_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \
-	export EXPORTING_IS_GREAT_API_SECRET=debug
+	export EXPORTING_IS_GREAT_API_SECRET=debug; \
+	export FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great.dev:8001/company-profile/edit/logo; \
+	export FAB_EDIT_PROFILE_URL=http://buyer.trade.great.dev:8001/company-profile; \
+	export FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/
 
 debug_webserver:
 	$(DEBUG_SET_ENV_VARS) && $(DJANGO_WEBSERVER)

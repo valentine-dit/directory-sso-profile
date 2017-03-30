@@ -15,6 +15,7 @@ body {
 
 .sso-profile-tab-container ul {
     padding-left: 0;
+    padding-bottom: 18px;
 }
 
 .sso-profile-tab-container li {
@@ -50,7 +51,7 @@ body {
 }
 
 #profile-required {
-  padding: 40px 20px 20px 20px;  
+  padding: 40px 20px 20px 20px;
   margin-bottom: 156px;
 }
 
@@ -69,29 +70,82 @@ body {
   margin-bottom: 30px;
 }
 
+.sso-profile-fab-container {
+    margin-top: 50px;
+    margin-bottom: 100px;
+}
+
+.sso-profile-fab-logo-container {
+    position: relative;
+}
+
+.sso-profile-fab-logo-edit-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #00549f;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.sso-profile-fab-logo-container img {
+    max-width: 200px;
+}
+
+.sso-profile-fab-company-name {
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.29;
+    color: #4a4a4a;
+}
+
+.sso-profile-fab-company-links {
+    margin-top: 20px;
+}
+
+.sso-profile-fab-company-links a {
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 1.56;
+    color: #00549f;
+}
+
+.sso-profile-fab-company-links-seperator {
+    display: inline-block;
+    font-size: 20px;
+    color: #999999;
+    margin-left: 13px;
+    margin-right: 13px;
+}
+
 
 /*********
-  Mobile 
+  Mobile
  *********/
 @media (max-width: 767px) {
   .button-primary {
     font-size: 18px;
   }
-  
+
   .h1 {
     font-size: 30px;
   }
-    
+
   .sso-profile-tab-container li.active {
     background-color: transparent;
     border-bottom: 5px solid #E41F13;
     border-top: none;
   }
-  
+
   .sso-profile-toolbar-buttons-container {
     text-align: left;
   }
-  
+
   .sso-profile-toolbar-labels-container {
     padding-left: 20px;
     padding-right: 20px;
