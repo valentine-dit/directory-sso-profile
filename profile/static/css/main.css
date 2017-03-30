@@ -211,6 +211,9 @@ body {
   margin-bottom: 20px;
 }
 
+.service-error-container {
+  padding: 20px;
+}
 
 /*********
   Utilities
