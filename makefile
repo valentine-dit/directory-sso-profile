@@ -34,10 +34,10 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_DEBUG=true ;\
 	export SSO_PROFILE_SSO_API_CLIENT_KEY=api_signature_debug; \
 	export SSO_PROFILE_SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/api/v1/; \
-	export SSO_PROFILE_SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/; \
+	export SSO_PROFILE_SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
 	export SSO_PROFILE_SSO_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
 	export SSO_PROFILE_SSO_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
-	export SSO_PROFILE_SSO_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/; \
+	export SSO_PROFILE_SSO_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/?next=http://profile.trade.great.dev:8006; \
 	export SSO_PROFILE_SSO_PROFILE_URL=http://profile.trade.great.dev:8006; \
 	export SSO_PROFILE_SSO_REDIRECT_FIELD_NAME=next; \
 	export SSO_PROFILE_SSO_SESSION_COOKIE=debug_sso_session_cookie; \
@@ -95,10 +95,10 @@ DEBUG_SET_ENV_VARS := \
 	export DEBUG=true ;\
 	export SSO_API_CLIENT_KEY=api_signature_debug; \
 	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/api/v1/; \
-	export SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/; \
+	export SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
 	export SSO_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
 	export SSO_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
-	export SSO_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/; \
+	export SSO_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/?next=http://profile.trade.great.dev:8006; \
 	export SSO_REDIRECT_FIELD_NAME=next; \
 	export SSO_SESSION_COOKIE=debug_sso_session_cookie; \
 	export SSO_PROFILE_URL=http://profile.trade.great.dev:8006; \

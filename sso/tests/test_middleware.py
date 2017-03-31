@@ -1,6 +1,7 @@
 import http
-
 from unittest.mock import patch, Mock
+
+from django.core.urlresolvers import reverse
 
 
 def api_response_ok(*args, **kwargs):
@@ -26,7 +27,7 @@ def test_sso_middleware_no_cookie(
     mock_get_session_user, settings, client
 ):
     settings.MIDDLEWARE_CLASSES = ['sso.middleware.SSOUserMiddleware']
-    response = client.get('/')
+    response = client.get(reverse('find-a-buyer'))
 
     mock_get_session_user.assert_not_called()
 
@@ -40,7 +41,7 @@ def test_sso_middleware_api_response_ok(
     mock_get_session_user.return_value = api_response_ok()
     client.cookies[settings.SSO_SESSION_COOKIE] = '123'
     settings.MIDDLEWARE_CLASSES = ['sso.middleware.SSOUserMiddleware']
-    response = client.get('/')
+    response = client.get(reverse('find-a-buyer'))
 
     mock_get_session_user.assert_called_with('123')
     assert response._request.sso_user.id == 1
@@ -50,6 +51,6 @@ def test_sso_middleware_api_response_ok(
 @patch('sso.utils.sso_api_client.user.get_session_user', api_response_bad)
 def test_sso_middleware_bad_response(settings, client):
     settings.MIDDLEWARE_CLASSES = ['sso.middleware.SSOUserMiddleware']
-    response = client.get('/')
+    response = client.get(reverse('find-a-buyer'))
 
     assert response.status_code == http.client.FOUND

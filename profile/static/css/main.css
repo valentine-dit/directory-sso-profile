@@ -237,6 +237,25 @@ body {
   padding: 20px;
 }
 
+#sso-profile-landing-page-container {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+#sso-profile-landing-page-container h1 {
+  font-size: 48px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  margin-bottom: 40px;
+  display: inline-block;
+  line-height: 1em;
+}
+
+#sso-profile-landing-page-container p {
+  margin-bottom: 20px;
+}
+
+
 /*********
   Utilities
  *********/
