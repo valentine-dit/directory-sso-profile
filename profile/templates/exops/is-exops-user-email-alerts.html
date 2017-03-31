@@ -32,6 +32,10 @@
 						<a href="{{ alert.unsubscribe_url }}">Unsubscribe from this alert</a>
 					</div>
 				</div>
+				{% empty %}
+					<div>You have no email alerts.</div>
+					<br>
+					<br>
 				{% endfor %}
 			</div>
 		</div>

@@ -34,7 +34,15 @@
 						</a>
 					</div>
 				</div>
+				{% empty %}
+					<div>You have no applications.</div>
+					<br>
+					<div>
+						<a class="button button-primary" href="{{ EXPORTING_OPPORTUNITIES_SEARCH_URL }}">Find applications</a>
+					</div>
+					<br>
 				{% endfor %}
+
 			</div>
 		</div>
 	</div>
