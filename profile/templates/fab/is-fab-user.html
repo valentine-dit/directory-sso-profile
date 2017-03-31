@@ -1,7 +1,7 @@
 {% extends 'fab/base.html' %}
 {% block tab_content_main %}
 	<div class="row-fluid sso-profile-fab-container">
-		<div class="span3 sso-profile-fab-logo-container">
+		<div class="span3 sso-profile-fab-logo-container hidden-phone">
 			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}"><img src="{{company.logo}}" width="200" class="sso-profile-fab-logo" /></a>
 			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}" class="sso-profile-fab-logo-edit-button">
 				<span class="icon-white icon-pencil"></span>
@@ -17,6 +17,13 @@
 				<span class="sso-profile-external-links-seperator">|</span>
 				<a href="{{ FAB_ADD_CASE_STUDY_URL }}">Add case study</a>
 			</div>
+		</div>
+		<div class="span3 sso-profile-fab-logo-container visible-phone">
+			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}"><img src="{{company.logo}}" width="200" class="sso-profile-fab-logo" /></a>
+			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}" class="sso-profile-fab-logo-edit-button">
+				<span class="icon-white icon-pencil"></span>
+				<span>Edit</span>
+			</a>
 		</div>
 	</div>
 {% endblock tab_content_main %}
