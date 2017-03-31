@@ -33,11 +33,12 @@ class ExportOpportunitiesBaseView(SSOLoginRequiredMixin, TemplateView):
             template_name = self.template_name_not_exops_user
         return [template_name]
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self):
+        search_url = settings.EXPORTING_OPPORTUNITIES_SEARCH_URL
         return {
             'exops_tab_classes': 'active',
             'opportunities': self.opportunities,
-            **kwargs
+            'EXPORTING_OPPORTUNITIES_SEARCH_URL': search_url,
         }
 
 
@@ -47,7 +48,3 @@ class ExportOpportunitiesApplicationsView(ExportOpportunitiesBaseView):
 
 class ExportOpportunitiesEmailAlertsView(ExportOpportunitiesBaseView):
     template_name_exops_user = 'exops/is-exops-user-email-alerts.html'
-
-    def get_context_data(self):
-        url = settings.EXPORTING_OPPORTUNITIES_SEARCH_URL
-        return super().get_context_data(EXPORTING_OPPORTUNITIES_SEARCH_URL=url)
