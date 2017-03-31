@@ -16,6 +16,7 @@ def test_export_opportunities_applications_exposes_context(
     context_data = response.context_data
 
     assert context_data['exops_tab_classes'] == 'active'
+    assert context_data['EXPORTING_OPPORTUNITIES_SEARCH_URL'] == 'http://find'
 
 
 def test_export_opportunities_email_alerts_exposes_context(

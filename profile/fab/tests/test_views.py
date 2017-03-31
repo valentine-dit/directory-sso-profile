@@ -10,6 +10,7 @@ def test_find_a_buyer_exposes_context(client, sso_user_middleware, settings):
     settings.FAB_EDIT_COMPANY_LOGO_URL = 'http://logo'
     settings.FAB_EDIT_PROFILE_URL = 'http://profile'
     settings.FAB_ADD_CASE_STUDY_URL = 'http://case'
+    settings.FAB_REGISTER_URL = 'http://register'
 
     response = client.get(reverse('find-a-buyer'))
 
@@ -17,6 +18,7 @@ def test_find_a_buyer_exposes_context(client, sso_user_middleware, settings):
     assert response.context_data['FAB_EDIT_COMPANY_LOGO_URL'] == 'http://logo'
     assert response.context_data['FAB_EDIT_PROFILE_URL'] == 'http://profile'
     assert response.context_data['FAB_ADD_CASE_STUDY_URL'] == 'http://case'
+    assert response.context_data['FAB_REGISTER_URL'] == 'http://register'
 
 
 def test_find_a_buyer_unauthenticated(
