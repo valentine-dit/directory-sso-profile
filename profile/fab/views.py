@@ -41,4 +41,5 @@ class FindABuyerView(SSOLoginRequiredMixin, TemplateView):
             'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
             'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
             'FAB_ADD_CASE_STUDY_URL': settings.FAB_ADD_CASE_STUDY_URL,
+            'FAB_REGISTER_URL': settings.FAB_REGISTER_URL,
         }
