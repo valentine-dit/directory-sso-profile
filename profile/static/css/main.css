@@ -3,7 +3,18 @@ body {
 }
 
 .button-border:active {
-  background-color: white;
+  background-color: #ffffff;
+}
+
+.information-breakout {
+  background-image: url(/static/images/EiG_Profile_welcome_pointed_hand_grey.png);
+  background-position: 20px 20px;
+  background-repeat: no-repeat;
+  border: #979797 solid 1px;
+  color: #4a4a4a;
+  letter-spacing: -0.2px;
+  min-height: 90px;
+  padding: 20px 20px 20px 80px;
 }
 
 .sso-profile-tab-container {
@@ -54,7 +65,8 @@ body {
 }
 
 #tab-content h2 {
-  font-size: 24px;
+  font-size: 36px;
+  line-height: 1.1em;
   margin-bottom: 20px;
 }
 
@@ -313,11 +325,41 @@ body {
   .h1 {
     font-size: 30px;
   }
+  
+  .sso-profile-tab-container {
+    background: none;
+  }
+  
+  .sso-profile-tab-container li {
+    border-bottom: #ffffff solid 5px;
+    border-left: #ffffff solid 5px;
+    float: left;
+    margin: 0;
+    width: 49.2%;
+  }
+  
+  .sso-profile-tab-container li a {
+    background-color: #F0F3F2;
+    border-bottom: 5px solid #F0F3F2;
+    display: block;
+    letter-spacing: -0.3px;
+    min-height: 60px;
+    padding: 20px 0 0 0;
+    text-align: center;
+  }
+  
+  .sso-profile-tab-container li:nth-child(odd) {
+    border-right: none;
+    clear: left;
+  }
 
   .sso-profile-tab-container li.active {
     background-color: transparent;
-    border-bottom: 5px solid #E41F13;
     border-top: none;
+  }
+
+  .sso-profile-tab-container li.active a {  
+    border-bottom: 5px solid #E41F13;
   }
 
   .sso-profile-toolbar-buttons-container {
@@ -347,4 +389,7 @@ body {
     margin-top: 20px;
   }
 
+  #tab-content h2 {
+    font-size: 24px;
+  }
 }
