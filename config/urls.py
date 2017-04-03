@@ -5,12 +5,16 @@ from profile.fab import views as fab_views
 from profile.soo import views as soo_views
 from profile.exops import views as exops_views
 
-
 urlpatterns = [
     url(
         r'^$',
         eig_apps_views.LandingPageView.as_view(),
         name='index'
+    ),
+    url(
+        r'^about/$',
+        eig_apps_views.AboutView.as_view(),
+        name='about'
     ),
     url(
         r'^find-a-buyer/$',

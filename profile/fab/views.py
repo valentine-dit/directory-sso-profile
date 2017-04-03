@@ -3,11 +3,14 @@ from requests.exceptions import HTTPError
 from django.views.generic import TemplateView
 from django.conf import settings
 
+from profile.eig_apps.views import RedirectToAboutPageMixin
 from profile.fab import helpers
 from sso.utils import SSOLoginRequiredMixin
 
 
-class FindABuyerView(SSOLoginRequiredMixin, TemplateView):
+class FindABuyerView(
+    RedirectToAboutPageMixin, SSOLoginRequiredMixin, TemplateView
+):
     template_name_fab_user = 'fab/is-fab-user.html'
     template_name_not_fab_user = 'fab/is-not-fab-user.html'
     template_name_error = 'fab/supplier-company-retrieve-error.html'
