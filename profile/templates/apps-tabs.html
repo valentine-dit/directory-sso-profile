@@ -5,12 +5,14 @@
         <div class="row-fluid">
             <div class="span8 sso-profile-toolbar-labels-container">
                 <h1 class="h1">Profile</h1>
-                {% if sso_user %}
+                {% if sso_is_logged_in %}
                     <div>You are signed in as {{ sso_user.email }}.</div>
                 {% endif %}
             </div>
             <div class="span4 sso-profile-toolbar-buttons-container">
+                {% if sso_is_logged_in %}
                 <a class="button button-border" href="{{ sso_logout_url }}">Sign out</a>
+                {% endif %}
                 <a href="{{ sso_password_reset_url }}" class="link">Reset password</a>
             </div>
         </div>
