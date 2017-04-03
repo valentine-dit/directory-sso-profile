@@ -5,7 +5,9 @@
         <div class="row-fluid">
             <div class="span8 sso-profile-toolbar-labels-container">
                 <h1 class="h1">Profile</h1>
-                <div>You are signed in as {{ sso_user.email }}.</div>
+                {% if sso_user %}
+                    <div>You are signed in as {{ sso_user.email }}.</div>
+                {% endif %}
             </div>
             <div class="span4 sso-profile-toolbar-buttons-container">
                 <a class="button button-border" href="{{ sso_logout_url }}">Sign out</a>

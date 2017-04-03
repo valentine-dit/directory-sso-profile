@@ -25,3 +25,15 @@ def test_landing_page_redirect(client):
 
     assert response.status_code == http.client.FOUND
     assert response.get('Location') == reverse('about')
+
+
+def test_signed_in_as_displays_email(client, sso_user_middleware):
+    response = client.get(reverse('about'))
+
+    assert 'You are signed in as jim@example.com' in str(response.content)
+
+
+def test_not_signed_in_does_not_display_email(client):
+    response = client.get(reverse('about'))
+
+    assert 'You are signed in as' not in str(response.content)
