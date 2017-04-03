@@ -5,7 +5,10 @@ from unittest.mock import patch
 import pytest
 import requests
 
+from django.utils.module_loading import import_string
+
 from sso.utils import SSOUser
+from profile.eig_apps.constants import HAS_VISITED_ABOUT_PAGE_SESSION_KEY
 
 
 @pytest.fixture
@@ -85,3 +88,15 @@ def sso_user_middleware_unauthenticated():
     stub.start()
     yield
     stub.stop()
+
+
+@pytest.fixture
+def returned_client(client, settings):
+    """Client that has visited the about page already"""
+
+    session = import_string(settings.SESSION_ENGINE).SessionStore()
+    session.save()
+    session[HAS_VISITED_ABOUT_PAGE_SESSION_KEY] = 'true'
+    session.save()
+    client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
+    return client
