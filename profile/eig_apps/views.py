@@ -1,8 +1,12 @@
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 
 from profile.eig_apps import constants
+
+
+class LandingPageView(RedirectView):
+    pattern_name = 'about'
 
 
 class AboutView(TemplateView):
@@ -13,9 +17,10 @@ class AboutView(TemplateView):
             'about_tab_classes': 'active'
         }
 
-
-class LandingPageView(RedirectView):
-    pattern_name = 'about'
+    def get(self, *args, **kwargs):
+        session_key = constants.HAS_VISITED_ABOUT_PAGE_SESSION_KEY
+        self.request.session[session_key] = 'true'
+        return super().get(*args, **kwargs)
 
 
 class RedirectToAboutPageMixin:
