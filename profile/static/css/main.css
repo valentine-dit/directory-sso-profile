@@ -2,6 +2,10 @@ body {
   background-color: #ffffff;
 }
 
+.button-border:active {
+  background-color: #ffffff;
+}
+
 .information-breakout {
   background-image: url(/static/images/EiG_Profile_welcome_pointed_hand_grey.png);
   background-position: 20px 20px;
