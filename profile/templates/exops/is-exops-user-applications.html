@@ -20,7 +20,7 @@
 				{% for enquiry in opportunities.enquiries %}
 				<div class="sso-profile-eig-opportunity-item">
 					<div class="sso-profile-eig-opportunity-item-title">
-						<a class="link" href="{{ enquiry.enquiry_url }}">{{ enquiry.title }}</a>
+						<a class="link" href="{{ enquiry.opportunity_url }}">{{ enquiry.title }}</a>
 					</div>
 					<div class="sso-profile-eig-opportunity-item-description">
 						<span>{{ enquiry.description|linebreaks }}</span>
@@ -29,7 +29,7 @@
 						<strong>Opportunity expires: </strong><span>{{ enquiry.expiration_date|parse_date:"%Y-%m-%d"|date:"d F Y" }}</span>
 					</div>
 					<div class="sso-profile-eig-opportunity-item-application-link">
-						<a class="link" href="{{ enquiry.opportunity_url }}">
+						<a class="link" href="{{ enquiry.enquiry_url }}">
 							View your application
 						</a>
 					</div>
