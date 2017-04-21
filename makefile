@@ -94,7 +94,7 @@ DEBUG_SET_ENV_VARS := \
 	export PORT=8006; \
 	export SECRET_KEY=debug; \
 	export DEBUG=true ;\
-	export SSO_SIGNATURE_SECRET=api_signature_debug; \
+	export SSO_SIGNATURE_SECRET=proxy_signature_debug; \
 	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/api/v1/; \
 	export SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
 	export SSO_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
