@@ -33,13 +33,13 @@
         {% include 'google_tag_manager_body.html' %}
         <script>document.body.className = ((document.body.className) ? document.body.className + ' js-enabled' : 'js-enabled');</script>
 
-        {% include 'header.html' %}
+        {% include 'directory_header_footer/header.html' %}
 
         <div id="content" class="enrolment-content">
             {% block content %}
             {% endblock content %}
         </div>
-        {% include 'footer.html' %}
+        {% include 'directory_header_footer/footer.html' %}
 
         <script src="{% static 'Dit-Pattern-Styling/public/js/jquery.js' %}"></script>
         <!--[if IE 8]><script src="{% static 'Dit-Pattern-Styling/public/js/ie8.js' }"></script><![endif]-->

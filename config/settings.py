@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "raven.contrib.django.raven_compat",
     "django.contrib.sessions",
     "directory_constants",
+    "directory_header_footer",
     "profile",
 ]
 
@@ -61,9 +62,14 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'sso.context_processors.sso_user_processor',
+                'directory_header_footer.context_processors.sso_processor',
+                (
+                    'directory_header_footer.context_processors.'
+                    'header_footer_context_processor'
+                ),
                 'config.context_processors.feature_flags',
                 'config.context_processors.analytics',
+                'sso.context_processors.sso_processor',
             ],
         },
     },
@@ -256,3 +262,8 @@ FAB_REGISTER_URL = os.environ['FAB_REGISTER_URL']
 FAB_EDIT_COMPANY_LOGO_URL = os.environ['FAB_EDIT_COMPANY_LOGO_URL']
 FAB_EDIT_PROFILE_URL = os.environ['FAB_EDIT_PROFILE_URL']
 FAB_ADD_CASE_STUDY_URL = os.environ['FAB_ADD_CASE_STUDY_URL']
+
+HEADER_FOOTER_CONTACT_US_URL = os.getenv(
+    'HEADER_FOOTER_CONTACT_US_URL',
+    'https://contact-us.export.great.gov.uk/directory',
+)
