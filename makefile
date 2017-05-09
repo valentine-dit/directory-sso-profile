@@ -30,6 +30,7 @@ docker_run:
 	docker-compose up --build
 
 DOCKER_SET_DEBUG_ENV_VARS := \
+	export SSO_PROFILE_PORT=8006; \
 	export SSO_PROFILE_SECRET_KEY=debug; \
 	export SSO_PROFILE_DEBUG=true ;\
 	export SSO_PROFILE_SSO_SIGNATURE_SECRET=api_signature_debug; \
