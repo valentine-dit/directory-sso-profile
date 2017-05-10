@@ -1,9 +1,11 @@
 from django.conf.urls import url
 
+from profile.api import views as api_views
 from profile.eig_apps import views as eig_apps_views
 from profile.fab import views as fab_views
 from profile.soo import views as soo_views
 from profile.exops import views as exops_views
+
 
 urlpatterns = [
     url(
@@ -36,4 +38,9 @@ urlpatterns = [
         exops_views.ExportOpportunitiesEmailAlertsView.as_view(),
         name='export-opportunities-email-alerts'
     ),
+    url(
+        r'^api/v1/(?P<sso_id>.+)/directory/supplier/$',
+        api_views.ExternalSupplierAPIView.as_view(),
+        name='api-external-supplier'
+    )
 ]
