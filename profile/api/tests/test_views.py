@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 
-@patch('profile.api.helpers.get_supplier_profile')
+@patch('profile.api.views.get_supplier_profile')
 def test_external_supplier_get(mock_get_supplier_profile, client):
     mock_get_supplier_profile.return_value = {'foo': 'bar'}
 
@@ -14,7 +14,7 @@ def test_external_supplier_get(mock_get_supplier_profile, client):
     assert response.json() == {'foo': 'bar'}
 
 
-@patch('profile.api.helpers.get_supplier_profile')
+@patch('profile.api.views.get_supplier_profile')
 def test_external_supplier_client_error(mock_get_supplier_profile, client):
     client_response = Response()
     client_response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
