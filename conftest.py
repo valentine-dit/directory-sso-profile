@@ -6,6 +6,7 @@ import pytest
 import requests
 
 from django.utils.module_loading import import_string
+from rest_framework.test import APIClient
 
 from sso.utils import SSOUser
 from profile.eig_apps.constants import HAS_VISITED_ABOUT_PAGE_SESSION_KEY
@@ -100,3 +101,9 @@ def returned_client(client, settings):
     session.save()
     client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
     return client
+
+
+@pytest.fixture
+def api_client():
+    """DRF APIClient instance."""
+    return APIClient()
