@@ -39,7 +39,7 @@ urlpatterns = [
         name='export-opportunities-email-alerts'
     ),
     url(
-        r'^api/v1/(?P<sso_id>.+)/directory/supplier/$',
+        r'^api/v1/directory/supplier/$',
         api_views.ExternalSupplierAPIView.as_view(),
         name='api-external-supplier'
     )

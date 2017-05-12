@@ -8,7 +8,7 @@ test_requirements:
 	pip install -r requirements_test.txt
 
 FLAKE8 := flake8 . --exclude=.venv
-PYTEST := pytest . --cov=. --cov-config=.coveragerc --cov-report=html --cov-report=term --capture=no $(pytest_args)
+PYTEST := pytest . --cov=. --cov-config=.coveragerc --cov-report=html --cov-report=term --capture=no -s $(pytest_args)
 COLLECT_STATIC := python manage.py collectstatic --noinput
 
 test:
@@ -35,6 +35,7 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_DEBUG=true ;\
 	export SSO_PROFILE_SSO_SIGNATURE_SECRET=api_signature_debug; \
 	export SSO_PROFILE_SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/api/v1/; \
+	export SSO_API_OAUTH2_BASE_URL=http://sso.trade.great.dev:8004/oauth2/; \
 	export SSO_PROFILE_SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
 	export SSO_PROFILE_SSO_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
 	export SSO_PROFILE_SSO_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
@@ -97,6 +98,7 @@ DEBUG_SET_ENV_VARS := \
 	export DEBUG=true ;\
 	export SSO_SIGNATURE_SECRET=proxy_signature_debug; \
 	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/api/v1/; \
+	export SSO_API_OAUTH2_BASE_URL=http://sso.trade.great.dev:8004/oauth2/; \
 	export SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
 	export SSO_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
 	export SSO_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
@@ -134,8 +136,8 @@ debug_test:
 	$(DEBUG_SET_ENV_VARS) && \
 	$(DEBUG_TEST_SET_ENV_VARS) && \
 	$(COLLECT_STATIC) && \
-	$(FLAKE8) && \
-	$(PYTEST)
+	$(PYTEST)  && \
+	$(FLAKE8)
 
 debug_manage:
 	$(DEBUG_SET_ENV_VARS) && ./manage.py $(cmd)
