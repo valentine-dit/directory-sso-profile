@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     "raven.contrib.django.raven_compat",
     "django.contrib.sessions",
-    "django.contrib.contenttypes",
+    "django.contrib.contenttypes",  # required by DRF, not using any DB
     "django.contrib.auth",
     "directory_constants",
     "directory_header_footer",
