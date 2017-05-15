@@ -16,7 +16,9 @@ def get_supplier_profile(sso_id):
 
 
 def get_sso_id_from_request(request):
-    token = request.META['Authorization']
+    token = request.META.get('HTTP_AUTHORIZATION')
+    if not token:
+        return None
     url = '{base}{endpoint}'.format(
         base=settings.SSO_API_OAUTH2_BASE_URL,
         endpoint='user-profile/v1/')
