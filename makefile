@@ -58,7 +58,7 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great.dev:8001/company-profile/edit/logo; \
 	export SSO_PROFILE_FAB_EDIT_PROFILE_URL=http://buyer.trade.great.dev:8001/company-profile; \
 	export SSO_PROFILE_FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/; \
-	export SSO_PROFILE_FAB_REGISTER_URL=http://buyer.trade.great.dev:8001/register
+	export SSO_PROFILE_FAB_REGISTER_URL=http://buyer.trade.great.dev:8001
 
 DOCKER_REMOVE_ALL := \
 	docker ps -a | \
@@ -120,7 +120,7 @@ DEBUG_SET_ENV_VARS := \
 	export FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great.dev:8001/company-profile/edit/logo; \
 	export FAB_EDIT_PROFILE_URL=http://buyer.trade.great.dev:8001/company-profile; \
 	export FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/; \
-	export FAB_REGISTER_URL=http://buyer.trade.great.dev:8001/register
+	export FAB_REGISTER_URL=http://buyer.trade.great.dev:8001
 
 
 debug_webserver:
