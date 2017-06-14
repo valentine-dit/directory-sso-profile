@@ -6,3 +6,4 @@ pytest-django==3.0.0
 pytest-sugar==0.8.0
 flake8==3.0.4
 pytest-catchlog==1.2.2
+codecov==2.0.9

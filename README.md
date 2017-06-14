@@ -6,6 +6,11 @@ This is the repository for EIG Single User Dashboard (SUD) - the Department for 
 
 [![CircleCI](https://circleci.com/gh/uktrade/directory-sso-profile/tree/master.svg?style=svg)](https://circleci.com/gh/uktrade/directory-sso-profile/tree/master)
 
+## Coverage
+
+[![codecov](https://codecov.io/gh/uktrade/directory-sso-profile/branch/master/graph/badge.svg)](https://codecov.io/gh/uktrade/directory-sso-profile)
+
+
 ## Development 
 
 The back-end framework is Django 1.9. The front-end uses minimal Javascript. The motivation for this is for accessibility reasons, to reduce technical complexity, and reduce cross-browser compatibility issues. Therefore most front-end work will be HTML and SASS/CSS development.
