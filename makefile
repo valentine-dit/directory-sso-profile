@@ -10,9 +10,13 @@ test_requirements:
 FLAKE8 := flake8 . --exclude=.venv
 PYTEST := pytest . --cov=. --cov-config=.coveragerc --cov-report=html --cov-report=term --capture=no -s $(pytest_args)
 COLLECT_STATIC := python manage.py collectstatic --noinput
+CODECOV := \
+	if [ "$$CODECOV_REPO_TOKEN" != "" ]; then \
+	   codecov --token=$$CODECOV_REPO_TOKEN ;\
+	fi
 
 test:
-	$(COLLECT_STATIC) && $(FLAKE8) && $(PYTEST)
+	$(COLLECT_STATIC) && $(FLAKE8) && $(PYTEST) && $(CODECOV)
 
 DJANGO_WEBSERVER := \
 	python manage.py collectstatic --noinput && \
