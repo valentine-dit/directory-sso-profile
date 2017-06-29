@@ -64,6 +64,10 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/; \
 	export SSO_PROFILE_FAB_REGISTER_URL=http://buyer.trade.great.dev:8001
 
+docker_test_env_files:
+	$(DOCKER_SET_DEBUG_ENV_VARS) && \
+	$(DOCKER_COMPOSE_CREATE_ENVS)
+
 DOCKER_REMOVE_ALL := \
 	docker ps -a | \
 	grep profile | \
