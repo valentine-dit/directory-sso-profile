@@ -42,10 +42,10 @@ def test_find_a_buyer_unauthenticated(
 
 @patch('profile.fab.helpers.api_client.buyer.retrieve_supplier_company')
 def test_supplier_company_retrieve_not_found(
-    mock_retrieve_supplier_company, api_response_404, sso_user_middleware,
+    mock_retrieve_supplier_company, api_response_401, sso_user_middleware,
     returned_client
 ):
-    mock_retrieve_supplier_company.return_value = api_response_404
+    mock_retrieve_supplier_company.return_value = api_response_401
     expected_template_name = views.FindABuyerView.template_name_not_fab_user
 
     response = returned_client.get(reverse('find-a-buyer'))

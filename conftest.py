@@ -17,6 +17,7 @@ def sso_user():
     return SSOUser(
         id=1,
         email='jim@example.com',
+        session_id='213'
     )
 
 
@@ -39,6 +40,13 @@ def api_response_200():
     response = requests.Response()
     response.status_code = http.client.OK
     response.json = lambda: deepcopy({})
+    return response
+
+
+@pytest.fixture
+def api_response_401():
+    response = requests.Response()
+    response.status_code = http.client.UNAUTHORIZED
     return response
 
 
