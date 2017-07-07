@@ -21,9 +21,9 @@ class FindABuyerView(
     def dispatch(self, request, *args, **kwargs):
         if request.sso_user is None:
             return self.handle_no_permission()
-        sso_id = request.sso_user.id
+        sso_session_id = request.sso_user.session_id
         try:
-            self.company = helpers.get_supplier_company_profile(sso_id)
+            self.company = helpers.get_supplier_company_profile(sso_session_id)
         except HTTPError:
             self.company_retrieve_error = True
         return super().dispatch(request, *args, **kwargs)
