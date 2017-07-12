@@ -38,7 +38,7 @@ def request_logged_out(rf):
 @pytest.fixture
 def api_response_200():
     response = requests.Response()
-    response.status_code = http.client.OK
+    response.status_code = http.client.OK.value
     response.json = lambda: deepcopy({})
     return response
 
@@ -46,28 +46,28 @@ def api_response_200():
 @pytest.fixture
 def api_response_401():
     response = requests.Response()
-    response.status_code = http.client.UNAUTHORIZED
+    response.status_code = http.client.UNAUTHORIZED.value
     return response
 
 
 @pytest.fixture
 def api_response_403():
     response = requests.Response()
-    response.status_code = http.client.FORBIDDEN
+    response.status_code = http.client.FORBIDDEN.value
     return response
 
 
 @pytest.fixture
 def api_response_404():
     response = requests.Response()
-    response.status_code = http.client.NOT_FOUND
+    response.status_code = http.client.NOT_FOUND.value
     return response
 
 
 @pytest.fixture
 def api_response_500():
     response = requests.Response()
-    response.status_code = http.client.INTERNAL_SERVER_ERROR
+    response.status_code = http.client.INTERNAL_SERVER_ERROR.value
     return response
 
 
