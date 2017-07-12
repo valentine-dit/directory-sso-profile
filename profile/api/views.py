@@ -1,9 +1,8 @@
-from requests import HTTPError
-from rest_framework import status
+from rest_framework import authentication, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from profile.api.helpers import get_sso_id_from_request, get_supplier_profile
+from api_client import api_client
 
 
 class ExternalSupplierAPIView(APIView):
@@ -12,13 +11,15 @@ class ExternalSupplierAPIView(APIView):
     http_method_names = ('get', )
 
     def get(self, request, format=None):
-        sso_id = get_sso_id_from_request(request)
-        if not sso_id:
-            return Response('Unauthorized',
-                            status=status.HTTP_401_UNAUTHORIZED)
-        try:
-            supplier = get_supplier_profile(sso_id=sso_id)
-        except HTTPError as e:
-            # HTTPError doesn't have the message attribute!
-            return Response(str(e), status=e.response.status_code)
-        return Response(supplier)
+        auth = authentication.get_authorization_header(request).split()
+        if not auth or len(auth) == 1 or auth[0].decode() != 'Bearer':
+            return Response(
+                'Unauthorized', status=status.HTTP_401_UNAUTHORIZED
+            )
+        response = api_client.buyer.retrieve_supplier(auth[1].decode())
+        if response.ok:
+            return Response(response.json())
+        else:
+            return Response(
+                response.content, status=response.status_code
+            )
