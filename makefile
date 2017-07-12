@@ -38,7 +38,7 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_SECRET_KEY=debug; \
 	export SSO_PROFILE_DEBUG=true ;\
 	export SSO_PROFILE_SSO_SIGNATURE_SECRET=api_signature_debug; \
-	export SSO_PROFILE_SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/api/v1/; \
+	export SSO_PROFILE_SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/; \
 	export SSO_PROFILE_SSO_API_OAUTH2_BASE_URL=http://sso.trade.great.dev:8004/oauth2/; \
 	export SSO_PROFILE_SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
 	export SSO_PROFILE_SSO_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
@@ -105,7 +105,7 @@ DEBUG_SET_ENV_VARS := \
 	export SECRET_KEY=debug; \
 	export DEBUG=true ;\
 	export SSO_SIGNATURE_SECRET=proxy_signature_debug; \
-	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/api/v1/; \
+	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/; \
 	export SSO_API_OAUTH2_BASE_URL=http://sso.trade.great.dev:8004/oauth2/; \
 	export SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
 	export SSO_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
