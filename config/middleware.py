@@ -1,3 +1,6 @@
+from django.conf import settings
+
+
 class NoCacheMiddlware:
     """Tell the browser to not cache the pages.
 
@@ -6,6 +9,15 @@ class NoCacheMiddlware:
 
     """
 
+    def __init__(self, *args, **kwargs):
+        # `NoCacheMiddlware` depends on `request.sso_user`, which comes from
+        # `SSOUserMiddleware
+        assert (
+            'sso.middleware.SSOUserMiddleware' in settings.MIDDLEWARE_CLASSES
+        )
+        super().__init__(*args, **kwargs)
+
     def process_response(self, request, response):
-        response['Cache-Control'] = 'no-store, no-cache'
+        if request.sso_user:
+            response['Cache-Control'] = 'no-store, no-cache'
         return response
