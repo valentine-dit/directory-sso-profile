@@ -1,6 +1,6 @@
 ---
 applications:
-- name: directory-ui-supplier
+- name: directory-sso-profile
   memory: 256M
   disk_quota: 2G
   buildpack: python-buildpack
