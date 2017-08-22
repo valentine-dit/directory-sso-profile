@@ -1,7 +1,12 @@
 import http
 from unittest.mock import patch, Mock
 
+import pytest
+import requests
+
 from django.core.urlresolvers import reverse
+
+from sso import middleware
 
 
 def api_response_ok(*args, **kwargs):
@@ -12,6 +17,13 @@ def api_response_ok(*args, **kwargs):
             'email': 'jim@example.com',
         }
     )
+
+
+def api_response_ok_bad_json(*args, **kwargs):
+    response = requests.models.Response()
+    response.status_code = 200
+    response._content = b'<html></html>'
+    return response
 
 
 def api_response_bad():
@@ -57,3 +69,20 @@ def test_sso_middleware_bad_response(settings, returned_client):
     response = returned_client.get(reverse('find-a-buyer'))
 
     assert response.status_code == http.client.FOUND
+
+
+@patch('sso.utils.sso_api_client.user.get_session_user')
+def test_sso_middleware_bad_good_response(
+    mock_get_session_user, settings, returned_client
+):
+    mock_get_session_user.return_value = api_response_ok_bad_json()
+    returned_client.cookies[settings.SSO_SESSION_COOKIE] = '123'
+    settings.MIDDLEWARE_CLASSES = [
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'sso.middleware.SSOUserMiddleware'
+    ]
+
+    message = middleware.SSOUserMiddleware.MESSAGE_INVALID_JSON
+
+    with pytest.raises(ValueError, message=message):
+        response = returned_client.get(reverse('find-a-buyer'))
