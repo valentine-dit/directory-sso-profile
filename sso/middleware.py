@@ -5,7 +5,6 @@ from django.conf import settings
 from sso.utils import SSOUser, sso_api_client
 
 
-
 class SSOUserMiddleware:
 
     MESSAGE_INVALID_JSON = (

@@ -85,4 +85,4 @@ def test_sso_middleware_bad_good_response(
     message = middleware.SSOUserMiddleware.MESSAGE_INVALID_JSON
 
     with pytest.raises(ValueError, message=message):
-        response = returned_client.get(reverse('find-a-buyer'))
+        returned_client.get(reverse('find-a-buyer'))
