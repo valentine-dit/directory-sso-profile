@@ -45,4 +45,7 @@ class FindABuyerView(
             'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
             'FAB_ADD_CASE_STUDY_URL': settings.FAB_ADD_CASE_STUDY_URL,
             'FAB_REGISTER_URL': settings.FAB_REGISTER_URL,
+            'FAB_ADD_USER_URL': settings.FAB_ADD_USER_URL,
+            'FAB_REMOVE_USER_URL': settings.FAB_REMOVE_USER_URL,
+            'FAB_TRANSFER_ACCOUNT_URL': settings.FAB_TRANSFER_ACCOUNT_URL,
         }

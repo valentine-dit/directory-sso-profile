@@ -62,7 +62,11 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great.dev:8001/company-profile/edit/logo; \
 	export SSO_PROFILE_FAB_EDIT_PROFILE_URL=http://buyer.trade.great.dev:8001/company-profile; \
 	export SSO_PROFILE_FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/; \
-	export SSO_PROFILE_FAB_REGISTER_URL=http://buyer.trade.great.dev:8001
+	export SSO_PROFILE_FAB_REGISTER_URL=http://buyer.trade.great.dev:8001; \
+	export SSO_PROFILE_FAB_ADD_USER_URL=http://buyer.trade.great.dev:8001/account/add-collaborator/; \
+	export SSO_PROFILE_FAB_REMOVE_USER_URL=http://buyer.trade.great.dev:8001/account/remove-collaborator/; \
+	export SSO_PROFILE_FAB_TRANSFER_ACCOUNT_URL=http://buyer.trade.great.dev:8001/account/transfer/; \
+	export SSO_PROFILE_FEATURE_MULTI_USER_ACCOUNT_ENABLED=true
 
 docker_test_env_files:
 	$(DOCKER_SET_DEBUG_ENV_VARS) && \
@@ -128,7 +132,11 @@ DEBUG_SET_ENV_VARS := \
 	export FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great.dev:8001/company-profile/edit/logo; \
 	export FAB_EDIT_PROFILE_URL=http://buyer.trade.great.dev:8001/company-profile; \
 	export FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/; \
-	export FAB_REGISTER_URL=http://buyer.trade.great.dev:8001
+	export FAB_REGISTER_URL=http://buyer.trade.great.dev:8001; \
+	export FAB_ADD_USER_URL=http://buyer.trade.great.dev:8001/account/add-collaborator/; \
+	export FAB_REMOVE_USER_URL=http://buyer.trade.great.dev:8001/account/remove-collaborator/; \
+	export FAB_TRANSFER_ACCOUNT_URL=http://buyer.trade.great.dev:8001/account/transfer/; \
+	export FEATURE_MULTI_USER_ACCOUNT_ENABLED=true
 
 
 debug_webserver:

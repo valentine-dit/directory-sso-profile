@@ -7,11 +7,14 @@ def test_feature_flags_installed(settings):
     assert 'config.context_processors.feature_flags' in processors
 
 
-def test_feature_returns_expected_features():
+def test_feature_returns_expected_features(settings):
+    settings.FEATURE_MULTI_USER_ACCOUNT_ENABLED = True
+
     actual = context_processors.feature_flags(None)
 
     assert actual == {
         'features': {
+            'FEATURE_MULTI_USER_ACCOUNT_ENABLED': True
         }
     }
 
