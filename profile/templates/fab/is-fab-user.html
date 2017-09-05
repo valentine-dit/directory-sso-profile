@@ -19,14 +19,33 @@
 		</div>
 		<div class="span9">
 			<div>
-				<h1 class="sso-profile-fab-company-name">{{ company.name }}</h1>
+				<div>
+					<h1 class="sso-profile-fab-company-name">{{ company.name }}</h1>
+				</div>
+				<div class="sso-profile-external-links">
+					<a href="{{ FAB_EDIT_PROFILE_URL }}">Edit profile</a>
+					<span class="sso-profile-external-links-seperator">|</span>
+					<a href="{{ FAB_ADD_CASE_STUDY_URL }}">Add case study</a>
+				</div>
 			</div>
-			<div class="sso-profile-external-links">
-				<a href="{{ FAB_EDIT_PROFILE_URL }}">Edit profile</a>
-				<span class="sso-profile-external-links-seperator">|</span>
-				<a href="{{ FAB_ADD_CASE_STUDY_URL }}">Add case study</a>
-			</div>
+			{% if features.FEATURE_MULTI_USER_ACCOUNT_ENABLED %}
+				<br>
+				<br>
+				<div>
+					<div>
+						<h1 class="sso-profile-fab-company-name">Account details</h1>
+					</div>
+					<div class="sso-profile-external-links">
+						<a href="{{ FAB_ADD_USER_URL }}">Add user to account</a>
+						<span class="sso-profile-external-links-seperator">|</span>
+						<a href="{{ FAB_REMOVE_USER_URL }}">Remove user from account</a>
+						<span class="sso-profile-external-links-seperator">|</span>
+						<a href="{{ FAB_TRANSFER_ACCOUNT_URL }}">Transfer account</a>
+					</div>
+				</div>
+			{% endif %}
 		</div>
+
 		<div class="span3 sso-profile-fab-logo-container visible-phone">
 			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}">
 				{% if company.logo %}
