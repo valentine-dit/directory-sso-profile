@@ -16,7 +16,7 @@ class ExternalSupplierAPIView(APIView):
             return Response(
                 'Unauthorized', status=status.HTTP_401_UNAUTHORIZED
             )
-        response = api_client.buyer.retrieve_supplier(auth[1].decode())
+        response = api_client.supplier.retrieve_supplier(auth[1].decode())
         if response.ok:
             return Response(response.json())
         else:

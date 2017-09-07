@@ -3,6 +3,7 @@ from requests.exceptions import HTTPError
 from django.views.generic import TemplateView
 from django.conf import settings
 
+from api_client import api_client
 from profile.eig_apps.views import RedirectToAboutPageMixin
 from profile.fab import helpers
 from sso.utils import SSOLoginRequiredMixin
@@ -37,9 +38,20 @@ class FindABuyerView(
             template_name = self.template_name_not_fab_user
         return [template_name]
 
+    def is_company_profile_owner(self):
+        if not self.company:
+            return False
+        response = api_client.supplier.retrieve_supplier(
+            sso_session_id=self.request.sso_user.session_id,
+        )
+        response.raise_for_status()
+        parsed = response.json()
+        return parsed['is_company_owner']
+
     def get_context_data(self):
         return {
             'fab_tab_classes': 'active',
+            'is_profile_owner': self.is_company_profile_owner(),
             'company': self.company,
             'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
             'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,

@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 
-@patch('profile.api.views.api_client.buyer.retrieve_supplier')
+@patch('profile.api.views.api_client.supplier.retrieve_supplier')
 def test_external_supplier_get(
     mock_get_supplier_profile, api_client, sso_user, api_response_200
 ):
@@ -20,7 +20,7 @@ def test_external_supplier_get(
     assert response.status_code == status.HTTP_200_OK
 
 
-@patch('profile.api.views.api_client.buyer.retrieve_supplier')
+@patch('profile.api.views.api_client.supplier.retrieve_supplier')
 def test_external_supplier_client_error(
     mock_get_supplier_profile, api_client, api_response_500
 ):
@@ -35,7 +35,7 @@ def test_external_supplier_client_error(
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
-@patch('profile.api.views.api_client.buyer.retrieve_supplier')
+@patch('profile.api.views.api_client.supplier.retrieve_supplier')
 def test_external_supplier_incorrect_bearer_token(
     mock_get_supplier_profile, api_client, api_response_401
 ):
