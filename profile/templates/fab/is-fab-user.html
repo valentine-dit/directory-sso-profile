@@ -28,7 +28,7 @@
 					<a href="{{ FAB_ADD_CASE_STUDY_URL }}">Add case study</a>
 				</div>
 			</div>
-			{% if features.FEATURE_MULTI_USER_ACCOUNT_ENABLED %}
+			{% if is_profile_owner and features.FEATURE_MULTI_USER_ACCOUNT_ENABLED %}
 				<br>
 				<br>
 				<div>
