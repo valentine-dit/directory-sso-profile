@@ -3,6 +3,9 @@
 {% load static from staticfiles %}
 
 {% block tab_content_main %}
+	{% if success_message %}
+		<div class="sso-profile-success-message">{{ success_message }}</div>
+	{% endif %}
 	<div class="row-fluid sso-profile-fab-container">
 		<div class="span3 sso-profile-fab-logo-container hidden-phone">
 			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}">
