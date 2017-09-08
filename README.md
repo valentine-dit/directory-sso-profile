@@ -1,15 +1,13 @@
 # directory-sso-profile
 
-This is the repository for EIG Single User Dashboard (SUD) - the Department for International Trade (DIT) service for managing EIG profiles.
+[![code-climate-image]][code-climate]
+[![circle-ci-image]][circle-ci]
+[![codecov-image]][codecov]
+[![gemnasium-image]][gemnasium]
 
-## Build status
+--
 
-[![CircleCI](https://circleci.com/gh/uktrade/directory-sso-profile/tree/master.svg?style=svg)](https://circleci.com/gh/uktrade/directory-sso-profile/tree/master)
-
-## Coverage
-
-[![codecov](https://codecov.io/gh/uktrade/directory-sso-profile/branch/master/graph/badge.svg)](https://codecov.io/gh/uktrade/directory-sso-profile)
-
+**EIG Single User Dashboard (SUD) - the Department for International Trade (DIT) service for managing EIG profiles.**
 
 ## Development 
 
@@ -98,3 +96,16 @@ Note in production, the `directory-sso` session cookie is shared with all subdom
 Therefore to make cookie sharing work in development we need the apps to ne running on subdomains. Some stipulations:
  - `directory-sso-profile` and `directory-sso` must both be running on sibling subdomains (with same parent domain)
  - `directory-sso` must be told to target cookies at the parent domain.
+
+
+[code-climate-image]: https://codeclimate.com/github/uktrade/directory-sso-profile/badges/issue_count.svg
+[code-climate]: https://codeclimate.com/github/uktrade/directory-sso-profile
+
+[circle-ci-image]: https://circleci.com/gh/uktrade/directory-sso-profile/tree/master.svg?style=svg
+[circle-ci]: https://circleci.com/gh/uktrade/directory-sso-profile/tree/master
+
+[codecov-image]: https://codecov.io/gh/uktrade/directory-sso-profile/branch/master/graph/badge.svg
+[codecov]: https://codecov.io/gh/uktrade/directory-sso-profile
+
+[gemnasium-image]: https://gemnasium.com/badges/github.com/uktrade/directory-sso-profile.svg
+[gemnasium]: https://gemnasium.com/github.com/uktrade/directory-sso-profile
