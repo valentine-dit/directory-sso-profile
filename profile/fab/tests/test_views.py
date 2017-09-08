@@ -140,3 +140,26 @@ def test_non_company_owner(
     response = returned_client.get(reverse('find-a-buyer'))
 
     assert response.context_data['is_profile_owner'] is False
+
+
+@pytest.mark.parametrize('param', (
+    'owner-transferred', 'user-added', 'user-removed'
+))
+@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier_company')
+@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier')
+def test_success_message(
+    mock_mock_retrieve_supplier, mock_retrieve_supplier_company,
+    api_response_supplier_profile_non_owner_200, api_response_200,
+    sso_user_middleware, returned_client, param
+):
+    mock_retrieve_supplier_company.return_value = api_response_200
+    mock_mock_retrieve_supplier.return_value = (
+        api_response_supplier_profile_non_owner_200
+    )
+
+    url = reverse('find-a-buyer')
+    response = returned_client.get(url, {param: True})
+
+    assert response.context_data['success_message'] == (
+        views.FindABuyerView.SUCCESS_MESSAGES[param]
+    )

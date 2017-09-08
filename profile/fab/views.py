@@ -19,6 +19,12 @@ class FindABuyerView(
     company = None
     company_retrieve_error = False
 
+    SUCCESS_MESSAGES = {
+        'owner-transferred': 'Transfer ownership invite sent.',
+        'user-added': 'Collaboration invite sent.',
+        'user-removed': 'Remove collaborators successful.'
+    }
+
     def dispatch(self, request, *args, **kwargs):
         if request.sso_user is None:
             return self.handle_no_permission()
@@ -60,4 +66,10 @@ class FindABuyerView(
             'FAB_ADD_USER_URL': settings.FAB_ADD_USER_URL,
             'FAB_REMOVE_USER_URL': settings.FAB_REMOVE_USER_URL,
             'FAB_TRANSFER_ACCOUNT_URL': settings.FAB_TRANSFER_ACCOUNT_URL,
+            'success_message': self.get_success_messages()
         }
+
+    def get_success_messages(self):
+        for key, value in self.SUCCESS_MESSAGES.items():
+            if key in self.request.GET:
+                return value

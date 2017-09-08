@@ -87,8 +87,16 @@ body {
 /* FAB tab content
  **********************/
 .sso-profile-fab-container {
-    margin-top: 50px;
+    margin-top: 20px;
     margin-bottom: 100px;
+}
+
+.sso-profile-success-message {
+  background: #007EA3;
+  padding: 20px;
+  margin-top: 20px;
+  color: white;
+  font-size: 18px;
 }
 
 .sso-profile-fab-logo-container {
