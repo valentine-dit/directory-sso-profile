@@ -66,7 +66,8 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_FAB_ADD_USER_URL=http://buyer.trade.great.dev:8001/account/add-collaborator/; \
 	export SSO_PROFILE_FAB_REMOVE_USER_URL=http://buyer.trade.great.dev:8001/account/remove-collaborator/; \
 	export SSO_PROFILE_FAB_TRANSFER_ACCOUNT_URL=http://buyer.trade.great.dev:8001/account/transfer/; \
-	export SSO_PROFILE_FEATURE_MULTI_USER_ACCOUNT_ENABLED=true
+	export SSO_PROFILE_FEATURE_MULTI_USER_ACCOUNT_ENABLED=true; \
+	export SSO_PROFILE_SECURE_HSTS_SECONDS=0
 
 docker_test_env_files:
 	$(DOCKER_SET_DEBUG_ENV_VARS) && \
@@ -136,7 +137,8 @@ DEBUG_SET_ENV_VARS := \
 	export FAB_ADD_USER_URL=http://buyer.trade.great.dev:8001/account/add-collaborator/; \
 	export FAB_REMOVE_USER_URL=http://buyer.trade.great.dev:8001/account/remove-collaborator/; \
 	export FAB_TRANSFER_ACCOUNT_URL=http://buyer.trade.great.dev:8001/account/transfer/; \
-	export FEATURE_MULTI_USER_ACCOUNT_ENABLED=true
+	export FEATURE_MULTI_USER_ACCOUNT_ENABLED=true; \
+	export SECURE_HSTS_SECONDS=0
 
 
 debug_webserver:
