@@ -51,7 +51,7 @@ def test_sso_middleware_api_response_ok(
     mock_get_session_user, settings, returned_client
 ):
     mock_get_session_user.return_value = api_response_ok()
-    returned_client.cookies[settings.SSO_SESSION_COOKIE] = '123'
+    returned_client.cookies[settings.SSO_PROXY_SESSION_COOKIE] = '123'
     settings.MIDDLEWARE_CLASSES = [
         'django.contrib.sessions.middleware.SessionMiddleware',
         'sso.middleware.SSOUserMiddleware'
@@ -76,7 +76,7 @@ def test_sso_middleware_bad_good_response(
     mock_get_session_user, settings, returned_client
 ):
     mock_get_session_user.return_value = api_response_ok_bad_json()
-    returned_client.cookies[settings.SSO_SESSION_COOKIE] = '123'
+    returned_client.cookies[settings.SSO_PROXY_SESSION_COOKIE] = '123'
     settings.MIDDLEWARE_CLASSES = [
         'django.contrib.sessions.middleware.SessionMiddleware',
         'sso.middleware.SSOUserMiddleware'

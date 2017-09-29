@@ -34,40 +34,40 @@ docker_run:
 	docker-compose up --build
 
 DOCKER_SET_DEBUG_ENV_VARS := \
-	export SSO_PROFILE_PORT=8006; \
-	export SSO_PROFILE_SECRET_KEY=debug; \
-	export SSO_PROFILE_DEBUG=true ;\
-	export SSO_PROFILE_SSO_SIGNATURE_SECRET=api_signature_debug; \
-	export SSO_PROFILE_SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/; \
-	export SSO_PROFILE_SSO_API_OAUTH2_BASE_URL=http://sso.trade.great.dev:8004/oauth2/; \
-	export SSO_PROFILE_SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
-	export SSO_PROFILE_SSO_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
-	export SSO_PROFILE_SSO_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
-	export SSO_PROFILE_SSO_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/?next=http://profile.trade.great.dev:8006; \
-	export SSO_PROFILE_SSO_PROFILE_URL=http://profile.trade.great.dev:8006; \
-	export SSO_PROFILE_SSO_REDIRECT_FIELD_NAME=next; \
-	export SSO_PROFILE_SSO_SESSION_COOKIE=debug_sso_session_cookie; \
-	export SSO_PROFILE_SESSION_COOKIE_SECURE=false; \
-	export SSO_PROFILE_UTM_COOKIE_DOMAIN=.great.dev; \
-	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
-	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
-	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001/api/external/; \
-	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_SIGNATURE_SECRET=debug; \
-	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_CLASS_NAME='unit-test'; \
-	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_API_BASIC_AUTH_USERNAME=debug; \
-	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_API_BASIC_AUTH_PASSWORD=debug; \
-	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \
-	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_API_SECRET=debug; \
-	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_SEARCH_URL=https://opportunities.export.great.gov.uk/opportunities; \
-	export SSO_PROFILE_FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great.dev:8001/company-profile/edit/logo; \
-	export SSO_PROFILE_FAB_EDIT_PROFILE_URL=http://buyer.trade.great.dev:8001/company-profile; \
-	export SSO_PROFILE_FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/; \
-	export SSO_PROFILE_FAB_REGISTER_URL=http://buyer.trade.great.dev:8001; \
-	export SSO_PROFILE_FAB_ADD_USER_URL=http://buyer.trade.great.dev:8001/account/add-collaborator/; \
-	export SSO_PROFILE_FAB_REMOVE_USER_URL=http://buyer.trade.great.dev:8001/account/remove-collaborator/; \
-	export SSO_PROFILE_FAB_TRANSFER_ACCOUNT_URL=http://buyer.trade.great.dev:8001/account/transfer/; \
-	export SSO_PROFILE_FEATURE_MULTI_USER_ACCOUNT_ENABLED=true; \
-	export SSO_PROFILE_SECURE_HSTS_SECONDS=0
+	export SSO_PROXY_PROFILE_PORT=8006; \
+	export SSO_PROXY_PROFILE_SECRET_KEY=debug; \
+	export SSO_PROXY_PROFILE_DEBUG=true ;\
+	export SSO_PROXY_PROFILE_SSO_PROXY_SIGNATURE_SECRET=api_signature_debug; \
+	export SSO_PROXY_PROFILE_SSO_PROXY_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/; \
+	export SSO_PROXY_PROFILE_SSO_PROXY_API_OAUTH2_BASE_URL=http://sso.trade.great.dev:8004/oauth2/; \
+	export SSO_PROXY_PROFILE_SSO_PROXY_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
+	export SSO_PROXY_PROFILE_SSO_PROXY_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
+	export SSO_PROXY_PROFILE_SSO_PROXY_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
+	export SSO_PROXY_PROFILE_SSO_PROXY_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/?next=http://profile.trade.great.dev:8006; \
+	export SSO_PROXY_PROFILE_SSO_PROFILE_URL=http://profile.trade.great.dev:8006; \
+	export SSO_PROXY_PROFILE_SSO_PROXY_REDIRECT_FIELD_NAME=next; \
+	export SSO_PROXY_PROFILE_SSO_PROXY_SESSION_COOKIE=debug_sso_session_cookie; \
+	export SSO_PROXY_PROFILE_SESSION_COOKIE_SECURE=false; \
+	export SSO_PROXY_PROFILE_UTM_COOKIE_DOMAIN=.great.dev; \
+	export SSO_PROXY_PROFILE_GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
+	export SSO_PROXY_PROFILE_GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
+	export SSO_PROXY_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001/api/external/; \
+	export SSO_PROXY_PROFILE_DIRECTORY_API_EXTERNAL_SIGNATURE_SECRET=debug; \
+	export SSO_PROXY_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_CLASS_NAME='unit-test'; \
+	export SSO_PROXY_PROFILE_EXPORTING_OPPORTUNITIES_API_BASIC_AUTH_USERNAME=debug; \
+	export SSO_PROXY_PROFILE_EXPORTING_OPPORTUNITIES_API_BASIC_AUTH_PASSWORD=debug; \
+	export SSO_PROXY_PROFILE_EXPORTING_OPPORTUNITIES_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \
+	export SSO_PROXY_PROFILE_EXPORTING_OPPORTUNITIES_API_SECRET=debug; \
+	export SSO_PROXY_PROFILE_EXPORTING_OPPORTUNITIES_SEARCH_URL=https://opportunities.export.great.gov.uk/opportunities; \
+	export SSO_PROXY_PROFILE_FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great.dev:8001/company-profile/edit/logo; \
+	export SSO_PROXY_PROFILE_FAB_EDIT_PROFILE_URL=http://buyer.trade.great.dev:8001/company-profile; \
+	export SSO_PROXY_PROFILE_FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/; \
+	export SSO_PROXY_PROFILE_FAB_REGISTER_URL=http://buyer.trade.great.dev:8001; \
+	export SSO_PROXY_PROFILE_FAB_ADD_USER_URL=http://buyer.trade.great.dev:8001/account/add-collaborator/; \
+	export SSO_PROXY_PROFILE_FAB_REMOVE_USER_URL=http://buyer.trade.great.dev:8001/account/remove-collaborator/; \
+	export SSO_PROXY_PROFILE_FAB_TRANSFER_ACCOUNT_URL=http://buyer.trade.great.dev:8001/account/transfer/; \
+	export SSO_PROXY_PROFILE_FEATURE_MULTI_USER_ACCOUNT_ENABLED=true; \
+	export SSO_PROXY_PROFILE_SECURE_HSTS_SECONDS=0
 
 docker_test_env_files:
 	$(DOCKER_SET_DEBUG_ENV_VARS) && \
@@ -109,15 +109,15 @@ DEBUG_SET_ENV_VARS := \
 	export PORT=8006; \
 	export SECRET_KEY=debug; \
 	export DEBUG=true ;\
-	export SSO_SIGNATURE_SECRET=proxy_signature_debug; \
-	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/; \
-	export SSO_API_OAUTH2_BASE_URL=http://sso.trade.great.dev:8004/oauth2/; \
-	export SSO_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
-	export SSO_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
-	export SSO_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
-	export SSO_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/?next=http://profile.trade.great.dev:8006; \
-	export SSO_REDIRECT_FIELD_NAME=next; \
-	export SSO_SESSION_COOKIE=debug_sso_session_cookie; \
+	export SSO_PROXY_SIGNATURE_SECRET=proxy_signature_debug; \
+	export SSO_PROXY_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/; \
+	export SSO_PROXY_API_OAUTH2_BASE_URL=http://sso.trade.great.dev:8004/oauth2/; \
+	export SSO_PROXY_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
+	export SSO_PROXY_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
+	export SSO_PROXY_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
+	export SSO_PROXY_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/?next=http://profile.trade.great.dev:8006; \
+	export SSO_PROXY_REDIRECT_FIELD_NAME=next; \
+	export SSO_PROXY_SESSION_COOKIE=debug_sso_session_cookie; \
 	export SSO_PROFILE_URL=http://profile.trade.great.dev:8006; \
 	export SESSION_COOKIE_SECURE=false; \
 	export UTM_COOKIE_DOMAIN=.great.dev; \

@@ -13,4 +13,6 @@ def test_sso_processor_plugged_in(settings):
 def test_sso_reset_password_url(request_logged_in, settings):
     context = context_processors.sso_processor(request_logged_in)
 
-    assert context['sso_password_reset_url'] == settings.SSO_PASSWORD_RESET_URL
+    assert context['sso_password_reset_url'] == (
+        settings.SSO_PROXY_PASSWORD_RESET_URL
+    )
