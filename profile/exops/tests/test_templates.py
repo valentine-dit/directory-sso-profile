@@ -30,4 +30,4 @@ def test_email_alert_without_term():
     }
     html = render_to_string('exops/is-exops-user-email-alerts.html', context)
 
-    assert '<empty>' in html
+    assert '&lt;empty&gt;' in html
