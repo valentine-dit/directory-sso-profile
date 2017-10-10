@@ -2,8 +2,74 @@ body {
   background-color: #ffffff;
 }
 
+.button-primary {
+    background-color: #e41f13;
+    color: #ffffff;
+    font-size: 24px;
+}
+
+.button {
+    border: 0;
+    border-radius: 3px;
+    box-shadow: none;
+    cursor: pointer;
+    display: inline-block;
+    font-family: "Roboto",arial,helvetica,sans-serif;
+    padding: 12px 30px;
+    text-decoration: none;
+}
+
+.button-border {
+    border: 2px solid;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+
+.button-border:active {
+    background-color: #ffffff;
+}
+.button-border:active {
+    background-color: #007ea3;
+    outline: 0;
+}
+.button-border:hover {
+    background-color: transparent;
+    color: #007ea3;
+}
+.button-border:link, .button-border:visited {
+    background-color: transparent;
+    color: #007ea3;
+}
+.button-border:focus {
+    outline: 3px solid #ffbf47;
+}
+
+a:focus {
+    outline: 3px solid #ffbf47;
+}
+
+.link {
+    border-bottom: 1px solid;
+    color: #00549f;
+    text-decoration: none;
+}
+
+.font-large, .h4, .button, .button-close:before {
+    font-size: 18px;
+    letter-spacing: 0;
+    line-height: 25px;
+}
+
+.h1, .font-medium, h1, h2, h3, h4, h5, h6, strong, .button {
+    font-weight: 500;
+}
+
 .button-border:active {
   background-color: #ffffff;
+}
+
+.button.navigation-main-button {
+  padding: 8px 10px 5px;
 }
 
 .information-breakout {
@@ -86,6 +152,10 @@ body {
 
 /* FAB tab content
  **********************/
+
+#profile-required ul {
+  padding: 0;
+}
 .sso-profile-fab-container {
     margin-top: 20px;
     margin-bottom: 100px;
@@ -313,6 +383,9 @@ body {
   .sso-profile-tab-container li {
       display: inline-block;
       list-style-type: none;
+  }
+  .sso-profile-tab-container ul {
+    margin: 0;
   }
 }
 
