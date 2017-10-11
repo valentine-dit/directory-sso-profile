@@ -20,9 +20,14 @@ class FindABuyerView(
     company_retrieve_error = False
 
     SUCCESS_MESSAGES = {
-        'owner-transferred': 'Transfer ownership invite sent.',
-        'user-added': 'Collaboration invite sent.',
-        'user-removed': 'Remove collaborators successful.'
+        'owner-transferred': (
+            'We’ve sent a confirmation email to the new profile owner.'
+        ),
+        'user-added': (
+            'We’ve sent an invitation to the user you want added to your '
+            'profile.'
+        ),
+        'user-removed': 'User successfully removed from your profile.'
     }
 
     def dispatch(self, request, *args, **kwargs):
