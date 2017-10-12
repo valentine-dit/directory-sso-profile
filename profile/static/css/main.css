@@ -2,6 +2,22 @@ body {
   background-color: #ffffff;
 }
 
+@media (max-width: 979px) {
+  padding: 0;
+  .container {
+    max-width: 960px;
+    padding: 0 20px;
+    width: 100%;
+  }
+}
+
+@media (min-width: 979px) {
+  .container {
+    max-width: 960px;
+    width: 100%;
+  }
+}
+
 .button-primary {
     background-color: #e41f13;
     color: #ffffff;
