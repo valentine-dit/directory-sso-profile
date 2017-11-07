@@ -19,10 +19,17 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta property="og:image" content="{% static 'images/opengraph-image.png' %}">
+        <!--[if IE 8]>
+          <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
+          <script type="text/javascript" src="{% static 'Dit-Pattern-Styling/public/js/selectivizr.js' %}"></script>
+        <![endif]-->
+        <!--[if gte IE 9]><!-->
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <!--<![endif]-->
         {% if features.FEATURE_NEW_SHARED_HEADER_ENABLED %}
             <link href="{% static 'Dit-Pattern-Styling/public/css/main.css' %}" media="all" rel="stylesheet" />
             <link href="{% static 'Dit-Pattern-Styling/public/css/compatibility.css' %}" media="all" rel="stylesheet" />
-            <script src="{% static 'Dit-Pattern-Styling/public/js/third-party.js' %}"></script>
             <script src="{% static 'Dit-Pattern-Styling/public/js/script.js' %}"></script>
         {% else %}
         <link href="{% static 'Dit-Pattern-Styling/public/css/main_old.css' %}" media="all" rel="stylesheet" />
@@ -53,11 +60,8 @@
         {% else %}
             {% include 'directory_header_footer/footer_old.html' %}
         {% endif %}
-        <!--[if IE 8]><script src="{% static 'Dit-Pattern-Styling/public/js/ie8.js' }"></script><![endif]-->
-        <!--[if IE 8]><script type="text/javascript" src="Dit-Pattern-Styling/public/js/selectivizr.js"></script><![endif]-->
 
         {% if not features.FEATURE_NEW_SHARED_HEADER_ENABLED %}
-            <script src="{% static 'Dit-Pattern-Styling/public/js/jquery.js' %}"></script>
             <script type="text/javascript" src="{% static 'Dit-Pattern-Styling/public/js/navigation.js' %}"></script>
         {% endif %}
         <script type="text/javascript" src="{% static 'javascripts/index.js' %}"></script>
