@@ -422,11 +422,11 @@ a:focus {
   .h1 {
     font-size: 30px;
   }
-  
+
   .sso-profile-tab-container {
     background: none;
   }
-  
+
   .sso-profile-tab-container li {
     border-bottom: #ffffff solid 5px;
     border-left: #ffffff solid 5px;
@@ -434,7 +434,7 @@ a:focus {
     margin: 0;
     width: 49.2%;
   }
-  
+
   .sso-profile-tab-container li a {
     background-color: #F0F3F2;
     border-bottom: 5px solid #F0F3F2;
@@ -444,7 +444,7 @@ a:focus {
     padding: 20px 0 0 0;
     text-align: center;
   }
-  
+
   .sso-profile-tab-container li:nth-child(odd) {
     border-right: none;
     clear: left;
@@ -455,7 +455,7 @@ a:focus {
     border-top: none;
   }
 
-  .sso-profile-tab-container li.active a {  
+  .sso-profile-tab-container li.active a {
     border-bottom: 5px solid #E41F13;
   }
 
@@ -489,4 +489,12 @@ a:focus {
   #tab-content h2 {
     font-size: 24px;
   }
+}
+
+/* header/footer fixes */
+.static-header-footer .container {
+  width: auto;
+}
+#footer a {
+  line-height: inherit;
 }

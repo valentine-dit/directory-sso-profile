@@ -69,7 +69,21 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROXY_PROFILE_FEATURE_MULTI_USER_ACCOUNT_ENABLED=true; \
 	export SSO_PROXY_PROFILE_SECURE_HSTS_SECONDS=0; \
 	export SSO_PROXY_PROFILE_PYTHONWARNINGS=all; \
-	export SSO_PROXY_PROFILE_PYTHONDEBUG=true
+	export SSO_PROXY_PROFILE_PYTHONDEBUG=true; \
+	export DIRECTORY_UI_BUYER_GREAT_EXPORT_HOME=http://exred.trade.great.dev:8007; \
+	export DIRECTORY_UI_BUYER_EXPORTING_NEW=http://exred.trade.great.dev:8007/new; \
+	export DIRECTORY_UI_BUYER_EXPORTING_OCCASIONAL=http://exred.trade.great.dev:8007/occasional; \
+	export DIRECTORY_UI_BUYER_EXPORTING_REGULAR=http://exred.trade.great.dev:8007/regular; \
+	export DIRECTORY_UI_BUYER_GUIDANCE_MARKET_RESEARCH=http://exred.trade.great.dev:8007/market-research; \
+	export DIRECTORY_UI_BUYER_GUIDANCE_CUSTOMER_INSIGHT=http://exred.trade.great.dev:8007/customer-insight; \
+	export DIRECTORY_UI_BUYER_GUIDANCE_FINANCE=http://exred.trade.great.dev:8007/finance; \
+	export DIRECTORY_UI_BUYER_GUIDANCE_BUSINESS_PLANNING=http://exred.trade.great.dev:8007/business-planning; \
+	export DIRECTORY_UI_BUYER_GUIDANCE_GETTING_PAID=http://exred.trade.great.dev:8007/getting-paid; \
+	export DIRECTORY_UI_BUYER_GUIDANCE_OPERATIONS_AND_COMPLIANCE=http://exred.trade.great.dev:8007/operations-and-compliance; \
+	export DIRECTORY_UI_BUYER_SERVICES_EXOPPS=http://opportunities.export.great.gov.uk; \
+	export DIRECTORY_UI_BUYER_SERVICES_FAB=http://buyer.trade.great.dev:8001; \
+	export DIRECTORY_UI_BUYER_SERVICES_GET_FINANCE=http://exred.trade.great.dev:8007/finance/get-finance-support-from-government; \
+	export DIRECTORY_UI_BUYER_SERVICES_SOO=http://soo.trade.great.dev:8008
 
 docker_test_env_files:
 	$(DOCKER_SET_DEBUG_ENV_VARS) && \
@@ -143,7 +157,21 @@ DEBUG_SET_ENV_VARS := \
 	export SECURE_HSTS_SECONDS=0; \
 	export PYTHONWARNINGS=all; \
 	export PYTHONDEBUG=true; \
-	export FEATURE_NEW_SHARED_HEADER_ENABLED=true
+	export FEATURE_NEW_SHARED_HEADER_ENABLED=true; \
+	export GREAT_EXPORT_HOME=http://exred.trade.great.dev:8007; \
+	export EXPORTING_NEW=http://exred.trade.great.dev:8007/new; \
+	export EXPORTING_OCCASIONAL=http://exred.trade.great.dev:8007/occasional; \
+	export EXPORTING_REGULAR=http://exred.trade.great.dev:8007/regular; \
+	export GUIDANCE_MARKET_RESEARCH=http://exred.trade.great.dev:8007/market-research; \
+	export GUIDANCE_CUSTOMER_INSIGHT=http://exred.trade.great.dev:8007/customer-insight; \
+	export GUIDANCE_FINANCE=http://exred.trade.great.dev:8007/finance; \
+	export GUIDANCE_BUSINESS_PLANNING=http://exred.trade.great.dev:8007/business-planning; \
+	export GUIDANCE_GETTING_PAID=http://exred.trade.great.dev:8007/getting-paid; \
+	export GUIDANCE_OPERATIONS_AND_COMPLIANCE=http://exred.trade.great.dev:8007/operations-and-compliance; \
+	export SERVICES_EXOPPS=http://opportunities.export.great.gov.uk; \
+	export SERVICES_FAB=http://buyer.trade.great.dev:8001; \
+	export SERVICES_GET_FINANCE=http://exred.trade.great.dev:8007/finance/get-finance-support-from-government; \
+	export SERVICES_SOO=http://soo.trade.great.dev:8008
 
 
 debug_webserver:
