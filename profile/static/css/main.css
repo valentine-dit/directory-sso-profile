@@ -77,8 +77,13 @@ a:focus {
     line-height: 25px;
 }
 
+p {
+    margin-bottom: 23px;
+}
+
+
 .h1, .font-medium, h1, h2, h3, h4, h5, h6, strong, .button {
-    font-weight: 500;
+    font-weight: 700;
 }
 
 .button-border:active {
@@ -197,7 +202,7 @@ a:focus {
     background-color: #00549f;
     color: white;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 700;
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 5px;
@@ -206,7 +211,7 @@ a:focus {
 
 .sso-profile-fab-company-name {
     font-size: 24px;
-    font-weight: 500;
+    font-weight: 700;
     line-height: 1.29;
     color: #4a4a4a;
 }
@@ -234,7 +239,7 @@ a:focus {
  **********************/
 .sso-profile-eig-title {
   font-size: 36px;
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.29;
   color: #4a4a4a;
   margin-bottom: 40px;
@@ -246,7 +251,7 @@ a:focus {
   padding: 20px;
   display: inline-block;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 700;
   color: #333333;
   width: 100%;
 }
@@ -282,7 +287,7 @@ a:focus {
 
 .sso-profile-eig-opportunity-item-title {
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.29;
   color: #00549f;
   margin-bottom: 17px;
@@ -342,7 +347,7 @@ a:focus {
 
 #sso-profile-landing-page-container h1 {
   font-size: 48px;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: -0.5px;
   margin-bottom: 40px;
   display: inline-block;
@@ -376,7 +381,7 @@ a:focus {
   border-radius: 8px;
   background-color: #dfd5c5;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.72;
   color: #333333;
   padding-top: 10px;
