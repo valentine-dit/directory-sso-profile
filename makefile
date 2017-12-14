@@ -38,20 +38,20 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_SECRET_KEY=debug; \
 	export SSO_PROFILE_DEBUG=true ;\
 	export SSO_PROFILE_SSO_PROXY_SIGNATURE_SECRET=api_signature_debug; \
-	export SSO_PROFILE_SSO_PROXY_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/; \
-	export SSO_PROFILE_SSO_PROXY_API_OAUTH2_BASE_URL=http://sso.trade.great.dev:8004/oauth2/; \
-	export SSO_PROFILE_SSO_PROXY_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
-	export SSO_PROFILE_SSO_PROXY_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
-	export SSO_PROFILE_SSO_PROXY_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
-	export SSO_PROFILE_SSO_PROXY_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/?next=http://profile.trade.great.dev:8006; \
-	export SSO_PROFILE_SSO_PROFILE_URL=http://profile.trade.great.dev:8006; \
+	export SSO_PROFILE_SSO_PROXY_API_CLIENT_BASE_URL=http://sso.trade.great:8004/; \
+	export SSO_PROFILE_SSO_PROXY_API_OAUTH2_BASE_URL=http://sso.trade.great:8004/oauth2/; \
+	export SSO_PROFILE_SSO_PROXY_LOGIN_URL=http://sso.trade.great:8004/accounts/login/?next=http://profile.trade.great:8006; \
+	export SSO_PROFILE_SSO_PROXY_LOGOUT_URL=http://sso.trade.great:8004/accounts/logout/?next=http://profile.trade.great:8006; \
+	export SSO_PROFILE_SSO_PROXY_PASSWORD_RESET_URL=http://sso.trade.great:8004/accounts/password/reset/; \
+	export SSO_PROFILE_SSO_PROXY_SIGNUP_URL=http://sso.trade.great:8004/accounts/signup/?next=http://profile.trade.great:8006; \
+	export SSO_PROFILE_SSO_PROFILE_URL=http://profile.trade.great:8006; \
 	export SSO_PROFILE_SSO_PROXY_REDIRECT_FIELD_NAME=next; \
 	export SSO_PROFILE_SSO_PROXY_SESSION_COOKIE=debug_sso_session_cookie; \
 	export SSO_PROFILE_SESSION_COOKIE_SECURE=false; \
-	export SSO_PROFILE_UTM_COOKIE_DOMAIN=.great.dev; \
+	export SSO_PROFILE_UTM_COOKIE_DOMAIN=.great; \
 	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
 	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
-	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001/api/external/; \
+	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great:8001/api/external/; \
 	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_SIGNATURE_SECRET=debug; \
 	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_CLASS_NAME='unit-test'; \
 	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_API_BASIC_AUTH_USERNAME=debug; \
@@ -59,31 +59,31 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \
 	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_API_SECRET=debug; \
 	export SSO_PROFILE_EXPORTING_OPPORTUNITIES_SEARCH_URL=https://opportunities.export.great.gov.uk/opportunities; \
-	export SSO_PROFILE_FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great.dev:8001/company-profile/edit/logo; \
-	export SSO_PROFILE_FAB_EDIT_PROFILE_URL=http://buyer.trade.great.dev:8001/company-profile; \
-	export SSO_PROFILE_FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/; \
-	export SSO_PROFILE_FAB_REGISTER_URL=http://buyer.trade.great.dev:8001; \
-	export SSO_PROFILE_FAB_ADD_USER_URL=http://buyer.trade.great.dev:8001/account/add-collaborator/; \
-	export SSO_PROFILE_FAB_REMOVE_USER_URL=http://buyer.trade.great.dev:8001/account/remove-collaborator/; \
-	export SSO_PROFILE_FAB_TRANSFER_ACCOUNT_URL=http://buyer.trade.great.dev:8001/account/transfer/; \
+	export SSO_PROFILE_FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great:8001/company-profile/edit/logo; \
+	export SSO_PROFILE_FAB_EDIT_PROFILE_URL=http://buyer.trade.great:8001/company-profile; \
+	export SSO_PROFILE_FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great:8001/company/case-study/edit/; \
+	export SSO_PROFILE_FAB_REGISTER_URL=http://buyer.trade.great:8001; \
+	export SSO_PROFILE_FAB_ADD_USER_URL=http://buyer.trade.great:8001/account/add-collaborator/; \
+	export SSO_PROFILE_FAB_REMOVE_USER_URL=http://buyer.trade.great:8001/account/remove-collaborator/; \
+	export SSO_PROFILE_FAB_TRANSFER_ACCOUNT_URL=http://buyer.trade.great:8001/account/transfer/; \
 	export SSO_PROFILE_FEATURE_MULTI_USER_ACCOUNT_ENABLED=true; \
 	export SSO_PROFILE_SECURE_HSTS_SECONDS=0; \
 	export SSO_PROFILE_PYTHONWARNINGS=all; \
 	export SSO_PROFILE_PYTHONDEBUG=true; \
-	export SSO_PROFILE_GREAT_EXPORT_HOME=http://exred.trade.great.dev:8007; \
-	export SSO_PROFILE_EXPORTING_NEW=http://exred.trade.great.dev:8007/new; \
-	export SSO_PROFILE_EXPORTING_OCCASIONAL=http://exred.trade.great.dev:8007/occasional; \
-	export SSO_PROFILE_EXPORTING_REGULAR=http://exred.trade.great.dev:8007/regular; \
-	export SSO_PROFILE_GUIDANCE_MARKET_RESEARCH=http://exred.trade.great.dev:8007/market-research; \
-	export SSO_PROFILE_GUIDANCE_CUSTOMER_INSIGHT=http://exred.trade.great.dev:8007/customer-insight; \
-	export SSO_PROFILE_GUIDANCE_FINANCE=http://exred.trade.great.dev:8007/finance; \
-	export SSO_PROFILE_GUIDANCE_BUSINESS_PLANNING=http://exred.trade.great.dev:8007/business-planning; \
-	export SSO_PROFILE_GUIDANCE_GETTING_PAID=http://exred.trade.great.dev:8007/getting-paid; \
-	export SSO_PROFILE_GUIDANCE_OPERATIONS_AND_COMPLIANCE=http://exred.trade.great.dev:8007/operations-and-compliance; \
+	export SSO_PROFILE_GREAT_EXPORT_HOME=http://exred.trade.great:8007; \
+	export SSO_PROFILE_EXPORTING_NEW=http://exred.trade.great:8007/new; \
+	export SSO_PROFILE_EXPORTING_OCCASIONAL=http://exred.trade.great:8007/occasional; \
+	export SSO_PROFILE_EXPORTING_REGULAR=http://exred.trade.great:8007/regular; \
+	export SSO_PROFILE_GUIDANCE_MARKET_RESEARCH=http://exred.trade.great:8007/market-research; \
+	export SSO_PROFILE_GUIDANCE_CUSTOMER_INSIGHT=http://exred.trade.great:8007/customer-insight; \
+	export SSO_PROFILE_GUIDANCE_FINANCE=http://exred.trade.great:8007/finance; \
+	export SSO_PROFILE_GUIDANCE_BUSINESS_PLANNING=http://exred.trade.great:8007/business-planning; \
+	export SSO_PROFILE_GUIDANCE_GETTING_PAID=http://exred.trade.great:8007/getting-paid; \
+	export SSO_PROFILE_GUIDANCE_OPERATIONS_AND_COMPLIANCE=http://exred.trade.great:8007/operations-and-compliance; \
 	export SSO_PROFILE_SERVICES_EXOPPS=http://opportunities.export.great.gov.uk; \
-	export SSO_PROFILE_SERVICES_FAB=http://buyer.trade.great.dev:8001; \
-	export SSO_PROFILE_SERVICES_GET_FINANCE=http://exred.trade.great.dev:8007/finance/get-finance-support-from-government; \
-	export SSO_PROFILE_SERVICES_SOO=http://soo.trade.great.dev:8008; \
+	export SSO_PROFILE_SERVICES_FAB=http://buyer.trade.great:8001; \
+	export SSO_PROFILE_SERVICES_GET_FINANCE=http://exred.trade.great:8007/finance/get-finance-support-from-government; \
+	export SSO_PROFILE_SERVICES_SOO=http://soo.trade.great:8008; \
 	export SSO_PROFILE_SECURE_SSL_REDIRECT=false
 
 docker_test_env_files:
@@ -127,52 +127,52 @@ DEBUG_SET_ENV_VARS := \
 	export SECRET_KEY=debug; \
 	export DEBUG=true ;\
 	export SSO_PROXY_SIGNATURE_SECRET=proxy_signature_debug; \
-	export SSO_PROXY_API_CLIENT_BASE_URL=http://sso.trade.great.dev:8004/; \
-	export SSO_PROXY_API_OAUTH2_BASE_URL=http://sso.trade.great.dev:8004/oauth2/; \
-	export SSO_PROXY_LOGIN_URL=http://sso.trade.great.dev:8004/accounts/login/?next=http://profile.trade.great.dev:8006; \
-	export SSO_PROXY_LOGOUT_URL=http://sso.trade.great.dev:8004/accounts/logout/?next=http://profile.trade.great.dev:8006; \
-	export SSO_PROXY_PASSWORD_RESET_URL=http://sso.trade.great.dev:8004/accounts/password/reset/; \
-	export SSO_PROXY_SIGNUP_URL=http://sso.trade.great.dev:8004/accounts/signup/?next=http://profile.trade.great.dev:8006; \
+	export SSO_PROXY_API_CLIENT_BASE_URL=http://sso.trade.great:8004/; \
+	export SSO_PROXY_API_OAUTH2_BASE_URL=http://sso.trade.great:8004/oauth2/; \
+	export SSO_PROXY_LOGIN_URL=http://sso.trade.great:8004/accounts/login/?next=http://profile.trade.great:8006; \
+	export SSO_PROXY_LOGOUT_URL=http://sso.trade.great:8004/accounts/logout/?next=http://profile.trade.great:8006; \
+	export SSO_PROXY_PASSWORD_RESET_URL=http://sso.trade.great:8004/accounts/password/reset/; \
+	export SSO_PROXY_SIGNUP_URL=http://sso.trade.great:8004/accounts/signup/?next=http://profile.trade.great:8006; \
 	export SSO_PROXY_REDIRECT_FIELD_NAME=next; \
 	export SSO_PROXY_SESSION_COOKIE=debug_sso_session_cookie; \
-	export SSO_PROFILE_URL=http://profile.trade.great.dev:8006; \
+	export SSO_PROFILE_URL=http://profile.trade.great:8006; \
 	export SESSION_COOKIE_SECURE=false; \
-	export UTM_COOKIE_DOMAIN=.great.dev; \
+	export UTM_COOKIE_DOMAIN=.great; \
 	export GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
 	export GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
-	export DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great.dev:8001/api/external/; \
+	export DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great:8001/api/external/; \
 	export DIRECTORY_API_EXTERNAL_SIGNATURE_SECRET=debug; \
 	export EXPORTING_OPPORTUNITIES_API_BASIC_AUTH_USERNAME=debug; \
 	export EXPORTING_OPPORTUNITIES_API_BASIC_AUTH_PASSWORD=debug; \
 	export EXPORTING_OPPORTUNITIES_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \
 	export EXPORTING_OPPORTUNITIES_API_SECRET=debug; \
 	export EXPORTING_OPPORTUNITIES_SEARCH_URL=https://opportunities.export.great.gov.uk/opportunities; \
-	export FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great.dev:8001/company-profile/edit/logo; \
-	export FAB_EDIT_PROFILE_URL=http://buyer.trade.great.dev:8001/company-profile; \
-	export FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great.dev:8001/company/case-study/edit/; \
-	export FAB_REGISTER_URL=http://buyer.trade.great.dev:8001; \
-	export FAB_ADD_USER_URL=http://buyer.trade.great.dev:8001/account/add-collaborator/; \
-	export FAB_REMOVE_USER_URL=http://buyer.trade.great.dev:8001/account/remove-collaborator/; \
-	export FAB_TRANSFER_ACCOUNT_URL=http://buyer.trade.great.dev:8001/account/transfer/; \
+	export FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great:8001/company-profile/edit/logo; \
+	export FAB_EDIT_PROFILE_URL=http://buyer.trade.great:8001/company-profile; \
+	export FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great:8001/company/case-study/edit/; \
+	export FAB_REGISTER_URL=http://buyer.trade.great:8001; \
+	export FAB_ADD_USER_URL=http://buyer.trade.great:8001/account/add-collaborator/; \
+	export FAB_REMOVE_USER_URL=http://buyer.trade.great:8001/account/remove-collaborator/; \
+	export FAB_TRANSFER_ACCOUNT_URL=http://buyer.trade.great:8001/account/transfer/; \
 	export FEATURE_MULTI_USER_ACCOUNT_ENABLED=true; \
 	export SECURE_HSTS_SECONDS=0; \
 	export PYTHONWARNINGS=all; \
 	export PYTHONDEBUG=true; \
 	export FEATURE_NEW_SHARED_HEADER_ENABLED=true; \
-	export GREAT_EXPORT_HOME=http://exred.trade.great.dev:8007; \
-	export EXPORTING_NEW=http://exred.trade.great.dev:8007/new; \
-	export EXPORTING_OCCASIONAL=http://exred.trade.great.dev:8007/occasional; \
-	export EXPORTING_REGULAR=http://exred.trade.great.dev:8007/regular; \
-	export GUIDANCE_MARKET_RESEARCH=http://exred.trade.great.dev:8007/market-research; \
-	export GUIDANCE_CUSTOMER_INSIGHT=http://exred.trade.great.dev:8007/customer-insight; \
-	export GUIDANCE_FINANCE=http://exred.trade.great.dev:8007/finance; \
-	export GUIDANCE_BUSINESS_PLANNING=http://exred.trade.great.dev:8007/business-planning; \
-	export GUIDANCE_GETTING_PAID=http://exred.trade.great.dev:8007/getting-paid; \
-	export GUIDANCE_OPERATIONS_AND_COMPLIANCE=http://exred.trade.great.dev:8007/operations-and-compliance; \
+	export GREAT_EXPORT_HOME=http://exred.trade.great:8007; \
+	export EXPORTING_NEW=http://exred.trade.great:8007/new; \
+	export EXPORTING_OCCASIONAL=http://exred.trade.great:8007/occasional; \
+	export EXPORTING_REGULAR=http://exred.trade.great:8007/regular; \
+	export GUIDANCE_MARKET_RESEARCH=http://exred.trade.great:8007/market-research; \
+	export GUIDANCE_CUSTOMER_INSIGHT=http://exred.trade.great:8007/customer-insight; \
+	export GUIDANCE_FINANCE=http://exred.trade.great:8007/finance; \
+	export GUIDANCE_BUSINESS_PLANNING=http://exred.trade.great:8007/business-planning; \
+	export GUIDANCE_GETTING_PAID=http://exred.trade.great:8007/getting-paid; \
+	export GUIDANCE_OPERATIONS_AND_COMPLIANCE=http://exred.trade.great:8007/operations-and-compliance; \
 	export SERVICES_EXOPPS=http://opportunities.export.great.gov.uk; \
-	export SERVICES_FAB=http://buyer.trade.great.dev:8001; \
-	export SERVICES_GET_FINANCE=http://exred.trade.great.dev:8007/finance/get-finance-support-from-government; \
-	export SERVICES_SOO=http://soo.trade.great.dev:8008; \
+	export SERVICES_FAB=http://buyer.trade.great:8001; \
+	export SERVICES_GET_FINANCE=http://exred.trade.great:8007/finance/get-finance-support-from-government; \
+	export SERVICES_SOO=http://soo.trade.great:8008; \
 	export SECURE_SSL_REDIRECT=false
 
 
