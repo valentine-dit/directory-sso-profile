@@ -84,7 +84,8 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_SERVICES_FAB=http://buyer.trade.great:8001; \
 	export SSO_PROFILE_SERVICES_GET_FINANCE=http://exred.trade.great:8007/finance/get-finance-support-from-government; \
 	export SSO_PROFILE_SERVICES_SOO=http://soo.trade.great:8008; \
-	export SSO_PROFILE_SECURE_SSL_REDIRECT=false
+	export SSO_PROFILE_SECURE_SSL_REDIRECT=false; \
+	export SSO_PROFILE_HEALTH_CHECK_TOKEN=debug
 
 docker_test_env_files:
 	$(DOCKER_SET_DEBUG_ENV_VARS) && \
@@ -173,7 +174,8 @@ DEBUG_SET_ENV_VARS := \
 	export SERVICES_FAB=http://buyer.trade.great:8001; \
 	export SERVICES_GET_FINANCE=http://exred.trade.great:8007/finance/get-finance-support-from-government; \
 	export SERVICES_SOO=http://soo.trade.great:8008; \
-	export SECURE_SSL_REDIRECT=false
+	export SECURE_SSL_REDIRECT=false; \
+	export HEALTH_CHECK_TOKEN=debug
 
 
 debug_webserver:

@@ -44,7 +44,9 @@ INSTALLED_APPS = [
     "directory_constants",
     "directory_header_footer",
     "profile",
-    "profile.api"
+    "profile.api",
+    "directory_healthcheck",
+    "health_check",
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -332,3 +334,6 @@ FEATURE_MULTI_USER_ACCOUNT_ENABLED = os.getenv(
 FEATURE_NEW_SHARED_HEADER_ENABLED = os.getenv(
     'FEATURE_NEW_SHARED_HEADER_ENABLED'
 ) == 'true'
+
+# healthcheck
+HEALTH_CHECK_TOKEN = os.environ['HEALTH_CHECK_TOKEN']
