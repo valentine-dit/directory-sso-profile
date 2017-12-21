@@ -6,6 +6,8 @@ from profile.fab import views as fab_views
 from profile.soo import views as soo_views
 from profile.exops import views as exops_views
 
+import healthcheck.views
+
 
 urlpatterns = [
     url(
@@ -42,5 +44,15 @@ urlpatterns = [
         r'^api/v1/directory/supplier/$',
         api_views.ExternalSupplierAPIView.as_view(),
         name='api-external-supplier'
-    )
+    ),
+    url(
+        r'^healthcheck/api/$',
+        healthcheck.views.APIProxyAPIView.as_view(),
+        name='healthcheck-api'
+    ),
+    url(
+        r'^healthcheck/single-sign-on/$',
+        healthcheck.views.SingleSignOnAPIView.as_view(),
+        name='healthcheck-single-sign-on'
+    ),
 ]
