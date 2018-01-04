@@ -1,0 +1,105 @@
+/* Tablet
+**********************/
+
+@media (min-width: 767px) {
+  #sso-profile-eig-container {
+    margin-top: 50px;
+  }
+
+  .sso-profile-fab-logo-container img {
+    max-width: 200px;
+  }
+  .sso-profile-tab-container li {
+    display: inline-block;
+    list-style-type: none;
+  }
+  .sso-profile-tab-container ul {
+    margin: 0;
+  }
+}
+
+/* Mobile
+**********************/
+@media (max-width: 767px) {
+
+  /* mobile hidden elements */
+  .soo-startpage-image {
+    display: none;
+  }
+
+  /* mobile alternatives */
+  .button-primary {
+    font-size: 18px;
+  }
+
+  .h1 {
+    font-size: 30px;
+  }
+
+  .sso-profile-tab-container {
+    background: none;
+  }
+
+  .sso-profile-tab-container li {
+    border-bottom: #ffffff solid 5px;
+    border-left: #ffffff solid 5px;
+    float: left;
+    margin: 0;
+    width: 49.2%;
+  }
+
+  .sso-profile-tab-container li a {
+    background-color: #F0F3F2;
+    border-bottom: 5px solid #F0F3F2;
+    display: block;
+    letter-spacing: -0.3px;
+    min-height: 60px;
+    padding: 20px 0 0 0;
+    text-align: center;
+  }
+
+  .sso-profile-tab-container li:nth-child(odd) {
+    border-right: none;
+    clear: left;
+  }
+
+  .sso-profile-tab-container li.active {
+    background-color: transparent;
+    border-top: none;
+  }
+
+  .sso-profile-tab-container li.active a {
+    border-bottom: 5px solid #E41F13;
+  }
+
+  .sso-profile-toolbar-buttons-container {
+    text-align: left;
+  }
+
+  .sso-profile-toolbar-labels-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  #tab-content section {
+    padding: 0 20px;
+  }
+
+  .sso-profile-fab-container,
+  #sso-profile-eig-container {
+    margin-top: 5px;
+    padding: 10px;
+  }
+
+  #sso-profile-eig-buttons {
+    margin-bottom: 10px;
+  }
+
+  .sso-profile-fab-logo-container {
+    margin-top: 20px;
+  }
+
+  #tab-content h2 {
+    font-size: 24px;
+  }
+}
