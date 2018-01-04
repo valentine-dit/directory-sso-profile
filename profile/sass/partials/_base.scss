@@ -1,7 +1,6 @@
 body {
   background-color: #ffffff;
 }
-
 @media (max-width: 979px) {
   body {
     padding: 0;
@@ -21,73 +20,70 @@ body {
 }
 
 .button-primary {
-  background-color: #e41f13;
-  color: #ffffff;
-  font-size: 24px;
+    background-color: #e41f13;
+    color: #ffffff;
+    font-size: 24px;
 }
 
 .button {
-  border: 0;
-  border-radius: 3px;
-  box-shadow: none;
-  cursor: pointer;
-  display: inline-block;
-  font-family: "Roboto",arial,helvetica,sans-serif;
-  padding: 12px 30px;
-  text-decoration: none;
+    border: 0;
+    border-radius: 3px;
+    box-shadow: none;
+    cursor: pointer;
+    display: inline-block;
+    font-family: "Roboto",arial,helvetica,sans-serif;
+    padding: 12px 30px;
+    text-decoration: none;
 }
 
 .button-border {
-  border: 2px solid;
-  padding-bottom: 10px;
-  padding-top: 10px;
+    border: 2px solid;
+    padding-bottom: 10px;
+    padding-top: 10px;
 }
 
 .button-border:active {
-  background-color: #ffffff;
+    background-color: #ffffff;
 }
-
 .button-border:active {
-  background-color: #007ea3;
-  outline: 0;
+    background-color: #007ea3;
+    outline: 0;
 }
-
 .button-border:hover {
-  background-color: transparent;
-  color: #007ea3;
+    background-color: transparent;
+    color: #007ea3;
 }
-
 .button-border:link, .button-border:visited {
-  background-color: transparent;
-  color: #007ea3;
+    background-color: transparent;
+    color: #007ea3;
 }
-
 .button-border:focus {
-  outline: 3px solid #ffbf47;
+    outline: 3px solid #ffbf47;
 }
 
 a:focus {
-  outline: 3px solid #ffbf47;
+    outline: 3px solid #ffbf47;
 }
 
 .link {
-  border-bottom: 1px solid;
-  color: #00549f;
-  text-decoration: none;
+    border-bottom: 1px solid;
+    color: #00549f;
+    text-decoration: none;
 }
 
 .font-large, .h4, .button, .button-close:before {
-  font-size: 18px;
-  letter-spacing: 0;
-  line-height: 25px;
+    font-size: 18px;
+    letter-spacing: 0;
+    line-height: 25px;
 }
 
 p {
-  margin-bottom: 23px;
+    margin-bottom: 23px;
 }
 
+
 .h1, .font-medium, h1, h2, h3, h4, h5, h6, strong, .button {
-  font-weight: 700;
+    font-weight: 700;
 }
 
 .button-border:active {
@@ -110,17 +106,17 @@ p {
 }
 
 .sso-profile-tab-container {
-  margin-top: 30px;
-  background-color: #F0F3F2;
+    margin-top: 30px;
+    background-color: #F0F3F2;
 }
 
 .sso-profile-tab-container ul {
-  padding-left: 0;
+    padding-left: 0;
 }
 
 .sso-profile-tab-container li.active {
-  background-color: white;
-  border-top: 5px solid #E41F13;
+    background-color: white;
+    border-top: 5px solid #E41F13;
 }
 
 .sso-profile-tab-container li a {
@@ -131,12 +127,12 @@ p {
 }
 
 .sso-profile-toolbar-labels-container {
-  margin-top: 10px;
+    margin-top: 10px;
 }
 
 .sso-profile-toolbar-buttons-container {
-  margin-top: 30px;
-  text-align: right;
+    margin-top: 30px;
+    text-align: right;
 }
 
 .sso-profile-toolbar-buttons-container .button,
@@ -152,8 +148,7 @@ p {
 }
 
 #tab-content .span3:first-child {
-  min-height: 1px;
-  /* avoids area appearing to collapse */
+  min-height: 1px; /* avoids area appearing to collapse */
   width: 220px;
 }
 
@@ -179,13 +174,13 @@ p {
 
 /* FAB tab content
  **********************/
+
 #profile-required ul {
   padding: 0;
 }
-
 .sso-profile-fab-container {
-  margin-top: 20px;
-  margin-bottom: 100px;
+    margin-top: 20px;
+    margin-bottom: 100px;
 }
 
 .sso-profile-success-message {
@@ -197,47 +192,47 @@ p {
 }
 
 .sso-profile-fab-logo-container {
-  position: relative;
+    position: relative;
 }
 
 .sso-profile-fab-logo-edit-button {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-color: #00549f;
-  color: white;
-  font-size: 16px;
-  font-weight: 700;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #00549f;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 .sso-profile-fab-company-name {
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.29;
-  color: #4a4a4a;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.29;
+    color: #4a4a4a;
 }
 
 .sso-profile-external-links {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 
 .sso-profile-external-links a {
-  font-size: 16px;
-  font-weight: normal;
-  line-height: 1.56;
-  color: #00549f;
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 1.56;
+    color: #00549f;
 }
 
 .sso-profile-fab-company-links-seperator {
-  display: inline-block;
-  font-size: 20px;
-  color: #999999;
-  margin-left: 13px;
-  margin-right: 13px;
+    display: inline-block;
+    font-size: 20px;
+    color: #999999;
+    margin-left: 13px;
+    margin-right: 13px;
 }
 
 /* EiG tab content
@@ -363,15 +358,17 @@ p {
   margin-bottom: 20px;
 }
 
+
 /*********
   Utilities
  *********/
+
 .sso-profile-external-links-seperator {
-  display: inline-block;
-  font-size: 20px;
-  color: #999999;
-  margin-left: 13px;
-  margin-right: 13px;
+    display: inline-block;
+    font-size: 20px;
+    color: #999999;
+    margin-left: 13px;
+    margin-right: 13px;
 }
 
 .button-primary {
@@ -401,12 +398,13 @@ p {
   #sso-profile-eig-container {
     margin-top: 50px;
   }
+
   .sso-profile-fab-logo-container img {
-    max-width: 200px;
+      max-width: 200px;
   }
   .sso-profile-tab-container li {
-    display: inline-block;
-    list-style-type: none;
+      display: inline-block;
+      list-style-type: none;
   }
   .sso-profile-tab-container ul {
     margin: 0;
@@ -416,20 +414,25 @@ p {
 /* Mobile changes
  **********************/
 @media (max-width: 767px) {
+
   /* mobile hidden elements */
   .soo-startpage-image {
     display: none;
   }
+
   /* mobile alternatives */
   .button-primary {
     font-size: 18px;
   }
+
   .h1 {
     font-size: 30px;
   }
+
   .sso-profile-tab-container {
     background: none;
   }
+
   .sso-profile-tab-container li {
     border-bottom: #ffffff solid 5px;
     border-left: #ffffff solid 5px;
@@ -437,6 +440,7 @@ p {
     margin: 0;
     width: 49.2%;
   }
+
   .sso-profile-tab-container li a {
     background-color: #F0F3F2;
     border-bottom: 5px solid #F0F3F2;
@@ -446,71 +450,79 @@ p {
     padding: 20px 0 0 0;
     text-align: center;
   }
+
   .sso-profile-tab-container li:nth-child(odd) {
     border-right: none;
     clear: left;
   }
+
   .sso-profile-tab-container li.active {
     background-color: transparent;
     border-top: none;
   }
+
   .sso-profile-tab-container li.active a {
     border-bottom: 5px solid #E41F13;
   }
+
   .sso-profile-toolbar-buttons-container {
     text-align: left;
   }
+
   .sso-profile-toolbar-labels-container {
     padding-left: 20px;
     padding-right: 20px;
   }
+
   #tab-content section {
     padding: 0 20px;
   }
+
   .sso-profile-fab-container,
   #sso-profile-eig-container {
     margin-top: 5px;
     padding: 10px;
   }
+
   #sso-profile-eig-buttons {
     margin-bottom: 10px;
   }
+
   .sso-profile-fab-logo-container {
     margin-top: 20px;
   }
+
   #tab-content h2 {
     font-size: 24px;
   }
 }
 
 .error-page-container {
-  color: #4a4a4a;
-  margin-top: 80px;
-  margin-bottom: 80px;
+    color: #4a4a4a;
+    margin-top: 80px;
+    margin-bottom: 80px;
 }
 
 .error-page-container .error-page-title {
-  margin-top: 80px;
-  margin-bottom: 40px;
-  font-size: 48px;
-  font-weight: 400;
-  line-height: 50px;
+    margin-top: 80px;
+    margin-bottom: 40px;
+    font-size: 48px;
+    font-weight: 400;
+    line-height: 50px;
 }
 
 .error-page-container ul.error-page-synopsis {
-  margin: 0;
+    margin: 0
 }
 
 .error-page-container ul.error-page-synopsis li {
-  margin-bottom: 10px;
+    margin-bottom: 10px
 }
 
 .error-page-container .error-page-status {
-  padding-bottom: 40px;
+    padding-bottom: 40px
 }
 
 .error-page-container hr {
-  border-bottom: 1px solid #4f0b7b;
+    border-bottom: 1px solid #4f0b7b
 }
-
-/*# sourceMappingURL=sourcemaps/main.css.map */
