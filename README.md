@@ -73,7 +73,7 @@ This requires all host environment variables to be set.
 If you're doing front-end development work you will need to be able to compile the SASS to CSS. For this you need:
 
 	$ npm install
-	$ npm run sass-prod
+	$ gulp
 
 We add compiled CSS files to version control. This will sometimes result in conflicts if multiple developers are working on the same SASS files. However, by adding the compiled CSS to version control we avoid having to install node, npm, node-sass, etc to non-development machines.
 

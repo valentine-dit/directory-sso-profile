@@ -1,0 +1,32 @@
+body {
+  background-color: #ffffff;
+}
+
+@media (max-width: 979px) {
+  body {
+    padding: 0;
+  }
+  .container {
+    max-width: 960px;
+    padding: 0 20px;
+    width: 100%;
+  }
+}
+
+a:focus {
+  outline: 3px solid #ffbf47;
+}
+
+p {
+  margin-bottom: 23px;
+}
+
+.link {
+  border-bottom: 1px solid;
+  color: #00549f;
+  text-decoration: none;
+}
+
+.h1, h1, h2, h3, h4, h5, h6, strong, .button {
+  font-weight: 700;
+}
