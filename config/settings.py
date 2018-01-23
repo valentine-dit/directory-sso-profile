@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.contenttypes",  # required by DRF, not using any DB
     "django.contrib.auth",
+    "core",
     "directory_constants",
+    "directory_components",
     "directory_header_footer",
     "profile",
     "profile.api",
@@ -74,8 +76,8 @@ TEMPLATES = [
                 'directory_header_footer.context_processors.urls_processor',
                 ('directory_header_footer.context_processors.'
                     'header_footer_context_processor'),
+                'directory_components.context_processors.analytics',
                 'config.context_processors.feature_flags',
-                'config.context_processors.analytics',
                 'sso.context_processors.sso_processor',
             ],
         },

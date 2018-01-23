@@ -1,15 +1,8 @@
-{% extends 'base.html' %}
-{% load external_url from constants_tags %}
-{% block content %}
-<div class="error-page-container outer-container">
-    <h1 class="error-page-title">Page not found</h1>
-    <ul class="error-page-synopsis">
-        <li>If you typed in a web address, check if it was entered correctly.</li>
-        <li>If you followed a link here, <a class="link" href="{% external_url 'feedback_sso' %}" title="report a broken link">report the broken link</a>.</li>
-        <li>Return to the <a class="link" href="{% url 'index' %}" title="return to homepage">homepage</a>.</li>
-    </ul>
-    <hr>
-    <p class="error-page-status">HTTP 404 Error Code - Page not found</p>
-</div>
+{% extends 'directory_components/404.html' %}
 
+{% load static from staticfiles %}
+
+{% block head_css %}
+    {{ block.super }}
+    <link href="{% static 'css/404.css' %}" media="all" rel="stylesheet" />
 {% endblock %}

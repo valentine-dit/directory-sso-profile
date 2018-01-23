@@ -1,0 +1,25 @@
+{% extends 'directory_components/base.html' %}
+
+{% load staticfiles %}
+
+{% block head_css %}
+    <link href="{% static 'Dit-Pattern-Styling/public/css/main.css' %}" media="all" rel="stylesheet" />
+    <link href="{% static 'css/bootstrap/css/bootstrap-grid-icons-only.min.css' %}" media="all" rel="stylesheet" />
+    <link href="{% static 'css/bootstrap/css/bootstrap-responsive.min.css' %}" media="all" rel="stylesheet" />
+    <link href="{% static 'Dit-Pattern-Styling/public/css/compatibility.css' %}" media="all" rel="stylesheet" />
+    <link href="{% static 'css/main.css' %}" media="all" rel="stylesheet" />
+{% endblock %}
+
+{% block head_js %}
+    <script src="{% static 'Dit-Pattern-Styling/public/js/third-party.js' %}"></script>
+    <script src="{% static 'Dit-Pattern-Styling/public/js/script.js' %}"></script>
+{% endblock %}
+
+{% block css_layout_class %}enrolment-content{% endblock css_layout_class %}
+
+{% block body_js %}
+    <script type="text/javascript" src="{% static 'javascripts/index.js' %}"></script>
+    <script type="text/javascript">GOVUK.page.init();</script>
+{% endblock body_js %}
+
+{% block feedback_reporter %}{% endblock %}
