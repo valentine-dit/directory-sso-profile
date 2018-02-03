@@ -10,22 +10,35 @@
   width: 220px;
 }
 
-#tab-content h2 {
-  font-size: 36px;
-  line-height: 1.1em;
-  margin-bottom: 20px;
+#tab-content {
+  ul {
+    margin-bottom: 30px;
+  }
+  h2 {
+    font-size: 36px;
+    line-height: 1.1em;
+    margin-bottom: 20px;
+  }
+  section {
+    margin-bottom: 156px;
+  }
 }
 
-#tab-content li {
-  list-style-type: disc;
-  margin: 0 0 10px 20px;
-  padding-left: 15px;
+#content h1 {
+  margin: 0;
 }
 
-#tab-content section {
-  margin-bottom: 156px;
+#reset-password {
+  padding-top: 10px;
+  display: inline-block;
 }
 
-#tab-content ul {
-  margin-bottom: 30px;
+@media (max-width: 767px) {
+  .hidden-phone {
+      display: none!important;
+  }
+}
+
+.visible-phone {
+    display: none!important;
 }

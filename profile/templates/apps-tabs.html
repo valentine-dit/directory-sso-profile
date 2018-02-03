@@ -2,24 +2,24 @@
 
 {% block content %}
     <div class="container">
-        <div class="row-fluid">
-            <div class="span8 sso-profile-toolbar-labels-container">
-                <h1 class="h1">Profile</h1>
+        <div class="grid-row">
+            <div class="column-two-thirds sso-profile-toolbar-labels-container">
+                <h1 class="heading-xlarge">Profile</h1>
                 {% if sso_is_logged_in %}
                     <div>You are signed in as {{ sso_user.email }}.</div>
                 {% endif %}
             </div>
-            <div class="span4 sso-profile-toolbar-buttons-container">
+            <div class="column-one-third sso-profile-toolbar-buttons-container">
                 {% if sso_is_logged_in %}
-                <a class="button button-border" href="{{ sso_logout_url }}">Sign out</a>
+                <a class="button button-border font-small" href="{{ sso_logout_url }}">Sign out</a>
                 {% endif %}
-                <a href="{{ sso_password_reset_url }}" class="link">Reset password</a>
+                <a href="{{ sso_password_reset_url }}" class="link font-small" id="reset-password">Reset password</a>
             </div>
         </div>
     </div>
     <div class="sso-profile-tab-container">
         <div class="container">
-            <div class="row-fluid">
+            <div class="grid-row">
                 <ul>
                     <li class="{{ exops_tab_classes }}"><a href="{% url 'export-opportunities-applications' %}">Export opportunities</a></li>
                     <li class="{{ fab_tab_classes }}"><a href="{% url 'find-a-buyer' %}">Find a buyer</a></li>

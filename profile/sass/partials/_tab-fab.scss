@@ -8,6 +8,7 @@
 .sso-profile-fab-container {
   margin-top: 20px;
   margin-bottom: 100px;
+  margin-left: 0;
 }
 
 .sso-profile-success-message {
@@ -28,12 +29,16 @@
   left: 0;
   background-color: #00549f;
   color: white;
+  text-decoration: none;
   font-size: 16px;
   font-weight: 700;
   padding-left: 10px;
   padding-right: 10px;
   padding-top: 5px;
   padding-bottom: 5px;
+  &:visited {
+    color: white;
+  }
 }
 
 .sso-profile-fab-company-name {
@@ -48,10 +53,7 @@
 }
 
 .sso-profile-external-links a {
-  font-size: 16px;
-  font-weight: normal;
-  line-height: 1.56;
-  color: #00549f;
+  text-decoration: none;
 }
 
 .sso-profile-fab-company-links-seperator {
