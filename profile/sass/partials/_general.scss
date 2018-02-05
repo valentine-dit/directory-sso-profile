@@ -13,6 +13,10 @@
 .sso-profile-tab-container {
   margin-top: 30px;
   background-color: #F0F3F2;
+
+  .grid-row {
+    margin: 0;
+  }
 }
 
 .sso-profile-tab-container ul {
@@ -29,6 +33,7 @@
   font-weight: bold;
   color: #363636;
   padding: 20px;
+  text-decoration: none;
 }
 
 .sso-profile-toolbar-labels-container {
@@ -43,5 +48,14 @@
 .sso-profile-toolbar-buttons-container .button,
 .sso-profile-toolbar-buttons-container .link {
   font-size: 16px;
+}
+
+.sso-profile-toolbar-buttons-container .link {
   margin-left: 20px;
+}
+
+#tab-content {
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0; 
+  }
 }

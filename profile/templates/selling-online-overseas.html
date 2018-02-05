@@ -1,16 +1,16 @@
 {% extends 'apps-tabs.html' %}
 {% load static from staticfiles %}
 {% block tab_content %}
-	<div class="row-fluid" id="tab-content">
-		<div class="span3">
+	<div class="grid-row" id="tab-content">
+		<div class="column-one-quarter">
 			<img src="{% static 'images/soo-screen.png' %}" width="200" class="soo-startpage-image" />
 		</div>
-		<div class="span9">
+		<div class="column-two-thirds">
 			<section>
-				<h2>Selling online overseas</h2>
+				<h2 class="heading-large">Selling online overseas</h2>
 				<p>We've built partnerships across the globe with online marketplaces, so we can fast track your applications and give you access to exclusive offers.</p>
 				<p class="ul-leader">Selling online overseas (SOO) will help you to:</p>
-				<ul>
+				<ul class="list list-bullet">
 					<li>join online marketplaces around the world</li>
 					<li>quickly compare and contrast marketplaces</li>
 					<li>understand what marketplaces need from new applicants to be able to join</li>

@@ -1,32 +1,38 @@
+@import 'config/staticfiles/export_elements/stylesheets/govuk-elements-styles';
+@import 'reset';
+
 body {
   background-color: #ffffff;
 }
 
-@media (max-width: 979px) {
-  body {
-    padding: 0;
-  }
-  .container {
-    max-width: 960px;
-    padding: 0 20px;
-    width: 100%;
-  }
-}
-
-a:focus {
-  outline: 3px solid #ffbf47;
+#content {
+  max-width: none;
 }
 
 p {
-  margin-bottom: 23px;
+    margin-bottom: 23px;
 }
 
-.link {
-  border-bottom: 1px solid;
-  color: #00549f;
-  text-decoration: none;
+.container {
+  max-width: 1200px;
+  outline: none;
 }
 
-.h1, h1, h2, h3, h4, h5, h6, strong, .button {
-  font-weight: 700;
+
+@media (min-width: 1020px) {
+  .container  {
+      margin: 0 auto;
+  }
+}
+
+@media (min-width: 641px) {
+  .container {
+      margin: 0 30px;
+  }
+}
+
+@media (min-width: 1020px) {
+  .container {
+      margin: 0 auto;
+  }
 }

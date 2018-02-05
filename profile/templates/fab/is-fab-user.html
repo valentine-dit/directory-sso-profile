@@ -1,4 +1,4 @@
-{% extends 'fab/base.html' %}
+	{% extends 'fab/base.html' %}
 
 {% load static from staticfiles %}
 
@@ -6,8 +6,8 @@
 	{% if success_message %}
 		<div class="sso-profile-success-message">{{ success_message }}</div>
 	{% endif %}
-	<div class="row-fluid sso-profile-fab-container">
-		<div class="span3 sso-profile-fab-logo-container hidden-phone">
+	<div class="grid-row sso-profile-fab-container">
+		<div class="column-one-quarter sso-profile-fab-logo-container hidden-phone">
 			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}">
 				{% if company.logo %}
 					<img src="{{company.logo}}" width="200" class="sso-profile-fab-logo"  alt="" />
@@ -15,20 +15,19 @@
 					<img  width="200" src="{% static 'images/company-logo-placeholder.png' %}" alt="" />
 				{% endif %}
 			</a>
-			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}" class="sso-profile-fab-logo-edit-button">
-				<span class="icon-white icon-pencil"></span>
+			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}" class="sso-profile-fab-logo-edit-button link">
 				<span>Edit logo</span>
 			</a>
 		</div>
-		<div class="span9">
+		<div class="column-two-thirds">
 			<div>
 				<div>
-					<h1 class="sso-profile-fab-company-name">{{ company.name }}</h1>
+					<h1 class="sso-profile-fab-company-name heading-xlarge">{{ company.name }}</h1>
 				</div>
 				<div class="sso-profile-external-links">
-					<a href="{{ FAB_EDIT_PROFILE_URL }}">Edit profile</a>
+					<a href="{{ FAB_EDIT_PROFILE_URL }}" class="link font-xsmall">Edit profile</a>
 					<span class="sso-profile-external-links-seperator">|</span>
-					<a href="{{ FAB_ADD_CASE_STUDY_URL }}">Add case study</a>
+					<a href="{{ FAB_ADD_CASE_STUDY_URL }}" class="link font-xsmall">Add case study</a>
 				</div>
 			</div>
 			{% if is_profile_owner and features.FEATURE_MULTI_USER_ACCOUNT_ENABLED %}
@@ -39,17 +38,17 @@
 						<h1 class="sso-profile-fab-company-name">Account details</h1>
 					</div>
 					<div class="sso-profile-external-links">
-						<a href="{{ FAB_ADD_USER_URL }}">Add user to account</a>
+						<a href="{{ FAB_ADD_USER_URL }}" class="link font-xsmall">Add user to account</a>
+						<span class="sso-profile-external-links-seperator" class="link font-xsmall">|</span>
+						<a href="{{ FAB_REMOVE_USER_URL }}" class="link font-xsmall">Remove user from account</a>
 						<span class="sso-profile-external-links-seperator">|</span>
-						<a href="{{ FAB_REMOVE_USER_URL }}">Remove user from account</a>
-						<span class="sso-profile-external-links-seperator">|</span>
-						<a href="{{ FAB_TRANSFER_ACCOUNT_URL }}">Transfer account</a>
+						<a href="{{ FAB_TRANSFER_ACCOUNT_URL }}" class="link font-xsmall">Transfer account</a>
 					</div>
 				</div>
 			{% endif %}
 		</div>
 
-		<div class="span3 sso-profile-fab-logo-container visible-phone">
+		<div class="column-one-quarter sso-profile-fab-logo-container visible-phone">
 			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}">
 				{% if company.logo %}
 					<img src="{{company.logo}}" width="200" class="sso-profile-fab-logo" alt="" />
@@ -57,8 +56,7 @@
 					<img  width="200" src="{% static 'images/company-logo-placeholder.png' %}" alt="" />
 				{% endif %}
 			</a>
-			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}" class="sso-profile-fab-logo-edit-button">
-				<span class="icon-white icon-pencil"></span>
+			<a href="{{ FAB_EDIT_COMPANY_LOGO_URL }}" class="sso-profile-fab-logo-edit-button link">
 				<span>Edit logo</span>
 			</a>
 		</div>

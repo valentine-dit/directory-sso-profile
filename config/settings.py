@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "profile.api",
     "directory_healthcheck",
     "health_check",
+    "export_elements",
 ]
 
 MIDDLEWARE_CLASSES = [

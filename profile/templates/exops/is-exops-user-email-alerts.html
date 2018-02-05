@@ -1,21 +1,24 @@
 {% extends 'exops/base.html' %}
 {% load parse_date from profile_tags %}
 {% block tab_content_main %}
-	<div class="row-fluid" id="sso-profile-eig-container">
-		<div class="span2" id="sso-profile-eig-buttons">
-			<div class="sso-profile-eig-button-inactive" id="sso-profile-eig-button-applications">
-				<a href="{% url 'export-opportunities-applications' %}">
-					Applications
-				</a>
-			</div>
-			<div class="sso-profile-eig-button-active">
-				<span>
-					Email alerts
-				</span>
+	<div class="grid-row" id="sso-profile-eig-container">
+		<div class="column-one-quarter" id="sso-profile-eig-buttons">
+			<div class="column-two-thirds">
+				<div class="sso-profile-eig-button-inactive" id="sso-profile-eig-button-applications">
+					<a href="{% url 'export-opportunities-applications' %}">
+						Applications
+					</a>
+				</div>
+				<div class="sso-profile-eig-button-active">
+					<span>
+						Email alerts
+					</span>
+				</div>
 			</div>
 		</div>
-		<div class="span10">
-			<h1 class="sso-profile-eig-title">Email alerts</h1>
+		<div class="column-two-thirds">
+			<h1 class="sso-profile-eig-title heading-xlarge">Email alerts</h1>
+			<br>
 			<div>
 				{% for alert in opportunities.email_alerts %}
 				<div class="sso-profile-eig-email-alert-item">
