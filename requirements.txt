@@ -24,4 +24,5 @@ raven==5.19.0
 requests==2.13.0
 setuptools-git==1.2
 six==1.11.0               # via mohawk
+waitress==0.8.9
 whitenoise==3.1
