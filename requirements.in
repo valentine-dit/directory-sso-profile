@@ -1,6 +1,7 @@
 django==1.11.5
 djangorestframework==3.4.7
 gunicorn==19.5.0
+waitress==0.8.9
 raven==5.19.0
 requests==2.13.0
 whitenoise==3.1
