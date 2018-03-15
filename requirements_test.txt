@@ -37,5 +37,4 @@ requests==2.13.0
 setuptools-git==1.2
 six==1.11.0
 termcolor==1.1.0          # via pytest-sugar
-waitress==0.8.9
 whitenoise==3.1
