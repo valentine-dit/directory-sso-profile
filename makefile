@@ -70,22 +70,13 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_SECURE_HSTS_SECONDS=0; \
 	export SSO_PROFILE_PYTHONWARNINGS=all; \
 	export SSO_PROFILE_PYTHONDEBUG=true; \
-	export SSO_PROFILE_GREAT_EXPORT_HOME=http://exred.trade.great:8007; \
-	export SSO_PROFILE_EXPORTING_NEW=http://exred.trade.great:8007/new; \
-	export SSO_PROFILE_EXPORTING_OCCASIONAL=http://exred.trade.great:8007/occasional; \
-	export SSO_PROFILE_EXPORTING_REGULAR=http://exred.trade.great:8007/regular; \
-	export SSO_PROFILE_GUIDANCE_MARKET_RESEARCH=http://exred.trade.great:8007/market-research; \
-	export SSO_PROFILE_GUIDANCE_CUSTOMER_INSIGHT=http://exred.trade.great:8007/customer-insight; \
-	export SSO_PROFILE_GUIDANCE_FINANCE=http://exred.trade.great:8007/finance; \
-	export SSO_PROFILE_GUIDANCE_BUSINESS_PLANNING=http://exred.trade.great:8007/business-planning; \
-	export SSO_PROFILE_GUIDANCE_GETTING_PAID=http://exred.trade.great:8007/getting-paid; \
-	export SSO_PROFILE_GUIDANCE_OPERATIONS_AND_COMPLIANCE=http://exred.trade.great:8007/operations-and-compliance; \
-	export SSO_PROFILE_SERVICES_EXOPPS=http://opportunities.export.great.gov.uk; \
-	export SSO_PROFILE_SERVICES_FAB=http://buyer.trade.great:8001; \
-	export SSO_PROFILE_SERVICES_GET_FINANCE=http://exred.trade.great:8007/finance/get-finance-support-from-government; \
-	export SSO_PROFILE_SERVICES_SOO=http://soo.trade.great:8008; \
 	export SSO_PROFILE_SECURE_SSL_REDIRECT=false; \
-	export SSO_PROFILE_HEALTH_CHECK_TOKEN=debug
+	export SSO_PROFILE_HEALTH_CHECK_TOKEN=debug; \
+	export SSO_PROFILE_GOV_NOTIFY_API_KEY=debug; \
+	export SSO_PROFILE_HEADER_FOOTER_URLS_GREAT_HOME=http://exred.trade.great:8007/; \
+	export SSO_PROFILE_HEADER_FOOTER_URLS_FAB=http://buyer.trade.great:8001; \
+	export SSO_PROFILE_HEADER_FOOTER_URLS_SOO=http://soo.trade.great:8008; \
+	export SSO_PROFILE_HEADER_FOOTER_URLS_CONTACT_US=http://contact.trade.great:8009/directory/
 
 docker_test_env_files:
 	$(DOCKER_SET_DEBUG_ENV_VARS) && \
@@ -160,22 +151,12 @@ DEBUG_SET_ENV_VARS := \
 	export PYTHONWARNINGS=all; \
 	export PYTHONDEBUG=true; \
 	export FEATURE_NEW_SHARED_HEADER_ENABLED=true; \
-	export GREAT_EXPORT_HOME=http://exred.trade.great:8007; \
-	export EXPORTING_NEW=http://exred.trade.great:8007/new; \
-	export EXPORTING_OCCASIONAL=http://exred.trade.great:8007/occasional; \
-	export EXPORTING_REGULAR=http://exred.trade.great:8007/regular; \
-	export GUIDANCE_MARKET_RESEARCH=http://exred.trade.great:8007/market-research; \
-	export GUIDANCE_CUSTOMER_INSIGHT=http://exred.trade.great:8007/customer-insight; \
-	export GUIDANCE_FINANCE=http://exred.trade.great:8007/finance; \
-	export GUIDANCE_BUSINESS_PLANNING=http://exred.trade.great:8007/business-planning; \
-	export GUIDANCE_GETTING_PAID=http://exred.trade.great:8007/getting-paid; \
-	export GUIDANCE_OPERATIONS_AND_COMPLIANCE=http://exred.trade.great:8007/operations-and-compliance; \
-	export SERVICES_EXOPPS=http://opportunities.export.great.gov.uk; \
-	export SERVICES_FAB=http://buyer.trade.great:8001; \
-	export SERVICES_GET_FINANCE=http://exred.trade.great:8007/finance/get-finance-support-from-government; \
-	export SERVICES_SOO=http://soo.trade.great:8008; \
 	export SECURE_SSL_REDIRECT=false; \
-	export HEALTH_CHECK_TOKEN=debug
+	export HEALTH_CHECK_TOKEN=debug; \
+	export HEADER_FOOTER_URLS_GREAT_HOME=http://exred.trade.great:8007/; \
+	export HEADER_FOOTER_URLS_FAB=http://buyer.trade.great:8001; \
+	export HEADER_FOOTER_URLS_SOO=http://soo.trade.great:8008; \
+	export HEADER_FOOTER_URLS_CONTACT_US=http://contact.trade.great:8009/directory/
 
 
 debug_webserver:
