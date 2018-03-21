@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     "core",
     "directory_constants",
     "directory_components",
-    "directory_header_footer",
     "profile",
     "profile.api",
     "directory_healthcheck",
@@ -72,13 +71,15 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'directory_header_footer.context_processors.sso_processor',
-                'directory_header_footer.context_processors.urls_processor',
-                ('directory_header_footer.context_processors.'
-                    'header_footer_context_processor'),
-                'directory_components.context_processors.analytics',
                 'config.context_processors.feature_flags',
                 'sso.context_processors.sso_processor',
+                'directory_components.context_processors.urls_processor',
+                ('directory_components.context_processors.'
+                 'header_footer_processor'),
+                'directory_components.context_processors.sso_processor',
+                'directory_components.context_processors.analytics',
+
+
             ],
         },
     },
