@@ -11,7 +11,7 @@ contextlib2==0.5.5
 coverage==4.4.1           # via codecov, pytest-cov
 directory-api-external==4.2.1
 directory-client-core==0.2.1
-directory-components==1.4.0
+directory-components==1.8.2
 directory-constants==6.5.2
 directory-healthcheck==0.4.2
 directory-sso-api-client==2.5.1
