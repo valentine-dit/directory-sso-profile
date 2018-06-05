@@ -1,11 +1,11 @@
-django==1.11.5
+django==1.11.13
 djangorestframework==3.4.7
 gunicorn==19.5.0
 raven==5.19.0
 requests==2.18.4
 whitenoise==3.1
 directory-sso-api-client==2.5.1
-directory-constants==6.5.2
+directory-constants==6.8.0
 sigauth==2.1.2
 directory-api-external==4.2.1
 directory-validators==4.5.1
