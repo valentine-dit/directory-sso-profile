@@ -6,18 +6,19 @@
 #
 certifi==2018.4.16        # via requests
 chardet==3.0.4            # via requests
+contextlib2==0.5.5        # via raven
 directory-api-external==4.2.1
 directory-client-core==0.2.1  # via directory-api-external, directory-sso-api-client
-directory-components==2.2.0
+directory-components==1.8.2
 directory-constants==6.8.0
 directory-healthcheck==0.4.2
 directory-sso-api-client==2.5.1
-directory-validators==5.0.0
+directory-validators==4.5.1
 django-health-check==3.0.0  # via directory-healthcheck
 django==1.11.13
-djangorestframework==3.8.2
-export-elements==0.12.2
-gunicorn==19.8.1
+djangorestframework==3.4.7
+export-elements==0.10.2
+gunicorn==19.5.0
 idna==2.6                 # via requests
 mohawk==0.3.4             # via sigauth
 monotonic==1.5            # via directory-client-core
@@ -25,9 +26,9 @@ olefile==0.44             # via directory-validators, pillow
 phonenumberslite==7.7.4   # via directory-validators
 pillow==4.2.1             # via directory-validators
 pytz==2017.2              # via directory-constants, directory-healthcheck, directory-validators, django
-raven==6.9.0
+raven==5.19.0
 requests==2.18.4
 sigauth==2.1.2
 six==1.11.0               # via mohawk
 urllib3==1.22             # via requests
-whitenoise==3.3.1
+whitenoise==3.1
