@@ -9,7 +9,7 @@ chardet==3.0.4            # via requests
 contextlib2==0.5.5        # via raven
 directory-api-external==4.2.1
 directory-client-core==0.2.1  # via directory-api-external, directory-sso-api-client
-directory-components==2.6.0
+directory-components==2.7.2
 directory-constants==6.8.0
 directory-healthcheck==0.4.2
 directory-sso-api-client==2.5.1
