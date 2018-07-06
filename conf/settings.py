@@ -52,15 +52,17 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE_CLASSES = [
+    'directory_components.middleware.MaintenanceModeMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'sso.middleware.SSOUserMiddleware',
-    'config.middleware.NoCacheMiddlware',
+    'directory_components.middleware.NoCacheMiddlware',
+    'directory_components.middleware.RobotsIndexControlHeaderMiddlware',
 ]
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = 'conf.urls'
 
 TEMPLATES = [
     {
@@ -71,7 +73,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'config.context_processors.feature_flags',
+                'core.context_processors.feature_flags',
                 'sso.context_processors.sso_processor',
                 'directory_components.context_processors.urls_processor',
                 ('directory_components.context_processors.'
@@ -85,7 +87,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = 'conf.wsgi.application'
 
 
 # # Database
@@ -298,9 +300,16 @@ HEADER_FOOTER_CONTACT_US_URL = os.getenv(
 FEATURE_MULTI_USER_ACCOUNT_ENABLED = os.getenv(
     'FEATURE_MULTI_USER_ACCOUNT_ENABLED'
 ) == 'true'
-
 FEATURE_NEW_SHARED_HEADER_ENABLED = os.getenv(
     'FEATURE_NEW_SHARED_HEADER_ENABLED'
+) == 'true'
+# used by directory-components
+FEATURE_MAINTENANCE_MODE_ENABLED = os.getenv(
+    'FEATURE_MAINTENANCE_MODE_ENABLED'
+) == 'true'
+# used by directory-components
+FEATURE_SEARCH_ENGINE_INDEXING_DISABLED = os.getenv(
+    'FEATURE_SEARCH_ENGINE_INDEXING_DISABLED'
 ) == 'true'
 
 # healthcheck

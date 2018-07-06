@@ -29,13 +29,6 @@ def request_logged_in(rf, sso_user):
 
 
 @pytest.fixture
-def request_logged_out(rf):
-    request = rf.get('/')
-    request.sso_user = None
-    return request
-
-
-@pytest.fixture
 def api_response_200():
     response = requests.Response()
     response.status_code = http.client.OK.value
