@@ -12,4 +12,3 @@ directory-api-external==4.2.1
 directory-validators==4.5.1
 directory-healthcheck==0.4.2
 directory-components==2.10.0
-export-elements==0.10.6

@@ -18,7 +18,7 @@ django-environ==0.4.5
 django-health-check==3.0.0  # via directory-healthcheck
 django==1.11.13
 djangorestframework==3.4.7
-export-elements==0.10.6
+export-elements==0.14.5   # via directory-components
 gunicorn==19.5.0
 idna==2.6                 # via requests
 mohawk==0.3.4             # via sigauth
