@@ -30,20 +30,22 @@
 					<a href="{{ FAB_ADD_CASE_STUDY_URL }}" class="link font-xsmall">Add case study</a>
 				</div>
 			</div>
-			<br>
-			<br>
-			<div>
+			{% if is_profile_owner %}
+				<br>
+				<br>
 				<div>
-					<h1 class="sso-profile-fab-company-name">Account details</h1>
+					<div>
+						<h1 class="sso-profile-fab-company-name">Account details</h1>
+					</div>
+					<div class="sso-profile-external-links">
+						<a href="{{ FAB_ADD_USER_URL }}" class="link font-xsmall">Add user to account</a>
+						<span class="sso-profile-external-links-seperator" class="link font-xsmall">|</span>
+						<a href="{{ FAB_REMOVE_USER_URL }}" class="link font-xsmall">Remove user from account</a>
+						<span class="sso-profile-external-links-seperator">|</span>
+						<a href="{{ FAB_TRANSFER_ACCOUNT_URL }}" class="link font-xsmall">Transfer account</a>
+					</div>
 				</div>
-				<div class="sso-profile-external-links">
-					<a href="{{ FAB_ADD_USER_URL }}" class="link font-xsmall">Add user to account</a>
-					<span class="sso-profile-external-links-seperator" class="link font-xsmall">|</span>
-					<a href="{{ FAB_REMOVE_USER_URL }}" class="link font-xsmall">Remove user from account</a>
-					<span class="sso-profile-external-links-seperator">|</span>
-					<a href="{{ FAB_TRANSFER_ACCOUNT_URL }}" class="link font-xsmall">Transfer account</a>
-				</div>
-			</div>
+			{% endif %}
 		</div>
 
 		<div class="column-one-quarter sso-profile-fab-logo-container visible-phone">
