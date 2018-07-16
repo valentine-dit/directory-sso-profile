@@ -12,7 +12,10 @@ gulp.task('sass', function () {
   return gulp.src(SASS_FILES)
     .pipe(sourcemaps.init())
     .pipe(sass({
-      outputStyle: 'expanded'
+      includePaths: [
+        './conf/',
+      ],
+      outputStyle: 'compressed'
     }).on('error', sass.logError))
     .pipe(sourcemaps.write('./sourcemaps', {includeContent: false}))
     .pipe(gulp.dest(OUTPUT_CSS));
