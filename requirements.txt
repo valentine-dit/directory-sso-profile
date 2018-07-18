@@ -8,7 +8,7 @@ certifi==2018.4.16        # via requests
 chardet==3.0.4            # via requests
 contextlib2==0.5.5        # via raven
 directory-api-external==4.2.1
-directory-client-core==0.2.1  # via directory-api-external, directory-sso-api-client
+directory-client-core==0.2.2  # via directory-api-external, directory-sso-api-client
 directory-components==2.11.0
 directory-constants==6.8.0
 directory-healthcheck==0.4.2
