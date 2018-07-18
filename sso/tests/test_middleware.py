@@ -86,3 +86,23 @@ def test_sso_middleware_bad_good_response(
 
     with pytest.raises(ValueError, message=message):
         returned_client.get(reverse('find-a-buyer'))
+
+
+@patch('sso.utils.sso_api_client.user.get_session_user')
+def test_sso_middleware_timeout(
+    mock_get_session_user, settings, returned_client, caplog
+):
+    mock_get_session_user.side_effect = requests.exceptions.ReadTimeout()
+    returned_client.cookies[settings.SSO_PROXY_SESSION_COOKIE] = '123'
+    settings.MIDDLEWARE_CLASSES = [
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'sso.middleware.SSOUserMiddleware'
+    ]
+
+    response = returned_client.get(reverse('about'))
+
+    assert response.status_code == 200
+
+    log = caplog.records[0]
+    assert log.levelname == 'ERROR'
+    assert log.msg == middleware.SSOUserMiddleware.MESSAGE_SSO_UNREACHABLE
