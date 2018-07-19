@@ -37,8 +37,8 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_PORT=8006; \
 	export SSO_PROFILE_SECRET_KEY=debug; \
 	export SSO_PROFILE_DEBUG=true ;\
-	export SSO_PROFILE_SSO_PROXY_SIGNATURE_SECRET=api_signature_debug; \
-	export SSO_PROFILE_SSO_PROXY_API_CLIENT_BASE_URL=http://sso.trade.great:8004/; \
+	export SSO_PROFILE_SSO_SIGNATURE_SECRET=api_signature_debug; \
+	export SSO_PROFILE_SSO_API_CLIENT_BASE_URL=http://sso.trade.great:8003/; \
 	export SSO_PROFILE_SSO_PROXY_API_OAUTH2_BASE_URL=http://sso.trade.great:8004/oauth2/; \
 	export SSO_PROFILE_SSO_PROXY_LOGIN_URL=http://sso.trade.great:8004/accounts/login/?next=http://profile.trade.great:8006; \
 	export SSO_PROFILE_SSO_PROXY_LOGOUT_URL=http://sso.trade.great:8004/accounts/logout/?next=http://profile.trade.great:8006; \
@@ -46,7 +46,7 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_SSO_PROXY_SIGNUP_URL=http://sso.trade.great:8004/accounts/signup/?next=http://profile.trade.great:8006; \
 	export SSO_PROFILE_SSO_PROFILE_URL=http://profile.trade.great:8006; \
 	export SSO_PROFILE_SSO_PROXY_REDIRECT_FIELD_NAME=next; \
-	export SSO_PROFILE_SSO_PROXY_SESSION_COOKIE=debug_sso_session_cookie; \
+	export SSO_PROFILE_SSO_SESSION_COOKIE=debug_sso_session_cookie; \
 	export SSO_PROFILE_SESSION_COOKIE_SECURE=false; \
 	export SSO_PROFILE_UTM_COOKIE_DOMAIN=.great; \
 	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
@@ -118,15 +118,15 @@ DEBUG_SET_ENV_VARS := \
 	export PORT=8006; \
 	export SECRET_KEY=debug; \
 	export DEBUG=true ;\
-	export SSO_PROXY_SIGNATURE_SECRET=proxy_signature_debug; \
-	export SSO_PROXY_API_CLIENT_BASE_URL=http://sso.trade.great:8004/; \
+	export SSO_SIGNATURE_SECRET=api_signature_debug; \
+	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great:8003/; \
 	export SSO_PROXY_API_OAUTH2_BASE_URL=http://sso.trade.great:8004/oauth2/; \
 	export SSO_PROXY_LOGIN_URL=http://sso.trade.great:8004/accounts/login/?next=http://profile.trade.great:8006; \
 	export SSO_PROXY_LOGOUT_URL=http://sso.trade.great:8004/accounts/logout/?next=http://profile.trade.great:8006; \
 	export SSO_PROXY_PASSWORD_RESET_URL=http://sso.trade.great:8004/accounts/password/reset/; \
 	export SSO_PROXY_SIGNUP_URL=http://sso.trade.great:8004/accounts/signup/?next=http://profile.trade.great:8006; \
 	export SSO_PROXY_REDIRECT_FIELD_NAME=next; \
-	export SSO_PROXY_SESSION_COOKIE=debug_sso_session_cookie; \
+	export SSO_SESSION_COOKIE=debug_sso_session_cookie; \
 	export SSO_PROFILE_URL=http://profile.trade.great:8006; \
 	export SESSION_COOKIE_SECURE=false; \
 	export UTM_COOKIE_DOMAIN=.great; \
