@@ -1,6 +1,3 @@
-@import 'staticfiles/export_elements/stylesheets/govuk-elements-styles';
-@import 'reset';
-
 body {
   background-color: #ffffff;
 }
@@ -11,10 +8,6 @@ body {
 
 nav ul {
   list-style: none;
-}
-
-p {
-    margin-bottom: 23px;
 }
 
 .container {

@@ -4,12 +4,13 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
+beautifulsoup4==4.6.0     # via directory-components
 certifi==2018.4.16        # via requests
 chardet==3.0.4            # via requests
 contextlib2==0.5.5        # via raven
 directory-api-external==4.2.1
 directory-client-core==0.2.2  # via directory-api-external, directory-sso-api-client
-directory-components==2.14.0
+directory-components==2.15.1
 directory-constants==6.8.0
 directory-healthcheck==0.4.2
 directory-sso-api-client==2.5.1
@@ -18,7 +19,7 @@ django-environ==0.4.5
 django-health-check==3.0.0  # via directory-healthcheck
 django==1.11.13
 djangorestframework==3.4.7
-export-elements==0.15.0   # via directory-components
+export-elements==0.15.1   # via directory-components
 gunicorn==19.5.0
 idna==2.6                 # via requests
 mohawk==0.3.4             # via sigauth
