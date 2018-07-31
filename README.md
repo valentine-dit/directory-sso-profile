@@ -3,7 +3,7 @@
 [![code-climate-image]][code-climate]
 [![circle-ci-image]][circle-ci]
 [![codecov-image]][codecov]
-[![gemnasium-image]][gemnasium]
+[![snyk-image]][snyk]
 
 ---
 
@@ -114,5 +114,5 @@ Therefore to make cookie sharing work in development we need the apps to be runn
 [codecov-image]: https://codecov.io/gh/uktrade/directory-sso-profile/branch/master/graph/badge.svg
 [codecov]: https://codecov.io/gh/uktrade/directory-sso-profile
 
-[gemnasium-image]: https://gemnasium.com/badges/github.com/uktrade/directory-sso-profile.svg
-[gemnasium]: https://gemnasium.com/github.com/uktrade/directory-sso-profile
+[snyk-image]: https://snyk.io/test/github/uktrade/directory-sso-profile/badge.svg
+[snyk]: https://snyk.io/test/github/uktrade/directory-sso-profile
