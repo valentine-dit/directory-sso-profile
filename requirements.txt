@@ -17,7 +17,7 @@ directory-sso-api-client==2.5.1
 directory-validators==4.5.1
 django-environ==0.4.5
 django-health-check==3.0.0  # via directory-healthcheck
-django==1.11.13
+django==1.11.15
 djangorestframework==3.4.7
 export-elements==0.15.1   # via directory-components
 gunicorn==19.5.0
