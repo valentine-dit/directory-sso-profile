@@ -11,4 +11,5 @@ sigauth==2.1.2
 directory-api-external==4.2.1
 directory-validators==4.5.1
 directory-healthcheck==0.4.2
-directory-components==2.15.1
+directory_components==2.17.2
+export_elements==0.17.3
