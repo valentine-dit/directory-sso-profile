@@ -48,7 +48,7 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_SSO_PROXY_REDIRECT_FIELD_NAME=next; \
 	export SSO_PROFILE_SSO_SESSION_COOKIE=debug_sso_session_cookie; \
 	export SSO_PROFILE_SESSION_COOKIE_SECURE=false; \
-	export SSO_PROFILE_UTM_COOKIE_DOMAIN=.great; \
+	export SSO_PROFILE_UTM_COOKIE_DOMAIN=.trade.great; \
 	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
 	export SSO_PROFILE_GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
 	export SSO_PROFILE_DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great:8001/api/external/; \
@@ -76,7 +76,9 @@ DOCKER_SET_DEBUG_ENV_VARS := \
 	export SSO_PROFILE_HEADER_FOOTER_URLS_GREAT_HOME=http://exred.trade.great:8007/; \
 	export SSO_PROFILE_HEADER_FOOTER_URLS_FAB=http://buyer.trade.great:8001; \
 	export SSO_PROFILE_HEADER_FOOTER_URLS_SOO=http://soo.trade.great:8008; \
-	export SSO_PROFILE_HEADER_FOOTER_URLS_CONTACT_US=http://contact.trade.great:8009/directory/
+	export SSO_PROFILE_HEADER_FOOTER_URLS_CONTACT_US=http://contact.trade.great:8009/directory/; \
+	export SSO_PROFILE_PRIVACY_COOKIE_DOMAIN=.trade.great
+
 
 docker_test_env_files:
 	$(DOCKER_SET_DEBUG_ENV_VARS) && \
@@ -129,7 +131,7 @@ DEBUG_SET_ENV_VARS := \
 	export SSO_SESSION_COOKIE=debug_sso_session_cookie; \
 	export SSO_PROFILE_URL=http://profile.trade.great:8006; \
 	export SESSION_COOKIE_SECURE=false; \
-	export UTM_COOKIE_DOMAIN=.great; \
+	export UTM_COOKIE_DOMAIN=.trade.great; \
 	export GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
 	export GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
 	export DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great:8001/api/external/; \
@@ -153,7 +155,8 @@ DEBUG_SET_ENV_VARS := \
 	export HEADER_FOOTER_URLS_GREAT_HOME=http://exred.trade.great:8007/; \
 	export HEADER_FOOTER_URLS_FAB=http://buyer.trade.great:8001; \
 	export HEADER_FOOTER_URLS_SOO=http://soo.trade.great:8008; \
-	export HEADER_FOOTER_URLS_CONTACT_US=http://contact.trade.great:8009/directory/
+	export HEADER_FOOTER_URLS_CONTACT_US=http://contact.trade.great:8009/directory/; \
+	export PRIVACY_COOKIE_DOMAIN=.trade.great
 
 
 debug_webserver:
