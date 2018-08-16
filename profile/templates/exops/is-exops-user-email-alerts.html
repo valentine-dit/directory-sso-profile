@@ -24,7 +24,22 @@
 				<div class="sso-profile-eig-email-alert-item">
 					<div class="sso-profile-eig-email-alert-item-search-term-label" >Search term:</div>
 					<div class="sso-profile-eig-email-alert-item-search-term">
-						<span class="sso-profile-pill-button">{{ alert.term|default:'&lt;empty&gt;' }}</span>
+						<span class="sso-profile-pill-button">
+							{% if alert.title %}
+								{{ alert.title }}
+							{% elif alert.term %}
+								{% if alert.countries %}
+									{{ alert.term }} in {{ alert.countries }}
+								{% else %}
+									{{ alert.term }} in all countries
+								{% endif %}
+							{% elif alert.countries %}
+								all opportunities in {{ alert.countries }}
+							{% else %}
+								all opportunities
+							{% endif %}
+
+						</span>
 					</div>
 					<div>
 						<strong>Alert created on: </strong><span>{{ alert.created_on|parse_date:"%Y-%m-%dT%H:%M:%S.%fZ"|date:"d F Y" }}</span>
