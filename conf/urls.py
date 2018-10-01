@@ -1,3 +1,5 @@
+import directory_healthcheck.views
+
 from django.conf.urls import url
 
 from profile.api import views as api_views
@@ -5,11 +7,25 @@ from profile.eig_apps import views as eig_apps_views
 from profile.fab import views as fab_views
 from profile.soo import views as soo_views
 from profile.exops import views as exops_views
-
 import healthcheck.views
 
 
 urlpatterns = [
+    url(
+        r'^healthcheck/single-sign-on/$',
+        healthcheck.views.SingleSignOnAPIView.as_view(),
+        name='healthcheck-single-sign-on'
+    ),
+    url(
+        r'^healthcheck/ping/$',
+        directory_healthcheck.views.PingView.as_view(),
+        name='healthcheck-ping'
+    ),
+    url(
+        r'^healthcheck/sentry/$',
+        directory_healthcheck.views.SentryHealthcheckView.as_view(),
+        name='healthcheck-sentry'
+    ),
     url(
         r'^$',
         eig_apps_views.LandingPageView.as_view(),
@@ -44,15 +60,5 @@ urlpatterns = [
         r'^api/v1/directory/supplier/$',
         api_views.ExternalSupplierAPIView.as_view(),
         name='api-external-supplier'
-    ),
-    url(
-        r'^healthcheck/api/$',
-        healthcheck.views.APIProxyAPIView.as_view(),
-        name='healthcheck-api'
-    ),
-    url(
-        r'^healthcheck/single-sign-on/$',
-        healthcheck.views.SingleSignOnAPIView.as_view(),
-        name='healthcheck-single-sign-on'
     ),
 ]
