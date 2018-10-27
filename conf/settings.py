@@ -61,6 +61,7 @@ MIDDLEWARE_CLASSES = [
     'directory_components.middleware.MaintenanceModeMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'core.middleware.PrefixUrlMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'sso.middleware.SSOUserMiddleware',
@@ -68,7 +69,13 @@ MIDDLEWARE_CLASSES = [
     'directory_components.middleware.RobotsIndexControlHeaderMiddlware',
 ]
 
-ROOT_URLCONF = 'conf.urls'
+FEATURE_URL_PREFIX_ENABLED = env.bool('FEATURE_URL_PREFIX_ENABLED', False)
+URL_PREFIX_DOMAIN = env.str('URL_PREFIX_DOMAIN', '')
+if FEATURE_URL_PREFIX_ENABLED:
+    ROOT_URLCONF = 'conf.urls_prefixed'
+else:
+    ROOT_URLCONF = 'conf.urls'
+
 
 TEMPLATES = [
     {
