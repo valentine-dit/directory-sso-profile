@@ -268,6 +268,7 @@ RAVEN_CONFIG = {
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 SESSION_COOKIE_SECURE = env.bool('SESSION_COOKIE_SECURE', True)
+SESSION_COOKIE_NAME = env.str('SESSION_COOKIE_NAME', 'profile_sessionid')
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = True
 

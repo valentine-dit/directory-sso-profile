@@ -157,7 +157,8 @@ DEBUG_SET_ENV_VARS := \
 	export HEADER_FOOTER_URLS_SOO=http://soo.trade.great:8008; \
 	export HEADER_FOOTER_URLS_CONTACT_US=http://contact.trade.great:8009/directory/; \
 	export PRIVACY_COOKIE_DOMAIN=.trade.great; \
-	export EXPORTING_OPPORTUNITIES_API_SECRET=debug
+	export EXPORTING_OPPORTUNITIES_API_SECRET=debug; \
+	export FEATURE_URL_PREFIX_ENABLED=true
 
 
 debug_webserver:
