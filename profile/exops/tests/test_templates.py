@@ -64,11 +64,13 @@ def test_email_alert_all_opportunities():
 
     assert 'all opportunities' in html
 
+
 def test_email_alert_link_region():
     html = render_html([
         {
             'created_on': '2000-01-01T01:01:01.000001Z',
-            'countries': ['Greece','Italy']
+            'countries': ['Greece', 'Italy']
         }
     ])
-    assert 'href="?suppress_subscription_block=true&s=&countries[]=Greece&countries[]=Italy' in html
+    assert 'href="?suppress_subscription_block=true&s=&'\
+        'countries[]=Greece&countries[]=Italy' in html
