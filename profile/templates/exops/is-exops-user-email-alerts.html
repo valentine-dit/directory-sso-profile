@@ -29,12 +29,12 @@
 								{{ alert.title }}
 							{% elif alert.term %}
 								{% if alert.countries %}
-									{{ alert.term }} in {{ alert.countries }}
+									{{ alert.term }} in {{ alert.countries|join:", "  }}
 								{% else %}
 									{{ alert.term }} in all countries
 								{% endif %}
 							{% elif alert.countries %}
-								all opportunities in {{ alert.countries }}
+								all opportunities in {{ alert.countries|join:", " }}
 							{% else %}
 								all opportunities
 							{% endif %}
@@ -45,7 +45,7 @@
 						<strong>Alert created on: </strong><span>{{ alert.created_on|parse_date:"%Y-%m-%dT%H:%M:%S.%fZ"|date:"d F Y" }}</span>
 					</div>
 					<div class="sso-profile-external-links">
-						<a href="{{ EXPORTING_OPPORTUNITIES_SEARCH_URL }}?suppress_subscription_block=true&s={{ alert.term }}">See matching opportunities</a>
+						<a href="{{ EXPORTING_OPPORTUNITIES_SEARCH_URL }}?suppress_subscription_block=true&s={{ alert.term }}&countries[]={{ alert.countries|join:"&countries[]=" }}">See matching opportunities</a>
 						<span class="sso-profile-external-links-seperator">|</span>
 						<a href="{{ alert.unsubscribe_url }}">Unsubscribe from this alert</a>
 					</div>
