@@ -15,8 +15,10 @@ directory-healthcheck==0.6.0
 directory-sso-api-client==2.5.1
 directory-validators==4.5.1
 directory_components==2.28.0
+django-admin-ip-restrictor==1.0.0
 django-environ==0.4.5
 django-health-check==3.0.0  # via directory-healthcheck
+django-ipware==2.1.0      # via django-admin-ip-restrictor
 django==1.11.15
 djangorestframework==3.4.7
 export-elements==0.22.0   # via directory-components

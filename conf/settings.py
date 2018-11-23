@@ -59,6 +59,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE_CLASSES = [
     'directory_components.middleware.MaintenanceModeMiddleware',
+    'admin_ip_restrictor.middleware.AdminIPRestrictorMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'core.middleware.PrefixUrlMiddleware',
@@ -327,3 +328,11 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     )
 }
+
+# ip-restrictor
+RESTRICT_ADMIN = env.bool('IP_RESTRICTOR_RESTRICT_IPS', False)
+ALLOWED_ADMIN_IPS = env.list('IP_RESTRICTOR_ALLOWED_ADMIN_IPS', default=[])
+ALLOWED_ADMIN_IP_RANGES = env.list(
+    'IP_RESTRICTOR_ALLOWED_ADMIN_IP_RANGES', default=[]
+)
+RESTRICTED_APP_NAMES = ['admin', '']

@@ -12,3 +12,4 @@ directory-api-external==4.2.1
 directory-validators==4.5.1
 directory-healthcheck==0.6.0
 directory_components==2.28.0
+django-admin-ip-restrictor>=1.0.0
