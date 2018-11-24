@@ -1,6 +1,6 @@
 import directory_healthcheck.views
 
-from django.conf.urls import url
+from django.conf.urls import include, url
 
 from profile.api import views as api_views
 from profile.eig_apps import views as eig_apps_views
