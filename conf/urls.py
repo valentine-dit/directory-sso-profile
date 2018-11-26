@@ -1,6 +1,6 @@
 import directory_healthcheck.views
 
-from django.conf.urls import url
+from django.conf.urls import include, url
 
 from profile.api import views as api_views
 from profile.eig_apps import views as eig_apps_views
@@ -10,21 +10,43 @@ from profile.exops import views as exops_views
 import healthcheck.views
 
 
+healthcheck_urls = [
+    url(
+        r'^single-sign-on/$',
+        healthcheck.views.SingleSignOnAPIView.as_view(),
+        name='single-sign-on'
+    ),
+    url(
+        r'^ping/$',
+        directory_healthcheck.views.PingView.as_view(),
+        name='ping'
+    ),
+    url(
+        r'^sentry/$',
+        directory_healthcheck.views.SentryHealthcheckView.as_view(),
+        name='sentry'
+    ),
+]
+
+api_urls = [
+    url(
+        r'^v1/directory/supplier/$',
+        api_views.ExternalSupplierAPIView.as_view(),
+        name='external-supplier'
+    ),
+]
+
+
 urlpatterns = [
     url(
-        r'^healthcheck/single-sign-on/$',
-        healthcheck.views.SingleSignOnAPIView.as_view(),
-        name='healthcheck-single-sign-on'
+        r'^api/',
+        include(api_urls, namespace='api', app_name='api')
     ),
     url(
-        r'^healthcheck/ping/$',
-        directory_healthcheck.views.PingView.as_view(),
-        name='healthcheck-ping'
-    ),
-    url(
-        r'^healthcheck/sentry/$',
-        directory_healthcheck.views.SentryHealthcheckView.as_view(),
-        name='healthcheck-sentry'
+        r'^healthcheck/',
+        include(
+            healthcheck_urls, namespace='healthcheck', app_name='healthcheck'
+        )
     ),
     url(
         r'^$',
@@ -55,10 +77,5 @@ urlpatterns = [
         r'^export-opportunities/email-alerts/$',
         exops_views.ExportOpportunitiesEmailAlertsView.as_view(),
         name='export-opportunities-email-alerts'
-    ),
-    url(
-        r'^api/v1/directory/supplier/$',
-        api_views.ExternalSupplierAPIView.as_view(),
-        name='api-external-supplier'
     ),
 ]

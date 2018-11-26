@@ -11,7 +11,7 @@ def test_external_supplier_get(
     api_response_200.json = lambda: {'foo': 'bar'}
     mock_get_supplier_profile.return_value = api_response_200
 
-    url = reverse('api-external-supplier')
+    url = reverse('api:external-supplier')
     response = api_client.get(
         url, HTTP_AUTHORIZATION='Bearer {token}'.format(token='1234')
     )
@@ -26,7 +26,7 @@ def test_external_supplier_client_error(
 ):
     mock_get_supplier_profile.return_value = api_response_500
 
-    url = reverse('api-external-supplier')
+    url = reverse('api:external-supplier')
 
     response = api_client.get(
         url, HTTP_AUTHORIZATION='Bearer {token}'.format(token='1234')
@@ -41,7 +41,7 @@ def test_external_supplier_incorrect_bearer_token(
 ):
     mock_get_supplier_profile.return_value = api_response_401
 
-    url = reverse('api-external-supplier')
+    url = reverse('api:external-supplier')
 
     response = api_client.get(
         url, HTTP_AUTHORIZATION='Bearer {token}'.format(token='1234')
@@ -52,7 +52,7 @@ def test_external_supplier_incorrect_bearer_token(
 
 def test_external_supplier_missing_bearer_token(api_client):
 
-    url = reverse('api-external-supplier')
+    url = reverse('api:external-supplier')
 
     response = api_client.get(url)
 

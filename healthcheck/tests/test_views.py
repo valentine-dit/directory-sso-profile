@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 )
 def test_single_sign_on(mock_check_status, client, settings):
     response = client.get(
-        reverse('healthcheck-single-sign-on'),
+        reverse('healthcheck:single-sign-on'),
         {'token': settings.HEALTH_CHECK_TOKEN},
     )
 
