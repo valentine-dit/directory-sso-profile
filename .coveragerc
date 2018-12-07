@@ -1,2 +1,2 @@
 [run]
-omit = .venv/*,conf/wsgi.py,manage.py,sso/tests/*,config/settings.py
+omit = .venv/*,conf/wsgi.py,manage.py,sso/tests/*,conf/settings.py
