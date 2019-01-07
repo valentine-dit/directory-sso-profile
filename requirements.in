@@ -6,9 +6,8 @@ raven==5.19.0
 requests==2.18.4
 whitenoise==3.1
 directory-sso-api-client==2.5.1
-directory-constants>=11.0.0,<12.0.0
 sigauth==2.1.2
 directory-api-external==4.2.1
 directory-validators==4.5.1
 directory-healthcheck==0.6.0
-directory-components==3.5.0
+directory_components==3.6.1
