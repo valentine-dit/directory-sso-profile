@@ -10,18 +10,18 @@ chardet==3.0.4            # via requests
 contextlib2==0.5.5        # via raven
 directory-api-external==4.2.1
 directory-client-core==0.3.1  # via directory-api-external, directory-sso-api-client
-directory-components==3.5.0
-directory-constants==11.1.0
+directory-constants==11.4.0  # via directory-components
 directory-healthcheck==0.6.0
 directory-sso-api-client==2.5.1
 directory-validators==4.5.1
+directory_components==3.6.1
 django-admin-ip-restrictor==1.0.0  # via directory-components
 django-environ==0.4.5
 django-health-check==3.0.0  # via directory-healthcheck
 django-ipware==2.1.0      # via django-admin-ip-restrictor
 django==1.11.15
 djangorestframework==3.4.7
-export-elements==0.22.0   # via directory-components
+export-elements==1.0.0    # via directory-components
 gunicorn==19.5.0
 idna==2.6                 # via requests
 mohawk==0.3.4             # via directory-components, sigauth
