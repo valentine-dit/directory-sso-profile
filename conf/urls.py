@@ -7,24 +7,18 @@ from profile.eig_apps import views as eig_apps_views
 from profile.fab import views as fab_views
 from profile.soo import views as soo_views
 from profile.exops import views as exops_views
-import healthcheck.views
 
 
 healthcheck_urls = [
     url(
-        r'^single-sign-on/$',
-        healthcheck.views.SingleSignOnAPIView.as_view(),
-        name='single-sign-on'
+        r'^$',
+        directory_healthcheck.views.HealthcheckView.as_view(),
+        name='healthcheck'
     ),
     url(
         r'^ping/$',
         directory_healthcheck.views.PingView.as_view(),
         name='ping'
-    ),
-    url(
-        r'^sentry/$',
-        directory_healthcheck.views.SentryHealthcheckView.as_view(),
-        name='sentry'
     ),
 ]
 
