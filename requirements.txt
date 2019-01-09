@@ -8,16 +8,16 @@ beautifulsoup4==4.6.0     # via directory-components
 certifi==2018.4.16        # via requests
 chardet==3.0.4            # via requests
 contextlib2==0.5.5        # via raven
-directory-api-external==4.2.1
-directory-client-core==0.3.1  # via directory-api-external, directory-sso-api-client
+directory-api-external==5.0.0
+directory-client-core==4.3.0  # via directory-api-external, directory-sso-api-client
+directory-components==3.6.1
 directory-constants==11.4.0  # via directory-components
 directory-healthcheck==1.0.0
-directory-sso-api-client==2.5.1
+directory-sso-api-client==3.0.1
 directory-validators==4.5.1
-directory_components==3.6.1
 django-admin-ip-restrictor==1.0.0  # via directory-components
 django-environ==0.4.5
-django-health-check==3.0.0  # via directory-healthcheck
+django-health-check==3.8.0  # via directory-healthcheck
 django-ipware==2.1.0      # via django-admin-ip-restrictor
 django==1.11.15
 djangorestframework==3.4.7
@@ -29,10 +29,11 @@ monotonic==1.5            # via directory-client-core
 olefile==0.44             # via directory-validators, pillow
 phonenumberslite==7.7.4   # via directory-validators
 pillow==4.2.1             # via directory-validators
-pytz==2017.2              # via directory-healthcheck, directory-validators, django
+pytz==2017.2              # via directory-validators, django
 raven==5.19.0
 requests==2.18.4
-sigauth==2.1.2
-six==1.11.0               # via mohawk
+sigauth==4.0.1
+six==1.11.0               # via mohawk, w3lib
 urllib3==1.22             # via requests
+w3lib==1.19.0             # via directory-client-core
 whitenoise==3.1

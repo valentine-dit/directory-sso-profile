@@ -34,7 +34,7 @@ def test_sso_middleware_installed(settings):
     assert 'sso.middleware.SSOUserMiddleware' in settings.MIDDLEWARE_CLASSES
 
 
-@patch('sso.utils.sso_api_client.user.get_session_user')
+@patch('directory_sso_api_client.client.sso_api_client.user.get_session_user')
 def test_sso_middleware_no_cookie(
     mock_get_session_user, settings, client
 ):
@@ -46,10 +46,16 @@ def test_sso_middleware_no_cookie(
     assert response.status_code == http.client.FOUND
 
 
-@patch('sso.utils.sso_api_client.user.get_session_user')
+@patch(
+    'directory_api_external.client.api_client.supplier.'
+    'retrieve_supplier_company',
+)
+@patch('directory_sso_api_client.client.sso_api_client.user.get_session_user')
 def test_sso_middleware_api_response_ok(
-    mock_get_session_user, settings, returned_client
+    mock_get_session_user, mock_retrieve_supplier_company, settings,
+    returned_client
 ):
+    mock_retrieve_supplier_company.return_value = api_response_ok()
     mock_get_session_user.return_value = api_response_ok()
     returned_client.cookies[settings.SSO_SESSION_COOKIE] = '123'
     settings.MIDDLEWARE_CLASSES = [
@@ -63,7 +69,10 @@ def test_sso_middleware_api_response_ok(
     assert response._request.sso_user.email == 'jim@example.com'
 
 
-@patch('sso.utils.sso_api_client.user.get_session_user', api_response_bad)
+@patch(
+    'directory_sso_api_client.client.sso_api_client.user.get_session_user',
+    api_response_bad
+)
 def test_sso_middleware_bad_response(settings, returned_client):
     settings.MIDDLEWARE_CLASSES = ['sso.middleware.SSOUserMiddleware']
     response = returned_client.get(reverse('find-a-buyer'))
@@ -71,7 +80,7 @@ def test_sso_middleware_bad_response(settings, returned_client):
     assert response.status_code == http.client.FOUND
 
 
-@patch('sso.utils.sso_api_client.user.get_session_user')
+@patch('directory_sso_api_client.client.sso_api_client.user.get_session_user')
 def test_sso_middleware_bad_good_response(
     mock_get_session_user, settings, returned_client
 ):
@@ -91,7 +100,7 @@ def test_sso_middleware_bad_good_response(
 @pytest.mark.parametrize(
     'excpetion_class', requests.exceptions.RequestException.__subclasses__()
 )
-@patch('sso.utils.sso_api_client.user.get_session_user')
+@patch('directory_sso_api_client.client.sso_api_client.user.get_session_user')
 def test_sso_middleware_timeout(
     mock_get_session_user, settings, returned_client, caplog, excpetion_class
 ):

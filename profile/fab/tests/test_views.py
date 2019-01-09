@@ -33,18 +33,39 @@ def api_response_company_profile_200():
     return response
 
 
+@patch('directory_api_external.client.api_client.supplier.retrieve_supplier')
+@patch(
+    'directory_api_external.client.api_client.supplier.'
+    'retrieve_supplier_company',
+)
 def test_find_a_buyer_redirect_first_time_user(
-    sso_user_middleware, client
+    mock_retrieve_company, mock_retrieve_supplier, sso_user_middleware, client,
+    api_response_company_profile_200, api_response_supplier_profile_owner_200
 ):
+    mock_retrieve_company.return_value = api_response_company_profile_200
+    mock_retrieve_supplier.return_value = (
+        api_response_supplier_profile_owner_200
+    )
     response = client.get(reverse('find-a-buyer'))
 
     assert response.status_code == http.client.FOUND
     assert response.get('Location') == reverse('about')
 
 
+@patch('directory_api_external.client.api_client.supplier.retrieve_supplier')
+@patch(
+    'directory_api_external.client.api_client.supplier.'
+    'retrieve_supplier_company',
+)
 def test_find_a_buyer_exposes_context(
-    returned_client, sso_user_middleware, settings
+    mock_retrieve_company, mock_retrieve_supplier, returned_client,
+    sso_user_middleware, settings, api_response_company_profile_200,
+    api_response_supplier_profile_owner_200
 ):
+    mock_retrieve_company.return_value = api_response_company_profile_200
+    mock_retrieve_supplier.return_value = (
+        api_response_supplier_profile_owner_200
+    )
     settings.FAB_EDIT_COMPANY_LOGO_URL = 'http://logo'
     settings.FAB_EDIT_PROFILE_URL = 'http://profile'
     settings.FAB_ADD_CASE_STUDY_URL = 'http://case'
