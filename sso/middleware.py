@@ -1,10 +1,12 @@
 import json
 import logging
 
-from django.conf import settings
+from directory_sso_api_client.client import sso_api_client
 from requests.exceptions import RequestException
 
-from sso.utils import SSOUser, sso_api_client
+from django.conf import settings
+
+from sso.utils import SSOUser
 
 
 logger = logging.getLogger(__name__)

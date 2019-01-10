@@ -1,6 +1,6 @@
 import http
 
-from api_client import api_client
+from directory_api_external.client import api_client
 
 
 def get_supplier_company_profile(sso_sesison_id):
@@ -9,4 +9,4 @@ def get_supplier_company_profile(sso_sesison_id):
         return None
     elif response.status_code == http.client.OK:
         return response.json()
-    raise response.raise_for_status()
+    response.raise_for_status()

@@ -1,9 +1,9 @@
+from directory_api_external.client import api_client
 from requests.exceptions import HTTPError
 
 from django.views.generic import TemplateView
 from django.conf import settings
 
-from api_client import api_client
 from profile.eig_apps.views import RedirectToAboutPageMixin
 from profile.fab import helpers
 from sso.utils import SSOLoginRequiredMixin

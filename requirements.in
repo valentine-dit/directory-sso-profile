@@ -3,11 +3,12 @@ django-environ==0.4.5
 djangorestframework==3.4.7
 gunicorn==19.5.0
 raven==5.19.0
-requests==2.18.4
+requests==2.21.0
 whitenoise==3.1
-directory-sso-api-client==2.5.1
-sigauth==2.1.2
-directory-api-external==4.2.1
+directory-sso-api-client==3.0.1
+sigauth==4.0.1
+directory-api-external==5.0.0
 directory-validators==4.5.1
 directory-healthcheck==1.0.0
-directory_components==3.6.1
+directory-components==3.6.1
+urllib3>=1.23.0<2.0.0

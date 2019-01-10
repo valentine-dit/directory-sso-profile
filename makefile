@@ -77,8 +77,7 @@ DEBUG_SET_ENV_VARS := \
 DEBUG_TEST_SET_ENV_VARS := \
 	export EXPORTING_OPPORTUNITIES_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \
 	export EXPORTING_OPPORTUNITIES_API_SECRET=debug; \
-	export EXPORTING_OPPORTUNITIES_SEARCH_URL=https://opportunities.export.great.gov.uk/opportunities; \
-	export DIRECTORY_API_EXTERNAL_CLIENT_CLASS_NAME='unit-test'
+	export EXPORTING_OPPORTUNITIES_SEARCH_URL=https://opportunities.export.great.gov.uk/opportunities
 
 debug_webserver:
 	$(DEBUG_SET_ENV_VARS) && $(DJANGO_WEBSERVER)

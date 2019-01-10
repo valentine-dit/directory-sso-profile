@@ -2,7 +2,7 @@ from rest_framework import authentication, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api_client import api_client
+from directory_api_external.client import api_client
 
 
 class ExternalSupplierAPIView(APIView):
