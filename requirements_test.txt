@@ -47,10 +47,10 @@ pytest-sugar==0.9.1
 pytest==3.6.0
 pytz==2017.2
 raven==5.19.0
-requests==2.18.4
+requests==2.21.0
 sigauth==4.0.1
 six==1.11.0
 termcolor==1.1.0          # via pytest-sugar
-urllib3==1.22
+urllib3==1.24.1
 w3lib==1.19.0
 whitenoise==3.1

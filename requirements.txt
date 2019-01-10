@@ -31,9 +31,9 @@ phonenumberslite==7.7.4   # via directory-validators
 pillow==4.2.1             # via directory-validators
 pytz==2017.2              # via directory-validators, django
 raven==5.19.0
-requests==2.18.4
+requests==2.21.0
 sigauth==4.0.1
 six==1.11.0               # via mohawk, w3lib
-urllib3==1.22             # via requests
+urllib3==1.24.1
 w3lib==1.19.0             # via directory-client-core
 whitenoise==3.1
