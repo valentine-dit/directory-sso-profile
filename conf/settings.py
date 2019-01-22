@@ -313,6 +313,9 @@ FEATURE_FLAGS = {
     # used by directory-components
     'SEARCH_ENGINE_INDEXING_OFF': env.bool(
         'FEATURE_SEARCH_ENGINE_INDEXING_DISABLED', False
+    ),
+    'NEW_ACCOUNT_JOURNEY_ON': env.bool(
+        'FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED', False
     )
 }
 
