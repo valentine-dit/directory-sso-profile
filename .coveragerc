@@ -1,5 +1,4 @@
 [run]
-[run]
 omit =
     .venv/*
     conf/wsgi.py

@@ -1,0 +1,36 @@
+{% extends 'enrolment/wizard.html' %}
+
+{% load static from static %}
+
+{% block above_form %}
+    <div class="grey-information-box">
+        <h3 class="heading-medium">Type of business or organisation</h3>
+        <p>A business registered with Companies House</p>
+        <a href="{% url 'enrolment' step='business-type' %}" class="link">Change</a>
+    </div>
+    <div id="form-step-body-text">
+        <h1 class="heading-large">Your business details</h1>
+    </div>
+{% endblock %}
+
+{% block below_form %}
+    <p><a class="link" href="#">My company can't be found</a></p>
+{% endblock %}
+
+{% block body_js %}
+    {{ block.super }}
+    <script src="{% static 'directory_components/js/dit.components.company-lookup.js' %}"></script>
+    <script type="text/javascript">
+      var companyName = document.getElementById('id_companies-house-search-company_name');
+      var companyNumber = document.getElementById('id_companies-house-search-company_number');
+      $(document.body).on(
+        "click.SelectiveLookupCloseAll",
+        dit.components.lookup.SelectiveLookup.closeAll
+      );
+      new dit.components.lookup.CompaniesHouseNameLookup(
+        $(companyName),
+        $(companyNumber),
+        '{% url "api:companies-house-search" %}'
+      );
+    </script>
+{% endblock %}

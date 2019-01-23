@@ -47,11 +47,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.contenttypes',  # required by DRF, not using any DB
     'django.contrib.auth',
+    'captcha',
     'core',
     'directory_constants',
     'directory_components',
     'profile',
     'profile.api',
+    'enrolment',
     'directory_healthcheck',
     'export_elements',
 ]
@@ -357,3 +359,23 @@ RESTRICTED_APP_NAMES = env.list(
 if env.bool('IP_RESTRICTOR_RESTRICT_UI', False):
     # restrict all pages that are not in apps API, healthcheck, admin, etc
     RESTRICTED_APP_NAMES.append('')
+
+# Google captcha
+RECAPTCHA_PUBLIC_KEY = env.str('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = env.str('RECAPTCHA_PRIVATE_KEY')
+# NOCAPTCHA = True turns on version 2 of recaptcha
+NOCAPTCHA = env.bool('NOCAPTCHA', True)
+
+# Companies House Search
+DIRECTORY_CH_SEARCH_CLIENT_BASE_URL = env.str(
+    'DIRECTORY_CH_SEARCH_CLIENT_BASE_URL'
+)
+DIRECTORY_CH_SEARCH_CLIENT_API_KEY = env.str(
+    'DIRECTORY_CH_SEARCH_CLIENT_API_KEY'
+)
+DIRECTORY_CH_SEARCH_CLIENT_SENDER_ID = env.str(
+    'DIRECTORY_CH_SEARCH_CLIENT_SENDER_ID', 'directory'
+)
+DIRECTORY_CH_SEARCH_CLIENT_DEFAULT_TIMEOUT = env.str(
+    'DIRECTORY_CH_SEARCH_CLIENT_DEFAULT_TIMEOUT', 5
+)

@@ -1,0 +1,26 @@
+{% extends 'enrolment/wizard.html' %}
+
+{% load static from static %}
+
+{% block above_form %}
+    <div class="grey-information-box">
+        <h3 class="heading-medium">Type of business or organisation</h3>
+        <p>A business registered with Companies House</p>
+        <a href="{% url 'enrolment' step='business-type' %}" class="link">Change</a>
+    </div>
+    <br>
+    <div class="grey-information-box">
+        <h3 class="heading-medium">Your company details</h3>
+        <p>{{ company_name }}</p>
+        <p>{{ address }}</p>
+        <a href="{% url 'enrolment' step='ompanies-house-business-details' %}" class="link">Change</a>
+    </div>
+
+    <div id="form-step-body-text">
+        <h1 class="heading-large">Enter personal details</h1>
+    </div>
+{% endblock %}
+
+{% block below_form %}
+    <p><a class="link" href="#">View the list of background checks here</a></p>
+{% endblock %}

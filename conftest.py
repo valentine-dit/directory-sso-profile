@@ -1,4 +1,5 @@
 from copy import deepcopy
+import os
 import http
 from unittest.mock import patch
 
@@ -115,3 +116,11 @@ def feature_flags(settings):
     # solves this issue: https://github.com/pytest-dev/pytest-django/issues/601
     settings.FEATURE_FLAGS = {**settings.FEATURE_FLAGS}
     yield settings.FEATURE_FLAGS
+
+
+@pytest.fixture()
+def captcha_stub():
+    # https://github.com/praekelt/django-recaptcha#id5
+    os.environ['RECAPTCHA_TESTING'] = 'True'
+    yield 'PASSED'
+    os.environ['RECAPTCHA_TESTING'] = 'False'

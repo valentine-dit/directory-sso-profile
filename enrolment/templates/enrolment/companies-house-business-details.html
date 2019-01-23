@@ -1,0 +1,14 @@
+{% extends 'enrolment/wizard.html' %}
+
+{% load static from static %}
+
+{% block above_form %}
+    <div class="grey-information-box">
+        <h3 class="heading-medium">Type of business or organisation</h3>
+        <p>A business registered with Companies House</p>
+        <a href="{% url 'enrolment' step='business-type' %}" class="link">Change</a>
+    </div>
+    <div id="form-step-body-text">
+        <h1 class="heading-large">Your business details</h1>
+    </div>
+{% endblock %}
