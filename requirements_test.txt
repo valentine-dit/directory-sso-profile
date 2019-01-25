@@ -15,7 +15,7 @@ coverage==4.5.1           # via codecov, pytest-cov
 directory-api-external==5.0.0
 directory-ch-client==1.0.0
 directory-client-core==4.3.0
-directory-components==4.1.1
+directory-components==4.1.2
 directory-constants==12.1.0
 directory-forms-api-client==3.3.0
 directory-healthcheck==1.0.1
