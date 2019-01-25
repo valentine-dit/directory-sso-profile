@@ -1,0 +1,24 @@
+{% extends 'enrolment/base.html' %}
+
+
+{% load static from staticfiles %}
+{% load message_box from directory_components_tags %}
+
+{% block content %}
+  <section class="container">
+      {% include 'enrolment/breadcrumbs.html' %}
+      <div class="column-two-thirds">
+          <div id="success-message-container">
+            {% message_box heading="Complete" description="Your account has been created. We've sent you a confirmation email." heading_level='h1' %}
+          </div>
+      </div>
+  </section>
+
+  <section id="next-container">
+    <div class="container">
+      <h2 class="heading-medium">Next steps</h2>
+      <a class="link" href="{{ service_urls.home }}">Go to great.gov.uk home</a>
+    </div>
+  </section>
+
+{% endblock %}

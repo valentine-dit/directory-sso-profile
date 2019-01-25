@@ -1,0 +1,34 @@
+{% extends 'enrolment/base.html' %}
+
+{% load render_form from directory_components_tags %}
+
+{% block content %}
+    <section class="container">
+        <div class="column-one-half">
+            {% include 'enrolment/breadcrumbs.html' %}
+            {% block breadcrumbs %}{% endblock %}
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% block above_form %}
+                    <h1 class="heading-large">{% block step_title %}{% endblock %}</h1>
+                {% endblock %}
+                {{ wizard.management_form }}
+                {% if wizard.form.forms %}
+                    {{ wizard.form.management_form }}
+                    {% for form in wizard.form.forms %}
+                         {% render_form form %}
+                    {% endfor %}
+                {% else %}
+                    {% render_form form %}
+                {% endif %}
+                {% block below_form %}{% endblock %}
+                {% if wizard.steps.step1 != wizard.steps.count %}
+                    <button type="submit" class="button">Save and continue</button>
+                {% else %}
+                    <button class="button next" type="submit">Save and continue</button>
+                {% endif %}
+                {% block below_submit_button %}{% endblock %}
+            </form>
+        </div>
+    </section>
+{% endblock %}

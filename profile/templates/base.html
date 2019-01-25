@@ -1,3 +1,10 @@
 {% extends 'directory_components/base.html' %}
 
+{% load static from staticfiles %}
+
+{% block head_css %}
+	{{ block.super }}
+    <link href="{% static 'css/profile.css' %}" media="all" rel="stylesheet" />
+{% endblock %}
+
 {% block head_title %}Exporting is Great Account - GREAT.gov.uk{% endblock %}

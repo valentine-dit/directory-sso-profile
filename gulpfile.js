@@ -5,8 +5,8 @@ const sass = require('gulp-sass');
 const sourcemaps = require('gulp-sourcemaps');
 
 const PROJECT_DIR = path.resolve(__dirname);
-const SASS_FILES = `${PROJECT_DIR}/profile/sass/**/*.scss`;
-const OUTPUT_CSS = `${PROJECT_DIR}/profile/static/css`;
+const SASS_FILES = `${PROJECT_DIR}/core/sass/**/*.scss`;
+const OUTPUT_CSS = `${PROJECT_DIR}/core/static/css`;
 
 gulp.task('sass', function () {
   return gulp.src(SASS_FILES)
