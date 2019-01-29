@@ -30,7 +30,8 @@
       new dit.components.lookup.CompaniesHouseNameLookup(
         $(companyName),
         $(companyNumber),
-        '{% url "api:companies-house-search" %}'
+        '{% url "api:companies-house-search" %}',
+        {showNoneOfThese: true}
       );
     </script>
 {% endblock %}
