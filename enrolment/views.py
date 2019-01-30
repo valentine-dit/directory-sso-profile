@@ -72,6 +72,14 @@ class EnrolmentView(
             initial['address'] = company.address
         return initial
 
+    def render_next_step(self, form, **kwargs):
+        if self.storage.current_step == self.USER_ACCOUNT:
+            password = form.cleaned_data.get("password")
+            email = form.cleaned_data.get("email")
+            new_user = helpers.create_user(email, password)
+
+        return super().render_next_step(form, **kwargs)
+
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form=form, **kwargs)
         if self.steps.current == self.PERSONAL_DETAILS:

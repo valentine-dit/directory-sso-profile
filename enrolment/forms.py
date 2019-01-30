@@ -5,7 +5,7 @@ from directory_constants.constants import choices, urls
 from django.forms import PasswordInput
 from django.utils.safestring import mark_safe
 
-from enrolment import constants
+from enrolment import constants, helpers
 from enrolment.fields import DateField
 
 
@@ -64,10 +64,10 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
-    captcha = ReCaptchaField(
+    """captcha = ReCaptchaField(
         label='',
         label_suffix='',
-    )
+    )"""
     terms_agreed = fields.BooleanField(
         label=mark_safe(
             'Tick this box to accept the '
@@ -75,6 +75,16 @@ class UserAccount(forms.Form):
             'conditions</a> of the great.gov.uk service.'
         )
     )
+
+    def clean(self):
+        cleaned_data = super(UserAccount, self).clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("password_confirmed")
+
+        if password != confirm_password:
+            self.add_error('password_confirmed', "Passwords do not match")
+
+        return cleaned_data
 
 
 class UserAccountVerification(forms.Form):

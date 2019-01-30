@@ -30,3 +30,8 @@ def test_get_company_profile_not_ok(mock_get_company_profile):
     mock_get_company_profile.return_value = create_response(400)
     with pytest.raises(HTTPError):
         helpers.get_company_profile('123456')
+
+
+def test_create_user():
+    result = helpers.create_user(email='test@test123.com', password='1234')
+    assert result

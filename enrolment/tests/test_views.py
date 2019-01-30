@@ -52,7 +52,7 @@ def submit_step_factory(client, url_name, view_name, view_class):
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 @mock.patch.object(helpers, 'get_company_profile')
 def test_companies_house_enrolment(
-    mock_get_company_profile, mock_clean, client, captcha_stub
+    mock_get_company_profile, mock_clean ,client, captcha_stub
 ):
     mock_get_company_profile.return_value = {
         'company_number': '12345678',
@@ -73,7 +73,8 @@ def test_companies_house_enrolment(
         'choice': constants.COMPANIES_HOUSE_COMPANY
     })
     assert response.status_code == 302
-
+    import pdb;
+    pdb.set_trace()
     response = submit_step({
         'email': 'text@example.com',
         'password': 'thing',
@@ -109,3 +110,36 @@ def test_companies_house_enrolment(
         'confirmed_background_checks': True,
     })
     assert response.status_code == 302
+
+
+@mock.patch('captcha.fields.ReCaptchaField.clean')
+def test_new_user_enrolment(mock_clean, client, captcha_stub):
+    '''
+    mock_create_user.return_value = {
+        'email': 'test@test.com',
+        'password': '123456',
+    }
+    '''
+
+    submit_step = submit_step_factory(
+
+        client=client,
+        url_name='enrolment',
+        view_name='enrolment_view',
+        view_class=views.EnrolmentView,
+    )
+
+    response = submit_step({
+        'choice': constants.SOLE_TRADER
+    })
+    assert response.status_code == 302
+
+    response = submit_step({
+        'email': 'text2@example.com',
+        'password': 'thing',
+        'password_confirmed': 'thing',
+        'captcha': captcha_stub,
+        'terms_agreed': True
+    })
+    assert response.status_code == 302
+
