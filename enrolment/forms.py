@@ -5,7 +5,7 @@ from directory_constants.constants import choices, urls
 from django.forms import PasswordInput
 from django.utils.safestring import mark_safe
 
-from enrolment import constants, helpers
+from enrolment import constants
 from enrolment.fields import DateField
 
 
@@ -64,10 +64,10 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
-    """captcha = ReCaptchaField(
+    captcha = ReCaptchaField(
         label='',
         label_suffix='',
-    )"""
+    )
     terms_agreed = fields.BooleanField(
         label=mark_safe(
             'Tick this box to accept the '

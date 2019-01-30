@@ -32,6 +32,15 @@ def test_get_company_profile_not_ok(mock_get_company_profile):
         helpers.get_company_profile('123456')
 
 
-def test_create_user():
-    result = helpers.create_user(email='test@test123.com', password='1234')
-    assert result
+@mock.patch.object(helpers.user_api, 'create_user')
+def test_create_user(mock_create_user):
+
+    data = {
+        'email': 'test@test1234.com',
+        'verification_code': '12345',
+    }
+    mock_create_user.return_value = create_response(200, data)
+    result = helpers.create_user(email='test@test1234.com', password='1234')
+    assert mock_create_user.call_count == 1
+    assert mock_create_user.call_args == mock.call('test@test1234.com', '1234')
+    assert result == data
