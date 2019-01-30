@@ -73,8 +73,6 @@ def test_companies_house_enrolment(
         'choice': constants.COMPANIES_HOUSE_COMPANY
     })
     assert response.status_code == 302
-    import pdb;
-    pdb.set_trace()
     response = submit_step({
         'email': 'text@example.com',
         'password': 'thing',
@@ -135,7 +133,7 @@ def test_new_user_enrolment(mock_clean, client, captcha_stub):
     assert response.status_code == 302
 
     response = submit_step({
-        'email': 'text2@example.com',
+        'email': 'tex4566eqw7@example.com',
         'password': 'thing',
         'password_confirmed': 'thing',
         'captcha': captcha_stub,
