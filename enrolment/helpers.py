@@ -32,7 +32,8 @@ class CompanyProfileFormatter:
     def date_created(self):
         date = self.data.get('date_of_creation')
         if date:
-            return datetime.strptime(date, COMPANIES_HOUSE_DATE_FORMAT)
+            date_format = COMPANIES_HOUSE_DATE_FORMAT
+            return datetime.strptime(date, date_format).strftime('%m %B %Y')
 
     @property
     def address(self):

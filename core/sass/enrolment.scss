@@ -9,6 +9,14 @@ body.js-enabled {
     display: none;
   }
 }
+body.js-enabled {
+  #id_companies-house-business-details-address_finder-container {
+    display: none;
+    margin-top: 20px;
+  }
+}
+
+
 
 #id_companies-house-business-details-company_number-container,
 #id_companies-house-business-details-sic-container,

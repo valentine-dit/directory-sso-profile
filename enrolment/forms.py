@@ -126,6 +126,9 @@ class CompaniesHouseBusinessDetails(forms.Form):
         disabled=True,
         required=False,
     )
+    address_finder = fields.CharField(
+        required=False,
+    )
     address = fields.CharField(
         disabled=True,
         required=False,
