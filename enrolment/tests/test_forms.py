@@ -1,6 +1,7 @@
 from django.urls import reverse
 from enrolment import forms
 
+
 def test_password_verify_password_not_matching():
     form = forms.UserAccount(
         data={'password': 'password', 'password_confirmed': 'drowssap'}
