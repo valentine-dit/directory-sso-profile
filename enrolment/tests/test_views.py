@@ -10,6 +10,7 @@ urls = (
     reverse('enrolment-success'),
 )
 
+
 @pytest.fixture(autouse=True)
 def mock_get_company_profile():
     patch = mock.patch.object(helpers, 'get_company_profile', return_value={
@@ -21,7 +22,6 @@ def mock_get_company_profile():
     })
     yield patch.start()
     patch.stop()
-
 
 
 @pytest.fixture(autouse=True)
@@ -185,7 +185,10 @@ def test_companies_house_enrolment_change_company_name(
     assert response.context_data['form']['company_name'].data == 'Example corp'
 
 
-def test_create_user_enrolment(mock_create_user, client, captcha_stub):
+@mock.patch('captcha.fields.ReCaptchaField.clean')
+def test_create_user_enrolment(
+    mock_clean, mock_create_user, client, captcha_stub
+):
 
     submit_step = submit_step_factory(
         client=client,
@@ -195,7 +198,7 @@ def test_create_user_enrolment(mock_create_user, client, captcha_stub):
     )
 
     response = submit_step({
-        'choice': constants.SOLE_TRADER
+        'choice': constants.COMPANIES_HOUSE_COMPANY
     })
     assert response.status_code == 302
 
@@ -206,6 +209,7 @@ def test_create_user_enrolment(mock_create_user, client, captcha_stub):
         'captcha': captcha_stub,
         'terms_agreed': True
     })
+
     assert response.status_code == 302
     assert mock_create_user.call_count == 1
     assert mock_create_user.call_args == mock.call(

@@ -77,7 +77,7 @@ class EnrolmentView(
         if self.storage.current_step == self.USER_ACCOUNT:
             password = form.cleaned_data["password"]
             email = form.cleaned_data.get("email")
-            helpers.create_user(email, password)
+            helpers.create_user(email=email, password=password)
         return super().render_next_step(form, **kwargs)
 
     def get_context_data(self, form, **kwargs):
