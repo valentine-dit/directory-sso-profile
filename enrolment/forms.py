@@ -82,7 +82,7 @@ class UserAccount(forms.Form):
         confirm_password = cleaned_data.get("password_confirmed")
 
         if password != confirm_password:
-            self.add_error('password_confirmed', "Passwords do not match")
+            self.add_error('password_confirmed', "Passwords don't match")
 
         return cleaned_data
 
