@@ -30,3 +30,17 @@ def test_get_company_profile_not_ok(mock_get_company_profile):
     mock_get_company_profile.return_value = create_response(400)
     with pytest.raises(HTTPError):
         helpers.get_company_profile('123456')
+
+
+@mock.patch.object(helpers.sso_api_client.user, 'create_user')
+def test_create_user(mock_create_user):
+
+    data = {
+        'email': 'test@test1234.com',
+        'verification_code': '12345',
+    }
+    mock_create_user.return_value = create_response(200, data)
+    result = helpers.create_user(email='test@test1234.com', password='1234')
+    assert mock_create_user.call_count == 1
+    assert mock_create_user.call_args == mock.call('test@test1234.com', '1234')
+    assert result == data

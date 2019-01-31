@@ -77,6 +77,16 @@ class UserAccount(forms.Form):
         )
     )
 
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data["password"]
+        confirm_password = cleaned_data["password_confirmed"]
+
+        if password != confirm_password:
+            self.add_error('password_confirmed', "Passwords don't match")
+
+        return cleaned_data
+
 
 class UserAccountVerification(forms.Form):
     code = fields.CharField(label='')

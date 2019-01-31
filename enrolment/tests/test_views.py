@@ -50,9 +50,11 @@ def submit_step_factory(client, url_name, view_name, view_class):
 
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
+@mock.patch.object(helpers, 'create_user')
 @mock.patch.object(helpers, 'get_company_profile')
 def test_companies_house_enrolment(
-    mock_get_company_profile, mock_clean, client, captcha_stub
+    mock_get_company_profile, mock_create_user,
+    mock_clean, client, captcha_stub,
 ):
     mock_get_company_profile.return_value = {
         'company_number': '12345678',
@@ -60,6 +62,11 @@ def test_companies_house_enrolment(
         'sic_codes': ['1234'],
         'date_of_creation': '2001-01-20',
         'registered_office_address': {'one': '555', 'two': 'fake street'},
+    }
+
+    mock_create_user.return_value = {
+        'email': 'test@test.com',
+        'password': '123456',
     }
 
     submit_step = submit_step_factory(
@@ -73,7 +80,6 @@ def test_companies_house_enrolment(
         'choice': constants.COMPANIES_HOUSE_COMPANY
     })
     assert response.status_code == 302
-
     response = submit_step({
         'email': 'text@example.com',
         'password': 'thing',
@@ -107,5 +113,39 @@ def test_companies_house_enrolment(
         'phone_number': '1232342',
         'confirmed_is_company_representative': True,
         'confirmed_background_checks': True,
+    })
+    assert response.status_code == 302
+
+
+@mock.patch('captcha.fields.ReCaptchaField.clean')
+@mock.patch.object(helpers, 'create_user')
+def test_create_user_enrolment(
+        mock_create_user, mock_clean, client, captcha_stub
+):
+
+    mock_create_user.return_value = {
+        'email': 'test@test.com',
+        'password': '123456',
+    }
+
+    submit_step = submit_step_factory(
+
+        client=client,
+        url_name='enrolment',
+        view_name='enrolment_view',
+        view_class=views.EnrolmentView,
+    )
+
+    response = submit_step({
+        'choice': constants.SOLE_TRADER
+    })
+    assert response.status_code == 302
+
+    response = submit_step({
+        'email': 'tex4566eqw34e7@example.com',
+        'password': 'thing',
+        'password_confirmed': 'thing',
+        'captcha': captcha_stub,
+        'terms_agreed': True
     })
     assert response.status_code == 302
