@@ -1,19 +1,10 @@
 from datetime import datetime
 
-from django.conf import settings
-
 from directory_ch_client.client import ch_search_api_client
-from directory_sso_api_client.user import UserAPIClient
+from directory_sso_api_client.client import sso_api_client
 
 
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
-
-sso_api_user = UserAPIClient(
-    base_url=settings.DIRECTORY_SSO_API_USER_BASE_URL,
-    api_key=settings.DIRECTORY_SSO_API_USER_API_KEY,
-    sender_id=settings.DIRECTORY_SSO_API_USER_SENDER_ID,
-    timeout=settings.DIRECTORY_SSO_API_USER_DEFAULT_TIMEOUT,
-)
 
 
 def get_company_profile(number):
@@ -23,7 +14,7 @@ def get_company_profile(number):
 
 
 def create_user(email, password):
-    response = sso_api_user.create_user(email, password)
+    response = sso_api_client.user.create_user(email, password)
     response.raise_for_status()
     return response.json()
 
