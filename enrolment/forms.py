@@ -77,9 +77,9 @@ class UserAccount(forms.Form):
     )
 
     def clean(self):
-        cleaned_data = super(UserAccount, self).clean()
-        password = cleaned_data.get("password")
-        confirm_password = cleaned_data.get("password_confirmed")
+        cleaned_data = super().clean()
+        password = cleaned_data["password"]
+        confirm_password = cleaned_data["password_confirmed"]
 
         if password != confirm_password:
             self.add_error('password_confirmed', "Passwords don't match")

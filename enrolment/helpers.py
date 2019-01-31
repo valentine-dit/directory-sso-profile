@@ -5,9 +5,10 @@ from django.conf import settings
 from directory_ch_client.client import ch_search_api_client
 from directory_sso_api_client.user import UserAPIClient
 
+
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
 
-user_api = UserAPIClient(
+sso_api_user = UserAPIClient(
     base_url=settings.DIRECTORY_SSO_API_USER_BASE_URL,
     api_key=settings.DIRECTORY_SSO_API_USER_API_KEY,
     sender_id=settings.DIRECTORY_SSO_API_USER_SENDER_ID,
@@ -22,7 +23,7 @@ def get_company_profile(number):
 
 
 def create_user(email, password):
-    response = user_api.create_user(email, password)
+    response = sso_api_user.create_user(email, password)
     response.raise_for_status()
     return response.json()
 

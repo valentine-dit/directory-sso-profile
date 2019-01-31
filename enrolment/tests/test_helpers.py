@@ -32,7 +32,7 @@ def test_get_company_profile_not_ok(mock_get_company_profile):
         helpers.get_company_profile('123456')
 
 
-@mock.patch.object(helpers.user_api, 'create_user')
+@mock.patch.object(helpers.sso_api_user, 'create_user')
 def test_create_user(mock_create_user):
 
     data = {
