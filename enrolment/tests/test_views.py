@@ -23,6 +23,17 @@ def mock_get_company_profile():
     patch.stop()
 
 
+
+@pytest.fixture(autouse=True)
+def mock_create_user():
+    patch = mock.patch.object(helpers, 'create_user', return_value={
+        'email': 'test@test.com',
+        'verification_code': '123456',
+    })
+    yield patch.start()
+    patch.stop()
+
+
 @pytest.mark.parametrize('url', urls)
 def test_404_feature_off(url, client, settings):
 
@@ -172,3 +183,32 @@ def test_companies_house_enrolment_change_company_name(
     response = client.get(response.url)
 
     assert response.context_data['form']['company_name'].data == 'Example corp'
+
+
+def test_create_user_enrolment(mock_create_user, client, captcha_stub):
+
+    submit_step = submit_step_factory(
+        client=client,
+        url_name='enrolment',
+        view_name='enrolment_view',
+        view_class=views.EnrolmentView,
+    )
+
+    response = submit_step({
+        'choice': constants.SOLE_TRADER
+    })
+    assert response.status_code == 302
+
+    response = submit_step({
+        'email': 'tex4566eqw34e7@example.com',
+        'password': 'thing',
+        'password_confirmed': 'thing',
+        'captcha': captcha_stub,
+        'terms_agreed': True
+    })
+    assert response.status_code == 302
+    assert mock_create_user.call_count == 1
+    assert mock_create_user.call_args == mock.call(
+        email='tex4566eqw34e7@example.com',
+        password='thing'
+    )

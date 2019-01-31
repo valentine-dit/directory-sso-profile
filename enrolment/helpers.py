@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from directory_ch_client.client import ch_search_api_client
+from directory_sso_api_client.client import sso_api_client
 
 
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
@@ -8,6 +9,12 @@ COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
 
 def get_company_profile(number):
     response = ch_search_api_client.company.get_company_profile(number)
+    response.raise_for_status()
+    return response.json()
+
+
+def create_user(email, password):
+    response = sso_api_client.user.create_user(email, password)
     response.raise_for_status()
     return response.json()
 
