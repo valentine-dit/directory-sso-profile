@@ -51,3 +51,40 @@ def test_companies_house_search(mock_search, client, settings):
 
     assert response.status_code == 200
     assert response.content == b'[{"name":"Smashing corp"}]'
+
+
+@mock.patch('core.views.requests.get')
+def test_address_lookup_bad_postcode(mock_get, client):
+    mock_get.return_value = create_response(400)
+    url = reverse('api:postcode-search')
+
+    response = client.get(url, data={'postcode': '21313'})
+
+    assert response.status_code == 200
+    assert response.content == b'[]'
+
+
+@mock.patch('core.views.requests.get')
+def test_address_lookup_not_ok(mock_get, client):
+    mock_get.return_value = create_response(500)
+    url = reverse('api:postcode-search')
+
+    with pytest.raises(requests.HTTPError):
+        client.get(url, data={'postcode': '21313'})
+
+
+@mock.patch('core.views.requests.get')
+def test_address_lookup_ok(mock_get, client):
+    mock_get    .return_value = create_response(200, {'addresses': [
+        '1 A road, , , , Ashire',
+        '2 B road, , , , Bshire',
+    ]})
+    url = reverse('api:postcode-search')
+
+    response = client.get(url, data={'postcode': '123123'})
+
+    assert response.status_code == 200
+    assert response.content == (
+        b'[{"text":"1 A road, Ashire","value":"1 A road, Ashire, 123123"},'
+        b'{"text":"2 B road, Bshire","value":"2 B road, Bshire, 123123"}]'
+    )

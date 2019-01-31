@@ -34,9 +34,15 @@ api_urls = [
     ),
     url(
         r'^v1/companies-house-search/$',
-        core.views.CompaniesHouseSearchApiView.as_view(),
+        core.views.CompaniesHouseSearchAPIView.as_view(),
         name='companies-house-search'
     ),
+    url(
+        r'^v1/postcode-search/$',
+        core.views.AddressSearchAPIView.as_view(),
+        name='postcode-search'
+    ),
+
 ]
 
 

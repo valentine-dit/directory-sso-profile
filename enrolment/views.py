@@ -68,7 +68,7 @@ class EnrolmentView(
             initial['company_name'] = company.name
             initial['company_number'] = company.number
             initial['sic'] = company.sic_code
-            initial['date_created'] = company.date_created.strftime('%m %B %Y')
+            initial['date_created'] = company.date_created
             initial['address'] = company.address
         return initial
 

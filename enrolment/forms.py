@@ -2,7 +2,8 @@ from captcha.fields import ReCaptchaField
 from directory_components import forms, fields, widgets
 from directory_constants.constants import choices, urls
 
-from django.forms import PasswordInput
+from django.forms import PasswordInput, ValidationError
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from enrolment import constants
@@ -92,10 +93,25 @@ class UserAccountVerification(forms.Form):
 
 
 class CompaniesHouseSearch(forms.Form):
+    MESSAGE_COMPANY_NOT_FOUND = (
+        "<p>Your company name can't be found.</p>"
+        "<p>Check that you entered the registered company name correctly "
+        "and select the matching company name from the list.</p>"
+        "<p>If your company is not registered with Companies House "
+        "<a href='{url}'>change type of business</a></p>"
+    )
+
     company_name = fields.CharField(
         label='Registered company name'
     )
     company_number = fields.CharField()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if 'company_number' not in cleaned_data:
+            url = reverse('enrolment', kwargs={'step': 'business-type'})
+            message = self.MESSAGE_COMPANY_NOT_FOUND.format(url=url)
+            raise ValidationError({'company_name': mark_safe(message)})
 
 
 class CompaniesHouseBusinessDetails(forms.Form):
@@ -118,6 +134,9 @@ class CompaniesHouseBusinessDetails(forms.Form):
         label='Incorporated on',
         input_formats=['%m %B %Y'],
         disabled=True,
+        required=False,
+    )
+    address_finder = fields.CharField(
         required=False,
     )
     address = fields.CharField(
