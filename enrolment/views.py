@@ -3,7 +3,7 @@ from formtools.wizard.views import NamedUrlSessionWizardView
 from django.conf import settings
 from django.http import Http404
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView
 
 import core.mixins
@@ -56,7 +56,8 @@ class EnrolmentView(
     def render(self, *args, **kwargs):
         prev = self.steps.prev
         if prev and not self.get_cleaned_data_for_step(prev):
-            return redirect(self.url_name, kwargs={'step': self.steps.first})
+            url = reverse(self.url_name, kwargs={'step': self.steps.first})
+            return redirect(url)
         return super().render(*args, **kwargs)
 
     def get_form_initial(self, step):
@@ -76,7 +77,7 @@ class EnrolmentView(
         if self.storage.current_step == self.USER_ACCOUNT:
             password = form.cleaned_data["password"]
             email = form.cleaned_data.get("email")
-            helpers.create_user(email, password)
+            helpers.create_user(email=email, password=password)
         return super().render_next_step(form, **kwargs)
 
     def get_context_data(self, form, **kwargs):

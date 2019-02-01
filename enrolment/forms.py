@@ -5,6 +5,7 @@ from directory_constants.constants import choices, urls
 from django.forms import PasswordInput, ValidationError
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.http.request import QueryDict
 
 from enrolment import constants
 from enrolment.fields import DateField
@@ -152,6 +153,18 @@ class CompaniesHouseBusinessDetails(forms.Form):
         help_text='The website address must start with http:// or https://',
         required=False,
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # force the form to use the initial value rather than the value
+        # the user submitted in previous sessions
+        # on GET the data structure is a MultiValueDict. on POST the data
+        # structure is a QueryDict
+        if self.data and not isinstance(self.data, QueryDict):
+            self.data.setlist(
+                self.add_prefix('company_name'),
+                [self.initial['company_name']]
+            )
 
 
 class PersonalDetails(forms.Form):
