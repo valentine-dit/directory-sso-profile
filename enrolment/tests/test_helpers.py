@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from requests.cookies import RequestsCookieJar
 from requests.exceptions import HTTPError
 
 from enrolment import helpers
@@ -38,6 +39,7 @@ def test_create_user(mock_create_user):
     data = {
         'email': 'test@test1234.com',
         'verification_code': '12345',
+        'cookies': RequestsCookieJar(),
     }
     mock_create_user.return_value = create_response(200, data)
     result = helpers.create_user(email='test@test1234.com', password='1234')

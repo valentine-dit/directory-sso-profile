@@ -74,17 +74,21 @@ class EnrolmentView(
         return initial
 
     def render_next_step(self, form, **kwargs):
-        if self.storage.current_step == self.USER_ACCOUNT:
-            password = form.cleaned_data["password"]
-            email = form.cleaned_data.get("email")
-            helpers.create_user(email=email, password=password)
-            new_user = helpers.create_user(email, password)
+        response = super().render_next_step(form, **kwargs)
+        if form.prefix == self.USER_ACCOUNT:
+            user_details = helpers.create_user(
+                email=form.cleaned_data["email"],
+                password=form.cleaned_data["password"],
+            )
             helpers.send_verification_code_email(
-                email=new_user['email'],
-                verification_code=new_user['verification_code'],
+                email=form.cleaned_data["email"],
+                verification_code=user_details['verification_code'],
                 from_url=self.request.path,
             )
-        return super().render_next_step(form, **kwargs)
+            response.cookies.update(
+                helpers.cookiekjar_to_simple_cookie(user_details['cookies'])
+            )
+        return response
 
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form=form, **kwargs)

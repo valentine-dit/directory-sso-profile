@@ -31,6 +31,7 @@ django==1.11.18
 djangorestframework==3.4.7
 export-elements==1.0.0
 flake8==3.5.0
+freezegun==0.3.11
 gunicorn==19.5.0
 idna==2.6
 mccabe==0.6.1             # via flake8
@@ -49,6 +50,7 @@ pytest-cov==2.5.1
 pytest-django==3.2.1
 pytest-sugar==0.9.1
 pytest==3.6.0
+python-dateutil==2.7.5    # via freezegun
 pytz==2017.2
 raven==5.19.0
 requests==2.21.0
