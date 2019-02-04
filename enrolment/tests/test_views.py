@@ -1,7 +1,10 @@
 import datetime
-
-import pytest
+from http import cookiejar
 from unittest import mock
+
+from freezegun import freeze_time
+import pytest
+from requests.cookies import RequestsCookieJar
 
 from django.urls import reverse
 
@@ -38,9 +41,49 @@ def mock_get_company_profile():
 
 @pytest.fixture(autouse=True)
 def mock_create_user():
+    cookies = RequestsCookieJar()
+    cookies['debug_sso_session_cookie'] = cookiejar.Cookie(
+        version=0,
+        name='debug_sso_session_cookie',
+        value='a',
+        port=None,
+        port_specified=False,
+        domain='.trade.great',
+        domain_specified=True,
+        domain_initial_dot=True,
+        path='/',
+        path_specified=True,
+        secure=False,
+        expires=1550483231,
+        discard=False,
+        comment=None,
+        comment_url=None,
+        rest={'HttpOnly': None},
+        rfc2109=False
+    )
+    cookies['sso_display_logged_in'] = cookiejar.Cookie(
+        version=0,
+        name='sso_display_logged_in',
+        value='true',
+        port=None,
+        port_specified=False,
+        domain='.trade.great',
+        domain_specified=True,
+        domain_initial_dot=True,
+        path='/',
+        path_specified=True,
+        secure=False,
+        expires=1550483231,
+        discard=False,
+        comment=None,
+        comment_url=None,
+        rest={},
+        rfc2109=False
+    )
     patch = mock.patch.object(helpers, 'create_user', return_value={
         'email': 'test@test.com',
         'verification_code': '123456',
+        'cookies': cookies,
     })
     yield patch.start()
     patch.stop()
@@ -268,4 +311,40 @@ def test_companies_house_enrolment_redirect_to_start(
     assert response.status_code == 302
     assert response.url == reverse(
         'enrolment', kwargs={'step': views.EnrolmentView.BUSINESS_TYPE}
+    )
+
+
+@freeze_time('2012-01-14 12:00:02')
+@mock.patch('captcha.fields.ReCaptchaField.clean', mock.Mock)
+def test_companies_house_enrolment_passes_cookies(
+    submit_enrolment_step, client, captcha_stub
+):
+    response = submit_enrolment_step({
+        'choice': constants.COMPANIES_HOUSE_COMPANY
+    })
+    assert response.status_code == 302
+
+    response = submit_enrolment_step({
+        'email': 'text@example.com',
+        'password': 'thing',
+        'password_confirmed': 'thing',
+        'captcha': captcha_stub,
+        'terms_agreed': True
+    })
+    assert response.status_code == 302
+    assert str(response.cookies['debug_sso_session_cookie']) == (
+        'Set-Cookie: debug_sso_session_cookie="'
+        '<Cookie debug_sso_session_cookie=a for .trade.great/>"; '
+        'Comment=None; '
+        'expires=Sat, 14 Jan 2012 12:00:02 GMT; '
+        'Path=/; '
+        'Version=0'
+    )
+    assert str(response.cookies['sso_display_logged_in']) == (
+        'Set-Cookie: sso_display_logged_in="'
+        '<Cookie sso_display_logged_in=true for .trade.great/>"; '
+        'Comment=None; '
+        'expires=Sat, 14 Jan 2012 12:00:02 GMT; '
+        'Path=/; '
+        'Version=0'
     )

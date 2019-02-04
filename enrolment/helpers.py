@@ -1,4 +1,6 @@
+from http import cookies
 from datetime import datetime
+import time
 
 from directory_ch_client.client import ch_search_api_client
 from directory_sso_api_client.client import sso_api_client
@@ -16,7 +18,10 @@ def get_company_profile(number):
 def create_user(email, password):
     response = sso_api_client.user.create_user(email, password)
     response.raise_for_status()
-    return response.json()
+    return {
+        'cookies': response.cookies,
+        **response.json()
+    }
 
 
 class CompanyProfileFormatter:
@@ -47,3 +52,19 @@ class CompanyProfileFormatter:
         return ' '.join(
             self.data.get('registered_office_address', {}).values()
         )
+
+
+def cookiekjar_to_simple_cookie(cookiejar):
+    simple_cookies = cookies.SimpleCookie()
+    for cookie in cookiejar:
+        simple_cookies[cookie.name] = cookie.value
+        for attr in ('path', 'comment', 'domain', 'secure', 'version'):
+            simple_cookies[cookie.name][attr] = getattr(cookie, attr)
+        # Cookies thinks an int expires x seconds in future,
+        # cookielib thinks it is x seconds from epoch,
+        # so doing the conversion to string for Cookies
+        simple_cookies[cookie.name]['expires'] = time.strftime(
+            '%a, %d %b %Y %H:%M:%S GMT',
+            time.gmtime(cookie.expires)
+        )
+    return simple_cookies
