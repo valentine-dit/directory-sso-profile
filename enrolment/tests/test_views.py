@@ -1,4 +1,3 @@
-import datetime
 from http import cookiejar
 from unittest import mock
 
@@ -8,12 +7,25 @@ from requests.cookies import RequestsCookieJar
 
 from django.urls import reverse
 
+from core.tests.helpers import create_response
 from enrolment import constants, helpers, views
+
 
 urls = (
     reverse('enrolment', kwargs={'step': 'business-type'}),
     reverse('enrolment-success'),
 )
+
+
+@pytest.fixture
+def authenticate_user(client, settings):
+    client.cookies[settings.SSO_SESSION_COOKIE] = '123'
+    patch = mock.patch(
+        'directory_sso_api_client.client.sso_api_client.user.get_session_user',
+        return_value=create_response(200, {'id': '123', 'email': 'test@a.com'})
+    )
+    yield patch
+    patch.stop()
 
 
 @pytest.fixture
@@ -33,7 +45,10 @@ def mock_get_company_profile():
         'company_name': 'Example corp',
         'sic_codes': ['1234'],
         'date_of_creation': '2001-01-20',
-        'registered_office_address': {'one': '555', 'two': 'fake street'},
+        'registered_office_address': {
+            'address_line_1': '555 fake street, London',
+            'postal_code': 'EDG 4DF'
+        },
     })
     yield patch.start()
     patch.stop()
@@ -41,9 +56,17 @@ def mock_get_company_profile():
 
 @pytest.fixture(autouse=True)
 def mock_send_verification_code_email():
-    patch = mock.patch.object(helpers,
-                              'send_verification_code_email',
-                              )
+    patch = mock.patch.object(helpers, 'send_verification_code_email')
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_enrolment_send(client, settings):
+    patch = mock.patch(
+        'directory_api_client.client.api_client.enrolment.send_form',
+        return_value=create_response(201)
+    )
     yield patch.start()
     patch.stop()
 
@@ -89,11 +112,15 @@ def mock_create_user():
         rest={},
         rfc2109=False
     )
-    patch = mock.patch.object(helpers, 'create_user', return_value={
+    response = create_response(200, {
         'email': 'test@test.com',
         'verification_code': '123456',
-        'cookies': cookies,
     })
+    response.cookies = cookies
+    patch = mock.patch.object(
+        helpers.sso_api_client.user, 'create_user',
+        return_value=response
+    )
     yield patch.start()
     patch.stop()
 
@@ -138,7 +165,7 @@ def submit_step_factory(client, url_name, view_name, view_class):
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment(
-    mock_clean, client, captcha_stub, submit_enrolment_step
+    mock_clean, client, captcha_stub, submit_enrolment_step, authenticate_user
 ):
     response = submit_enrolment_step({
         'choice': constants.COMPANIES_HOUSE_COMPANY
@@ -153,6 +180,8 @@ def test_companies_house_enrolment(
         'terms_agreed': True
     })
     assert response.status_code == 302
+
+    authenticate_user.start()
 
     response = submit_enrolment_step({
         'code': '123'
@@ -184,7 +213,7 @@ def test_companies_house_enrolment(
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_change_company_name(
-    mock_clean, client, captcha_stub, submit_enrolment_step
+    mock_clean, client, captcha_stub, submit_enrolment_step, authenticate_user
 ):
     response = submit_enrolment_step({
         'choice': constants.COMPANIES_HOUSE_COMPANY
@@ -199,6 +228,8 @@ def test_companies_house_enrolment_change_company_name(
         'terms_agreed': True
     })
     assert response.status_code == 302
+
+    authenticate_user.start()
 
     response = submit_enrolment_step({
         'code': '123'
@@ -260,7 +291,7 @@ def test_create_user_enrolment(mock_clean, client, captcha_stub):
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_expose_company(
-    mock_clean, client, captcha_stub, submit_enrolment_step
+    mock_clean, client, captcha_stub, submit_enrolment_step, authenticate_user
 ):
     response = submit_enrolment_step({
         'choice': constants.COMPANIES_HOUSE_COMPANY
@@ -275,6 +306,8 @@ def test_companies_house_enrolment_expose_company(
         'terms_agreed': True
     })
     assert response.status_code == 302
+
+    authenticate_user.start()
 
     response = submit_enrolment_step({
         'code': '123'
@@ -299,9 +332,11 @@ def test_companies_house_enrolment_expose_company(
         'company_name': 'Example corp',
         'company_number': '12345678',
         'sic': '1234',
-        'date_created': datetime.date(2001, 1, 1),
-        'address_finder': '',
-        'address': '555 fake street',
+        'date_of_creation': '2001-01-01',
+        'postal_code': 'EDG 4DF',
+        'address': '555 fake street, London',
+        'address_line_1': '555 fake street',
+        'address_line_2': 'London',
         'industry': 'AEROSPACE',
         'website_address': ''
     }
@@ -356,3 +391,75 @@ def test_companies_house_enrolment_passes_cookies(
         'Path=/; '
         'Version=0'
     )
+
+
+@mock.patch('captcha.fields.ReCaptchaField.clean')
+def test_companies_house_enrolment_submit_end_to_end(
+    mock_clean, client, captcha_stub, submit_enrolment_step, authenticate_user,
+    mock_enrolment_send
+):
+    response = submit_enrolment_step({
+        'choice': constants.COMPANIES_HOUSE_COMPANY
+    })
+    assert response.status_code == 302
+
+    response = submit_enrolment_step({
+        'email': 'text@example.com',
+        'password': 'thing',
+        'password_confirmed': 'thing',
+        'captcha': captcha_stub,
+        'terms_agreed': True
+    })
+    assert response.status_code == 302
+
+    authenticate_user.start()
+
+    response = submit_enrolment_step({
+        'code': '123'
+    })
+    assert response.status_code == 302
+
+    response = submit_enrolment_step({
+        'company_name': 'Example corp',
+        'company_number': '12345678',
+    })
+    assert response.status_code == 302
+
+    response = submit_enrolment_step({
+        'company_name': 'Example corp',
+        'industry': 'AEROSPACE',
+    })
+    assert response.status_code == 302
+
+    response = submit_enrolment_step({
+        'given_name': 'Foo',
+        'family_name': 'Bar',
+        'job_title': 'Fooer',
+        'phone_number': '1234567',
+        'confirmed_is_company_representative': True,
+        'confirmed_background_checks': True,
+    })
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.url == reverse('enrolment-success')
+    assert mock_enrolment_send.call_count == 1
+    assert mock_enrolment_send.call_args == mock.call({
+        'company_email': 'text@example.com',
+        'contact_email_address': 'text@example.com',
+        'company_name': 'Example corp',
+        'company_number': '12345678',
+        'sic': '1234',
+        'date_of_creation': '2001-01-01',
+        'postal_code': 'EDG 4DF',
+        'address_line_1': '555 fake street',
+        'address_line_2': 'London',
+        'industry': 'AEROSPACE',
+        'website_address': '',
+        'given_name': 'Foo',
+        'family_name': 'Bar',
+        'job_title': 'Fooer',
+        'phone_number': '1234567',
+        'sso_id': '123'
+    })

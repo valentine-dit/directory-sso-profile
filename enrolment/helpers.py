@@ -8,21 +8,23 @@ from directory_sso_api_client.client import sso_api_client
 from directory_forms_api_client import actions
 
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
+SESSION_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'
 
 
-def get_company_profile(number):
-    response = ch_search_api_client.company.get_company_profile(number)
-    response.raise_for_status()
-    return response.json()
+def get_company_profile(number, session):
+    session_key = f'{SESSION_KEY_COMPANY_PROFILE}-{number}'
+    if session_key not in session:
+        response = ch_search_api_client.company.get_company_profile(number)
+        response.raise_for_status()
+        session[session_key] = response.json()
+    return session[session_key]
 
 
-def create_user(email, password):
+def create_user(email, password, cookies):
     response = sso_api_client.user.create_user(email, password)
     response.raise_for_status()
-    return {
-        'cookies': response.cookies,
-        **response.json()
-    }
+    cookies.update(cookiekjar_to_simple_cookie(response.cookies))
+    return response.json()
 
 
 def send_verification_code_email(email, verification_code, from_url):
@@ -65,9 +67,18 @@ class CompanyProfileFormatter:
 
     @property
     def address(self):
-        return ' '.join(
-            self.data.get('registered_office_address', {}).values()
-        )
+        address = []
+        if self.data.get('registered_office_address'):
+            for field in ['address_line_1', 'address_line_2', 'locality']:
+                value = self.data['registered_office_address'].get(field)
+                if value:
+                    address.append(value)
+        return ', '.join(address)
+
+    @property
+    def postcode(self):
+        if self.data.get('registered_office_address'):
+            return self.data['registered_office_address']['postal_code']
 
 
 def cookiekjar_to_simple_cookie(cookiejar):

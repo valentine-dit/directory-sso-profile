@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.http.request import QueryDict
 
-from enrolment import constants
+from enrolment import constants, helpers
 from enrolment.fields import DateField
 
 
@@ -88,6 +88,11 @@ class UserAccount(forms.Form):
 
         return cleaned_data
 
+    def clean_email(self):
+        self.cleaned_data['company_email'] = self.cleaned_data['email']
+        self.cleaned_data['contact_email_address'] = self.cleaned_data['email']
+        return self.cleaned_data['email']
+
 
 class UserAccountVerification(forms.Form):
     code = fields.CharField(label='')
@@ -131,13 +136,14 @@ class CompaniesHouseBusinessDetails(forms.Form):
         disabled=True,
         required=False,
     )
-    date_created = DateField(
+    date_of_creation = DateField(
         label='Incorporated on',
         input_formats=['%m %B %Y'],
         disabled=True,
         required=False,
     )
-    address_finder = fields.CharField(
+    postal_code = fields.CharField(
+        label='Address finder',
         required=False,
     )
     address = fields.CharField(
@@ -154,17 +160,41 @@ class CompaniesHouseBusinessDetails(forms.Form):
         required=False,
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, company_profile, initial, *args, **kwargs):
+        super().__init__(initial=initial, *args, **kwargs)
+        self.set_form_initial(company_profile)
         # force the form to use the initial value rather than the value
         # the user submitted in previous sessions
         # on GET the data structure is a MultiValueDict. on POST the data
         # structure is a QueryDict
         if self.data and not isinstance(self.data, QueryDict):
-            self.data.setlist(
-                self.add_prefix('company_name'),
-                [self.initial['company_name']]
-            )
+            self.initial_to_data('company_name')
+            if not self.data.get('postal_code'):
+                self.initial_to_data('postal_code')
+
+    def set_form_initial(self, company_profile):
+        company = helpers.CompanyProfileFormatter(company_profile)
+        self.initial['company_name'] = company.name
+        self.initial['company_number'] = company.number
+        self.initial['sic'] = company.sic_code
+        self.initial['date_of_creation'] = company.date_created
+        self.initial['address'] = company.address
+        self.initial['postal_code'] = company.postcode
+
+    def initial_to_data(self, field_name):
+        self.data.setlist(
+            self.add_prefix(field_name),
+            [self.initial[field_name]]
+        )
+
+    def clean_date_of_creation(self):
+        return self.cleaned_data['date_of_creation'].isoformat()
+
+    def clean_address(self):
+        address_parts = self.cleaned_data['address'].split(',')
+        self.cleaned_data['address_line_1'] = address_parts[0].strip()
+        self.cleaned_data['address_line_2'] = address_parts[1].strip()
+        return self.cleaned_data['address']
 
 
 class PersonalDetails(forms.Form):

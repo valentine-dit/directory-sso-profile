@@ -20,11 +20,11 @@
         <script src="{% static 'directory_components/js/dit.components.company-lookup.js' %}"></script>
         <script type="text/javascript">
         // insert office finder
-        var addressFinderContainer = document.getElementById('id_companies-house-business-details-address_finder-container');
-        var addressFinder = document.getElementById('id_companies-house-business-details-address_finder');
+        var postcodeFinderContainer = document.getElementById('id_companies-house-business-details-postal_code-container');
+        var addressFinder = document.getElementById('id_companies-house-business-details-postal_code');
         var address = document.getElementById('id_companies-house-business-details-address');
 
-        addressFinderContainer.style.display = 'block';
+        postcodeFinderContainer.style.display = 'block';
 
         $(document.body).on(
           "click.SelectiveLookupCloseAll",

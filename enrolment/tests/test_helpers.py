@@ -9,7 +9,8 @@ from core.tests.helpers import create_response
 
 
 @mock.patch.object(helpers.ch_search_api_client.company, 'get_company_profile')
-def test_get_company_profile_ok(mock_get_company_profile):
+def test_get_company_profile_ok_saves_to_session(mock_get_company_profile):
+    session = {}
     data = {
         'company_number': '12345678',
         'company_name': 'Example corp',
@@ -19,18 +20,36 @@ def test_get_company_profile_ok(mock_get_company_profile):
     }
 
     mock_get_company_profile.return_value = create_response(200, data)
-    result = helpers.get_company_profile('123456')
+    helpers.get_company_profile('123456', session)
+
+    assert session['COMPANY_PROFILE-123456'] == data
+
+
+@mock.patch.object(helpers.ch_search_api_client.company, 'get_company_profile')
+def test_get_company_profile_ok(mock_get_company_profile):
+    session = {}
+    data = {
+        'company_number': '12345678',
+        'company_name': 'Example corp',
+        'sic_codes': ['1234'],
+        'date_of_creation': '2001-01-20',
+        'registered_office_address': {'one': '555', 'two': 'fake street'},
+    }
+
+    mock_get_company_profile.return_value = create_response(200, data)
+    result = helpers.get_company_profile('123456', session)
 
     assert mock_get_company_profile.call_count == 1
     assert mock_get_company_profile.call_args == mock.call('123456')
     assert result == data
+    assert session['COMPANY_PROFILE-123456'] == data
 
 
 @mock.patch.object(helpers.ch_search_api_client.company, 'get_company_profile')
 def test_get_company_profile_not_ok(mock_get_company_profile):
     mock_get_company_profile.return_value = create_response(400)
     with pytest.raises(HTTPError):
-        helpers.get_company_profile('123456')
+        helpers.get_company_profile('123456', {})
 
 
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
@@ -41,8 +60,12 @@ def test_create_user(mock_create_user):
         'verification_code': '12345',
         'cookies': RequestsCookieJar(),
     }
-    mock_create_user.return_value = create_response(200, data)
-    result = helpers.create_user(email='test@test1234.com', password='1234')
+    mock_create_user.return_value = response = create_response(200, data)
+    result = helpers.create_user(
+        email='test@test1234.com',
+        password='1234',
+        cookies=response.cookies
+    )
     assert mock_create_user.call_count == 1
     assert mock_create_user.call_args == mock.call('test@test1234.com', '1234')
     assert result == data
