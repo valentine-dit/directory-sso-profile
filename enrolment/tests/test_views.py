@@ -37,6 +37,15 @@ def mock_get_company_profile():
 
 
 @pytest.fixture(autouse=True)
+def mock_send_verification_code_email():
+    patch = mock.patch.object(helpers,
+                              'send_verification_code_email',
+                              )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
 def mock_create_user():
     patch = mock.patch.object(helpers, 'create_user', return_value={
         'email': 'test@test.com',
@@ -183,28 +192,37 @@ def test_companies_house_enrolment_change_company_name(
 
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
+@mock.patch.object(helpers, 'send_verification_code_email')
+@mock.patch.object(helpers, 'create_user')
 def test_create_user_enrolment(
-    mock_clean, mock_create_user, client, captcha_stub, submit_enrolment_step
+        mock_create_user, mock_send_code, mock_clean, client, captcha_stub
 ):
-    response = submit_enrolment_step({
-        'choice': constants.COMPANIES_HOUSE_COMPANY
+    mock_create_user.return_value = {
+        'email': 'test@test.com',
+        'verification_code': '123456',
+    }
+
+    submit_step = submit_step_factory(
+
+        client=client,
+        url_name='enrolment',
+        view_name='enrolment_view',
+        view_class=views.EnrolmentView,
+    )
+
+    response = submit_step({
+        'choice': constants.SOLE_TRADER
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_step({
         'email': 'tex4566eqw34e7@example.com',
         'password': 'thing',
         'password_confirmed': 'thing',
         'captcha': captcha_stub,
         'terms_agreed': True
     })
-
     assert response.status_code == 302
-    assert mock_create_user.call_count == 1
-    assert mock_create_user.call_args == mock.call(
-        email='tex4566eqw34e7@example.com',
-        password='thing'
-    )
 
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')

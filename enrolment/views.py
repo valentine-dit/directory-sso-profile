@@ -78,6 +78,12 @@ class EnrolmentView(
             password = form.cleaned_data["password"]
             email = form.cleaned_data.get("email")
             helpers.create_user(email=email, password=password)
+            new_user = helpers.create_user(email, password)
+            helpers.send_verification_code_email(
+                email=new_user['email'],
+                verification_code=new_user['verification_code'],
+                from_url=self.request.path,
+            )
         return super().render_next_step(form, **kwargs)
 
     def get_context_data(self, form, **kwargs):
