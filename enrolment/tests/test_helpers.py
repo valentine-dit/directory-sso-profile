@@ -101,7 +101,7 @@ def test_send_verification_code_email(mock_submit):
 
 @mock.patch.object(helpers.sso_api_client.user, 'verify_verification_code')
 def test_confirm_verification_code(mock_confirm_code):
-    result = helpers.confirm_verification_code(
+    helpers.confirm_verification_code(
         sso_session_id='12345',
         verification_code='1234'
     )
