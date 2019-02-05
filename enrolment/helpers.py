@@ -44,7 +44,8 @@ def send_verification_code_email(email, verification_code, from_url):
 
 def confirm_verification_code(sso_session_id, verification_code):
     response = sso_api_client.user.verify_verification_code(
-        sso_session_id, verification_code
+        sso_session_id=sso_session_id,
+        code=verification_code,
     )
     response.raise_for_status()
     return response

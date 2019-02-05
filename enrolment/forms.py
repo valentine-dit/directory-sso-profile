@@ -95,15 +95,7 @@ class UserAccount(forms.Form):
 
 
 class UserAccountVerification(forms.Form):
-    code = fields.CharField(label='')
-
-    def clean(self):
-        cleaned_data = super().clean()
-        code = cleaned_data["code"]
-        if not (code.isdigit() and len(code) == 5):
-            self.add_error('code', "Please enter a 5 digit code")
-
-        return cleaned_data
+    code = fields.CharField(label=', min_length=5, max_length=5')
 
 
 class CompaniesHouseSearch(forms.Form):

@@ -101,7 +101,6 @@ def test_send_verification_code_email(mock_submit):
 
 @mock.patch.object(helpers.sso_api_client.user, 'verify_verification_code')
 def test_confirm_verification_code(mock_confirm_code):
-    mock_confirm_code.return_value = create_response(201)
     result = helpers.confirm_verification_code(
         sso_session_id='12345',
         verification_code='1234'
@@ -109,4 +108,6 @@ def test_confirm_verification_code(mock_confirm_code):
 
     assert mock_confirm_code.call_count == 1
     assert mock_confirm_code.return_value == result
-    assert mock_confirm_code.call_args == mock.call('12345', '1234')
+    assert mock_confirm_code.call_args == mock.call(
+        sso_session_id='12345', code='1234'
+    )

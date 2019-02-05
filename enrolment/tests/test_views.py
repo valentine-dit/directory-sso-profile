@@ -500,3 +500,7 @@ def test_confirm_user_verify_code(
 
     assert response.status_code == 302
     assert mock_confirm_verification_code.call_count == 1
+    assert mock_confirm_verification_code.call_args == mock.call(
+        sso_session_id='<Cookie debug_sso_session_cookie=a for .trade.great/>',
+        verification_code='12345'
+    )
