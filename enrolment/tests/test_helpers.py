@@ -107,7 +107,6 @@ def test_confirm_verification_code(mock_confirm_code):
     )
 
     assert mock_confirm_code.call_count == 1
-    assert mock_confirm_code.return_value == result
     assert mock_confirm_code.call_args == mock.call(
         sso_session_id='12345', code='1234'
     )
