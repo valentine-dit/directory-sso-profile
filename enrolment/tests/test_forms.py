@@ -20,3 +20,21 @@ def test_companies_house_search_company_number_empty():
     assert form.errors['company_name'] == [
         form.MESSAGE_COMPANY_NOT_FOUND.format(url=url)
     ]
+
+
+def test_validation_code_non_numeric():
+    form = forms.UserAccountVerification(
+        data={'code': 'notcode'}
+    )
+
+    assert form.is_valid() is False
+    assert "Please enter a 5 digit code" in form.errors['code']
+
+
+def test_validation_code_not_5_chars():
+    form = forms.UserAccountVerification(
+        data={'code': '1234'}
+    )
+
+    assert form.is_valid() is False
+    assert "Please enter a 5 digit code" in form.errors['code']

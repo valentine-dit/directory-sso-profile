@@ -11,7 +11,7 @@ contextlib2==0.5.5        # via raven
 directory-api-client==11.1.0
 directory-api-external==5.0.0
 directory-ch-client==1.0.0
-directory-client-core==4.3.0  # via directory-api-client, directory-api-external, directory-ch-client, directory-forms-api-client, directory-sso-api-client
+directory-client-core==4.4.0
 directory-components==4.1.2
 directory-constants==12.1.0  # via directory-components
 directory-forms-api-client==3.3.0
@@ -24,6 +24,7 @@ django-formtools==2.0
 django-health-check==3.8.0  # via directory-healthcheck
 django-ipware==2.1.0      # via django-admin-ip-restrictor
 django-recaptcha==1.2.0
+django-redis==4.8.0
 django==1.11.18
 djangorestframework==3.4.7
 export-elements==1.0.0    # via directory-components
@@ -36,6 +37,7 @@ phonenumberslite==7.7.4   # via directory-validators
 pillow==4.2.1             # via directory-validators
 pytz==2017.2              # via directory-validators, django
 raven==5.19.0
+redis==3.1.0              # via django-redis
 requests==2.21.0
 sigauth==4.0.1
 six==1.11.0               # via mohawk, w3lib

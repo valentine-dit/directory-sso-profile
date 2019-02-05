@@ -125,6 +125,13 @@ def mock_create_user():
     patch.stop()
 
 
+@pytest.fixture(autouse=True)
+def mock_confirm_verification_code():
+    patch = mock.patch.object(helpers, 'confirm_verification_code')
+    yield patch.start()
+    patch.stop()
+
+
 @pytest.mark.parametrize('url', urls)
 def test_404_feature_off(url, client, settings):
 
@@ -184,7 +191,7 @@ def test_companies_house_enrolment(
     authenticate_user.start()
 
     response = submit_enrolment_step({
-        'code': '123'
+        'code': '12345'
     })
     assert response.status_code == 302
 
@@ -232,7 +239,7 @@ def test_companies_house_enrolment_change_company_name(
     authenticate_user.start()
 
     response = submit_enrolment_step({
-        'code': '123'
+        'code': '12345'
     })
     assert response.status_code == 302
 
@@ -310,7 +317,7 @@ def test_companies_house_enrolment_expose_company(
     authenticate_user.start()
 
     response = submit_enrolment_step({
-        'code': '123'
+        'code': '12345'
     })
     assert response.status_code == 302
 
@@ -415,7 +422,7 @@ def test_companies_house_enrolment_submit_end_to_end(
     authenticate_user.start()
 
     response = submit_enrolment_step({
-        'code': '123'
+        'code': '12345'
     })
     assert response.status_code == 302
 
@@ -463,3 +470,33 @@ def test_companies_house_enrolment_submit_end_to_end(
         'phone_number': '1234567',
         'sso_id': '123'
     })
+
+
+@mock.patch('captcha.fields.ReCaptchaField.clean')
+def test_confirm_user_verify_code(
+    mock_clean, client, captcha_stub, submit_enrolment_step,
+    authenticate_user, mock_confirm_verification_code
+):
+    response = submit_enrolment_step({
+        'choice': constants.SOLE_TRADER
+    })
+
+    assert response.status_code == 302
+
+    response = submit_enrolment_step({
+        'email': 'text@example.com',
+        'password': 'thing',
+        'password_confirmed': 'thing',
+        'captcha': captcha_stub,
+        'terms_agreed': True
+    })
+    assert response.status_code == 302
+
+    authenticate_user.start()
+
+    response = submit_enrolment_step({
+        'code': '12345',
+    })
+
+    assert response.status_code == 302
+    assert mock_confirm_verification_code.call_count == 1
