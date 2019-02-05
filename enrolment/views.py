@@ -7,6 +7,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView
 
 import core.mixins
+from directory_api_client.client import api_client
 from enrolment import forms, helpers
 
 
@@ -60,18 +61,16 @@ class EnrolmentView(
             return redirect(url)
         return super().render(*args, **kwargs)
 
-    def get_form_initial(self, step):
-        initial = super().get_form_initial(step)
+    def get_form_kwargs(self, step=None):
+        form_kwargs = super().get_form_kwargs(step=step)
         if step == self.COMPANIES_HOUSE_BUSINESS_DETAILS:
-            data = self.get_cleaned_data_for_step(self.COMPANY_SEARCH)
-            company_data = helpers.get_company_profile(data['company_number'])
-            company = helpers.CompanyProfileFormatter(company_data)
-            initial['company_name'] = company.name
-            initial['company_number'] = company.number
-            initial['sic'] = company.sic_code
-            initial['date_created'] = company.date_created
-            initial['address'] = company.address
-        return initial
+            previous_data = self.get_cleaned_data_for_step(self.COMPANY_SEARCH)
+            if previous_data:
+                form_kwargs['company_profile'] = helpers.get_company_profile(
+                    number=previous_data['company_number'],
+                    session=self.request.session,
+                )
+        return form_kwargs
 
     def render_next_step(self, form, **kwargs):
         response = super().render_next_step(form, **kwargs)
@@ -79,14 +78,12 @@ class EnrolmentView(
             user_details = helpers.create_user(
                 email=form.cleaned_data["email"],
                 password=form.cleaned_data["password"],
+                cookies=response.cookies,
             )
             helpers.send_verification_code_email(
                 email=form.cleaned_data["email"],
                 verification_code=user_details['verification_code'],
                 from_url=self.request.path,
-            )
-            response.cookies.update(
-                helpers.cookiekjar_to_simple_cookie(user_details['cookies'])
             )
         return response
 
@@ -101,7 +98,35 @@ class EnrolmentView(
         return [self.templates[self.steps.current]]
 
     def done(self, form_list, **kwargs):
+        data = self.serialize_form_list(form_list)
+        response = api_client.enrolment.send_form({
+            **data, 'sso_id': self.request.sso_user.id
+        })
+        response.raise_for_status()
         return redirect(self.success_url)
+
+    def serialize_form_list(self, form_list):
+        data = {}
+        for form in form_list:
+            data.update(form.cleaned_data)
+        whitelist = [
+            'address_line_1',
+            'address_line_2',
+            'company_email',
+            'company_name',
+            'company_number',
+            'contact_email_address',
+            'date_of_creation',
+            'family_name',
+            'given_name',
+            'industry',
+            'job_title',
+            'phone_number',
+            'postal_code',
+            'sic',
+            'website_address',
+        ]
+        return {key: value for key, value in data.items() if key in whitelist}
 
 
 class EnrolmentSuccess(NotFoundOnDisabledFeature, TemplateView):

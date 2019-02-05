@@ -104,10 +104,29 @@ TEMPLATES = [
 WSGI_APPLICATION = 'conf.wsgi.application'
 
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+VCAP_SERVICES = env.json('VCAP_SERVICES', {})
+
+if 'redis' in VCAP_SERVICES:
+    REDIS_URL = VCAP_SERVICES['redis'][0]['credentials']['uri']
+else:
+    REDIS_URL = env.str('REDIS_URL', '')
+
+if REDIS_URL:
+    cache = {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_URL,
+        'OPTIONS': {
+            'CLIENT_CLASS': "django_redis.client.DefaultClient",
+        }
     }
+else:
+    cache = {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+
+CACHES = {
+    'default': cache,
+    'api_fallback': cache,
 }
 
 # Internationalization
@@ -392,7 +411,19 @@ DIRECTORY_FORMS_API_DEFAULT_TIMEOUT = env.int(
 )
 
 VERIFICATION_EXPIRY_DAYS = env.int('VERIFICATION_EXPIRY_DAYS')
+
+# gov.uk notify
 CONFIRM_VERIFICATION_CODE_TEMPLATE_ID = env.str(
     'CONFIRM_VERIFICATION_CODE_TEMPLATE_ID',
     'aa4bb8dc-0e54-43d1-bcc7-a8b29d2ecba6'
+)
+
+# directory api
+DIRECTORY_API_CLIENT_BASE_URL = env.str('DIRECTORY_API_CLIENT_BASE_URL')
+DIRECTORY_API_CLIENT_API_KEY = env.str('DIRECTORY_API_CLIENT_API_KEY')
+DIRECTORY_API_CLIENT_SENDER_ID = env.str(
+    'DIRECTORY_API_CLIENT_SENDER_ID', 'directory'
+)
+DIRECTORY_API_CLIENT_DEFAULT_TIMEOUT = env.str(
+    'DIRECTORY_API_CLIENT_DEFAULT_TIMEOUT', 15
 )

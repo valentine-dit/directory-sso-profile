@@ -24,7 +24,6 @@ class SSOUserMiddleware:
     def process_request(self, request):
         request.sso_user = None
         session_id = request.COOKIES.get(settings.SSO_SESSION_COOKIE)
-
         if session_id:
             try:
                 sso_response = sso_api_client.user.get_session_user(session_id)
