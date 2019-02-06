@@ -60,11 +60,10 @@ def test_create_user(mock_create_user):
         'verification_code': '12345',
         'cookies': RequestsCookieJar(),
     }
-    mock_create_user.return_value = response = create_response(200, data)
+    mock_create_user.return_value = create_response(200, data)
     result = helpers.create_user(
         email='test@test1234.com',
         password='1234',
-        cookies=response.cookies
     )
     assert mock_create_user.call_count == 1
     assert mock_create_user.call_args == mock.call('test@test1234.com', '1234')
@@ -102,11 +101,11 @@ def test_send_verification_code_email(mock_submit):
 @mock.patch.object(helpers.sso_api_client.user, 'verify_verification_code')
 def test_confirm_verification_code(mock_confirm_code):
     helpers.confirm_verification_code(
-        sso_session_id='12345',
-        verification_code='1234'
+        email='test@example.com',
+        verification_code='1234',
     )
 
     assert mock_confirm_code.call_count == 1
-    assert mock_confirm_code.call_args == mock.call(
-        sso_session_id='12345', code='1234'
-    )
+    assert mock_confirm_code.call_args == mock.call({
+        'email': 'test@example.com', 'code': '1234'
+    })

@@ -20,10 +20,9 @@ def get_company_profile(number, session):
     return session[session_key]
 
 
-def create_user(email, password, cookies):
+def create_user(email, password):
     response = sso_api_client.user.create_user(email, password)
     response.raise_for_status()
-    cookies.update(cookiekjar_to_simple_cookie(response.cookies))
     return response.json()
 
 
@@ -42,11 +41,11 @@ def send_verification_code_email(email, verification_code, from_url):
     return response
 
 
-def confirm_verification_code(sso_session_id, verification_code):
-    response = sso_api_client.user.verify_verification_code(
-        sso_session_id=sso_session_id,
-        code=verification_code,
-    )
+def confirm_verification_code(email, verification_code):
+    response = sso_api_client.user.verify_verification_code({
+        'email': email,
+        'code': verification_code,
+    })
     response.raise_for_status()
     return response
 

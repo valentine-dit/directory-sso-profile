@@ -11,6 +11,9 @@ from directory_api_client.client import api_client
 from enrolment import forms, helpers
 
 
+SESSION_KEY_ENROL_EMAIL = 'ENROL_EMAIL'
+
+
 class NotFoundOnDisabledFeature:
     def dispatch(self, *args, **kwargs):
         if not settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON']:
@@ -54,6 +57,14 @@ class EnrolmentView(
         PERSONAL_DETAILS: 'enrolment/personal-details.html',
     }
 
+    def user_account_condition(self):
+        return self.request.sso_user is None
+
+    condition_dict = {
+        USER_ACCOUNT: user_account_condition,
+        USER_ACCOUNT_VERIFICATION: user_account_condition,
+    }
+
     def render(self, *args, **kwargs):
         prev = self.steps.prev
         if prev and not self.get_cleaned_data_for_step(prev):
@@ -72,24 +83,28 @@ class EnrolmentView(
                 )
         return form_kwargs
 
+    def get_form_initial(self, step):
+        form_initial = super().get_form_initial(step)
+        if step == self.USER_ACCOUNT_VERIFICATION:
+            data = self.get_cleaned_data_for_step(self.USER_ACCOUNT)
+            if data:
+                form_initial['email'] = data['email']
+        return form_initial
+
     def render_next_step(self, form, **kwargs):
         response = super().render_next_step(form, **kwargs)
         if form.prefix == self.USER_ACCOUNT:
             user_details = helpers.create_user(
-                email=form.cleaned_data["email"],
-                password=form.cleaned_data["password"],
-                cookies=response.cookies,
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password'],
             )
             helpers.send_verification_code_email(
-                email=form.cleaned_data["email"],
+                email=form.cleaned_data['email'],
                 verification_code=user_details['verification_code'],
                 from_url=self.request.path,
             )
         elif form.prefix == self.USER_ACCOUNT_VERIFICATION:
-            helpers.confirm_verification_code(
-                sso_session_id=self.request.sso_user.session_id,
-                verification_code=form.cleaned_data["code"],
-            )
+            response.cookies.update(form.cleaned_data['cookies'])
         return response
 
     def get_context_data(self, form, **kwargs):
