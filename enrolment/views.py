@@ -105,7 +105,10 @@ class EnrolmentView(
     def done(self, form_list, **kwargs):
         data = self.serialize_form_list(form_list)
         response = api_client.enrolment.send_form({
-            **data, 'sso_id': self.request.sso_user.id
+            **data,
+            'sso_id': self.request.sso_user.id,
+            'company_email': self.request.sso_user.email,
+            'contact_email_address': self.request.sso_user.email,
         })
         response.raise_for_status()
         return redirect(self.success_url)
@@ -117,10 +120,8 @@ class EnrolmentView(
         whitelist = [
             'address_line_1',
             'address_line_2',
-            'company_email',
             'company_name',
             'company_number',
-            'contact_email_address',
             'date_of_creation',
             'family_name',
             'given_name',

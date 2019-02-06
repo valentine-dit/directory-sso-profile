@@ -150,7 +150,7 @@ def test_companies_house_enrolment(
     assert response.status_code == 302
 
     response = submit_enrolment_step({
-        'email': 'text@example.com',
+        'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
         'captcha': captcha_stub,
@@ -198,7 +198,7 @@ def test_companies_house_enrolment_change_company_name(
     assert response.status_code == 302
 
     response = submit_enrolment_step({
-        'email': 'text@example.com',
+        'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
         'captcha': captcha_stub,
@@ -276,7 +276,7 @@ def test_companies_house_enrolment_expose_company(
     assert response.status_code == 302
 
     response = submit_enrolment_step({
-        'email': 'text@example.com',
+        'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
         'captcha': captcha_stub,
@@ -345,7 +345,7 @@ def test_companies_house_enrolment_passes_cookies(
     assert response.status_code == 302
 
     response = submit_enrolment_step({
-        'email': 'text@example.com',
+        'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
         'captcha': captcha_stub,
@@ -379,7 +379,7 @@ def test_companies_house_enrolment_submit_end_to_end(
     assert response.status_code == 302
 
     response = submit_enrolment_step({
-        'email': 'text@example.com',
+        'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
         'captcha': captcha_stub,
@@ -421,8 +421,8 @@ def test_companies_house_enrolment_submit_end_to_end(
     assert response.url == reverse('enrolment-success')
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
-        'company_email': 'text@example.com',
-        'contact_email_address': 'text@example.com',
+        'company_email': 'test@a.com',
+        'contact_email_address': 'test@a.com',
         'company_name': 'Example corp',
         'company_number': '12345678',
         'sic': '1234',
@@ -454,7 +454,7 @@ def test_confirm_user_verify_code(
     assert response.status_code == 302
 
     response = submit_enrolment_step({
-        'email': 'text@example.com',
+        'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
         'captcha': captcha_stub,

@@ -54,6 +54,7 @@ class UserAccount(forms.Form):
         '<li>not contain the word "password"</li>'
         '</ul>'
     )
+    MESSAGE_NOT_MATCH = "Passwords don't match"
 
     email = fields.EmailField(
         label='Your email'
@@ -78,20 +79,11 @@ class UserAccount(forms.Form):
         )
     )
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data["password"]
-        confirm_password = cleaned_data["password_confirmed"]
-
-        if password != confirm_password:
-            self.add_error('password_confirmed', "Passwords don't match")
-
-        return cleaned_data
-
-    def clean_email(self):
-        self.cleaned_data['company_email'] = self.cleaned_data['email']
-        self.cleaned_data['contact_email_address'] = self.cleaned_data['email']
-        return self.cleaned_data['email']
+    def clean_password_confirmed(self):
+        value = self.cleaned_data['password_confirmed']
+        if value != self.cleaned_data['password']:
+            raise ValidationError(self.MESSAGE_NOT_MATCH)
+        return value
 
 
 class UserAccountVerification(forms.Form):
