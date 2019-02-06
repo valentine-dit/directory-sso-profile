@@ -37,12 +37,12 @@ def send_verification_code_email(email, verification_code, from_url):
         form_url=from_url,
     )
 
-    response = action.save({
-        'code': verification_code,
+    respone = action.save({
+        'code': verification_code['code'],
         'expiry_days': settings.VERIFICATION_EXPIRY_DAYS,
     })
-    response.raise_for_status()
-    return response
+    respone.raise_for_status()
+    return respone
 
 
 def notify_already_registered(email, from_url):
@@ -62,10 +62,10 @@ def notify_already_registered(email, from_url):
     return response
 
 
-def confirm_verification_code(sso_session_id, verification_code):
+def confirm_verification_code(sso_session_id, code):
     response = sso_api_client.user.verify_verification_code(
         sso_session_id=sso_session_id,
-        code=verification_code,
+        code=code,
     )
     response.raise_for_status()
     return response

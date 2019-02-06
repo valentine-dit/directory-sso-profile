@@ -91,7 +91,7 @@ def test_create_user_duplicate(mock_create_user):
 )
 def test_send_verification_code_email(mock_submit):
     email = 'gurdeep.atwal@digital.trade.gov.uk'
-    verification_code = '12345'
+    verification_code = {'code': 12345}
     from_url = 'test'
 
     mock_submit.return_value = create_response(201)
@@ -101,7 +101,7 @@ def test_send_verification_code_email(mock_submit):
         from_url=from_url,
     )
 
-    expected = {'data': {'code': '12345', 'expiry_days': 3},
+    expected = {'data': {'code': 12345, 'expiry_days': 3},
                 'meta': {'action_name': 'gov-notify',
                          'form_url': from_url,
                          'sender': {},
@@ -118,12 +118,11 @@ def test_send_verification_code_email(mock_submit):
 def test_confirm_verification_code(mock_confirm_code):
     helpers.confirm_verification_code(
         sso_session_id='12345',
-        verification_code='1234'
+        code={'code': 1234}
     )
-
     assert mock_confirm_code.call_count == 1
     assert mock_confirm_code.call_args == mock.call(
-        sso_session_id='12345', code='1234'
+        sso_session_id='12345', code={'code': 1234}
     )
 
 
