@@ -423,9 +423,6 @@ GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID = env.str(
     '5c8cc5aa-a4f5-48ae-89e6-df5572c317ec'
     )
 
-SSO_BASE_URL = env.str('SSO_BASE_URL', 'https://sso.trade.great.gov.uk')
-
-
 # directory api
 DIRECTORY_API_CLIENT_BASE_URL = env.str('DIRECTORY_API_CLIENT_BASE_URL')
 DIRECTORY_API_CLIENT_API_KEY = env.str('DIRECTORY_API_CLIENT_API_KEY')
