@@ -86,13 +86,10 @@ class EnrolmentView(
                 from_url=self.request.path,
             )
         elif form.prefix == self.USER_ACCOUNT_VERIFICATION:
-            session_id = self.request.sso_user.session_id
-            code = form.cleaned_data["code"]
             helpers.confirm_verification_code(
-                sso_session_id=session_id,
-                verification_code=code,
+                sso_session_id=self.request.sso_user.session_id,
+                verification_code=form.cleaned_data["code"],
             )
-
         return response
 
     def get_context_data(self, form, **kwargs):
