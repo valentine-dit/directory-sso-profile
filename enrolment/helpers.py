@@ -42,6 +42,15 @@ def send_verification_code_email(email, verification_code, from_url):
     return response
 
 
+def confirm_verification_code(sso_session_id, verification_code):
+    response = sso_api_client.user.verify_verification_code(
+        sso_session_id=sso_session_id,
+        code=verification_code,
+    )
+    response.raise_for_status()
+    return response
+
+
 class CompanyProfileFormatter:
     def __init__(self, unfomatted_companies_house_data):
         self.data = unfomatted_companies_house_data

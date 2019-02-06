@@ -1,4 +1,3 @@
-from http import cookiejar
 from unittest import mock
 
 from freezegun import freeze_time
@@ -17,14 +16,21 @@ urls = (
 )
 
 
-@pytest.fixture
-def authenticate_user(client, settings):
+@pytest.fixture(autouse=True)
+def mock_session_user(client, settings):
     client.cookies[settings.SSO_SESSION_COOKIE] = '123'
     patch = mock.patch(
         'directory_sso_api_client.client.sso_api_client.user.get_session_user',
-        return_value=create_response(200, {'id': '123', 'email': 'test@a.com'})
+        return_value=create_response(404)
     )
-    yield patch
+
+    def login():
+        started.return_value = create_response(
+            200, {'id': '123', 'email': 'test@a.com'}
+        )
+    started = patch.start()
+    started.login = login
+    yield started
     patch.stop()
 
 
@@ -74,44 +80,8 @@ def mock_enrolment_send(client, settings):
 @pytest.fixture(autouse=True)
 def mock_create_user():
     cookies = RequestsCookieJar()
-    cookies['debug_sso_session_cookie'] = cookiejar.Cookie(
-        version=0,
-        name='debug_sso_session_cookie',
-        value='a',
-        port=None,
-        port_specified=False,
-        domain='.trade.great',
-        domain_specified=True,
-        domain_initial_dot=True,
-        path='/',
-        path_specified=True,
-        secure=False,
-        expires=1550483231,
-        discard=False,
-        comment=None,
-        comment_url=None,
-        rest={'HttpOnly': None},
-        rfc2109=False
-    )
-    cookies['sso_display_logged_in'] = cookiejar.Cookie(
-        version=0,
-        name='sso_display_logged_in',
-        value='true',
-        port=None,
-        port_specified=False,
-        domain='.trade.great',
-        domain_specified=True,
-        domain_initial_dot=True,
-        path='/',
-        path_specified=True,
-        secure=False,
-        expires=1550483231,
-        discard=False,
-        comment=None,
-        comment_url=None,
-        rest={},
-        rfc2109=False
-    )
+    cookies['debug_sso_session_cookie'] = 'a'
+    cookies['sso_display_logged_in'] = 'true'
     response = create_response(200, {
         'email': 'test@test.com',
         'verification_code': '123456',
@@ -121,6 +91,13 @@ def mock_create_user():
         helpers.sso_api_client.user, 'create_user',
         return_value=response
     )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_confirm_verification_code():
+    patch = mock.patch.object(helpers, 'confirm_verification_code')
     yield patch.start()
     patch.stop()
 
@@ -165,7 +142,7 @@ def submit_step_factory(client, url_name, view_name, view_class):
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment(
-    mock_clean, client, captcha_stub, submit_enrolment_step, authenticate_user
+    mock_clean, client, captcha_stub, submit_enrolment_step, mock_session_user
 ):
     response = submit_enrolment_step({
         'choice': constants.COMPANIES_HOUSE_COMPANY
@@ -181,10 +158,10 @@ def test_companies_house_enrolment(
     })
     assert response.status_code == 302
 
-    authenticate_user.start()
+    mock_session_user.login()
 
     response = submit_enrolment_step({
-        'code': '123'
+        'code': '12345'
     })
     assert response.status_code == 302
 
@@ -213,7 +190,7 @@ def test_companies_house_enrolment(
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_change_company_name(
-    mock_clean, client, captcha_stub, submit_enrolment_step, authenticate_user
+    mock_clean, client, captcha_stub, submit_enrolment_step, mock_session_user
 ):
     response = submit_enrolment_step({
         'choice': constants.COMPANIES_HOUSE_COMPANY
@@ -229,10 +206,10 @@ def test_companies_house_enrolment_change_company_name(
     })
     assert response.status_code == 302
 
-    authenticate_user.start()
+    mock_session_user.login()
 
     response = submit_enrolment_step({
-        'code': '123'
+        'code': '12345'
     })
     assert response.status_code == 302
 
@@ -291,7 +268,7 @@ def test_create_user_enrolment(mock_clean, client, captcha_stub):
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_expose_company(
-    mock_clean, client, captcha_stub, submit_enrolment_step, authenticate_user
+    mock_clean, client, captcha_stub, submit_enrolment_step, mock_session_user
 ):
     response = submit_enrolment_step({
         'choice': constants.COMPANIES_HOUSE_COMPANY
@@ -307,10 +284,10 @@ def test_companies_house_enrolment_expose_company(
     })
     assert response.status_code == 302
 
-    authenticate_user.start()
+    mock_session_user.login()
 
     response = submit_enrolment_step({
-        'code': '123'
+        'code': '12345'
     })
     assert response.status_code == 302
 
@@ -376,16 +353,14 @@ def test_companies_house_enrolment_passes_cookies(
     })
     assert response.status_code == 302
     assert str(response.cookies['debug_sso_session_cookie']) == (
-        'Set-Cookie: debug_sso_session_cookie="'
-        '<Cookie debug_sso_session_cookie=a for .trade.great/>"; '
+        'Set-Cookie: debug_sso_session_cookie=a; '
         'Comment=None; '
         'expires=Sat, 14 Jan 2012 12:00:02 GMT; '
         'Path=/; '
         'Version=0'
     )
     assert str(response.cookies['sso_display_logged_in']) == (
-        'Set-Cookie: sso_display_logged_in="'
-        '<Cookie sso_display_logged_in=true for .trade.great/>"; '
+        'Set-Cookie: sso_display_logged_in=true; '
         'Comment=None; '
         'expires=Sat, 14 Jan 2012 12:00:02 GMT; '
         'Path=/; '
@@ -395,7 +370,7 @@ def test_companies_house_enrolment_passes_cookies(
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_submit_end_to_end(
-    mock_clean, client, captcha_stub, submit_enrolment_step, authenticate_user,
+    mock_clean, client, captcha_stub, submit_enrolment_step, mock_session_user,
     mock_enrolment_send
 ):
     response = submit_enrolment_step({
@@ -412,10 +387,10 @@ def test_companies_house_enrolment_submit_end_to_end(
     })
     assert response.status_code == 302
 
-    authenticate_user.start()
+    mock_session_user.login()
 
     response = submit_enrolment_step({
-        'code': '123'
+        'code': '12345'
     })
     assert response.status_code == 302
 
@@ -463,3 +438,39 @@ def test_companies_house_enrolment_submit_end_to_end(
         'phone_number': '1234567',
         'sso_id': '123'
     })
+
+
+@mock.patch('captcha.fields.ReCaptchaField.clean')
+def test_confirm_user_verify_code(
+    mock_clean, client, captcha_stub, submit_enrolment_step,
+    mock_session_user, mock_confirm_verification_code
+):
+    mock_session_user.return_value = create_response(404)
+
+    response = submit_enrolment_step({
+        'choice': constants.SOLE_TRADER
+    })
+
+    assert response.status_code == 302
+
+    response = submit_enrolment_step({
+        'email': 'text@example.com',
+        'password': 'thing',
+        'password_confirmed': 'thing',
+        'captcha': captcha_stub,
+        'terms_agreed': True
+    })
+    assert response.status_code == 302
+
+    mock_session_user.login()
+
+    response = submit_enrolment_step({
+        'code': '12345',
+    })
+
+    assert response.status_code == 302
+    assert mock_confirm_verification_code.call_count == 1
+    assert mock_confirm_verification_code.call_args == mock.call(
+        sso_session_id='a',
+        verification_code='12345'
+    )

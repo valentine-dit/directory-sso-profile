@@ -95,7 +95,7 @@ class UserAccount(forms.Form):
 
 
 class UserAccountVerification(forms.Form):
-    code = fields.CharField(label='')
+    code = fields.CharField(label='', min_length=5, max_length=5)
 
 
 class CompaniesHouseSearch(forms.Form):

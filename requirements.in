@@ -18,3 +18,4 @@ directory-sso-api-client==3.2.0
 directory-forms-api-client==3.3.0
 directory-api-client==11.1.0
 django-redis==4.8.0
+directory-client-core==4.4.0
