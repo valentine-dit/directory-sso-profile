@@ -1,11 +1,13 @@
 from unittest import mock
-
 import pytest
+
+from django.conf import settings
 from requests.cookies import RequestsCookieJar
 from requests.exceptions import HTTPError
 
 from enrolment import helpers
 from core.tests.helpers import create_response
+from directory_constants.constants import urls
 
 
 @mock.patch.object(helpers.ch_search_api_client.company, 'get_company_profile')
@@ -71,6 +73,19 @@ def test_create_user(mock_create_user):
     assert result == data
 
 
+@mock.patch.object(helpers.sso_api_client.user, 'create_user')
+def test_create_user_duplicate(mock_create_user):
+
+    mock_create_user.return_value = response = create_response(400)
+    result = helpers.create_user(
+        email='test@test1234.com',
+        password='1234',
+        cookies=response.cookies
+    )
+    assert mock_create_user.call_count == 1
+    assert result is None
+
+
 @mock.patch(
     'directory_forms_api_client.client.forms_api_client.submit_generic'
 )
@@ -110,3 +125,35 @@ def test_confirm_verification_code(mock_confirm_code):
     assert mock_confirm_code.call_args == mock.call(
         sso_session_id='12345', code='1234'
     )
+
+
+@mock.patch(
+    'directory_forms_api_client.client.forms_api_client.submit_generic'
+)
+def test_notify_already_registered(mock_submit):
+    email = 'test@test123.com'
+    from_url = 'test'
+
+    mock_submit.return_value = create_response(201)
+    helpers.notify_already_registered(
+        email=email,
+        from_url=from_url,
+    )
+
+    expected = {
+        'data': {
+            'login_url': settings.SSO_PROXY_LOGIN_URL,
+            'password_reset_url': settings.SSO_PROXY_PASSWORD_RESET_URL,
+            'contact_us_url': urls.FEEDBACK,
+            },
+        'meta': {
+            'action_name': 'gov-notify',
+            'form_url': from_url,
+            'sender': {},
+            'spam_control': {},
+            'template_id': settings.GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID,
+            'email_address': email
+            }
+    }
+    assert mock_submit.call_count == 1
+    assert mock_submit.call_args == mock.call(expected)
