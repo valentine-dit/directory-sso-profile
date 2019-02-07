@@ -2,7 +2,10 @@ from http import cookies
 from datetime import datetime
 import time
 
+from django.utils import formats
+from django.utils.dateparse import parse_datetime
 from django.conf import settings
+
 from directory_ch_client.client import ch_search_api_client
 from directory_sso_api_client.client import sso_api_client
 from directory_forms_api_client import actions
@@ -37,9 +40,13 @@ def send_verification_code_email(email, verification_code, from_url):
         form_url=from_url,
     )
 
+    expiry_date = parse_datetime(verification_code['expiration_date'])
+    formatted_expiry_date = formats.date_format(
+        expiry_date, "DATETIME_FORMAT"
+    )
     respone = action.save({
         'code': verification_code['code'],
-        'expiry_days': settings.VERIFICATION_EXPIRY_DAYS,
+        'expiry_days': formatted_expiry_date,
     })
     respone.raise_for_status()
     return respone
