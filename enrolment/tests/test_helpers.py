@@ -2,8 +2,6 @@ from unittest import mock
 import pytest
 
 from django.conf import settings
-from django.utils.dateparse import parse_datetime
-from django.utils import formats
 
 from requests.cookies import RequestsCookieJar
 from requests.exceptions import HTTPError
