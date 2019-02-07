@@ -46,7 +46,7 @@ def send_verification_code_email(email, verification_code, from_url):
     )
     respone = action.save({
         'code': verification_code['code'],
-        'expiry_days': formatted_expiry_date,
+        'expiry_date': formatted_expiry_date,
     })
     respone.raise_for_status()
     return respone

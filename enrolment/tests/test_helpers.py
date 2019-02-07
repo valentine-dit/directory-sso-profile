@@ -108,7 +108,7 @@ def test_send_verification_code_email(mock_submit):
     expected = {
         'data': {
             'code': 12345,
-            'expiry_days': '10 Feb 2019, 1:19 p.m.'
+            'expiry_date': '10 Feb 2019, 1:19 p.m.'
         },
         'meta': {
             'action_name': 'gov-notify',
