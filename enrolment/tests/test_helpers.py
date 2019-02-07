@@ -107,15 +107,10 @@ def test_send_verification_code_email(mock_submit):
         from_url=from_url,
     )
 
-    expiry_date = parse_datetime(verification_code['expiration_date'])
-    formatted_expiry_date = formats.date_format(
-        expiry_date, "DATETIME_FORMAT"
-    )
-
     expected = {
         'data': {
             'code': 12345,
-            'expiry_days': formatted_expiry_date
+            'expiry_days': '10 Feb 2019, 1:19 p.m.'
         },
         'meta': {
             'action_name': 'gov-notify',

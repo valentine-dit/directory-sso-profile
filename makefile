@@ -79,7 +79,6 @@ DEBUG_SET_ENV_VARS := \
 	export DIRECTORY_CH_SEARCH_CLIENT_API_KEY=debug; \
 	export DIRECTORY_CH_SEARCH_CLIENT_BASE_URL=http://127.0.0.1:8012; \
 	export DIRECTORY_FORMS_API_BASE_URL=http://forms.trade.great:8011; \
-	export VERIFICATION_EXPIRY_DAYS=3; \
 	export DIRECTORY_API_CLIENT_BASE_URL=http://api.trade.great:8000; \
 	export DIRECTORY_API_CLIENT_API_KEY=debug
 
