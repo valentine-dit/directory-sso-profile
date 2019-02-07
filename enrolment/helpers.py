@@ -2,10 +2,14 @@ from http import cookies
 from datetime import datetime
 import time
 
+from django.utils import formats
+from django.utils.dateparse import parse_datetime
 from django.conf import settings
+
 from directory_ch_client.client import ch_search_api_client
 from directory_sso_api_client.client import sso_api_client
 from directory_forms_api_client import actions
+from directory_constants.constants import urls
 
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
 SESSION_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'
@@ -22,6 +26,8 @@ def get_company_profile(number, session):
 
 def create_user(email, password, cookies):
     response = sso_api_client.user.create_user(email, password)
+    if response.status_code == 400:
+        return None
     response.raise_for_status()
     cookies.update(cookiekjar_to_simple_cookie(response.cookies))
     return response.json()
@@ -34,18 +40,39 @@ def send_verification_code_email(email, verification_code, from_url):
         form_url=from_url,
     )
 
+    expiry_date = parse_datetime(verification_code['expiration_date'])
+    formatted_expiry_date = formats.date_format(
+        expiry_date, "DATETIME_FORMAT"
+    )
     response = action.save({
-        'code': verification_code,
-        'expiry_days': settings.VERIFICATION_EXPIRY_DAYS,
+        'code': verification_code['code'],
+        'expiry_date': formatted_expiry_date,
     })
     response.raise_for_status()
     return response
 
 
-def confirm_verification_code(sso_session_id, verification_code):
+def notify_already_registered(email, from_url):
+    action = actions.GovNotifyAction(
+        email_address=email,
+        template_id=settings.GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID,
+        form_url=from_url,
+    )
+
+    response = action.save({
+        'login_url': settings.SSO_PROXY_LOGIN_URL,
+        'password_reset_url': settings.SSO_PROXY_PASSWORD_RESET_URL,
+        'contact_us_url': urls.FEEDBACK,
+    })
+
+    response.raise_for_status()
+    return response
+
+
+def confirm_verification_code(sso_session_id, code):
     response = sso_api_client.user.verify_verification_code(
         sso_session_id=sso_session_id,
-        code=verification_code,
+        code=code,
     )
     response.raise_for_status()
     return response

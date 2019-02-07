@@ -80,11 +80,18 @@ class EnrolmentView(
                 password=form.cleaned_data["password"],
                 cookies=response.cookies,
             )
-            helpers.send_verification_code_email(
-                email=form.cleaned_data["email"],
-                verification_code=user_details['verification_code'],
-                from_url=self.request.path,
-            )
+            # Check if we have a user, else the user is already registered
+            if user_details:
+                helpers.send_verification_code_email(
+                    email=form.cleaned_data["email"],
+                    verification_code=user_details['verification_code'],
+                    from_url=self.request.path,
+                )
+            else:
+                helpers.notify_already_registered(
+                    email=form.cleaned_data["email"],
+                    from_url=self.request.path
+                )
         elif form.prefix == self.USER_ACCOUNT_VERIFICATION:
             helpers.confirm_verification_code(
                 sso_session_id=self.request.sso_user.session_id,
