@@ -44,12 +44,12 @@ def send_verification_code_email(email, verification_code, from_url):
     formatted_expiry_date = formats.date_format(
         expiry_date, "DATETIME_FORMAT"
     )
-    respone = action.save({
+    response = action.save({
         'code': verification_code['code'],
         'expiry_date': formatted_expiry_date,
     })
-    respone.raise_for_status()
-    return respone
+    response.raise_for_status()
+    return response
 
 
 def notify_already_registered(email, from_url):
