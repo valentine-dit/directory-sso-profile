@@ -144,7 +144,7 @@ def test_notify_already_registered(mock_submit):
             'login_url': settings.SSO_PROXY_LOGIN_URL,
             'password_reset_url': settings.SSO_PROXY_PASSWORD_RESET_URL,
             'contact_us_url': urls.FEEDBACK,
-            },
+        },
         'meta': {
             'action_name': 'gov-notify',
             'form_url': from_url,
@@ -152,7 +152,7 @@ def test_notify_already_registered(mock_submit):
             'spam_control': {},
             'template_id': settings.GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID,
             'email_address': email
-            }
+        }
     }
     assert mock_submit.call_count == 1
     assert mock_submit.call_args == mock.call(expected)

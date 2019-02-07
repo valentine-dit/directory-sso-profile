@@ -53,10 +53,10 @@ def notify_already_registered(email, from_url):
     )
 
     response = action.save({
-            'login_url': settings.SSO_PROXY_LOGIN_URL,
-            'password_reset_url': settings.SSO_PROXY_PASSWORD_RESET_URL,
-            'contact_us_url': urls.FEEDBACK,
-        })
+        'login_url': settings.SSO_PROXY_LOGIN_URL,
+        'password_reset_url': settings.SSO_PROXY_PASSWORD_RESET_URL,
+        'contact_us_url': urls.FEEDBACK,
+    })
 
     response.raise_for_status()
     return response
