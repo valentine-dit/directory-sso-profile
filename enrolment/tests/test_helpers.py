@@ -2,6 +2,9 @@ from unittest import mock
 import pytest
 
 from django.conf import settings
+from django.utils.dateparse import parse_datetime
+from django.utils import formats
+
 from requests.cookies import RequestsCookieJar
 from requests.exceptions import HTTPError
 
@@ -91,7 +94,10 @@ def test_create_user_duplicate(mock_create_user):
 )
 def test_send_verification_code_email(mock_submit):
     email = 'gurdeep.atwal@digital.trade.gov.uk'
-    verification_code = {'code': 12345}
+    verification_code = {
+        'code': 12345,
+        'expiration_date': '2019-02-10T13:19:51.167097Z'
+    }
     from_url = 'test'
 
     mock_submit.return_value = create_response(201)
@@ -101,15 +107,25 @@ def test_send_verification_code_email(mock_submit):
         from_url=from_url,
     )
 
-    expected = {'data': {'code': 12345, 'expiry_days': 3},
-                'meta': {'action_name': 'gov-notify',
-                         'form_url': from_url,
-                         'sender': {},
-                         'spam_control': {},
-                         'template_id': 'aa4bb8dc-0e54-43d1-bcc7-a8b29d2ecba6',
-                         'email_address': email
-                         }
-                }
+    expiry_date = parse_datetime(verification_code['expiration_date'])
+    formatted_expiry_date = formats.date_format(
+        expiry_date, "DATETIME_FORMAT"
+    )
+
+    expected = {
+        'data': {
+            'code': 12345,
+            'expiry_days': formatted_expiry_date
+        },
+        'meta': {
+            'action_name': 'gov-notify',
+            'form_url': from_url,
+            'sender': {},
+            'spam_control': {},
+            'template_id': 'aa4bb8dc-0e54-43d1-bcc7-a8b29d2ecba6',
+            'email_address': email
+        }
+    }
     assert mock_submit.call_count == 1
     assert mock_submit.call_args == mock.call(expected)
 
