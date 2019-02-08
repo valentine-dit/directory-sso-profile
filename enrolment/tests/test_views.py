@@ -326,7 +326,7 @@ def test_create_user_enrolment_already_exists(
     assert mock_notify_already_registered.call_count == 1
     assert mock_notify_already_registered.call_args == mock.call(
         email='tex4566eqw34e7@example.com',
-        from_url='/profile/enrol/user-account/'
+        form_url='/profile/enrol/user-account/'
     )
 
 
@@ -700,11 +700,15 @@ def test_companies_house_enrolment_has_company_error(
 
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
+@mock.patch('enrolment.views.helpers.notify_request_collaboration')
 def test_companies_house_enrolment_submit_end_to_end_company_has_account(
-    mock_clean, client, captcha_stub, submit_enrolment_step, mock_session_user,
-    mock_enrolment_send, mock_retrieve_public_profile
+    mock_notify_request_collaboration, mock_clean, client, captcha_stub,
+    submit_enrolment_step, mock_session_user, mock_enrolment_send,
+    mock_retrieve_public_profile
 ):
-    mock_retrieve_public_profile.return_value = create_response(200)
+    mock_retrieve_public_profile.return_value = create_response(
+        200, {'email_address': 'the-company@example.com'}
+    )
 
     response = submit_enrolment_step({
         'choice': constants.COMPANIES_HOUSE_COMPANY
@@ -753,3 +757,11 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
 
     assert response.url == reverse('enrolment-success')
     assert mock_enrolment_send.call_count == 0
+
+    assert mock_notify_request_collaboration.call_count == 1
+    assert mock_notify_request_collaboration.call_args == mock.call(
+        email='the-company@example.com',
+        form_url=reverse('enrolment-start'),
+        from_email='test@a.com',
+        from_name='Foo Bar'
+    )

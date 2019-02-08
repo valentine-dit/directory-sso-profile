@@ -94,13 +94,13 @@ def test_send_verification_code_email(mock_submit):
         'code': 12345,
         'expiration_date': '2019-02-10T13:19:51.167097Z'
     }
-    from_url = 'test'
+    form_url = 'test'
 
     mock_submit.return_value = create_response(201)
     helpers.send_verification_code_email(
         email=email,
         verification_code=verification_code,
-        from_url=from_url,
+        form_url=form_url,
     )
 
     expected = {
@@ -110,7 +110,7 @@ def test_send_verification_code_email(mock_submit):
         },
         'meta': {
             'action_name': 'gov-notify',
-            'form_url': from_url,
+            'form_url': form_url,
             'sender': {},
             'spam_control': {},
             'template_id': 'aa4bb8dc-0e54-43d1-bcc7-a8b29d2ecba6',
@@ -138,12 +138,12 @@ def test_confirm_verification_code(mock_confirm_code):
 )
 def test_notify_already_registered(mock_submit):
     email = 'test@test123.com'
-    from_url = 'test'
+    form_url = 'test'
 
     mock_submit.return_value = create_response(201)
     helpers.notify_already_registered(
         email=email,
-        from_url=from_url,
+        form_url=form_url,
     )
 
     expected = {
@@ -154,7 +154,7 @@ def test_notify_already_registered(mock_submit):
         },
         'meta': {
             'action_name': 'gov-notify',
-            'form_url': from_url,
+            'form_url': form_url,
             'sender': {},
             'spam_control': {},
             'template_id': settings.GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID,

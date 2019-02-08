@@ -129,12 +129,12 @@ class EnrolmentView(
                 helpers.send_verification_code_email(
                     email=form.cleaned_data['email'],
                     verification_code=user_details['verification_code'],
-                    from_url=self.request.path,
+                    form_url=self.request.path,
                 )
             else:
                 helpers.notify_already_registered(
                     email=form.cleaned_data['email'],
-                    from_url=self.request.path
+                    form_url=self.request.path
                 )
         elif form.prefix == self.USER_ACCOUNT_VERIFICATION:
             response.cookies.update(form.cleaned_data['cookies'])
@@ -157,7 +157,8 @@ class EnrolmentView(
 
     def done(self, form_list, **kwargs):
         data = self.serialize_form_list(form_list)
-        if not helpers.company_has_account(data['company_number']):
+        company = helpers.get_public_company_profile(data['company_number'])
+        if not company:
             helpers.create_company_profile({
                 'sso_id': self.request.sso_user.id,
                 'company_email': self.request.sso_user.email,
@@ -165,10 +166,12 @@ class EnrolmentView(
                 **data,
             })
         else:
-            pass
-            # TODO: add user as read-only member of the business account
-            # and send notification to owner so they can be accepted
-
+            helpers.notify_request_collaboration(
+                email=company['email_address'],
+                form_url=reverse('enrolment-start'),
+                from_email=self.request.sso_user.email,
+                from_name=f"{data['given_name']} {data['family_name']}",
+            )
         return redirect(self.success_url)
 
     def serialize_form_list(self, form_list):
