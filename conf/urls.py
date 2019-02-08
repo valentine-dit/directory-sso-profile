@@ -1,8 +1,6 @@
 import directory_healthcheck.views
 
 from django.conf.urls import include, url
-from django.urls import reverse_lazy
-from django.views.generic.base import RedirectView
 
 import core.views
 import enrolment.views

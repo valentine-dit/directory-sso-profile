@@ -4,6 +4,7 @@
 @import 'partials/errors';
 @import 'partials/responsive';
 @import 'partials/progress';
+@import 'partials/colours';
 
 
 body.js-enabled {
@@ -131,7 +132,7 @@ body.js-enabled {
 
 #progress-column {
   float: right;
-  border-top: 5px solid #BF0000;
+  border-top: 5px solid $flag-red;
   padding-top: 30px;
   padding-left: 0;
   margin-top: 2.5em;
@@ -145,6 +146,10 @@ body.js-enabled {
   margin-top: 15px;
   width: 145px;
   &:active {
-    background-color: #004FB3;
+    background-color: $mid-blue;
   }
+}
+
+#start-page-progress-indicator {
+  font-size: 1.5em;
 }
