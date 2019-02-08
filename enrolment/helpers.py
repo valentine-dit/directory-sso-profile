@@ -42,6 +42,15 @@ def user_has_company(sso_session_id):
     response.raise_for_status()
 
 
+def company_has_account(company_number):
+    response = api_client.company.retrieve_public_profile(company_number)
+    if response.status_code == 404:
+        return False
+    elif response.status_code == 200:
+        return True
+    response.raise_for_status()
+
+
 def create_company_profile(data):
     response = api_client.enrolment.send_form(data)
     response.raise_for_status()

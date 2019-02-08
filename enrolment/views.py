@@ -156,12 +156,19 @@ class EnrolmentView(
         return [self.templates[self.steps.current]]
 
     def done(self, form_list, **kwargs):
-        helpers.create_company_profile({
-            'sso_id': self.request.sso_user.id,
-            'company_email': self.request.sso_user.email,
-            'contact_email_address': self.request.sso_user.email,
-            **self.serialize_form_list(form_list),
-        })
+        data = self.serialize_form_list(form_list)
+        if not helpers.company_has_account(data['company_number']):
+            helpers.create_company_profile({
+                'sso_id': self.request.sso_user.id,
+                'company_email': self.request.sso_user.email,
+                'contact_email_address': self.request.sso_user.email,
+                **data,
+            })
+        else:
+            pass
+            # TODO: add user as read-only member of the business account
+            # and send notification to owner so they can be accepted
+
         return redirect(self.success_url)
 
     def serialize_form_list(self, form_list):

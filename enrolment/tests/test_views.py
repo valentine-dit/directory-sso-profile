@@ -69,9 +69,19 @@ def mock_send_verification_code_email():
 
 
 @pytest.fixture(autouse=True)
-def mock_enrolment_send(client, settings):
-    patch = mock.patch(
-        'directory_api_client.client.api_client.enrolment.send_form',
+def mock_retrieve_public_profile(client):
+    patch = mock.patch.object(
+        helpers.api_client.company, 'retrieve_public_profile',
+        return_value=create_response(404)
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_enrolment_send(client):
+    patch = mock.patch.object(
+        helpers.api_client.enrolment, 'send_form',
         return_value=create_response(201)
     )
     yield patch.start()
@@ -687,3 +697,59 @@ def test_companies_house_enrolment_has_company_error(
 
     with pytest.raises(HTTPError):
         client.get(url)
+
+
+@mock.patch('captcha.fields.ReCaptchaField.clean')
+def test_companies_house_enrolment_submit_end_to_end_company_has_account(
+    mock_clean, client, captcha_stub, submit_enrolment_step, mock_session_user,
+    mock_enrolment_send, mock_retrieve_public_profile
+):
+    mock_retrieve_public_profile.return_value = create_response(200)
+
+    response = submit_enrolment_step({
+        'choice': constants.COMPANIES_HOUSE_COMPANY
+    })
+    assert response.status_code == 302
+
+    response = submit_enrolment_step({
+        'email': 'test@a.com',
+        'password': 'thing',
+        'password_confirmed': 'thing',
+        'captcha': captcha_stub,
+        'terms_agreed': True
+    })
+    assert response.status_code == 302
+
+    response = submit_enrolment_step({
+        'code': '12345'
+    })
+    assert response.status_code == 302
+
+    mock_session_user.login()
+
+    response = submit_enrolment_step({
+        'company_name': 'Example corp',
+        'company_number': '12345678',
+    })
+    assert response.status_code == 302
+
+    response = submit_enrolment_step({
+        'company_name': 'Example corp',
+        'industry': 'AEROSPACE',
+    })
+    assert response.status_code == 302
+
+    response = submit_enrolment_step({
+        'given_name': 'Foo',
+        'family_name': 'Bar',
+        'job_title': 'Fooer',
+        'phone_number': '1234567',
+        'confirmed_is_company_representative': True,
+        'confirmed_background_checks': True,
+    })
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.url == reverse('enrolment-success')
+    assert mock_enrolment_send.call_count == 0
