@@ -1,8 +1,9 @@
 from captcha.fields import ReCaptchaField
 from directory_components import forms, fields, widgets
 from directory_constants.constants import choices, urls
+from requests.exceptions import HTTPError
 
-from django.forms import PasswordInput, ValidationError
+from django.forms import HiddenInput, PasswordInput, ValidationError
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.http.request import QueryDict
@@ -54,6 +55,7 @@ class UserAccount(forms.Form):
         '<li>not contain the word "password"</li>'
         '</ul>'
     )
+    MESSAGE_NOT_MATCH = "Passwords don't match"
 
     email = fields.EmailField(
         label='Your email'
@@ -80,24 +82,35 @@ class UserAccount(forms.Form):
         )
     )
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data["password"]
-        confirm_password = cleaned_data["password_confirmed"]
-
-        if password != confirm_password:
-            self.add_error('password_confirmed', "Passwords don't match")
-
-        return cleaned_data
-
-    def clean_email(self):
-        self.cleaned_data['company_email'] = self.cleaned_data['email']
-        self.cleaned_data['contact_email_address'] = self.cleaned_data['email']
-        return self.cleaned_data['email']
+    def clean_password_confirmed(self):
+        value = self.cleaned_data['password_confirmed']
+        if value != self.cleaned_data['password']:
+            raise ValidationError(self.MESSAGE_NOT_MATCH)
+        return value
 
 
 class UserAccountVerification(forms.Form):
+    MESSAGE_INVALID_CODE = 'Invalid code'
+
+    email = fields.CharField(label='', widget=HiddenInput, disabled=True)
     code = fields.CharField(label='', min_length=5, max_length=5)
+
+    def clean_code(self):
+        try:
+            response = helpers.confirm_verification_code(
+                email=self.cleaned_data['email'],
+                verification_code=self.cleaned_data['code'],
+            )
+        except HTTPError as error:
+            if error.response.status_code == 400:
+                self.add_error('code', self.MESSAGE_INVALID_CODE)
+            else:
+                raise
+        else:
+            self.cleaned_data['cookies'] = helpers.cookiekjar_to_simple_cookie(
+                response.cookies
+            )
+        return None
 
 
 class CompaniesHouseSearch(forms.Form):
@@ -162,9 +175,10 @@ class CompaniesHouseBusinessDetails(forms.Form):
         required=False,
     )
 
-    def __init__(self, company_profile, initial, *args, **kwargs):
+    def __init__(self, initial, company_profile=None, *args, **kwargs):
         super().__init__(initial=initial, *args, **kwargs)
-        self.set_form_initial(company_profile)
+        if company_profile:
+            self.set_form_initial(company_profile)
         # force the form to use the initial value rather than the value
         # the user submitted in previous sessions
         # on GET the data structure is a MultiValueDict. on POST the data

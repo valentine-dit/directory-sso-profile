@@ -6,6 +6,7 @@ from django.utils import formats
 from django.utils.dateparse import parse_datetime
 from django.conf import settings
 
+from directory_api_client.client import api_client
 from directory_ch_client.client import ch_search_api_client
 from directory_sso_api_client.client import sso_api_client
 from directory_forms_api_client import actions
@@ -24,13 +25,27 @@ def get_company_profile(number, session):
     return session[session_key]
 
 
-def create_user(email, password, cookies):
+def create_user(email, password):
     response = sso_api_client.user.create_user(email, password)
     if response.status_code == 400:
         return None
     response.raise_for_status()
-    cookies.update(cookiekjar_to_simple_cookie(response.cookies))
     return response.json()
+
+
+def user_has_company(sso_session_id):
+    response = api_client.company.retrieve_private_profile(sso_session_id)
+    if response.status_code == 404:
+        return False
+    elif response.status_code == 200:
+        return True
+    response.raise_for_status()
+
+
+def create_company_profile(data):
+    response = api_client.enrolment.send_form(data)
+    response.raise_for_status()
+    return response
 
 
 def send_verification_code_email(email, verification_code, from_url):
@@ -69,11 +84,11 @@ def notify_already_registered(email, from_url):
     return response
 
 
-def confirm_verification_code(sso_session_id, code):
-    response = sso_api_client.user.verify_verification_code(
-        sso_session_id=sso_session_id,
-        code=code,
-    )
+def confirm_verification_code(email, verification_code):
+    response = sso_api_client.user.verify_verification_code({
+        'email': email,
+        'code': verification_code,
+    })
     response.raise_for_status()
     return response
 

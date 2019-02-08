@@ -7,8 +7,10 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView
 
 import core.mixins
-from directory_api_client.client import api_client
 from enrolment import forms, helpers
+
+
+SESSION_KEY_ENROL_EMAIL = 'ENROL_EMAIL'
 
 
 class NotFoundOnDisabledFeature:
@@ -54,6 +56,20 @@ class EnrolmentView(
         PERSONAL_DETAILS: 'enrolment/personal-details.html',
     }
 
+    def user_account_condition(self):
+        return self.request.sso_user is None
+
+    condition_dict = {
+        USER_ACCOUNT: user_account_condition,
+        USER_ACCOUNT_VERIFICATION: user_account_condition,
+    }
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.sso_user:
+            if helpers.user_has_company(request.sso_user.session_id):
+                return redirect('about')
+        return super().dispatch(request, *args, **kwargs)
+
     def render(self, *args, **kwargs):
         prev = self.steps.prev
         if prev and not self.get_cleaned_data_for_step(prev):
@@ -72,31 +88,35 @@ class EnrolmentView(
                 )
         return form_kwargs
 
+    def get_form_initial(self, step):
+        form_initial = super().get_form_initial(step)
+        if step == self.USER_ACCOUNT_VERIFICATION:
+            data = self.get_cleaned_data_for_step(self.USER_ACCOUNT)
+            if data:
+                form_initial['email'] = data['email']
+        return form_initial
+
     def render_next_step(self, form, **kwargs):
         response = super().render_next_step(form, **kwargs)
         if form.prefix == self.USER_ACCOUNT:
             user_details = helpers.create_user(
-                email=form.cleaned_data["email"],
-                password=form.cleaned_data["password"],
-                cookies=response.cookies,
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password'],
             )
             # Check if we have a user, else the user is already registered
             if user_details:
                 helpers.send_verification_code_email(
-                    email=form.cleaned_data["email"],
+                    email=form.cleaned_data['email'],
                     verification_code=user_details['verification_code'],
                     from_url=self.request.path,
                 )
             else:
                 helpers.notify_already_registered(
-                    email=form.cleaned_data["email"],
+                    email=form.cleaned_data['email'],
                     from_url=self.request.path
                 )
         elif form.prefix == self.USER_ACCOUNT_VERIFICATION:
-            helpers.confirm_verification_code(
-                sso_session_id=self.request.sso_user.session_id,
-                verification_code=form.cleaned_data["code"],
-            )
+            response.cookies.update(form.cleaned_data['cookies'])
         return response
 
     def get_context_data(self, form, **kwargs):
@@ -110,11 +130,12 @@ class EnrolmentView(
         return [self.templates[self.steps.current]]
 
     def done(self, form_list, **kwargs):
-        data = self.serialize_form_list(form_list)
-        response = api_client.enrolment.send_form({
-            **data, 'sso_id': self.request.sso_user.id
+        helpers.create_company_profile({
+            'sso_id': self.request.sso_user.id,
+            'company_email': self.request.sso_user.email,
+            'contact_email_address': self.request.sso_user.email,
+            **self.serialize_form_list(form_list),
         })
-        response.raise_for_status()
         return redirect(self.success_url)
 
     def serialize_form_list(self, form_list):
@@ -124,10 +145,8 @@ class EnrolmentView(
         whitelist = [
             'address_line_1',
             'address_line_2',
-            'company_email',
             'company_name',
             'company_number',
-            'contact_email_address',
             'date_of_creation',
             'family_name',
             'given_name',
