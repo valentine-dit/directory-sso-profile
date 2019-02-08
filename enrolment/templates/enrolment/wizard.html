@@ -4,8 +4,8 @@
 
 {% block content %}
     <section class="container">
+        {% include 'enrolment/breadcrumbs.html' %}
         <div class="column-one-half">
-            {% include 'enrolment/breadcrumbs.html' %}
             {% block breadcrumbs %}{% endblock %}
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
@@ -29,6 +29,11 @@
                 {% endif %}
                 {% block below_submit_button %}{% endblock %}
             </form>
+        </div>
+        <div class="column-one-third" id="progress-column">
+            <span>Part of:</span>
+            <a class="link heading-medium" href="{% url 'enrolment-start' %}">Create a great.gov.uk account</a>
+            {% include 'enrolment/progress.html' %}
         </div>
     </section>
 {% endblock %}

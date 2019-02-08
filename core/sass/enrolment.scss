@@ -3,6 +3,8 @@
 @import 'partials/buttons';
 @import 'partials/errors';
 @import 'partials/responsive';
+@import 'partials/progress';
+
 
 body.js-enabled {
   #id_companies-house-search-company_number-container {
@@ -117,5 +119,32 @@ body.js-enabled {
   #company-lookup-name-not-in-companies-house {
     border-top: 2px solid #999;
     background: #dedede;
+  }
+}
+
+#content {
+  nav.breadcrumbs {
+    padding-bottom: 0;
+    padding-left: 15px;
+  }
+}
+
+#progress-column {
+  float: right;
+  border-top: 5px solid #BF0000;
+  padding-top: 30px;
+  padding-left: 0;
+  margin-top: 2.5em;
+  a {
+    margin: 0;
+  }
+}
+
+#start-now-button {
+  display: block;
+  margin-top: 15px;
+  width: 145px;
+  &:active {
+    background-color: #004FB3;
   }
 }

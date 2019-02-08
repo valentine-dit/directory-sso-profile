@@ -87,14 +87,10 @@ urlpatterns = [
         profile.exops.views.ExportOpportunitiesEmailAlertsView.as_view(),
         name='export-opportunities-email-alerts'
     ),
-
-
     url(
         r'^enrol/$',
-        RedirectView.as_view(
-            url=reverse_lazy('enrolment', kwargs={'step': 'business-type'})
-        ),
-        name='enrol-redirect'
+        enrolment.views.EnrolmentStartView.as_view(),
+        name='enrolment-start'
     ),
     url(
         r'^enrol/done/$',

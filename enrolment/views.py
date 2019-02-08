@@ -20,6 +20,10 @@ class NotFoundOnDisabledFeature:
         return super().dispatch(*args, **kwargs)
 
 
+class EnrolmentStartView(TemplateView):
+    template_name = 'enrolment/start.html'
+
+
 class EnrolmentView(
     NotFoundOnDisabledFeature, core.mixins.PreventCaptchaRevalidationMixin,
     NamedUrlSessionWizardView
@@ -44,6 +48,23 @@ class EnrolmentView(
         ),
         (PERSONAL_DETAILS, forms.PersonalDetails),
     )
+
+    step_labels = (
+        'Select your business type',
+        'Enter your email and set a password',
+        'Confirm the validation code from your email',
+        'Confirm your business details',
+        'Enter personal details',
+    )
+
+    step_counter = {
+        BUSINESS_TYPE: 1,
+        USER_ACCOUNT: 2,
+        USER_ACCOUNT_VERIFICATION: 3,
+        COMPANY_SEARCH: 4,
+        COMPANIES_HOUSE_BUSINESS_DETAILS: 4,
+        PERSONAL_DETAILS: 5,
+    }
 
     templates = {
         BUSINESS_TYPE: 'enrolment/business-type.html',
@@ -120,7 +141,12 @@ class EnrolmentView(
         return response
 
     def get_context_data(self, form, **kwargs):
-        context = super().get_context_data(form=form, **kwargs)
+        context = super().get_context_data(
+            form=form,
+            step_labels=self.step_labels,
+            step_number=self.step_counter[self.steps.current],
+            **kwargs
+        )
         if self.steps.current == self.PERSONAL_DETAILS:
             step = self.COMPANIES_HOUSE_BUSINESS_DETAILS
             context['company'] = self.get_cleaned_data_for_step(step)
