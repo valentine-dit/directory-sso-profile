@@ -175,9 +175,10 @@ class CompaniesHouseBusinessDetails(forms.Form):
         required=False,
     )
 
-    def __init__(self, company_profile, initial, *args, **kwargs):
+    def __init__(self, initial, company_profile=None, *args, **kwargs):
         super().__init__(initial=initial, *args, **kwargs)
-        self.set_form_initial(company_profile)
+        if company_profile:
+            self.set_form_initial(company_profile)
         # force the form to use the initial value rather than the value
         # the user submitted in previous sessions
         # on GET the data structure is a MultiValueDict. on POST the data

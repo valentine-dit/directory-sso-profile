@@ -93,6 +93,16 @@ def mock_create_user():
 
 
 @pytest.fixture(autouse=True)
+def mock_user_has_company():
+    patch = mock.patch.object(
+        helpers.api_client.company, 'retrieve_private_profile',
+        return_value=create_response(404)
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
 def mock_confirm_verification_code():
     response = create_response(200)
     patch = mock.patch.object(
@@ -644,3 +654,36 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
         'phone_number': '1234567',
         'sso_id': '123'
     })
+
+
+@pytest.mark.parametrize(
+    'step', [name for name, _ in views.EnrolmentView.form_list]
+)
+def test_companies_house_enrolment_has_company(
+    client, step, mock_user_has_company, mock_session_user
+):
+    mock_session_user.login()
+
+    mock_user_has_company.return_value = create_response(200)
+
+    url = reverse('enrolment', kwargs={'step': step})
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('about')
+
+
+@pytest.mark.parametrize(
+    'step', [name for name, _ in views.EnrolmentView.form_list]
+)
+def test_companies_house_enrolment_has_company_error(
+    client, step, mock_user_has_company, mock_session_user
+):
+    mock_session_user.login()
+
+    mock_user_has_company.return_value = create_response(500)
+
+    url = reverse('enrolment', kwargs={'step': step})
+
+    with pytest.raises(HTTPError):
+        client.get(url)

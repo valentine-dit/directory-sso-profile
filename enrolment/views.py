@@ -7,7 +7,6 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView
 
 import core.mixins
-from directory_api_client.client import api_client
 from enrolment import forms, helpers
 
 
@@ -64,6 +63,12 @@ class EnrolmentView(
         USER_ACCOUNT: user_account_condition,
         USER_ACCOUNT_VERIFICATION: user_account_condition,
     }
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.sso_user:
+            if helpers.user_has_company(request.sso_user.session_id):
+                return redirect('about')
+        return super().dispatch(request, *args, **kwargs)
 
     def render(self, *args, **kwargs):
         prev = self.steps.prev
@@ -125,14 +130,12 @@ class EnrolmentView(
         return [self.templates[self.steps.current]]
 
     def done(self, form_list, **kwargs):
-        data = self.serialize_form_list(form_list)
-        response = api_client.enrolment.send_form({
-            **data,
+        helpers.create_company_profile({
             'sso_id': self.request.sso_user.id,
             'company_email': self.request.sso_user.email,
             'contact_email_address': self.request.sso_user.email,
+            **self.serialize_form_list(form_list),
         })
-        response.raise_for_status()
         return redirect(self.success_url)
 
     def serialize_form_list(self, form_list):
