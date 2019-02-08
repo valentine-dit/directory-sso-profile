@@ -106,6 +106,13 @@ def mock_confirm_verification_code():
     patch.stop()
 
 
+@pytest.fixture(autouse=True)
+def mock_notify_already_registered():
+    patch = mock.patch.object(helpers, 'notify_already_registered')
+    yield patch.start()
+    patch.stop()
+
+
 @pytest.mark.parametrize('url', urls)
 def test_404_feature_off(url, client, settings):
 
@@ -268,6 +275,39 @@ def test_create_user_enrolment(mock_clean, client, captcha_stub):
         'terms_agreed': True
     })
     assert response.status_code == 302
+
+
+@mock.patch('captcha.fields.ReCaptchaField.clean')
+def test_create_user_enrolment_already_exists(
+        mock_clean, client, captcha_stub, mock_create_user,
+        mock_notify_already_registered
+):
+    submit_step = submit_step_factory(
+        client=client,
+        url_name='enrolment',
+        view_name='enrolment_view',
+        view_class=views.EnrolmentView,
+    )
+
+    response = submit_step({
+        'choice': constants.SOLE_TRADER
+    })
+    assert response.status_code == 302
+    mock_create_user.return_value = create_response(400)
+
+    response = submit_step({
+        'email': 'tex4566eqw34e7@example.com',
+        'password': 'thing',
+        'password_confirmed': 'thing',
+        'captcha': captcha_stub,
+        'terms_agreed': True
+    })
+    assert response.status_code == 302
+    assert mock_notify_already_registered.call_count == 1
+    assert mock_notify_already_registered.call_args == mock.call(
+        email='tex4566eqw34e7@example.com',
+        from_url='/profile/enrol/user-account/'
+    )
 
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')

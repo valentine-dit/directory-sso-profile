@@ -1,11 +1,14 @@
 from unittest import mock
-
 import pytest
+
+from django.conf import settings
+
 from requests.cookies import RequestsCookieJar
 from requests.exceptions import HTTPError
 
 from enrolment import helpers
 from core.tests.helpers import create_response
+from directory_constants.constants import urls
 
 
 @mock.patch.object(helpers.ch_search_api_client.company, 'get_company_profile')
@@ -70,12 +73,27 @@ def test_create_user(mock_create_user):
     assert result == data
 
 
+@mock.patch.object(helpers.sso_api_client.user, 'create_user')
+def test_create_user_duplicate(mock_create_user):
+
+    mock_create_user.return_value = create_response(400)
+    result = helpers.create_user(
+        email='test@test1234.com',
+        password='1234',
+    )
+    assert mock_create_user.call_count == 1
+    assert result is None
+
+
 @mock.patch(
     'directory_forms_api_client.client.forms_api_client.submit_generic'
 )
 def test_send_verification_code_email(mock_submit):
     email = 'gurdeep.atwal@digital.trade.gov.uk'
-    verification_code = '12345'
+    verification_code = {
+        'code': 12345,
+        'expiration_date': '2019-02-10T13:19:51.167097Z'
+    }
     from_url = 'test'
 
     mock_submit.return_value = create_response(201)
@@ -85,15 +103,20 @@ def test_send_verification_code_email(mock_submit):
         from_url=from_url,
     )
 
-    expected = {'data': {'code': '12345', 'expiry_days': 3},
-                'meta': {'action_name': 'gov-notify',
-                         'form_url': from_url,
-                         'sender': {},
-                         'spam_control': {},
-                         'template_id': 'aa4bb8dc-0e54-43d1-bcc7-a8b29d2ecba6',
-                         'email_address': email
-                         }
-                }
+    expected = {
+        'data': {
+            'code': 12345,
+            'expiry_date': '10 Feb 2019, 1:19 p.m.'
+        },
+        'meta': {
+            'action_name': 'gov-notify',
+            'form_url': from_url,
+            'sender': {},
+            'spam_control': {},
+            'template_id': 'aa4bb8dc-0e54-43d1-bcc7-a8b29d2ecba6',
+            'email_address': email
+        }
+    }
     assert mock_submit.call_count == 1
     assert mock_submit.call_args == mock.call(expected)
 
@@ -104,8 +127,39 @@ def test_confirm_verification_code(mock_confirm_code):
         email='test@example.com',
         verification_code='1234',
     )
-
     assert mock_confirm_code.call_count == 1
     assert mock_confirm_code.call_args == mock.call({
         'email': 'test@example.com', 'code': '1234'
     })
+
+
+@mock.patch(
+    'directory_forms_api_client.client.forms_api_client.submit_generic'
+)
+def test_notify_already_registered(mock_submit):
+    email = 'test@test123.com'
+    from_url = 'test'
+
+    mock_submit.return_value = create_response(201)
+    helpers.notify_already_registered(
+        email=email,
+        from_url=from_url,
+    )
+
+    expected = {
+        'data': {
+            'login_url': settings.SSO_PROXY_LOGIN_URL,
+            'password_reset_url': settings.SSO_PROXY_PASSWORD_RESET_URL,
+            'contact_us_url': urls.FEEDBACK,
+        },
+        'meta': {
+            'action_name': 'gov-notify',
+            'form_url': from_url,
+            'sender': {},
+            'spam_control': {},
+            'template_id': settings.GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID,
+            'email_address': email
+        }
+    }
+    assert mock_submit.call_count == 1
+    assert mock_submit.call_args == mock.call(expected)
