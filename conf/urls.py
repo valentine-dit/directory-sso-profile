@@ -1,8 +1,6 @@
 import directory_healthcheck.views
 
 from django.conf.urls import include, url
-from django.urls import reverse_lazy
-from django.views.generic.base import RedirectView
 
 import core.views
 import enrolment.views
@@ -87,14 +85,10 @@ urlpatterns = [
         profile.exops.views.ExportOpportunitiesEmailAlertsView.as_view(),
         name='export-opportunities-email-alerts'
     ),
-
-
     url(
         r'^enrol/$',
-        RedirectView.as_view(
-            url=reverse_lazy('enrolment', kwargs={'step': 'business-type'})
-        ),
-        name='enrol-redirect'
+        enrolment.views.EnrolmentStartView.as_view(),
+        name='enrolment-start'
     ),
     url(
         r'^enrol/done/$',

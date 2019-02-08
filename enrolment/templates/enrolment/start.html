@@ -1,0 +1,30 @@
+{% extends 'enrolment/base.html' %}
+
+{% block content %}
+    <section class="container">
+        {% include 'enrolment/breadcrumbs.html' %}
+        <div class="column-one-half">
+            <h1 class="heading-xlarge">Create an account</h1>
+            <p>We'll email you a confirmation code while creating your account. Make sure you have access to your email.</p>
+            <p><a href="{{ sso_login_url }}">Sign in</a> if you have an account.</p>
+            
+            <div class="steps-progress-indicator" id="start-page-progress-indicator" aria-label="Process steps">
+              <p id="steps-progress-explanation" class="visually-hidden">List of steps required to complete the process:</p>
+              <ol aria-labelledby="steps-progress-explanation">
+                <li class="current">
+                    <span class="visually-hidden">Current:</span>
+                    <span>
+                        Select your business type
+                        <a id="start-now-button" class="button" href="{% url 'enrolment' step='company-type' %}">Start now</a>
+                    </span>
+                    
+                </li>
+                <li><span>Enter your email and set a password</span></li>
+                <li><span>Confirm the validation code from your email</span></li>
+                <li><span>Confirm your business details</span></li>
+                <li><span>Enter personal details</span></li>
+              </ol>
+            </div>
+        </div>
+    </section>
+{% endblock %}
