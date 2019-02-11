@@ -169,11 +169,6 @@ class EnrolmentView(
 
         return context
 
-
-
-    def get_template_names(self):
-        return [self.templates[self.steps.current]]
-
     def done(self, form_list, **kwargs):
         data = self.serialize_form_list(form_list)
         company = helpers.get_public_company_profile(
