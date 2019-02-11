@@ -777,8 +777,9 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     )
 
 
+@mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_search_has_company_not_found_url(
-        captcha_stub, submit_enrolment_step, mock_session_user, client
+    mock_clean, captcha_stub, submit_enrolment_step, mock_session_user, client
 ):
     response = submit_enrolment_step({
         'choice': constants.COMPANIES_HOUSE_COMPANY
