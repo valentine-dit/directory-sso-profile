@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 
 import core.mixins
 from enrolment import forms, helpers
-
+from directory_constants.constants import urls
 
 SESSION_KEY_ENROL_EMAIL = 'ENROL_EMAIL'
 
@@ -35,7 +35,6 @@ class EnrolmentView(
     USER_ACCOUNT_VERIFICATION = 'verification'
     COMPANY_SEARCH = 'companies-house-search'
     BUSINESS_DETAILS = 'companies-house-business-details'
-
     PERSONAL_DETAILS = 'personal-details'
 
     form_list = (
@@ -151,6 +150,11 @@ class EnrolmentView(
         if self.steps.current == self.PERSONAL_DETAILS:
             step = self.BUSINESS_DETAILS
             context['company'] = self.get_cleaned_data_for_step(step)
+        if self.steps.current == self.COMPANY_SEARCH:
+            context['company_not_found_url'] = urls.build_great_url(
+                'contact/triage/great-account/company-not-found/'
+            )
+
         return context
 
     def get_template_names(self):
