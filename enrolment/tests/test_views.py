@@ -89,6 +89,16 @@ def mock_validate_company_number(client):
 
 
 @pytest.fixture(autouse=True)
+def mock_request_collaboration(client):
+    patch = mock.patch.object(
+        helpers.api_client.company, 'request_collaboration',
+        return_value=create_response(200)
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
 def mock_enrolment_send(client):
     patch = mock.patch.object(
         helpers.api_client.enrolment, 'send_form',
@@ -710,15 +720,13 @@ def test_companies_house_enrolment_has_company_error(
 
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
-@mock.patch('enrolment.views.helpers.notify_request_collaboration')
+@mock.patch('enrolment.views.helpers.request_collaboration')
 def test_companies_house_enrolment_submit_end_to_end_company_has_account(
-    mock_notify_request_collaboration, mock_clean, client, captcha_stub,
+    mock_request_collaboration, mock_clean, client, captcha_stub,
     submit_enrolment_step, mock_session_user, mock_enrolment_send,
-    mock_retrieve_public_profile
+    mock_validate_company_number
 ):
-    mock_retrieve_public_profile.return_value = create_response(
-        200, {'email_address': 'the-company@example.com'}
-    )
+    mock_validate_company_number.return_value = create_response(400)
 
     response = submit_enrolment_step({
         'choice': constants.COMPANIES_HOUSE_COMPANY
@@ -768,12 +776,12 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     assert response.url == reverse('enrolment-success')
     assert mock_enrolment_send.call_count == 0
 
-    assert mock_notify_request_collaboration.call_count == 1
-    assert mock_notify_request_collaboration.call_args == mock.call(
-        email='the-company@example.com',
-        form_url=reverse('enrolment-start'),
-        from_email='test@a.com',
-        from_name='Foo Bar'
+    assert mock_request_collaboration.call_count == 1
+    assert mock_request_collaboration.call_args == mock.call(
+        company_number='12345678',
+        email='test@a.com',
+        name='Foo Bar',
+        form_url='/profile/enrol/finished/',
     )
 
 

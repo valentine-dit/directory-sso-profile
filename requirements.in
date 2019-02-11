@@ -16,6 +16,6 @@ django-recaptcha==1.2.0
 directory-ch-client==1.0.0
 directory-sso-api-client==4.0.0
 directory-forms-api-client==3.3.0
-directory-api-client==11.1.0
+directory-api-client==11.2.0
 django-redis==4.8.0
 directory-client-core==4.4.0
