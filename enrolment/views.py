@@ -34,7 +34,8 @@ class EnrolmentView(
     USER_ACCOUNT = 'user-account'
     USER_ACCOUNT_VERIFICATION = 'verification'
     COMPANY_SEARCH = 'companies-house-search'
-    COMPANIES_HOUSE_BUSINESS_DETAILS = 'companies-house-business-details'
+    BUSINESS_DETAILS = 'companies-house-business-details'
+
     PERSONAL_DETAILS = 'personal-details'
 
     form_list = (
@@ -42,10 +43,7 @@ class EnrolmentView(
         (USER_ACCOUNT, forms.UserAccount),
         (USER_ACCOUNT_VERIFICATION, forms.UserAccountVerification),
         (COMPANY_SEARCH, forms.CompaniesHouseSearch),
-        (
-            COMPANIES_HOUSE_BUSINESS_DETAILS,
-            forms.CompaniesHouseBusinessDetails
-        ),
+        (BUSINESS_DETAILS, forms.CompaniesHouseBusinessDetails),
         (PERSONAL_DETAILS, forms.PersonalDetails),
     )
 
@@ -62,7 +60,7 @@ class EnrolmentView(
         USER_ACCOUNT: 2,
         USER_ACCOUNT_VERIFICATION: 3,
         COMPANY_SEARCH: 4,
-        COMPANIES_HOUSE_BUSINESS_DETAILS: 4,
+        BUSINESS_DETAILS: 4,
         PERSONAL_DETAILS: 5,
     }
 
@@ -71,9 +69,7 @@ class EnrolmentView(
         USER_ACCOUNT: 'enrolment/user-account.html',
         USER_ACCOUNT_VERIFICATION: 'enrolment/user-account-verification.html',
         COMPANY_SEARCH: 'enrolment/companies-house-search.html',
-        COMPANIES_HOUSE_BUSINESS_DETAILS: (
-            'enrolment/companies-house-business-details.html'
-        ),
+        BUSINESS_DETAILS: 'enrolment/companies-house-business-details.html',
         PERSONAL_DETAILS: 'enrolment/personal-details.html',
     }
 
@@ -83,6 +79,7 @@ class EnrolmentView(
     condition_dict = {
         USER_ACCOUNT: user_account_condition,
         USER_ACCOUNT_VERIFICATION: user_account_condition,
+
     }
 
     def dispatch(self, request, *args, **kwargs):
@@ -100,11 +97,15 @@ class EnrolmentView(
 
     def get_form_kwargs(self, step=None):
         form_kwargs = super().get_form_kwargs(step=step)
-        if step == self.COMPANIES_HOUSE_BUSINESS_DETAILS:
+        if step == self.BUSINESS_DETAILS:
             previous_data = self.get_cleaned_data_for_step(self.COMPANY_SEARCH)
             if previous_data:
-                form_kwargs['company_profile'] = helpers.get_company_profile(
+                form_kwargs['company_data'] = helpers.get_company_profile(
                     number=previous_data['company_number'],
+                    session=self.request.session,
+                )
+                form_kwargs['is_enrolled'] = helpers.get_is_enrolled(
+                    company_number=previous_data['company_number'],
                     session=self.request.session,
                 )
         return form_kwargs
@@ -129,12 +130,12 @@ class EnrolmentView(
                 helpers.send_verification_code_email(
                     email=form.cleaned_data['email'],
                     verification_code=user_details['verification_code'],
-                    from_url=self.request.path,
+                    form_url=self.request.path,
                 )
             else:
                 helpers.notify_already_registered(
                     email=form.cleaned_data['email'],
-                    from_url=self.request.path
+                    form_url=self.request.path
                 )
         elif form.prefix == self.USER_ACCOUNT_VERIFICATION:
             response.cookies.update(form.cleaned_data['cookies'])
@@ -148,7 +149,7 @@ class EnrolmentView(
             **kwargs
         )
         if self.steps.current == self.PERSONAL_DETAILS:
-            step = self.COMPANIES_HOUSE_BUSINESS_DETAILS
+            step = self.BUSINESS_DETAILS
             context['company'] = self.get_cleaned_data_for_step(step)
         return context
 
@@ -156,12 +157,26 @@ class EnrolmentView(
         return [self.templates[self.steps.current]]
 
     def done(self, form_list, **kwargs):
-        helpers.create_company_profile({
-            'sso_id': self.request.sso_user.id,
-            'company_email': self.request.sso_user.email,
-            'contact_email_address': self.request.sso_user.email,
-            **self.serialize_form_list(form_list),
-        })
+        data = self.serialize_form_list(form_list)
+        company = helpers.get_public_company_profile(
+            company_number=data['company_number'],
+            session=self.request.session,
+        )
+
+        if not company:
+            helpers.create_company_profile({
+                'sso_id': self.request.sso_user.id,
+                'company_email': self.request.sso_user.email,
+                'contact_email_address': self.request.sso_user.email,
+                **data,
+            })
+        else:
+            helpers.notify_request_collaboration(
+                email=company['email_address'],
+                form_url=reverse('enrolment-start'),
+                from_email=self.request.sso_user.email,
+                from_name=f"{data['given_name']} {data['family_name']}",
+            )
         return redirect(self.success_url)
 
     def serialize_form_list(self, form_list):

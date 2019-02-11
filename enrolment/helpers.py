@@ -14,6 +14,8 @@ from directory_constants.constants import urls
 
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
 SESSION_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'
+SESSION_KEY_PUBLIC_COMPANY_PROFILE = 'PUBLIC_COMPANY_PROFILE'
+SESSION_KEY_IS_ENROLLED = 'IS_ENROLLED'
 
 
 def get_company_profile(number, session):
@@ -42,17 +44,41 @@ def user_has_company(sso_session_id):
     response.raise_for_status()
 
 
+def get_public_company_profile(company_number, session):
+    session_key = f'{SESSION_KEY_PUBLIC_COMPANY_PROFILE}-{company_number}'
+    if session_key not in session:
+        response = api_client.company.retrieve_public_profile(company_number)
+        if response.status_code == 404:
+            session[session_key] = None
+        else:
+            response.raise_for_status()
+            session[session_key] = response.json()
+    return session[session_key]
+
+
+def get_is_enrolled(company_number, session):
+    session_key = f'{SESSION_KEY_IS_ENROLLED}-{company_number}'
+    if session_key not in session:
+        response = api_client.company.validate_company_number(company_number)
+        if response.status_code == 400:
+            session[session_key] = True
+        else:
+            response.raise_for_status()
+            session[session_key] = False
+    return session[session_key]
+
+
 def create_company_profile(data):
     response = api_client.enrolment.send_form(data)
     response.raise_for_status()
     return response
 
 
-def send_verification_code_email(email, verification_code, from_url):
+def send_verification_code_email(email, verification_code, form_url):
     action = actions.GovNotifyAction(
         template_id=settings.CONFIRM_VERIFICATION_CODE_TEMPLATE_ID,
         email_address=email,
-        form_url=from_url,
+        form_url=form_url,
     )
 
     expiry_date = parse_datetime(verification_code['expiration_date'])
@@ -67,11 +93,11 @@ def send_verification_code_email(email, verification_code, from_url):
     return response
 
 
-def notify_already_registered(email, from_url):
+def notify_already_registered(email, form_url):
     action = actions.GovNotifyAction(
         email_address=email,
         template_id=settings.GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID,
-        form_url=from_url,
+        form_url=form_url,
     )
 
     response = action.save({
@@ -89,6 +115,24 @@ def confirm_verification_code(email, verification_code):
         'email': email,
         'code': verification_code,
     })
+    response.raise_for_status()
+    return response
+
+
+def notify_request_collaboration(email, form_url, from_email, from_name):
+    action = actions.GovNotifyAction(
+        email_address=email,
+        template_id=settings.GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID,
+        form_url=form_url,
+    )
+
+    response = action.save({
+        'name': from_name,
+        'email': from_email,
+        'add_collaborator_url': settings.FAB_ADD_USER_URL,
+        'report_abuse_url': urls.FEEDBACK,
+    })
+
     response.raise_for_status()
     return response
 

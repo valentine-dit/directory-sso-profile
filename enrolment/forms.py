@@ -175,10 +175,14 @@ class CompaniesHouseBusinessDetails(forms.Form):
         required=False,
     )
 
-    def __init__(self, initial, company_profile=None, *args, **kwargs):
+    def __init__(
+        self, initial, company_data=None, is_enrolled=False, *args, **kwargs
+    ):
         super().__init__(initial=initial, *args, **kwargs)
-        if company_profile:
-            self.set_form_initial(company_profile)
+        if company_data:
+            self.set_form_initial(company_data)
+        if is_enrolled:
+            self.delete_already_enrolled_fields()
         # force the form to use the initial value rather than the value
         # the user submitted in previous sessions
         # on GET the data structure is a MultiValueDict. on POST the data
@@ -187,6 +191,10 @@ class CompaniesHouseBusinessDetails(forms.Form):
             self.initial_to_data('company_name')
             if not self.data.get('postal_code'):
                 self.initial_to_data('postal_code')
+
+    def delete_already_enrolled_fields(self):
+        del self.fields['industry']
+        del self.fields['website_address']
 
     def set_form_initial(self, company_profile):
         company = helpers.CompanyProfileFormatter(company_profile)
