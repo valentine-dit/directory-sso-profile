@@ -9,7 +9,7 @@ from django.urls import resolve, reverse
 
 from core.tests.helpers import create_response
 from enrolment import constants, helpers, views
-
+from directory_constants.constants import urls as constants_url
 
 urls = (
     reverse('enrolment', kwargs={'step': 'business-type'}),
@@ -775,3 +775,32 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
         from_email='test@a.com',
         from_name='Foo Bar'
     )
+
+
+def test_companies_house_search_has_company_not_found_url(
+        captcha_stub, submit_enrolment_step, mock_session_user, client
+):
+    response = submit_enrolment_step({
+        'choice': constants.COMPANIES_HOUSE_COMPANY
+    })
+
+    response = submit_enrolment_step({
+        'email': 'test@a.com',
+        'password': 'thing',
+        'password_confirmed': 'thing',
+        'captcha': captcha_stub,
+        'terms_agreed': True
+    })
+
+    response = submit_enrolment_step({
+        'code': '12345'
+    })
+
+    mock_session_user.login()
+    response = client.get(response.url)
+
+    not_found_url = constants_url.build_great_url(
+        'contact/triage/great-account/company-not-found/'
+    )
+
+    assert response.context_data['company_not_found_url'] == not_found_url
