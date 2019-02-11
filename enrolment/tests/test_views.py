@@ -89,6 +89,16 @@ def mock_validate_company_number(client):
 
 
 @pytest.fixture(autouse=True)
+def mock_request_collaboration(client):
+    patch = mock.patch.object(
+        helpers.api_client.company, 'request_collaboration',
+        return_value=create_response(200)
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
 def mock_enrolment_send(client):
     patch = mock.patch.object(
         helpers.api_client.enrolment, 'send_form',
