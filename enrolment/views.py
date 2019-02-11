@@ -162,25 +162,24 @@ class EnrolmentView(
 
     def done(self, form_list, **kwargs):
         data = self.serialize_form_list(form_list)
-        company = helpers.get_public_company_profile(
+        is_enrolled = helpers.get_is_enrolled(
             company_number=data['company_number'],
             session=self.request.session,
         )
-
-        if not company:
+        if is_enrolled:
+            helpers.request_collaboration(
+                company_number=data['company_number'],
+                email=self.request.sso_user.email,
+                name=f"{data['given_name']} {data['family_name']}",
+                form_url=self.request.path,
+            )
+        else:
             helpers.create_company_profile({
                 'sso_id': self.request.sso_user.id,
                 'company_email': self.request.sso_user.email,
                 'contact_email_address': self.request.sso_user.email,
                 **data,
             })
-        else:
-            helpers.notify_request_collaboration(
-                email=company['email_address'],
-                form_url=reverse('enrolment-start'),
-                from_email=self.request.sso_user.email,
-                from_name=f"{data['given_name']} {data['family_name']}",
-            )
         return redirect(self.success_url)
 
     def serialize_form_list(self, form_list):
