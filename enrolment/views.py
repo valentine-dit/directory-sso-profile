@@ -20,12 +20,24 @@ class NotFoundOnDisabledFeature:
         return super().dispatch(*args, **kwargs)
 
 
+class SkipFormOnDisable:
+    def get_form(self, step=None, *args, **kwargs):
+        if not settings.FEATURE_FLAGS[
+            'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ENABLED'
+        ]:
+            if self.steps.current == self.BUSINESS_TYPE:
+                self.render_goto_step(self.steps.next, **kwargs)
+        return super().get_form(step, *args, **kwargs)
+
+
 class EnrolmentStartView(TemplateView):
     template_name = 'enrolment/start.html'
 
 
 class EnrolmentView(
-    NotFoundOnDisabledFeature, core.mixins.PreventCaptchaRevalidationMixin,
+    NotFoundOnDisabledFeature,
+    SkipFormOnDisable,
+    core.mixins.PreventCaptchaRevalidationMixin,
     NamedUrlSessionWizardView
 ):
     success_url = reverse_lazy('enrolment-success')
@@ -156,6 +168,8 @@ class EnrolmentView(
             )
 
         return context
+
+
 
     def get_template_names(self):
         return [self.templates[self.steps.current]]
