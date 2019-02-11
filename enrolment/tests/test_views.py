@@ -79,6 +79,16 @@ def mock_retrieve_public_profile(client):
 
 
 @pytest.fixture(autouse=True)
+def mock_validate_company_number(client):
+    patch = mock.patch.object(
+        helpers.api_client.company, 'validate_company_number',
+        return_value=create_response(200)
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
 def mock_enrolment_send(client):
     patch = mock.patch.object(
         helpers.api_client.enrolment, 'send_form',

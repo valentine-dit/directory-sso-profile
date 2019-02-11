@@ -14,6 +14,8 @@ from directory_constants.constants import urls
 
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
 SESSION_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'
+SESSION_KEY_PUBLIC_COMPANY_PROFILE = 'PUBLIC_COMPANY_PROFILE'
+SESSION_KEY_IS_ENROLLED = 'IS_ENROLLED'
 
 
 def get_company_profile(number, session):
@@ -42,12 +44,28 @@ def user_has_company(sso_session_id):
     response.raise_for_status()
 
 
-def get_public_company_profile(company_number):
-    response = api_client.company.retrieve_public_profile(company_number)
-    if response.status_code == 404:
-        return None
-    response.raise_for_status()
-    return response.json()
+def get_public_company_profile(company_number, session):
+    session_key = f'{SESSION_KEY_PUBLIC_COMPANY_PROFILE}-{company_number}'
+    if session_key not in session:
+        response = api_client.company.retrieve_public_profile(company_number)
+        if response.status_code == 404:
+            session[session_key] = None
+        else:
+            response.raise_for_status()
+            session[session_key] = response.json()
+    return session[session_key]
+
+
+def get_is_enrolled(company_number, session):
+    session_key = f'{SESSION_KEY_IS_ENROLLED}-{company_number}'
+    if session_key not in session:
+        response = api_client.company.validate_company_number(company_number)
+        if response.status_code == 400:
+            session[session_key] = True
+        else:
+            response.raise_for_status()
+            session[session_key] = False
+    return session[session_key]
 
 
 def create_company_profile(data):
