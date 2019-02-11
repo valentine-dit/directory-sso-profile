@@ -119,14 +119,24 @@ def confirm_verification_code(email, verification_code):
     return response
 
 
-def request_collaboration(company_number, email, name):
+def request_collaboration(company_number, email, name, form_url):
     response = api_client.company.request_collaboration(
         company_number=company_number,
-        email=email,
-        name=name,
+        collaborator_email=email,
     )
     response.raise_for_status()
-    return response
+    action = actions.GovNotifyAction(
+        email_address=response.json()['company_email'],
+        template_id=settings.GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID,
+        form_url=form_url,
+    )
+    response = action.save({
+        'name': name,
+        'email': email,
+        'add_collaborator_url': settings.FAB_ADD_USER_URL,
+        'report_abuse_url': urls.FEEDBACK,
+    })
+    response.raise_for_status()
 
 
 class CompanyProfileFormatter:

@@ -164,9 +164,10 @@ class EnrolmentView(
         )
         if is_enrolled:
             helpers.request_collaboration(
-                email=company['email_address'],
+                company_number=data['company_number'],
                 email=self.request.sso_user.email,
                 name=f"{data['given_name']} {data['family_name']}",
+                form_url=self.request.path,
             )
         else:
             helpers.create_company_profile({

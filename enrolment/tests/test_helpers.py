@@ -1,14 +1,14 @@
 from unittest import mock
+
+from directory_constants.constants import urls
 import pytest
-
-from django.conf import settings
-
 from requests.cookies import RequestsCookieJar
 from requests.exceptions import HTTPError
 
+from django.conf import settings
+
 from enrolment import helpers
 from core.tests.helpers import create_response
-from directory_constants.constants import urls
 
 
 @mock.patch.object(helpers.ch_search_api_client.company, 'get_company_profile')
@@ -163,3 +163,39 @@ def test_notify_already_registered(mock_submit):
     }
     assert mock_submit.call_count == 1
     assert mock_submit.call_args == mock.call(expected)
+
+
+@mock.patch(
+    'directory_forms_api_client.client.forms_api_client.submit_generic'
+)
+@mock.patch.object(helpers.api_client.company, 'request_collaboration')
+def test_request_collaboration(mock_request_collaboration, mock_submit):
+    mock_request_collaboration.return_value = create_response(
+        201, {'company_email': 'company@example.com'}
+    )
+
+    helpers.request_collaboration(
+        company_number='12334',
+        email='test@example.com',
+        name='Foo Bar',
+        form_url='/the/form/',
+    )
+
+    assert mock_submit.call_args == mock.call({
+        'data': {
+            'name': 'Foo Bar',
+            'email': 'test@example.com',
+            'add_collaborator_url': settings.FAB_ADD_USER_URL,
+            'report_abuse_url': urls.FEEDBACK,
+        },
+        'meta': {
+            'action_name': 'gov-notify',
+            'form_url': '/the/form/',
+            'sender': {},
+            'spam_control': {},
+            'template_id': (
+                settings.GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID
+            ),
+            'email_address': 'company@example.com'
+        }
+    })
