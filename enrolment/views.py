@@ -20,23 +20,12 @@ class NotFoundOnDisabledFeature:
         return super().dispatch(*args, **kwargs)
 
 
-class SkipFormOnDisable:
-    def get_form(self, step=None, *args, **kwargs):
-        if not settings.FEATURE_FLAGS[
-            'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ENABLED'
-        ]:
-            if self.steps.current == self.BUSINESS_TYPE:
-                self.render_goto_step(self.steps.next, **kwargs)
-        return super().get_form(step, *args, **kwargs)
-
-
 class EnrolmentStartView(TemplateView):
     template_name = 'enrolment/start.html'
 
 
 class EnrolmentView(
     NotFoundOnDisabledFeature,
-    SkipFormOnDisable,
     core.mixins.PreventCaptchaRevalidationMixin,
     NamedUrlSessionWizardView
 ):
@@ -90,7 +79,8 @@ class EnrolmentView(
     condition_dict = {
         USER_ACCOUNT: user_account_condition,
         USER_ACCOUNT_VERIFICATION: user_account_condition,
-
+        BUSINESS_TYPE: settings.FEATURE_FLAGS[
+            'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ENABLED'],
     }
 
     def dispatch(self, request, *args, **kwargs):

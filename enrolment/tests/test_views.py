@@ -805,3 +805,14 @@ def test_companies_house_search_has_company_not_found_url(
     )
 
     assert response.context_data['company_not_found_url'] == not_found_url
+
+
+def test_disable_select_company(submit_enrolment_step, settings):
+
+    settings.FEATURE_FLAGS[
+        'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ENABLED'
+    ] = False
+
+    response = submit_enrolment_step({})
+
+    assert response.template_name == ['enrolment/business-type.html']
