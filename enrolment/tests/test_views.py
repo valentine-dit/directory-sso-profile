@@ -815,8 +815,7 @@ def test_disable_select_company(submit_enrolment_step, client, settings):
 
     url = reverse('enrolment', kwargs={'step': 'business-type'})
     response = client.get(url)
-    import pdb
-    pdb.set_trace()
-    assert response.status_code == 200
+
+    assert response.status_code == 302
     assert response.url == reverse('enrolment',
                                    kwargs={'step': 'user-account'})
