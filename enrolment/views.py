@@ -78,7 +78,7 @@ class EnrolmentView(
 
     def select_company_condition(self):
         return settings.FEATURE_FLAGS[
-            'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ENABLED']
+            'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ON']
 
     condition_dict = {
         USER_ACCOUNT: user_account_condition,
