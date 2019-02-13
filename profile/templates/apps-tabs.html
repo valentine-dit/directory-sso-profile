@@ -9,12 +9,6 @@
                     <div>You are signed in as {{ sso_user.email }}.</div>
                 {% endif %}
             </div>
-            <div class="column-one-third sso-profile-toolbar-buttons-container">
-                {% if sso_is_logged_in %}
-                <a class="button button-border font-small" href="{{ sso_logout_url }}">Sign out</a>
-                {% endif %}
-                <a href="{{ sso_password_reset_url }}" class="link font-small" id="reset-password">Reset password</a>
-            </div>
         </div>
     </div>
     <div class="sso-profile-tab-container">

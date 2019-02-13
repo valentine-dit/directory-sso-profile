@@ -1,8 +1,8 @@
 from directory_api_external.client import api_client
 from requests.exceptions import HTTPError
 
-from django.views.generic import TemplateView
 from django.conf import settings
+from django.views.generic import TemplateView
 
 from profile.eig_apps.views import RedirectToAboutPageMixin
 from profile.fab import helpers
@@ -42,7 +42,10 @@ class FindABuyerView(
 
     def get_template_names(self, *args, **kwargs):
         if self.company is not None:
-            template_name = self.template_name_fab_user
+            if settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON']:
+                template_name = 'fab/profile.html'
+            else:
+                template_name = self.template_name_fab_user
         elif self.company_retrieve_error is True:
             template_name = self.template_name_error
         else:
