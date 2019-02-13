@@ -2,6 +2,10 @@ import directory_validators.company
 
 from directory_components import fields, forms
 
+from django.forms import Textarea
+
+from profile.fab import validators
+
 
 class SocialLinksForm(forms.Form):
     HELP_URLS = 'Use a full web address (URL) including http:// or https://'
@@ -38,4 +42,27 @@ class SocialLinksForm(forms.Form):
 class EmailAddressForm(forms.Form):
     company_email = fields.EmailField(
         label='Email address'
+    )
+
+
+class DescriptionForm(forms.Form):
+    summary = fields.CharField(
+        label='Brief summary to make your company stand out to buyers:',
+        help_text='Maximum 250 characters.',
+        max_length=250,
+        widget=Textarea,
+        validators=[
+            validators.does_not_contain_email,
+            directory_validators.company.no_html,
+        ],
+    )
+    description = fields.CharField(
+        widget=Textarea,
+        label='Describe your business to overseas buyers:',
+        help_text='Maximum 2,000 characters.',
+        max_length=2000,
+        validators=[
+            validators.does_not_contain_email,
+            directory_validators.company.no_html,
+        ],
     )

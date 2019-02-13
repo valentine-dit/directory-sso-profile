@@ -109,10 +109,14 @@ urlpatterns = [
         profile.fab.views.SocialLinksFormView.as_view(),
         name='find-a-buyer-social-links'
     ),
-
     url(
         r'^find-a-buyer/email/$',
         profile.fab.views.EmailAddressFormView.as_view(),
         name='find-a-buyer-email'
+    ),
+    url(
+        r'^find-a-buyer/description/$',
+        profile.fab.views.DescriptionFormView.as_view(),
+        name='find-a-buyer-description'
     ),
 ]

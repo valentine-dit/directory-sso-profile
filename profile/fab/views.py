@@ -91,3 +91,8 @@ class SocialLinksFormView(FormView):
 class EmailAddressFormView(FormView):
     template_name = 'fab/email-address-form.html'
     form_class = forms.EmailAddressForm
+
+
+class DescriptionFormView(FormView):
+    form_class = forms.DescriptionForm
+    template_name = 'fab/description-form.html'
