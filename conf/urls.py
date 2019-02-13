@@ -66,11 +66,6 @@ urlpatterns = [
         name='about'
     ),
     url(
-        r'^find-a-buyer/$',
-        profile.fab.views.FindABuyerView.as_view(),
-        name='find-a-buyer'
-    ),
-    url(
         r'^selling-online-overseas/$',
         profile.soo.views.SellingOnlineOverseasView.as_view(),
         name='selling-online-overseas'
@@ -102,5 +97,22 @@ urlpatterns = [
             done_step_name='finished'
         ),
         name='enrolment'
+    ),
+
+    url(
+        r'^find-a-buyer/$',
+        profile.fab.views.FindABuyerView.as_view(),
+        name='find-a-buyer'
+    ),
+    url(
+        r'^find-a-buyer/social-links/$',
+        profile.fab.views.SocialLinksFormView.as_view(),
+        name='find-a-buyer-social-links'
+    ),
+
+    url(
+        r'^find-a-buyer/email/$',
+        profile.fab.views.EmailAddressFormView.as_view(),
+        name='find-a-buyer-email'
     ),
 ]

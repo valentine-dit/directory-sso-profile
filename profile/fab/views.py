@@ -2,10 +2,10 @@ from directory_api_external.client import api_client
 from requests.exceptions import HTTPError
 
 from django.conf import settings
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, FormView
 
 from profile.eig_apps.views import RedirectToAboutPageMixin
-from profile.fab import helpers
+from profile.fab import forms, helpers
 from sso.utils import SSOLoginRequiredMixin
 
 
@@ -81,3 +81,13 @@ class FindABuyerView(
         for key, value in self.SUCCESS_MESSAGES.items():
             if key in self.request.GET:
                 return value
+
+
+class SocialLinksFormView(FormView):
+    template_name = 'fab/social-links-form.html'
+    form_class = forms.SocialLinksForm
+
+
+class EmailAddressFormView(FormView):
+    template_name = 'fab/email-address-form.html'
+    form_class = forms.EmailAddressForm

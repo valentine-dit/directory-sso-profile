@@ -59,7 +59,7 @@
                         {% if company.facebook_url %}
                             <a class="link" href="{{ company.facebook_url }}">{{ company.facebook_url }}</a>
                         {% else %}
-                            <a class="link" href="#">Add Facebook</a>
+                            <a class="link" href="{% url 'find-a-buyer-social-links' %}">Add Facebook</a>
                         {% endif %}
                     </li>
                     <li>
@@ -67,7 +67,7 @@
                         {% if company.twitter_url %}
                             <a class="link" href="{{ company.twitter_url }}">{{ company.twitter_url }}</a>
                         {% else %}
-                            <a class="link" href="#">Add Twitter</a>
+                            <a class="link" href="{% url 'find-a-buyer-social-links' %}">Add Twitter</a>
                         {% endif %}
                     </li>
                     <li>
@@ -75,7 +75,7 @@
                         {% if company.linkedin_url %}
                             <a class="link" href="{{ company.linkedin_url }}">{{ company.linkedin_url }}</a>
                         {% else %}
-                            <a class="link" href="#">Add Linkedin</a>
+                            <a class="link" href="{% url 'find-a-buyer-social-links' %}">Add Linkedin</a>
                         {% endif %}
                     </li>
                 </ul>
