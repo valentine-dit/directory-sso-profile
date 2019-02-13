@@ -6,8 +6,9 @@
         <div class="column-one-half">
             <h1 class="heading-xlarge">Create an account</h1>
             <p>We'll email you a confirmation code while creating your account. Make sure you have access to your email.</p>
+			{% if not sso_is_logged_in %}
             <p><a href="{{ sso_login_url }}">Sign in</a> if you have an account.</p>
-            
+             {% endif %}
             <div class="steps-progress-indicator" id="start-page-progress-indicator" aria-label="Process steps">
               <p id="steps-progress-explanation" class="visually-hidden">List of steps required to complete the process:</p>
               <ol aria-labelledby="steps-progress-explanation">
