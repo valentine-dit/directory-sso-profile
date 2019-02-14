@@ -23,6 +23,12 @@ class NotFoundOnDisabledFeature:
 class EnrolmentStartView(TemplateView):
     template_name = 'enrolment/start.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.sso_user:
+            if helpers.user_has_company(request.sso_user.session_id):
+                return redirect('find-a-buyer')
+        return super().dispatch(request, *args, **kwargs)
+
 
 class EnrolmentView(
     NotFoundOnDisabledFeature,
