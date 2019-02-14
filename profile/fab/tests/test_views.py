@@ -104,14 +104,30 @@ def test_supplier_company_retrieve_not_found(
 @patch('profile.fab.helpers.api_client.supplier.retrieve_supplier_company')
 def test_supplier_company_retrieve_found(
     mock_retrieve_supplier_company, api_response_200, sso_user_middleware,
-    returned_client
+    returned_client, settings
 ):
+    settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = False
+
     mock_retrieve_supplier_company.return_value = api_response_200
     expected_template_name = views.FindABuyerView.template_name_fab_user
 
     response = returned_client.get(reverse('find-a-buyer'))
 
     assert response.template_name == [expected_template_name]
+
+
+@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier_company')
+def test_supplier_company_retrieve_found_business_profile_on(
+    mock_retrieve_supplier_company, api_response_200, sso_user_middleware,
+    returned_client, settings
+):
+    settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = True
+
+    mock_retrieve_supplier_company.return_value = api_response_200
+
+    response = returned_client.get(reverse('find-a-buyer'))
+
+    assert response.template_name == ['fab/profile.html']
 
 
 @patch('profile.fab.helpers.api_client.supplier.retrieve_supplier_company')

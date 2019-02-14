@@ -30,11 +30,13 @@ def test_landing_page_redirect(client):
     assert response.get('Location') == reverse('about')
 
 
-def test_signed_in_as_displays_email(client, sso_user_middleware):
+def test_signed_in_as_displays_email(client, sso_user_middleware, settings):
+    settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = False
+
     response = client.get(reverse('about'))
 
     assert 'You are signed in as jim@example.com' in str(response.content)
-    assert str(response.content).count(SIGN_OUT_LABEL) == 2
+    assert str(response.content).count(SIGN_OUT_LABEL) == 1
 
 
 def test_not_signed_in_does_not_display_email(client):

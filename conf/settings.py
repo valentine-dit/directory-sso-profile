@@ -328,6 +328,9 @@ FAB_TRANSFER_ACCOUNT_URL = env.str('FAB_TRANSFER_ACCOUNT_URL')
 
 # feature flags
 FEATURE_FLAGS = {
+    'BUSINESS_PROFILE_ON': env.bool(
+        'FEATURE_BUSINESS_PROFILE_ENABLED', False
+    ),
     'EXPORT_JOURNEY_ON': env.bool('FEATURE_EXPORT_JOURNEY_ENABLED', True),
     # used by directory-components
     'MAINTENANCE_MODE_ON': env.bool('FEATURE_MAINTENANCE_MODE_ENABLED', False),

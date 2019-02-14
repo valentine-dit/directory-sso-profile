@@ -103,5 +103,4 @@ urlpatterns = [
         ),
         name='enrolment'
     ),
-
 ]
