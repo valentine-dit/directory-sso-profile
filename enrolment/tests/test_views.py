@@ -813,3 +813,17 @@ def test_companies_house_search_has_company_not_found_url(
     )
 
     assert response.context_data['company_not_found_url'] == not_found_url
+
+
+def test_disable_select_company(submit_enrolment_step, client, settings):
+
+    settings.FEATURE_FLAGS[
+        'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ON'
+    ] = False
+
+    url = reverse('enrolment', kwargs={'step': 'business-type'})
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('enrolment',
+                                   kwargs={'step': 'user-account'})
