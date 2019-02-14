@@ -328,7 +328,11 @@ FEATURE_FLAGS = {
     ),
     'NEW_ACCOUNT_JOURNEY_ON': env.bool(
         'FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED', False
+    ),
+    'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ON': env.bool(
+        'FEATURE_NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ENABLED', True
     )
+
 }
 
 # Healthcheck

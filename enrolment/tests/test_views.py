@@ -813,3 +813,42 @@ def test_companies_house_search_has_company_not_found_url(
     )
 
     assert response.context_data['company_not_found_url'] == not_found_url
+
+
+def test_disable_select_company(submit_enrolment_step, client, settings):
+
+    settings.FEATURE_FLAGS[
+        'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ON'
+    ] = False
+
+    url = reverse('enrolment', kwargs={'step': 'business-type'})
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('enrolment',
+                                   kwargs={'step': 'user-account'})
+
+
+def test_user_has_company_redirect_on_start(
+    client, mock_user_has_company, mock_session_user
+):
+    mock_session_user.login()
+    mock_user_has_company.return_value = create_response(200)
+
+    url = reverse('enrolment-start')
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
+
+
+def test_user_has_no_company_redirect_on_start(
+    client, mock_user_has_company, mock_session_user
+):
+    mock_session_user.login()
+    mock_user_has_company.return_value = create_response(404)
+
+    url = reverse('enrolment-start')
+    response = client.get(url)
+
+    assert response.status_code == 200

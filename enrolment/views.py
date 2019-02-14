@@ -23,9 +23,16 @@ class NotFoundOnDisabledFeature:
 class EnrolmentStartView(TemplateView):
     template_name = 'enrolment/start.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.sso_user:
+            if helpers.user_has_company(request.sso_user.session_id):
+                return redirect('find-a-buyer')
+        return super().dispatch(request, *args, **kwargs)
+
 
 class EnrolmentView(
-    NotFoundOnDisabledFeature, core.mixins.PreventCaptchaRevalidationMixin,
+    NotFoundOnDisabledFeature,
+    core.mixins.PreventCaptchaRevalidationMixin,
     NamedUrlSessionWizardView
 ):
     success_url = reverse_lazy('enrolment-success')
@@ -75,10 +82,14 @@ class EnrolmentView(
     def user_account_condition(self):
         return self.request.sso_user is None
 
+    def select_company_condition(self):
+        return settings.FEATURE_FLAGS[
+            'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ON']
+
     condition_dict = {
         USER_ACCOUNT: user_account_condition,
         USER_ACCOUNT_VERIFICATION: user_account_condition,
-
+        BUSINESS_TYPE: select_company_condition,
     }
 
     def dispatch(self, request, *args, **kwargs):
