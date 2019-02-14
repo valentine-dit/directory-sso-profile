@@ -102,17 +102,28 @@
             <h2 class="heading-large">{{ company.name }}</h2>
 
             <div class="{% if not company.email_address %}primary-action-required{% endif %} message-box border-medium border-black background-white">
-              <h3 class="box-heading heading-medium black-text">Profile email</h3>
+              <div class="grid-row">
+                <h3 class="box-heading heading-medium black-text column-one-half">Profile email</h3>
+                <div class="column-one-half right-column">
+                    {% if company.email_address %}<a href="{% url 'find-a-buyer-email' %}" class="link pencil-link">Edit</a>{% endif %}
+                </div>
+              </div>
               <p class="mid-grey-text font-xsmall">This will be the email address international buyers will contact you from the business profile.</p>
               {% if company.email_address %}
                 <span>{{ company.email_address }}</span>
               {% else %}
-                <a href="#" class="link">Add email address</a>
+                <a href="{% url 'find-a-buyer-email' %}" class="link">Add email address</a>
               {% endif %}
             </div>
 
             <div class="{% if not company.description %}primary-action-required{% endif %} message-box border-medium border-black background-white">
-              <h3 class="box-heading heading-medium black-text">Company description</h3>
+              <div class="grid-row">
+                <h3 class="box-heading heading-medium black-text column-one-half">Company description</h3>
+                <div class="column-one-half right-column">
+                    {% if company.description %}<a href="{% url 'find-a-buyer-description' %}" class="link pencil-link">Edit</a>{% endif %}
+                </div>
+              </div>
+
               <p class="mid-grey-text font-xsmall">This will be the email address international buyers will contact you from the business profile.</p>
               {% if company.description %}
                 <span>{{ company.description }}</span>
@@ -122,7 +133,9 @@
             </div>
 
             <div class="message-box action-required border-medium border-black background-white">
-              <h3 class="box-heading heading-medium black-text">Case studies</h3>
+              <div class="grid-row">
+                <h3 class="box-heading heading-medium black-text column-one-half">Case studies</h3>
+              </div>
               <div class="grid-row">
                   <p class="mid-grey-text font-xsmall">Describe something significant your company has done that will be relevant to international buyers.</p>
                   <ul id="case-studies">
@@ -134,7 +147,7 @@
                       {% endfor %}
                   </ul>
               </div>
-              <a href="#" class="link">Add a case study</a>
+              <a href="#" class="link add-case-study">Add a case study</a>
             </div>
 
         </div>

@@ -6,7 +6,6 @@ raven==5.19.0
 requests==2.21.0
 whitenoise==3.1
 sigauth==4.0.1
-directory-api-external==5.0.0
 directory-validators==4.5.1
 directory-healthcheck==1.0.1
 directory-components==4.1.2

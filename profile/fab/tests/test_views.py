@@ -1,6 +1,7 @@
 import http
 from unittest.mock import patch
 
+from directory_api_client.client import api_client
 import pytest
 import requests
 
@@ -33,11 +34,8 @@ def api_response_company_profile_200():
     return response
 
 
-@patch('directory_api_external.client.api_client.supplier.retrieve_supplier')
-@patch(
-    'directory_api_external.client.api_client.supplier.'
-    'retrieve_supplier_company',
-)
+@patch.object(api_client.supplier, 'retrieve_profile')
+@patch.object(api_client.company, 'retrieve_private_profile')
 def test_find_a_buyer_redirect_first_time_user(
     mock_retrieve_company, mock_retrieve_supplier, sso_user_middleware, client,
     api_response_company_profile_200, api_response_supplier_profile_owner_200
@@ -52,11 +50,8 @@ def test_find_a_buyer_redirect_first_time_user(
     assert response.get('Location') == reverse('about')
 
 
-@patch('directory_api_external.client.api_client.supplier.retrieve_supplier')
-@patch(
-    'directory_api_external.client.api_client.supplier.'
-    'retrieve_supplier_company',
-)
+@patch.object(api_client.supplier, 'retrieve_profile')
+@patch.object(api_client.company, 'retrieve_private_profile')
 def test_find_a_buyer_exposes_context(
     mock_retrieve_company, mock_retrieve_supplier, returned_client,
     sso_user_middleware, settings, api_response_company_profile_200,
@@ -88,7 +83,7 @@ def test_find_a_buyer_unauthenticated(
     assert response.status_code == http.client.FOUND
 
 
-@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier_company')
+@patch.object(api_client.company, 'retrieve_private_profile')
 def test_supplier_company_retrieve_not_found(
     mock_retrieve_supplier_company, api_response_404, sso_user_middleware,
     returned_client
@@ -101,7 +96,7 @@ def test_supplier_company_retrieve_not_found(
     assert response.template_name == [expected_template_name]
 
 
-@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier_company')
+@patch.object(api_client.company, 'retrieve_private_profile')
 def test_supplier_company_retrieve_found(
     mock_retrieve_supplier_company, api_response_200, sso_user_middleware,
     returned_client, settings
@@ -116,7 +111,7 @@ def test_supplier_company_retrieve_found(
     assert response.template_name == [expected_template_name]
 
 
-@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier_company')
+@patch.object(api_client.company, 'retrieve_private_profile')
 def test_supplier_company_retrieve_found_business_profile_on(
     mock_retrieve_supplier_company, api_response_200, sso_user_middleware,
     returned_client, settings
@@ -130,21 +125,8 @@ def test_supplier_company_retrieve_found_business_profile_on(
     assert response.template_name == ['fab/profile.html']
 
 
-@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier_company')
-def test_supplier_company_retrieve_error(
-    mock_retrieve_supplier_company, api_response_500, sso_user_middleware,
-    returned_client
-):
-    mock_retrieve_supplier_company.return_value = api_response_500
-    expected_template_name = views.FindABuyerView.template_name_error
-
-    response = returned_client.get(reverse('find-a-buyer'))
-
-    assert response.template_name == [expected_template_name]
-
-
-@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier_company')
-@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier')
+@patch.object(api_client.company, 'retrieve_private_profile')
+@patch.object(api_client.supplier, 'retrieve_profile')
 def test_company_owner(
     mock_mock_retrieve_supplier, mock_retrieve_supplier_company,
     api_response_supplier_profile_owner_200, api_response_company_profile_200,
@@ -162,8 +144,8 @@ def test_company_owner(
     assert response.context_data['is_profile_owner'] is True
 
 
-@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier_company')
-@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier')
+@patch.object(api_client.company, 'retrieve_private_profile')
+@patch.object(api_client.supplier, 'retrieve_profile')
 def test_non_company_owner(
     mock_mock_retrieve_supplier, mock_retrieve_supplier_company,
     api_response_supplier_profile_non_owner_200, api_response_200,
@@ -182,8 +164,8 @@ def test_non_company_owner(
 @pytest.mark.parametrize('param', (
     'owner-transferred', 'user-added', 'user-removed'
 ))
-@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier_company')
-@patch('profile.fab.helpers.api_client.supplier.retrieve_supplier')
+@patch.object(api_client.company, 'retrieve_private_profile')
+@patch.object(api_client.supplier, 'retrieve_profile')
 def test_success_message(
     mock_mock_retrieve_supplier, mock_retrieve_supplier_company,
     api_response_supplier_profile_non_owner_200, api_response_200,

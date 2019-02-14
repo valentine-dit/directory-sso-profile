@@ -40,7 +40,7 @@ class SocialLinksForm(forms.Form):
 
 
 class EmailAddressForm(forms.Form):
-    company_email = fields.EmailField(
+    email_address = fields.EmailField(
         label='Email address'
     )
 

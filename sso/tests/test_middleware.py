@@ -1,6 +1,7 @@
 import http
 from unittest.mock import patch, Mock
 
+from directory_api_client.client import api_client
 import pytest
 import requests
 
@@ -46,10 +47,7 @@ def test_sso_middleware_no_cookie(
     assert response.status_code == http.client.FOUND
 
 
-@patch(
-    'directory_api_external.client.api_client.supplier.'
-    'retrieve_supplier_company',
-)
+@patch.object(api_client.company, 'retrieve_private_profile')
 @patch('directory_sso_api_client.client.sso_api_client.user.get_session_user')
 def test_sso_middleware_api_response_ok(
     mock_get_session_user, mock_retrieve_supplier_company, settings,

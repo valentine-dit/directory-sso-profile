@@ -4,7 +4,6 @@ from django.conf.urls import include, url
 
 import core.views
 import enrolment.views
-import profile.api.views
 import profile.eig_apps.views
 import profile.exops.views
 import profile.fab.views
@@ -25,11 +24,6 @@ healthcheck_urls = [
 ]
 
 api_urls = [
-    url(
-        r'^v1/directory/supplier/$',
-        profile.api.views.ExternalSupplierAPIView.as_view(),
-        name='external-supplier'
-    ),
     url(
         r'^v1/companies-house-search/$',
         core.views.CompaniesHouseSearchAPIView.as_view(),

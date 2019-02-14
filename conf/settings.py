@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     'directory_constants',
     'directory_components',
     'profile',
-    'profile.api',
     'enrolment',
     'directory_healthcheck',
     'export_elements',
@@ -222,17 +221,6 @@ else:
             },
         },
     }
-
-
-# directory-external-api
-DIRECTORY_API_CLIENT_EXTERNAL_API_KEY = env.str(
-    'DIRECTORY_API_EXTERNAL_SIGNATURE_SECRET', ''
-)
-DIRECTORY_API_CLIENT_EXTERNAL_BASE_URL = env.str(
-    'DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL'
-)
-DIRECTORY_API_CLIENT_EXTERNAL_SENDER_ID = 'directory'
-DIRECTORY_API_CLIENT_EXTERNAL_DEFAULT_TIMEOUT = 15
 
 # SSO API Client
 DIRECTORY_SSO_API_CLIENT_BASE_URL = env.str('SSO_API_CLIENT_BASE_URL', '')
