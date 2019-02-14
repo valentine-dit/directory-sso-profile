@@ -92,7 +92,6 @@ urlpatterns = [
         ),
         name='enrolment'
     ),
-
     url(
         r'^find-a-buyer/$',
         profile.fab.views.FindABuyerView.as_view(),
@@ -101,7 +100,7 @@ urlpatterns = [
     url(
         r'^find-a-buyer/social-links/$',
         profile.fab.views.SocialLinksFormView.as_view(),
-        name='find-a-buyer-social-links'
+        name='find-a-buyer-social'
     ),
     url(
         r'^find-a-buyer/email/$',

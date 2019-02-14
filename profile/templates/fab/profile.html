@@ -17,7 +17,7 @@
             </div>
             <div class="column-one-half right-column">
                 <a class="background-light-blue font-xsmall pill" href="#">Admin view</a>
-                <span class="divider">|</span>
+                <span class="divider"></span>
                 <a href="#">View profile</a>
             </div>
         </div>
@@ -44,7 +44,7 @@
                 {% if not company.logo %}
                     <a id="add-image" href="#" class="link">Add a logo</a>
                 {% else %}
-                    <img alt="" src="{{ company.logo }}" />
+                    <img alt="{{ company.name }}" src="{{ company.logo }}" />
                 {% endif %}
             </div>
 
@@ -76,7 +76,7 @@
                         {% if company.facebook_url %}
                             <a class="link" href="{{ company.facebook_url }}">{{ company.facebook_url }}</a>
                         {% else %}
-                            <a class="link" href="{% url 'find-a-buyer-social-links' %}">Add Facebook</a>
+                            <a class="link" href="{% url 'find-a-buyer-social' %}">Add Facebook</a>
                         {% endif %}
                     </li>
                     <li>
@@ -84,7 +84,7 @@
                         {% if company.twitter_url %}
                             <a class="link" href="{{ company.twitter_url }}">{{ company.twitter_url }}</a>
                         {% else %}
-                            <a class="link" href="{% url 'find-a-buyer-social-links' %}">Add Twitter</a>
+                            <a class="link" href="{% url 'find-a-buyer-social' %}">Add Twitter</a>
                         {% endif %}
                     </li>
                     <li>
@@ -92,7 +92,7 @@
                         {% if company.linkedin_url %}
                             <a class="link" href="{{ company.linkedin_url }}">{{ company.linkedin_url }}</a>
                         {% else %}
-                            <a class="link" href="{% url 'find-a-buyer-social-links' %}">Add Linkedin</a>
+                            <a class="link" href="{% url 'find-a-buyer-social' %}">Add Linkedin</a>
                         {% endif %}
                     </li>
                 </ul>
@@ -147,7 +147,7 @@
                       {% endfor %}
                   </ul>
               </div>
-              <a href="#" class="link add-case-study">Add a case study</a>
+              <a href="#" class="link">Add a case study</a>
             </div>
 
         </div>

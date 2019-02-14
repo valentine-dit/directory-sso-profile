@@ -50,17 +50,17 @@ class DescriptionForm(forms.Form):
         label='Brief summary to make your company stand out to buyers:',
         help_text='Maximum 250 characters.',
         max_length=250,
-        widget=Textarea,
+        widget=Textarea(attrs={'rows': 5}),
         validators=[
             validators.does_not_contain_email,
             directory_validators.company.no_html,
         ],
     )
     description = fields.CharField(
-        widget=Textarea,
         label='Describe your business to overseas buyers:',
         help_text='Maximum 2,000 characters.',
         max_length=2000,
+        widget=Textarea(attrs={'rows': 5}),
         validators=[
             validators.does_not_contain_email,
             directory_validators.company.no_html,
