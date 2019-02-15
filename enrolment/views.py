@@ -287,7 +287,7 @@ class SoleTraderEnrolmentView(BaseEnrolmentWizardView):
     def get_form_initial(self, step):
         form_initial = super().get_form_initial(step)
         if step == BUSINESS_INFO:
-            data = self.get_cleaned_data_for_step(COMPANY_SEARCH, {})
+            data = self.get_cleaned_data_for_step(COMPANY_SEARCH)
             if data:
                 form_initial['address'] = data['address'].replace(', ', '\n')
                 form_initial['postal_code'] = data['postal_code']

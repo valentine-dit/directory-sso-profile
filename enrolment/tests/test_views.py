@@ -18,6 +18,7 @@ urls = (
     reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}),
     reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}),
 )
+company_types = (constants.COMPANIES_HOUSE_COMPANY, constants.SOLE_TRADER)
 
 
 @pytest.fixture(autouse=True)
@@ -48,6 +49,26 @@ def submit_companies_house_step(client):
     )
 
 
+@pytest.fixture
+def submit_sole_trader_step(client):
+    return submit_step_factory(
+        client=client,
+        url_name='enrolment-sole-trader',
+        view_name='sole_trader_enrolment_view',
+        view_class=views.SoleTraderEnrolmentView,
+    )
+
+
+@pytest.fixture
+def submit_step_builder(submit_companies_house_step, submit_sole_trader_step):
+    def inner(choice):
+        if choice == constants.COMPANIES_HOUSE_COMPANY:
+            return submit_companies_house_step
+        elif choice == constants.SOLE_TRADER:
+            return submit_sole_trader_step
+    return inner
+
+
 @pytest.fixture(autouse=True)
 def mock_get_company_profile():
     patch = mock.patch.object(helpers, 'get_company_profile', return_value={
@@ -67,6 +88,13 @@ def mock_get_company_profile():
 @pytest.fixture(autouse=True)
 def mock_send_verification_code_email():
     patch = mock.patch.object(helpers, 'send_verification_code_email')
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_clean():
+    patch = mock.patch('captcha.fields.ReCaptchaField.clean')
     yield patch.start()
     patch.stop()
 
@@ -242,10 +270,8 @@ def test_enrolment_routing(client, choice, expected_url):
     assert response.url == expected_url
 
 
-@mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment(
-    mock_clean, client, submit_companies_house_step,
-    mock_session_user, steps_data
+    client, submit_companies_house_step, mock_session_user, steps_data
 ):
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
@@ -268,10 +294,8 @@ def test_companies_house_enrolment(
     assert response.status_code == 302
 
 
-@mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_change_company_name(
-    mock_clean, client, submit_companies_house_step, mock_session_user,
-    steps_data
+    client, submit_companies_house_step, mock_session_user, steps_data
 ):
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
@@ -307,42 +331,8 @@ def test_companies_house_enrolment_change_company_name(
     assert response.context_data['form']['company_name'].data == 'Example corp'
 
 
-@mock.patch('captcha.fields.ReCaptchaField.clean')
-def test_create_user_enrolment(
-    mock_clean, client, captcha_stub, submit_companies_house_step
-):
-    response = submit_companies_house_step({
-        'email': 'tex4566eqw34e7@example.com',
-        'password': 'thing',
-        'password_confirmed': 'thing',
-        'captcha': captcha_stub,
-        'terms_agreed': True
-    })
-    assert response.status_code == 302
-
-
-@mock.patch('captcha.fields.ReCaptchaField.clean')
-def test_create_user_enrolment_already_exists(
-    mock_clean, client, steps_data, mock_create_user,
-    submit_companies_house_step, mock_notify_already_registered
-):
-    mock_create_user.return_value = create_response(400)
-
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
-    assert response.status_code == 302
-    assert mock_notify_already_registered.call_count == 1
-    assert mock_notify_already_registered.call_args == mock.call(
-        email='test@a.com',
-        form_url=reverse(
-            'enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}
-        )
-    )
-
-
-@mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_expose_company(
-    mock_clean, client, submit_companies_house_step, mock_session_user,
-    steps_data
+    client, submit_companies_house_step, mock_session_user, steps_data
 ):
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
@@ -387,36 +377,8 @@ def test_companies_house_enrolment_redirect_to_start(client):
     assert response.url == reverse('enrolment-business-type')
 
 
-@freeze_time('2012-01-14 12:00:02')
-@mock.patch('captcha.fields.ReCaptchaField.clean', mock.Mock)
-def test_companies_house_verification_passes_cookies(
-    submit_companies_house_step, client, steps_data
-):
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
-    assert response.status_code == 302
-
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
-    assert response.status_code == 302
-
-    assert str(response.cookies['debug_sso_session_cookie']) == (
-        'Set-Cookie: debug_sso_session_cookie=a; '
-        'Comment=None; '
-        'expires=Sat, 14 Jan 2012 12:00:02 GMT; '
-        'Path=/; '
-        'Version=0'
-    )
-    assert str(response.cookies['sso_display_logged_in']) == (
-        'Set-Cookie: sso_display_logged_in=true; '
-        'Comment=None; '
-        'expires=Sat, 14 Jan 2012 12:00:02 GMT; '
-        'Path=/; '
-        'Version=0'
-    )
-
-
-@mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_submit_end_to_end(
-    mock_clean, client, submit_companies_house_step, mock_session_user,
+    client, submit_companies_house_step, mock_session_user,
     mock_enrolment_send, steps_data
 ):
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
@@ -464,62 +426,8 @@ def test_companies_house_enrolment_submit_end_to_end(
     })
 
 
-@mock.patch('captcha.fields.ReCaptchaField.clean')
-def test_confirm_user_verify_code_incorrect_code(
-    mock_clean, client, submit_companies_house_step, mock_session_user,
-    mock_confirm_verification_code, steps_data
-):
-    mock_session_user.return_value = create_response(404)
-    mock_confirm_verification_code.return_value = create_response(400)
-
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
-    assert response.status_code == 302
-
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
-
-    assert response.status_code == 200
-    assert response.context_data['form'].errors['code'] == ['Invalid code']
-
-
-@mock.patch('captcha.fields.ReCaptchaField.clean')
-def test_confirm_user_verify_code_remote_error(
-    mock_clean, client, captcha_stub, submit_companies_house_step,
-    mock_session_user, mock_confirm_verification_code, steps_data
-):
-    mock_session_user.return_value = create_response(404)
-    mock_confirm_verification_code.return_value = create_response(500)
-
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
-    assert response.status_code == 302
-
-    with pytest.raises(HTTPError):
-        submit_companies_house_step(steps_data[views.VERIFICATION])
-
-
-@mock.patch('captcha.fields.ReCaptchaField.clean')
-def test_confirm_user_verify_code(
-    mock_clean, client, submit_companies_house_step, mock_session_user,
-    mock_confirm_verification_code, steps_data
-):
-    mock_session_user.return_value = create_response(404)
-
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
-    assert response.status_code == 302
-
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
-
-    mock_session_user.login()
-
-    assert response.status_code == 302
-    assert mock_confirm_verification_code.call_count == 1
-    assert mock_confirm_verification_code.call_args == mock.call({
-        'email': 'test@a.com', 'code': '12345'
-    })
-
-
-@mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_submit_end_to_end_logged_in(
-    mock_clean, client, captcha_stub, submit_companies_house_step,
+    client, captcha_stub, submit_companies_house_step,
     mock_session_user, mock_enrolment_send, steps_data
 ):
     mock_session_user.login()
@@ -613,10 +521,9 @@ def test_companies_house_enrolment_has_company_error(
         client.get(url)
 
 
-@mock.patch('captcha.fields.ReCaptchaField.clean')
 @mock.patch('enrolment.views.helpers.request_collaboration')
 def test_companies_house_enrolment_submit_end_to_end_company_has_account(
-    mock_request_collaboration, mock_clean, client, steps_data,
+    mock_request_collaboration, client, steps_data,
     submit_companies_house_step, mock_session_user, mock_enrolment_send,
     mock_validate_company_number
 ):
@@ -659,10 +566,8 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     )
 
 
-@mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_search_has_company_not_found_url(
-    mock_clean, submit_companies_house_step, mock_session_user, client,
-    steps_data
+    submit_companies_house_step, mock_session_user, client, steps_data
 ):
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
@@ -717,3 +622,261 @@ def test_user_has_no_company_redirect_on_start(
     response = client.get(url)
 
     assert response.status_code == 200
+
+
+@pytest.mark.parametrize('company_type', company_types)
+def test_create_user_enrolment(
+    client, steps_data, submit_step_builder, company_type
+):
+    submit_step = submit_step_builder(company_type)
+    response = submit_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+
+@pytest.mark.parametrize(
+    'company_type,form_url_name',
+    zip(company_types, ['enrolment-companies-house', 'enrolment-sole-trader'])
+)
+def test_create_user_enrolment_already_exists(
+    company_type, form_url_name, steps_data, mock_create_user,
+    submit_step_builder, mock_notify_already_registered
+):
+    mock_create_user.return_value = create_response(400)
+
+    submit_step = submit_step_builder(company_type)
+
+    response = submit_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+    assert mock_notify_already_registered.call_count == 1
+    assert mock_notify_already_registered.call_args == mock.call(
+        email='test@a.com',
+        form_url=reverse(form_url_name, kwargs={'step': views.USER_ACCOUNT})
+    )
+
+
+@pytest.mark.parametrize('company_type', company_types)
+@freeze_time('2012-01-14 12:00:02')
+def test_user_verification_passes_cookies(
+    company_type, submit_step_builder, client, steps_data
+):
+    submit_step = submit_step_builder(company_type)
+
+    response = submit_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    assert str(response.cookies['debug_sso_session_cookie']) == (
+        'Set-Cookie: debug_sso_session_cookie=a; '
+        'Comment=None; '
+        'expires=Sat, 14 Jan 2012 12:00:02 GMT; '
+        'Path=/; '
+        'Version=0'
+    )
+    assert str(response.cookies['sso_display_logged_in']) == (
+        'Set-Cookie: sso_display_logged_in=true; '
+        'Comment=None; '
+        'expires=Sat, 14 Jan 2012 12:00:02 GMT; '
+        'Path=/; '
+        'Version=0'
+    )
+
+
+@pytest.mark.parametrize('company_type', company_types)
+def test_confirm_user_verify_code_incorrect_code(
+    client, company_type, submit_step_builder, mock_session_user,
+    mock_confirm_verification_code, steps_data
+):
+    submit_step = submit_step_builder(company_type)
+
+    mock_session_user.return_value = create_response(404)
+    mock_confirm_verification_code.return_value = create_response(400)
+
+    response = submit_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_step(steps_data[views.VERIFICATION])
+
+    assert response.status_code == 200
+    assert response.context_data['form'].errors['code'] == ['Invalid code']
+
+
+@pytest.mark.parametrize('company_type', company_types)
+def test_confirm_user_verify_code_remote_error(
+    company_type, submit_step_builder, mock_session_user,
+    mock_confirm_verification_code, steps_data
+):
+    submit_step = submit_step_builder(company_type)
+
+    mock_session_user.return_value = create_response(404)
+    mock_confirm_verification_code.return_value = create_response(500)
+
+    response = submit_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    with pytest.raises(HTTPError):
+        submit_step(steps_data[views.VERIFICATION])
+
+
+@pytest.mark.parametrize('company_type', company_types)
+def test_confirm_user_verify_code(
+    client, company_type, submit_step_builder, mock_session_user,
+    mock_confirm_verification_code, steps_data
+):
+    submit_step = submit_step_builder(company_type)
+
+    mock_session_user.return_value = create_response(404)
+
+    response = submit_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_step(steps_data[views.VERIFICATION])
+
+    mock_session_user.login()
+
+    assert response.status_code == 302
+    assert mock_confirm_verification_code.call_count == 1
+    assert mock_confirm_verification_code.call_args == mock.call({
+        'email': 'test@a.com', 'code': '12345'
+    })
+
+
+def test_sole_trader_enrolment_expose_company(
+    client, submit_sole_trader_step, mock_session_user, steps_data
+):
+    response = submit_sole_trader_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_sole_trader_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    mock_session_user.login()
+
+    response = submit_sole_trader_step({
+        'company_name': 'Test company',
+        'postal_code': 'EEA 3AD',
+        'address': '555 fake street',
+    })
+
+    assert response.status_code == 302
+
+    response = submit_sole_trader_step({
+        'company_name': 'Test company',
+        'postal_code': 'EEA 3AD',
+        'address': '555 fake street',
+        'industry': 'AEROSPACE',
+    })
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.context_data['company'] == {
+        'company_name': 'Test company',
+        'postal_code': 'EEA 3AD',
+        'address': '555 fake street',
+        'industry': 'AEROSPACE',
+        'website_address': ''
+    }
+
+
+def test_sole_trader_enrolment_redirect_to_start(client):
+    url = reverse(
+        'enrolment-sole-trader', kwargs={'step': views.COMPANY_SEARCH}
+    )
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('enrolment-business-type')
+
+
+def test_sole_trader_enrolment_submit_end_to_end_logged_in(
+    client, submit_sole_trader_step, mock_session_user, steps_data
+):
+    mock_session_user.login()
+
+    url = reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT})
+    response = client.get(url)
+
+    assert response.status_code == 302
+
+    response = submit_sole_trader_step(
+        {
+            'company_name': 'Test company',
+            'postal_code': 'EEA 3AD',
+            'address': '555 fake street',
+        },
+        step_name=resolve(response.url).kwargs['step'],
+    )
+
+    assert response.status_code == 302
+
+    response = submit_sole_trader_step(
+        {
+            'company_name': 'Test company',
+            'postal_code': 'EEA 3AD',
+            'address': '555 fake street',
+            'industry': 'AEROSPACE',
+        },
+        step_name=resolve(response.url).kwargs['step']
+    )
+    assert response.status_code == 302
+
+    response = submit_sole_trader_step(
+        steps_data[views.PERSONAL_INFO],
+        step_name=resolve(response.url).kwargs['step']
+    )
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.status_code == 200
+    assert response.template_name == 'enrolment/success-sole-trader.html'
+
+
+@pytest.mark.parametrize(
+    'step', [name for name, _ in views.SoleTraderEnrolmentView.form_list]
+)
+def test_sole_trader_enrolment_has_company(
+    client, step, mock_user_has_company, mock_session_user
+):
+    mock_session_user.login()
+
+    mock_user_has_company.return_value = create_response(200)
+
+    url = reverse('enrolment-sole-trader', kwargs={'step': step})
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('about')
+
+
+@pytest.mark.parametrize(
+    'step', [name for name, _ in views.SoleTraderEnrolmentView.form_list]
+)
+def test_sole_trader_enrolment_has_company_error(
+    client, step, mock_user_has_company, mock_session_user
+):
+    mock_session_user.login()
+
+    mock_user_has_company.return_value = create_response(500)
+
+    url = reverse('enrolment-sole-trader', kwargs={'step': step})
+
+    with pytest.raises(HTTPError):
+        client.get(url)
+
+
+def test_sole_trader_search_address_not_found_url(
+    submit_sole_trader_step, mock_session_user, client, steps_data
+):
+    response = submit_sole_trader_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_sole_trader_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    mock_session_user.login()
+    response = client.get(response.url)
+
+    assert response.context_data['address_not_found_url'] == '#'
