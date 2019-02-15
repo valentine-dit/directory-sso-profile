@@ -11,9 +11,12 @@ from core.tests.helpers import create_response
 from enrolment import constants, helpers, views
 from directory_constants.constants import urls as constants_url
 
+
 urls = (
-    reverse('enrolment', kwargs={'step': 'business-type'}),
-    reverse('enrolment-success'),
+    reverse('enrolment-business-type'),
+    reverse('enrolment-start'),
+    reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}),
+    reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}),
 )
 
 
@@ -36,12 +39,12 @@ def mock_session_user(client, settings):
 
 
 @pytest.fixture
-def submit_enrolment_step(client):
+def submit_companies_house_step(client):
     return submit_step_factory(
         client=client,
-        url_name='enrolment',
-        view_name='enrolment_view',
-        view_class=views.EnrolmentView,
+        url_name='enrolment-companies-house',
+        view_name='companies_house_enrolment_view',
+        view_class=views.CompaniesHouseEnrolmentView,
     )
 
 
@@ -191,16 +194,31 @@ def submit_step_factory(client, url_name, view_name, view_class):
     return submit_step
 
 
+@pytest.mark.parametrize('choice,expected_url', (
+    (
+        constants.COMPANIES_HOUSE_COMPANY,
+        views.BusinessTypeRoutingView.url_companies_house_enrolment
+    ),
+    (
+        constants.SOLE_TRADER,
+        views.BusinessTypeRoutingView.url_sole_trader_enrolment
+    ),
+))
+def test_enrolment_routing(client, choice, expected_url):
+    url = reverse('enrolment-business-type')
+
+    response = client.post(url, {'choice': choice})
+
+    assert response.status_code == 302
+    assert response.url == expected_url
+
+
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment(
-    mock_clean, client, captcha_stub, submit_enrolment_step, mock_session_user
+    mock_clean, client, captcha_stub, submit_companies_house_step,
+    mock_session_user
 ):
-    response = submit_enrolment_step({
-        'choice': constants.COMPANIES_HOUSE_COMPANY
-    })
-    assert response.status_code == 302
-
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -209,26 +227,26 @@ def test_companies_house_enrolment(
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'code': '12345'
     })
     assert response.status_code == 302
 
     mock_session_user.login()
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Example corp',
         'company_number': '12345678',
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Example corp',
         'industry': 'AEROSPACE',
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'given_name': 'Foo',
         'family_name': 'Example',
         'job_title': 'Exampler',
@@ -241,14 +259,10 @@ def test_companies_house_enrolment(
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_change_company_name(
-    mock_clean, client, captcha_stub, submit_enrolment_step, mock_session_user
+    mock_clean, client, captcha_stub, submit_companies_house_step,
+    mock_session_user
 ):
-    response = submit_enrolment_step({
-        'choice': constants.COMPANIES_HOUSE_COMPANY
-    })
-    assert response.status_code == 302
-
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -257,33 +271,33 @@ def test_companies_house_enrolment_change_company_name(
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'code': '12345'
     })
     assert response.status_code == 302
 
     mock_session_user.login()
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Foo corp',
         'company_number': '12345678',
     })
     assert response.status_code == 302
 
     # given the user has submitted their company details
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Example corp',
         'industry': 'AEROSPACE',
     })
     assert response.status_code == 302
 
     # when they go back and changed their company
-    response = submit_enrolment_step(
+    response = submit_companies_house_step(
         data={
             'company_name': 'Bar corp',
             'company_number': '12345679',
         },
-        step_name=views.EnrolmentView.COMPANY_SEARCH
+        step_name=views.COMPANY_SEARCH
     )
     assert response.status_code == 302
 
@@ -294,20 +308,10 @@ def test_companies_house_enrolment_change_company_name(
 
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
-def test_create_user_enrolment(mock_clean, client, captcha_stub):
-    submit_step = submit_step_factory(
-        client=client,
-        url_name='enrolment',
-        view_name='enrolment_view',
-        view_class=views.EnrolmentView,
-    )
-
-    response = submit_step({
-        'choice': constants.SOLE_TRADER
-    })
-    assert response.status_code == 302
-
-    response = submit_step({
+def test_create_user_enrolment(
+    mock_clean, client, captcha_stub, submit_companies_house_step
+):
+    response = submit_companies_house_step({
         'email': 'tex4566eqw34e7@example.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -319,23 +323,12 @@ def test_create_user_enrolment(mock_clean, client, captcha_stub):
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_create_user_enrolment_already_exists(
-        mock_clean, client, captcha_stub, mock_create_user,
-        mock_notify_already_registered
+    mock_clean, client, captcha_stub, mock_create_user,
+    submit_companies_house_step, mock_notify_already_registered
 ):
-    submit_step = submit_step_factory(
-        client=client,
-        url_name='enrolment',
-        view_name='enrolment_view',
-        view_class=views.EnrolmentView,
-    )
-
-    response = submit_step({
-        'choice': constants.SOLE_TRADER
-    })
-    assert response.status_code == 302
     mock_create_user.return_value = create_response(400)
 
-    response = submit_step({
+    response = submit_companies_house_step({
         'email': 'tex4566eqw34e7@example.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -346,20 +339,18 @@ def test_create_user_enrolment_already_exists(
     assert mock_notify_already_registered.call_count == 1
     assert mock_notify_already_registered.call_args == mock.call(
         email='tex4566eqw34e7@example.com',
-        form_url='/profile/enrol/user-account/'
+        form_url=reverse(
+            'enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}
+        )
     )
 
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_expose_company(
-    mock_clean, client, captcha_stub, submit_enrolment_step, mock_session_user
+    mock_clean, client, captcha_stub, submit_companies_house_step,
+    mock_session_user
 ):
-    response = submit_enrolment_step({
-        'choice': constants.COMPANIES_HOUSE_COMPANY
-    })
-    assert response.status_code == 302
-
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -368,20 +359,20 @@ def test_companies_house_enrolment_expose_company(
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'code': '12345'
     })
     assert response.status_code == 302
 
     mock_session_user.login()
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Example corp',
         'company_number': '12345678',
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Example corp',
         'industry': 'AEROSPACE',
     })
@@ -403,31 +394,22 @@ def test_companies_house_enrolment_expose_company(
     }
 
 
-def test_companies_house_enrolment_redirect_to_start(
-    submit_enrolment_step, client
-):
+def test_companies_house_enrolment_redirect_to_start(client):
     url = reverse(
-        'enrolment', kwargs={'step': views.EnrolmentView.COMPANY_SEARCH}
+        'enrolment-companies-house', kwargs={'step': views.COMPANY_SEARCH}
     )
     response = client.get(url)
 
     assert response.status_code == 302
-    assert response.url == reverse(
-        'enrolment', kwargs={'step': views.EnrolmentView.BUSINESS_TYPE}
-    )
+    assert response.url == reverse('enrolment-business-type')
 
 
 @freeze_time('2012-01-14 12:00:02')
 @mock.patch('captcha.fields.ReCaptchaField.clean', mock.Mock)
 def test_companies_house_verification_passes_cookies(
-    submit_enrolment_step, client, captcha_stub
+    submit_companies_house_step, client, captcha_stub
 ):
-    response = submit_enrolment_step({
-        'choice': constants.COMPANIES_HOUSE_COMPANY
-    })
-    assert response.status_code == 302
-
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -436,7 +418,7 @@ def test_companies_house_verification_passes_cookies(
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'code': '12345'
     })
     assert response.status_code == 302
@@ -459,15 +441,10 @@ def test_companies_house_verification_passes_cookies(
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_submit_end_to_end(
-    mock_clean, client, captcha_stub, submit_enrolment_step, mock_session_user,
-    mock_enrolment_send
+    mock_clean, client, captcha_stub, submit_companies_house_step,
+    mock_session_user, mock_enrolment_send
 ):
-    response = submit_enrolment_step({
-        'choice': constants.COMPANIES_HOUSE_COMPANY
-    })
-    assert response.status_code == 302
-
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -476,26 +453,26 @@ def test_companies_house_enrolment_submit_end_to_end(
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'code': '12345'
     })
     assert response.status_code == 302
 
     mock_session_user.login()
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Example corp',
         'company_number': '12345678',
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Example corp',
         'industry': 'AEROSPACE',
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'given_name': 'Foo',
         'family_name': 'Bar',
         'job_title': 'Fooer',
@@ -507,7 +484,8 @@ def test_companies_house_enrolment_submit_end_to_end(
 
     response = client.get(response.url)
 
-    assert response.url == reverse('enrolment-success')
+    assert response.status_code == 200
+    assert response.template_name == 'enrolment/success-companies-house.html'
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
         'company_email': 'test@a.com',
@@ -531,19 +509,13 @@ def test_companies_house_enrolment_submit_end_to_end(
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_confirm_user_verify_code_incorrect_code(
-    mock_clean, client, captcha_stub, submit_enrolment_step,
+    mock_clean, client, captcha_stub, submit_companies_house_step,
     mock_session_user, mock_confirm_verification_code
 ):
     mock_session_user.return_value = create_response(404)
     mock_confirm_verification_code.return_value = create_response(400)
 
-    response = submit_enrolment_step({
-        'choice': constants.SOLE_TRADER
-    })
-
-    assert response.status_code == 302
-
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -552,7 +524,7 @@ def test_confirm_user_verify_code_incorrect_code(
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'code': '12345',
     })
 
@@ -562,19 +534,13 @@ def test_confirm_user_verify_code_incorrect_code(
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_confirm_user_verify_code_remote_error(
-    mock_clean, client, captcha_stub, submit_enrolment_step,
+    mock_clean, client, captcha_stub, submit_companies_house_step,
     mock_session_user, mock_confirm_verification_code
 ):
     mock_session_user.return_value = create_response(404)
     mock_confirm_verification_code.return_value = create_response(500)
 
-    response = submit_enrolment_step({
-        'choice': constants.SOLE_TRADER
-    })
-
-    assert response.status_code == 302
-
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -584,23 +550,17 @@ def test_confirm_user_verify_code_remote_error(
     assert response.status_code == 302
 
     with pytest.raises(HTTPError):
-        submit_enrolment_step({'code': '12345'})
+        submit_companies_house_step({'code': '12345'})
 
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_confirm_user_verify_code(
-    mock_clean, client, captcha_stub, submit_enrolment_step,
+    mock_clean, client, captcha_stub, submit_companies_house_step,
     mock_session_user, mock_confirm_verification_code
 ):
     mock_session_user.return_value = create_response(404)
 
-    response = submit_enrolment_step({
-        'choice': constants.SOLE_TRADER
-    })
-
-    assert response.status_code == 302
-
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -609,7 +569,7 @@ def test_confirm_user_verify_code(
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'code': '12345',
     })
 
@@ -624,20 +584,22 @@ def test_confirm_user_verify_code(
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_enrolment_submit_end_to_end_logged_in(
-    mock_clean, client, captcha_stub, submit_enrolment_step, mock_session_user,
-    mock_enrolment_send
+    mock_clean, client, captcha_stub, submit_companies_house_step,
+    mock_session_user, mock_enrolment_send
 ):
     mock_session_user.login()
 
-    response = submit_enrolment_step({
-        'choice': constants.COMPANIES_HOUSE_COMPANY
-    })
+    url = reverse(
+        'enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}
+    )
+    response = client.get(url)
     assert response.status_code == 302
+
     step = resolve(response.url).kwargs['step']
 
-    assert step == views.EnrolmentView.COMPANY_SEARCH
+    assert step == views.COMPANY_SEARCH
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Example corp',
         'company_number': '12345678',
     }, step_name=step)
@@ -645,14 +607,14 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
     assert response.status_code == 302
 
     step = resolve(response.url).kwargs['step']
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Example corp',
         'industry': 'AEROSPACE',
     }, step_name=step)
     assert response.status_code == 302
 
     step = resolve(response.url).kwargs['step']
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'given_name': 'Foo',
         'family_name': 'Bar',
         'job_title': 'Fooer',
@@ -664,7 +626,8 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
 
     response = client.get(response.url)
 
-    assert response.url == reverse('enrolment-success')
+    assert response.status_code == 200
+    assert response.template_name == 'enrolment/success-companies-house.html'
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
         'company_email': 'test@a.com',
@@ -687,7 +650,7 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
 
 
 @pytest.mark.parametrize(
-    'step', [name for name, _ in views.EnrolmentView.form_list]
+    'step', [name for name, _ in views.CompaniesHouseEnrolmentView.form_list]
 )
 def test_companies_house_enrolment_has_company(
     client, step, mock_user_has_company, mock_session_user
@@ -696,7 +659,7 @@ def test_companies_house_enrolment_has_company(
 
     mock_user_has_company.return_value = create_response(200)
 
-    url = reverse('enrolment', kwargs={'step': step})
+    url = reverse('enrolment-companies-house', kwargs={'step': step})
     response = client.get(url)
 
     assert response.status_code == 302
@@ -704,7 +667,7 @@ def test_companies_house_enrolment_has_company(
 
 
 @pytest.mark.parametrize(
-    'step', [name for name, _ in views.EnrolmentView.form_list]
+    'step', [name for name, _ in views.CompaniesHouseEnrolmentView.form_list]
 )
 def test_companies_house_enrolment_has_company_error(
     client, step, mock_user_has_company, mock_session_user
@@ -713,7 +676,7 @@ def test_companies_house_enrolment_has_company_error(
 
     mock_user_has_company.return_value = create_response(500)
 
-    url = reverse('enrolment', kwargs={'step': step})
+    url = reverse('enrolment-companies-house', kwargs={'step': step})
 
     with pytest.raises(HTTPError):
         client.get(url)
@@ -723,17 +686,12 @@ def test_companies_house_enrolment_has_company_error(
 @mock.patch('enrolment.views.helpers.request_collaboration')
 def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     mock_request_collaboration, mock_clean, client, captcha_stub,
-    submit_enrolment_step, mock_session_user, mock_enrolment_send,
-    mock_validate_company_number
+    submit_companies_house_step, mock_session_user,
+    mock_enrolment_send, mock_validate_company_number
 ):
     mock_validate_company_number.return_value = create_response(400)
 
-    response = submit_enrolment_step({
-        'choice': constants.COMPANIES_HOUSE_COMPANY
-    })
-    assert response.status_code == 302
-
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -742,26 +700,26 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'code': '12345'
     })
     assert response.status_code == 302
 
     mock_session_user.login()
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Example corp',
         'company_number': '12345678',
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'company_name': 'Example corp',
         'industry': 'AEROSPACE',
     })
     assert response.status_code == 302
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'given_name': 'Foo',
         'family_name': 'Bar',
         'job_title': 'Fooer',
@@ -773,7 +731,8 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
 
     response = client.get(response.url)
 
-    assert response.url == reverse('enrolment-success')
+    assert response.status_code == 200
+    assert response.template_name == 'enrolment/success-companies-house.html'
     assert mock_enrolment_send.call_count == 0
 
     assert mock_request_collaboration.call_count == 1
@@ -781,19 +740,18 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
         company_number='12345678',
         email='test@a.com',
         name='Foo Bar',
-        form_url='/profile/enrol/finished/',
+        form_url=(
+            reverse('enrolment-companies-house', kwargs={'step': 'finished'})
+        )
     )
 
 
 @mock.patch('captcha.fields.ReCaptchaField.clean')
 def test_companies_house_search_has_company_not_found_url(
-    mock_clean, captcha_stub, submit_enrolment_step, mock_session_user, client
+    mock_clean, captcha_stub, submit_companies_house_step,
+    mock_session_user, client
 ):
-    response = submit_enrolment_step({
-        'choice': constants.COMPANIES_HOUSE_COMPANY
-    })
-
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'email': 'test@a.com',
         'password': 'thing',
         'password_confirmed': 'thing',
@@ -801,7 +759,7 @@ def test_companies_house_search_has_company_not_found_url(
         'terms_agreed': True
     })
 
-    response = submit_enrolment_step({
+    response = submit_companies_house_step({
         'code': '12345'
     })
 
@@ -815,18 +773,20 @@ def test_companies_house_search_has_company_not_found_url(
     assert response.context_data['company_not_found_url'] == not_found_url
 
 
-def test_disable_select_company(submit_enrolment_step, client, settings):
-
+def test_disable_select_company(
+    submit_companies_house_step, client, settings
+):
     settings.FEATURE_FLAGS[
         'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ON'
     ] = False
 
-    url = reverse('enrolment', kwargs={'step': 'business-type'})
+    url = reverse('enrolment-business-type')
     response = client.get(url)
 
     assert response.status_code == 302
-    assert response.url == reverse('enrolment',
-                                   kwargs={'step': 'user-account'})
+    assert response.url == reverse(
+        'enrolment-companies-house', kwargs={'step': 'user-account'}
+    )
 
 
 def test_user_has_company_redirect_on_start(

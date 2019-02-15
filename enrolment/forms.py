@@ -135,7 +135,7 @@ class CompaniesHouseSearch(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         if 'company_number' not in cleaned_data:
-            url = reverse('enrolment', kwargs={'step': 'business-type'})
+            url = reverse('enrolment-business-type')
             message = self.MESSAGE_COMPANY_NOT_FOUND.format(url=url)
             raise ValidationError({'company_name': mark_safe(message)})
 
@@ -277,7 +277,6 @@ class SoleTraderBusinessDetails(forms.Form):
         required=False,
     )
 
-
     def __init__(self, initial, *args, **kwargs):
         super().__init__(initial=initial, *args, **kwargs)
         # force the form to use the initial value rather than the value
@@ -288,7 +287,6 @@ class SoleTraderBusinessDetails(forms.Form):
             self.initial_to_data('company_name')
             self.initial_to_data('postal_code')
             self.initial_to_data('address')
-
 
     def initial_to_data(self, field_name):
         self.data.setlist(
