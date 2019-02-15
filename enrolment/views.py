@@ -23,7 +23,7 @@ PROGRESS_STEP_LABELS = (
 )
 
 USER_ACCOUNT = 'user-account'
-USER_ACCOUNT_VERIFICATION = 'verification'
+VERIFICATION = 'verification'
 COMPANY_SEARCH = 'search'
 BUSINESS_INFO = 'business-details'
 PERSONAL_INFO = 'personal-details'
@@ -50,7 +50,7 @@ class ProgressIndicatorMixin:
 
     step_counter = {
         USER_ACCOUNT: 2,
-        USER_ACCOUNT_VERIFICATION: 3,
+        VERIFICATION: 3,
         COMPANY_SEARCH: 4,
         BUSINESS_INFO: 4,
         PERSONAL_INFO: 5,
@@ -80,12 +80,12 @@ class UserAccountEnrolmentHandlerMixin:
 
     condition_dict = {
         USER_ACCOUNT: user_account_condition,
-        USER_ACCOUNT_VERIFICATION: user_account_condition,
+        VERIFICATION: user_account_condition,
     }
 
     def get_form_initial(self, step):
         form_initial = super().get_form_initial(step)
-        if step == USER_ACCOUNT_VERIFICATION:
+        if step == VERIFICATION:
             data = self.get_cleaned_data_for_step(USER_ACCOUNT)
             if data:
                 form_initial['email'] = data['email']
@@ -110,7 +110,7 @@ class UserAccountEnrolmentHandlerMixin:
                     email=form.cleaned_data['email'],
                     form_url=self.request.path
                 )
-        elif form.prefix == USER_ACCOUNT_VERIFICATION:
+        elif form.prefix == VERIFICATION:
             response.cookies.update(form.cleaned_data['cookies'])
         return response
 
@@ -183,7 +183,7 @@ class BaseEnrolmentWizardView(
 class CompaniesHouseEnrolmentView(BaseEnrolmentWizardView):
     form_list = (
         (USER_ACCOUNT, forms.UserAccount),
-        (USER_ACCOUNT_VERIFICATION, forms.UserAccountVerification),
+        (VERIFICATION, forms.UserAccountVerification),
         (COMPANY_SEARCH, forms.CompaniesHouseSearch),
         (BUSINESS_INFO, forms.CompaniesHouseBusinessDetails),
         (PERSONAL_INFO, forms.PersonalDetails),
@@ -191,7 +191,7 @@ class CompaniesHouseEnrolmentView(BaseEnrolmentWizardView):
 
     templates = {
         USER_ACCOUNT: 'enrolment/user-account.html',
-        USER_ACCOUNT_VERIFICATION: 'enrolment/user-account-verification.html',
+        VERIFICATION: 'enrolment/user-account-verification.html',
         COMPANY_SEARCH: 'enrolment/companies-house-search.html',
         BUSINESS_INFO: 'enrolment/companies-house-business-details.html',
         PERSONAL_INFO: 'enrolment/companies-house-personal-details.html',
@@ -269,7 +269,7 @@ class SoleTraderEnrolmentView(BaseEnrolmentWizardView):
 
     form_list = (
         (USER_ACCOUNT, forms.UserAccount),
-        (USER_ACCOUNT_VERIFICATION, forms.UserAccountVerification),
+        (VERIFICATION, forms.UserAccountVerification),
         (COMPANY_SEARCH, forms.SoleTraderSearch),
         (BUSINESS_INFO, forms.SoleTraderBusinessDetails),
         (PERSONAL_INFO, forms.PersonalDetails),
@@ -277,7 +277,7 @@ class SoleTraderEnrolmentView(BaseEnrolmentWizardView):
 
     templates = {
         USER_ACCOUNT: 'enrolment/user-account.html',
-        USER_ACCOUNT_VERIFICATION: 'enrolment/user-account-verification.html',
+        VERIFICATION: 'enrolment/user-account-verification.html',
         COMPANY_SEARCH: 'enrolment/sole-trader-search.html',
         BUSINESS_INFO: 'enrolment/sole-trader-business-details.html',
         PERSONAL_INFO: 'enrolment/sole-trader-personal-details.html',
