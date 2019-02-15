@@ -13,16 +13,17 @@
     </div>
 {% endblock %}
 
+{% block below_form %}
+    <p><a class="link" href="{{ address_not_found_url }}">I cannot find my business address</a></p>
+{% endblock %}
 
 {% block body_js %}
     {{ block.super }}
-    {% if not form.address.initial %}
-        <script src="{% static 'directory_components/js/dit.components.company-lookup.js' %}"></script>
-        <script type="text/javascript">
-        // insert office finder
-        var postcodeFinderContainer = document.getElementById('id_companies-house-business-details-postal_code-container');
-        var addressFinder = document.getElementById('id_companies-house-business-details-postal_code');
-        var address = document.getElementById('id_companies-house-business-details-address');
+    <script src="{% static 'directory_components/js/dit.components.company-lookup.js' %}"></script>
+    <script type="text/javascript">
+        var postcodeFinderContainer = document.getElementById('id_search-postal_code-container');
+        var addressFinder = document.getElementById('id_search-postal_code');
+        var address = document.getElementById('id_search-address');
 
         postcodeFinderContainer.style.display = 'block';
 
@@ -63,6 +64,5 @@
           '{% url "api:postcode-search" %}',
           {lookupOnCharacter: 5}
         );
-      </script>
-    {% endif %}
+    </script>
 {% endblock %}

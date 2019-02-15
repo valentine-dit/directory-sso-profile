@@ -6,7 +6,7 @@
     <div class="grey-information-box">
         <h3 class="heading-medium">Type of business or organisation</h3>
         <p>A business registered with Companies House</p>
-        <a href="{% url 'enrolment' step='business-type' %}" class="link">Change</a>
+        <a href="{% url 'enrolment-business-type' %}" class="link">Change</a>
     </div>
     <div id="form-step-body-text">
         <h1 class="heading-large">Your business details</h1>
@@ -21,8 +21,8 @@
     {{ block.super }}
     <script src="{% static 'directory_components/js/dit.components.company-lookup.js' %}"></script>
     <script type="text/javascript">
-      var companyName = document.getElementById('id_companies-house-search-company_name');
-      var companyNumber = document.getElementById('id_companies-house-search-company_number');
+      var companyName = document.getElementById('id_search-company_name');
+      var companyNumber = document.getElementById('id_search-company_number');
       $(document.body).on(
         "click.SelectiveLookupCloseAll",
         dit.components.lookup.SelectiveLookup.closeAll
