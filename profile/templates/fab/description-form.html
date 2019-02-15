@@ -1,0 +1,15 @@
+{% extends 'fab/base-form.html' %}
+
+{% load render_form from directory_components_tags %}
+{% load static from staticfiles %}
+
+{% block head_css %}
+    {{ block.super }}
+    <link href="{% static 'css/company-profile.css' %}" media="all" rel="stylesheet" />
+{% endblock %}
+
+{% block form_contents %}
+	{% include 'fab/breadcrumbs.html' with label='Company description' %}
+    <h1 class="heading-large">Company description</h1>
+    {{ block.super }}
+{% endblock %}

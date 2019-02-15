@@ -1,23 +1,29 @@
-from directory_api_external.client import api_client
+from directory_api_client.client import api_client
+from raven.contrib.django.raven_compat.models import client as sentry_client
 from requests.exceptions import HTTPError
 
 from django.conf import settings
-from django.views.generic import TemplateView
+from django.shortcuts import redirect
+from django.utils.functional import cached_property
+from django.views.generic import TemplateView, FormView
 
 from profile.eig_apps.views import RedirectToAboutPageMixin
-from profile.fab import helpers
+from profile.fab import forms, helpers
 from sso.utils import SSOLoginRequiredMixin
 
 
+class CompanyProfileMixin:
+    @cached_property
+    def company(self):
+        return helpers.get_company_profile(self.request.sso_user.session_id)
+
+
 class FindABuyerView(
-    RedirectToAboutPageMixin, SSOLoginRequiredMixin, TemplateView
+    RedirectToAboutPageMixin, SSOLoginRequiredMixin, CompanyProfileMixin,
+    TemplateView
 ):
     template_name_fab_user = 'fab/is-fab-user.html'
     template_name_not_fab_user = 'fab/is-not-fab-user.html'
-    template_name_error = 'fab/supplier-company-retrieve-error.html'
-
-    company = None
-    company_retrieve_error = False
 
     SUCCESS_MESSAGES = {
         'owner-transferred': (
@@ -33,11 +39,6 @@ class FindABuyerView(
     def dispatch(self, request, *args, **kwargs):
         if request.sso_user is None:
             return self.handle_no_permission()
-        sso_session_id = request.sso_user.session_id
-        try:
-            self.company = helpers.get_supplier_company_profile(sso_session_id)
-        except HTTPError:
-            self.company_retrieve_error = True
         return super().dispatch(request, *args, **kwargs)
 
     def get_template_names(self, *args, **kwargs):
@@ -46,8 +47,6 @@ class FindABuyerView(
                 template_name = 'fab/profile.html'
             else:
                 template_name = self.template_name_fab_user
-        elif self.company_retrieve_error is True:
-            template_name = self.template_name_error
         else:
             template_name = self.template_name_not_fab_user
         return [template_name]
@@ -55,7 +54,7 @@ class FindABuyerView(
     def is_company_profile_owner(self):
         if not self.company:
             return False
-        response = api_client.supplier.retrieve_supplier(
+        response = api_client.supplier.retrieve_profile(
             sso_session_id=self.request.sso_user.session_id,
         )
         response.raise_for_status()
@@ -81,3 +80,56 @@ class FindABuyerView(
         for key, value in self.SUCCESS_MESSAGES.items():
             if key in self.request.GET:
                 return value
+
+
+class BaseFormView(CompanyProfileMixin, FormView):
+    def get_initial(self):
+        return self.company
+
+    def form_valid(self, form):
+        response = api_client.company.update_profile(
+            sso_session_id=self.request.sso_user.session_id,
+            data=self.serialize_form(form)
+        )
+        try:
+            response.raise_for_status()
+        except HTTPError:
+            self.send_update_error_to_sentry(
+                sso_user=self.request.sso_user,
+                api_response=response
+            )
+            raise
+        else:
+            return redirect('find-a-buyer')
+
+    def serialize_form(self, form):
+        return form.cleaned_data
+
+    @staticmethod
+    def send_update_error_to_sentry(sso_user, api_response):
+        # This is needed to not include POST data (e.g. binary image), which
+        # was causing sentry to fail at sending
+        sentry_client.context.clear()
+        sentry_client.user_context(
+            {'sso_id': sso_user.id, 'sso_user_email': sso_user.email}
+        )
+        sentry_client.captureMessage(
+            message='Updating company profile failed',
+            data={},
+            extra={'api_response': str(api_response.content)}
+        )
+
+
+class SocialLinksFormView(BaseFormView):
+    template_name = 'fab/social-links-form.html'
+    form_class = forms.SocialLinksForm
+
+
+class EmailAddressFormView(BaseFormView):
+    template_name = 'fab/email-address-form.html'
+    form_class = forms.EmailAddressForm
+
+
+class DescriptionFormView(BaseFormView):
+    form_class = forms.DescriptionForm
+    template_name = 'fab/description-form.html'

@@ -5,7 +5,6 @@ from unittest.mock import patch
 
 import pytest
 import requests
-from rest_framework.test import APIClient
 
 from django.contrib.sessions.backends import signed_cookies
 
@@ -38,23 +37,9 @@ def api_response_200():
 
 
 @pytest.fixture
-def api_response_401():
-    response = requests.Response()
-    response.status_code = http.client.UNAUTHORIZED.value
-    return response
-
-
-@pytest.fixture
 def api_response_403():
     response = requests.Response()
     response.status_code = http.client.FORBIDDEN.value
-    return response
-
-
-@pytest.fixture
-def api_response_404():
-    response = requests.Response()
-    response.status_code = http.client.NOT_FOUND.value
     return response
 
 
@@ -65,7 +50,7 @@ def api_response_500():
     return response
 
 
-@pytest.fixture
+@pytest.fixture()
 def sso_user_middleware(sso_user):
     def process_request(self, request):
         request.sso_user = sso_user
@@ -103,12 +88,6 @@ def returned_client(client, settings):
     session.save()
     client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
     return client
-
-
-@pytest.fixture
-def api_client():
-    """DRF APIClient instance."""
-    return APIClient()
 
 
 @pytest.fixture(autouse=True)

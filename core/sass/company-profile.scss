@@ -33,18 +33,42 @@
 }
 
 #hero {
-  height: 300px;
-  border: 1px solid #dedede;
-  background-color: #F5F2EC;
   position: relative;
+}
+
+.right-column {
+  text-align: right;
+}
+
+#user-mode-container {
+  margin-top: 25px;
+  hr {
+    margin: 0;
+    background-color: #999;
+    margin-top: 15px;
+    height: 2px;
+  }
+  .pill {
+    padding: 5px 10px;
+    color: white;
+    text-decoration: none;
+  }
+  .divider {
+    content: '|';
+    margin-left: 15px;
+    margin-right: 15px;
+    display: inline-block;
+    height: 36px;
+    width: 2px;
+    background-color: #999;
+    vertical-align: middle;
+  }
 }
 
 #logo-container {
   max-height: 250px;
   max-width: 250px;
   background-color: white;
-  position: absolute;
-  bottom: -3em;
   border: 1px solid #999;
   img {
     width: 100%;
@@ -68,7 +92,7 @@
 }
 
 #data-column {
-  margin-top: 60px;
+  margin-top: 45px;
   dt {
     font-weight: bold;
   }
@@ -88,19 +112,23 @@
   }
 }
 
+
 #main-content {
-  padding-top: 10px;
   .message-box {
     padding: 20px;
     position: relative;
     border-width: 2px;
-    a {
-      display: inline-block;
-      margin-bottom: 10px;
-      margin-top: 10px;
-    }
     h3 {
       margin-bottom: 0;
+    }
+    .pencil-link {
+      display: inline-block;
+      &:before {
+        content: '✏';
+        transform: rotate(135deg);
+        display: inline-block;
+        margin-right: 10px;
+      }
     }
   }
 
@@ -111,9 +139,10 @@
       color: white;
       position: absolute;
       left: -20px;
-      line-height: 5em;
       font-weight: bold;
       font-size: 25px;
+      top: 0;
+      line-height: 5em;
     }
   }
   .message-box.action-required {    
@@ -134,5 +163,18 @@
       padding-left: 20px;
       font-weight: bold;
     }
+  }
+}
+
+#content {
+  form {
+    margin-top: 45px;
+    margin-bottom: 45px;
+  }
+  .button {
+    margin-top: 45px;
+  }
+  input, textarea {
+    width: 100%;
   }
 }

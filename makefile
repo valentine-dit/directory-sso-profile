@@ -41,8 +41,6 @@ DEBUG_SET_ENV_VARS := \
 	export UTM_COOKIE_DOMAIN=.trade.great; \
 	export GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \
 	export GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x; \
-	export DIRECTORY_API_EXTERNAL_CLIENT_BASE_URL=http://buyer.trade.great:8001/api/external/; \
-	export DIRECTORY_API_EXTERNAL_SIGNATURE_SECRET=debug; \
 	export EXPORTING_OPPORTUNITIES_API_BASE_URL=https://opportunities.export.staging.uktrade.io; \
 	export EXPORTING_OPPORTUNITIES_SEARCH_URL=https://opportunities.export.great.gov.uk/opportunities; \
 	export FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great:8001/company-profile/edit/logo; \

@@ -4,7 +4,6 @@ from django.conf.urls import include, url
 
 import core.views
 import enrolment.views
-import profile.api.views
 import profile.eig_apps.views
 import profile.exops.views
 import profile.fab.views
@@ -25,11 +24,6 @@ healthcheck_urls = [
 ]
 
 api_urls = [
-    url(
-        r'^v1/directory/supplier/$',
-        profile.api.views.ExternalSupplierAPIView.as_view(),
-        name='external-supplier'
-    ),
     url(
         r'^v1/companies-house-search/$',
         core.views.CompaniesHouseSearchAPIView.as_view(),
@@ -66,11 +60,6 @@ urlpatterns = [
         name='about'
     ),
     url(
-        r'^find-a-buyer/$',
-        profile.fab.views.FindABuyerView.as_view(),
-        name='find-a-buyer'
-    ),
-    url(
         r'^selling-online-overseas/$',
         profile.soo.views.SellingOnlineOverseasView.as_view(),
         name='selling-online-overseas'
@@ -102,5 +91,25 @@ urlpatterns = [
             done_step_name='finished'
         ),
         name='enrolment'
+    ),
+    url(
+        r'^find-a-buyer/$',
+        profile.fab.views.FindABuyerView.as_view(),
+        name='find-a-buyer'
+    ),
+    url(
+        r'^find-a-buyer/social-links/$',
+        profile.fab.views.SocialLinksFormView.as_view(),
+        name='find-a-buyer-social'
+    ),
+    url(
+        r'^find-a-buyer/email/$',
+        profile.fab.views.EmailAddressFormView.as_view(),
+        name='find-a-buyer-email'
+    ),
+    url(
+        r'^find-a-buyer/description/$',
+        profile.fab.views.DescriptionFormView.as_view(),
+        name='find-a-buyer-description'
     ),
 ]

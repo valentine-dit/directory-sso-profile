@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% load render_form from directory_components_tags %}
+{% load static from staticfiles %}
+
+{% block head_css %}
+    {{ block.super }}
+    <link href="{% static 'css/company-profile.css' %}" media="all" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+       <div class="grid-row">
+            <div class="column-one-half">
+                {% block form_contents %}
+                    <form method="post" enctype="multipart/form-data">
+                        {% render_form form %}
+                        <button class="button">Save and continue</button>
+                        <div>
+                            <br>
+                            <a class="link" href="{% url 'find-a-buyer' %}">Back</a>
+                        </div>
+                     </form>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

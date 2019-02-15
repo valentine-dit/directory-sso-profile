@@ -8,6 +8,23 @@
 {% endblock %}
 
 {% block tab_content %}
+
+    {% if is_profile_owner %}
+    <div id="user-mode-container">
+        <div class="grid-row" >
+            <div class="column-one-half">
+                <a href="#">Admin tools</a>
+            </div>
+            <div class="column-one-half right-column">
+                <a class="background-light-blue font-xsmall pill" href="#">Admin view</a>
+                <span class="divider"></span>
+                <a href="#">View profile</a>
+            </div>
+        </div>
+        <hr>
+    </div>
+    {% endif %}
+    {% if not company.email_address %}
     <div id="alerts-top" class="grid-row alerts-container">
         {% if not company.email_address %}
             <div class="column-two-thirds flag-red-text">
@@ -19,18 +36,18 @@
             </div>
         {% endif %}
     </div>
-    <div id="hero">
-        <div id="logo-container">
-            {% if not company.logo %}
-                <a id="add-image" href="#" class="link">Add a logo</a>
-            {% else %}
-                <img alt="" src="{{ company.logo }}" />
-            {% endif %}
-        </div>
-    </div>
-
+    {% endif %}
     <div id="main-content" class="grid-row">
         <div class="column-one-third" id="data-column">
+
+            <div id="logo-container">
+                {% if not company.logo %}
+                    <a id="add-image" href="#" class="link">Add a logo</a>
+                {% else %}
+                    <img alt="{{ company.name }}" src="{{ company.logo }}" />
+                {% endif %}
+            </div>
+
             <div>
                 <h3 class="heading-medium">About company</h3>
                 <dl>
@@ -59,7 +76,7 @@
                         {% if company.facebook_url %}
                             <a class="link" href="{{ company.facebook_url }}">{{ company.facebook_url }}</a>
                         {% else %}
-                            <a class="link" href="#">Add Facebook</a>
+                            <a class="link" href="{% url 'find-a-buyer-social' %}">Add Facebook</a>
                         {% endif %}
                     </li>
                     <li>
@@ -67,7 +84,7 @@
                         {% if company.twitter_url %}
                             <a class="link" href="{{ company.twitter_url }}">{{ company.twitter_url }}</a>
                         {% else %}
-                            <a class="link" href="#">Add Twitter</a>
+                            <a class="link" href="{% url 'find-a-buyer-social' %}">Add Twitter</a>
                         {% endif %}
                     </li>
                     <li>
@@ -75,7 +92,7 @@
                         {% if company.linkedin_url %}
                             <a class="link" href="{{ company.linkedin_url }}">{{ company.linkedin_url }}</a>
                         {% else %}
-                            <a class="link" href="#">Add Linkedin</a>
+                            <a class="link" href="{% url 'find-a-buyer-social' %}">Add Linkedin</a>
                         {% endif %}
                     </li>
                 </ul>
@@ -85,27 +102,40 @@
             <h2 class="heading-large">{{ company.name }}</h2>
 
             <div class="{% if not company.email_address %}primary-action-required{% endif %} message-box border-medium border-black background-white">
-              <h3 class="box-heading heading-medium black-text">Profile email</h3>
+              <div class="grid-row">
+                <h3 class="box-heading heading-medium black-text column-one-half">Profile email</h3>
+                <div class="column-one-half right-column">
+                    {% if company.email_address %}<a href="{% url 'find-a-buyer-email' %}" class="link pencil-link">Edit</a>{% endif %}
+                </div>
+              </div>
               <p class="mid-grey-text font-xsmall">This will be the email address international buyers will contact you from the business profile.</p>
               {% if company.email_address %}
                 <span>{{ company.email_address }}</span>
               {% else %}
-                <a href="#" class="link">Add email address</a>
+                <a href="{% url 'find-a-buyer-email' %}" class="link">Add email address</a>
               {% endif %}
             </div>
 
             <div class="{% if not company.description %}primary-action-required{% endif %} message-box border-medium border-black background-white">
-              <h3 class="box-heading heading-medium black-text">Company description</h3>
+              <div class="grid-row">
+                <h3 class="box-heading heading-medium black-text column-one-half">Company description</h3>
+                <div class="column-one-half right-column">
+                    {% if company.description %}<a href="{% url 'find-a-buyer-description' %}" class="link pencil-link">Edit</a>{% endif %}
+                </div>
+              </div>
+
               <p class="mid-grey-text font-xsmall">This will be the email address international buyers will contact you from the business profile.</p>
               {% if company.description %}
                 <span>{{ company.description }}</span>
               {% else %}
-                <a href="#" class="link">Add description</a>
+                <a href="{% url 'find-a-buyer-description' %}" class="link">Add description</a>
               {% endif %}
             </div>
 
             <div class="message-box action-required border-medium border-black background-white">
-              <h3 class="box-heading heading-medium black-text">Case studies</h3>
+              <div class="grid-row">
+                <h3 class="box-heading heading-medium black-text column-one-half">Case studies</h3>
+              </div>
               <div class="grid-row">
                   <p class="mid-grey-text font-xsmall">Describe something significant your company has done that will be relevant to international buyers.</p>
                   <ul id="case-studies">
@@ -125,6 +155,7 @@
 
     {% if not company.email_address %}
     <div id="alerts-bottom" class="grid-row alerts-container">
+        {% if not company.email_address %}
         <div class="column-two-thirds flag-red-text">
             <h2 class="heading-medium">Your business profile has no contact email</h2>
             <p>This lets international buyers contact you on business profile</p>
@@ -132,6 +163,7 @@
         <div class="column-one-third alerts-button-container">
             <a class="button button-ghost-white">Set your email address</a>
         </div>
+        {% endif %}
     </div>
     {% endif %}
 
