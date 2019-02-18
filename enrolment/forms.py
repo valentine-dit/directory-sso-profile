@@ -3,13 +3,18 @@ from directory_components import forms, fields, widgets
 from directory_constants.constants import choices, urls
 from requests.exceptions import HTTPError
 
-from django.forms import HiddenInput, PasswordInput, ValidationError
+from django.forms import HiddenInput, PasswordInput, Textarea, ValidationError
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.http.request import QueryDict
 
 from enrolment import constants, helpers
 from enrolment.fields import DateField
+
+
+INDUSTRY_CHOICES = (
+    (('', 'Please select'),) + choices.INDUSTRIES + (('OTHER', 'Other'),)
+)
 
 
 class BusinessType(forms.Form):
@@ -68,12 +73,10 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
-
     captcha = ReCaptchaField(
         label='',
         label_suffix='',
     )
-
     terms_agreed = fields.BooleanField(
         label=mark_safe(
             'Tick this box to accept the '
@@ -130,15 +133,12 @@ class CompaniesHouseSearch(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         if 'company_number' not in cleaned_data:
-            url = reverse('enrolment', kwargs={'step': 'business-type'})
+            url = reverse('enrolment-business-type')
             message = self.MESSAGE_COMPANY_NOT_FOUND.format(url=url)
             raise ValidationError({'company_name': mark_safe(message)})
 
 
 class CompaniesHouseBusinessDetails(forms.Form):
-    INDUSTRY_CHOICES = (
-        (('', 'Please select'),) + choices.INDUSTRIES + (('OTHER', 'Other'),)
-    )
     company_name = fields.CharField(
         label='Registered company name'
     )
@@ -241,3 +241,53 @@ class PersonalDetails(forms.Form):
     confirmed_background_checks = fields.BooleanField(
         label='I understand that DIT may run background checks...'
     )
+
+
+class SoleTraderSearch(forms.Form):
+    company_name = fields.CharField(
+        label='Business name'
+    )
+    postal_code = fields.CharField()
+    address = fields.CharField()
+
+
+class SoleTraderBusinessDetails(forms.Form):
+    company_name = fields.CharField(
+        label='Business name'
+    )
+    postal_code = fields.CharField(
+        label='Business postcode',
+        required=False,
+        disabled=True
+    )
+    address = fields.CharField(
+        disabled=True,
+        required=False,
+        widget=Textarea(attrs={'rows': 3}),
+    )
+    industry = fields.ChoiceField(
+        label='What industry is your business in?',
+        choices=INDUSTRY_CHOICES,
+    )
+    website_address = fields.URLField(
+        label='What\'s your business web address (optional)',
+        help_text='The website address must start with http:// or https://',
+        required=False,
+    )
+
+    def __init__(self, initial, *args, **kwargs):
+        super().__init__(initial=initial, *args, **kwargs)
+        # force the form to use the initial value rather than the value
+        # the user submitted in previous sessions
+        # on GET the data structure is a MultiValueDict. on POST the data
+        # structure is a QueryDict
+        if self.data and not isinstance(self.data, QueryDict):
+            self.initial_to_data('company_name')
+            self.initial_to_data('postal_code')
+            self.initial_to_data('address')
+
+    def initial_to_data(self, field_name):
+        self.data.setlist(
+            self.add_prefix(field_name),
+            [self.initial[field_name]]
+        )

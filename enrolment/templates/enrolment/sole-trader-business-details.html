@@ -20,9 +20,9 @@
         <script src="{% static 'directory_components/js/dit.components.company-lookup.js' %}"></script>
         <script type="text/javascript">
         // insert office finder
-        var postcodeFinderContainer = document.getElementById('id_companies-house-business-details-postal_code-container');
-        var addressFinder = document.getElementById('id_companies-house-business-details-postal_code');
-        var address = document.getElementById('id_companies-house-business-details-address');
+        var postcodeFinderContainer = document.getElementById('id_search-postal_code-container');
+        var addressFinder = document.getElementById('id_search-postal_code');
+        var address = document.getElementById('id_search-address');
 
         postcodeFinderContainer.style.display = 'block';
 
@@ -50,6 +50,7 @@
           instance._private.$list.on("click.PostcodeLookup", function(event) {
             var $eventTarget = $(event.target);
             if($eventTarget.attr("data-value")) {
+              instance._private.$input.val($eventTarget.text());
               instance._private.$field.val($eventTarget.attr("data-value"));
             }
           });

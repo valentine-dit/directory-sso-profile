@@ -80,17 +80,25 @@ urlpatterns = [
         name='enrolment-start'
     ),
     url(
-        r'^enrol/done/$',
-        enrolment.views.EnrolmentSuccess.as_view(),
-        name='enrolment-success'
+        r'^enrol/business-type/$',
+        enrolment.views.BusinessTypeRoutingView.as_view(),
+        name='enrolment-business-type'
     ),
     url(
-        r'^enrol/(?P<step>.+)/$',
-        enrolment.views.EnrolmentView.as_view(
-            url_name='enrolment',
+        r'^enrol/business-type/companies-house/(?P<step>.+)/$',
+        enrolment.views.CompaniesHouseEnrolmentView.as_view(
+            url_name='enrolment-companies-house',
             done_step_name='finished'
         ),
-        name='enrolment'
+        name='enrolment-companies-house'
+    ),
+    url(
+        r'^enrol/business-type/sole-trader/(?P<step>.+)/$',
+        enrolment.views.SoleTraderEnrolmentView.as_view(
+            url_name='enrolment-sole-trader',
+            done_step_name='finished'
+        ),
+        name='enrolment-sole-trader'
     ),
     url(
         r'^find-a-buyer/$',

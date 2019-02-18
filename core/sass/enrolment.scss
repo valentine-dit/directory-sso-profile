@@ -8,23 +8,25 @@
 
 
 body.js-enabled {
-  #id_companies-house-search-company_number-container {
+  #id_search-company_number-container,
+  #id_business-details-company_number-container,
+  #id_search-address-container{
     display: none;
   }
 }
 body.js-enabled {
-  #id_companies-house-business-details-postal_code-container {
+  #id_business-details-postal_code-container {
     display: none;
     margin-top: 20px;
   }
 }
 
+CompaniesHouseEnrolmentView
 
-
-#id_companies-house-business-details-company_number-container,
-#id_companies-house-business-details-sic-container,
-#id_companies-house-business-details-date_of_creation-container,
-#id_companies-house-business-details-address-container {
+#id_business-details-company_number-container,
+#id_business-details-sic-container,
+#id_business-details-date_of_creation-container,
+#id_business-details-address-container {
   padding-bottom: 10px;
   margin-bottom: 0;
   border-left: 5px solid #0858CD;
@@ -32,14 +34,18 @@ body.js-enabled {
   label {
     font-weight: bold;
   }
-  input {
+  input, textarea {
     background: transparent;
     border: 0;
     padding: 0;
   }
+  textarea {
+    overflow: hidden;
+    resize: none;
+  }
 }
 
-#id_companies-house-business-details-address-container {
+#id_business-details-address-container {
   margin-bottom: 20px;
 }
 
@@ -74,7 +80,7 @@ body.js-enabled {
         border: 2px solid #DFD5C3;
         background: #F5F2EC;
         padding: 20px;
-        h3 {
+        h2 {
             margin: 0;
         }
         p {
