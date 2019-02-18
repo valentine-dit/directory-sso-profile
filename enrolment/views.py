@@ -298,7 +298,7 @@ class SoleTraderEnrolmentView(BaseEnrolmentWizardView):
         context = super().get_context_data(*args, **kwargs)
         if self.steps.current == COMPANY_SEARCH:
             context['address_not_found_url'] = urls.build_great_url(
-                'contact/triage/great-account/sole-trader-company-not-found/'
+                'contact/triage/great-account/sole-trader-not-found/'
             )
 
         return context

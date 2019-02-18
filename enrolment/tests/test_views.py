@@ -880,6 +880,6 @@ def test_sole_trader_search_address_not_found_url(
     response = client.get(response.url)
 
     not_found_url = constants_url.build_great_url(
-        'contact/triage/great-account/sole-trader-company-not-found/'
+        'contact/triage/great-account/sole-trader-not-found/'
     )
     assert response.context_data['address_not_found_url'] == not_found_url
