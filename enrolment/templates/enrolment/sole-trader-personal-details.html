@@ -4,13 +4,13 @@
 
 {% block above_form %}
     <div class="grey-information-box">
-        <h3 class="heading-medium">Type of business or organisation</h3>
+        <h2 class="heading-medium">Type of business or organisation</h2>
         <p>Sole trader</p>
         <a href="{% url 'enrolment-business-type' %}" class="link">Change</a>
     </div>
     <br>
     <div class="grey-information-box">
-        <h3 class="heading-medium">Your company details</h3>
+        <h2 class="heading-medium">Your company details</h2>
         <p>{{ company.company_name }}</p>
         <p>{{ company.address }}</p>
         <a href="{% url 'enrolment-sole-trader' step='search' %}" class="link">Change</a>
