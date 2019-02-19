@@ -898,4 +898,7 @@ def test_sole_trader_search_address_not_found_url(
     mock_session_user.login()
     response = client.get(response.url)
 
-    assert response.context_data['address_not_found_url'] == '#'
+    not_found_url = constants_url.build_great_url(
+        'contact/triage/great-account/sole-trader-address-not-found/'
+    )
+    assert response.context_data['address_not_found_url'] == not_found_url
