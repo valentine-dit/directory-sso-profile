@@ -170,7 +170,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
         choices=INDUSTRY_CHOICES,
     )
     website_address = fields.URLField(
-        label='Company website (optional)',
+        label='What’s your business web address (optional)',
         help_text='The website address must start with http:// or https://',
         required=False,
     )
