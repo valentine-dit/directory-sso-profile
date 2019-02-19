@@ -16,10 +16,10 @@ SESSION_KEY_ENROL_EMAIL = 'ENROL_EMAIL'
 
 PROGRESS_STEP_LABELS = (
     'Select your business type',
-    'Enter your email and set a password',
-    'Confirm the validation code from your email',
-    'Confirm your business details',
-    'Enter personal details',
+    'Enter your business email address and set a password',
+    'Enter your confirmation code',
+    'Enter your business details',
+    'Enter your details',
 )
 
 USER_ACCOUNT = 'user-account'
