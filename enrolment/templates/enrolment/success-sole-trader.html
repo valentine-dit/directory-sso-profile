@@ -7,9 +7,11 @@
 {% block content %}
   <section class="container">
       {% include 'enrolment/breadcrumbs.html' %}
-      <div class="column-two-thirds">
-          <div id="success-message-container">
-            {% message_box heading="Complete" description="Your account has been created. We've sent you a confirmation email." heading_level='h1' %}
+      <div class="grid-row">
+          <div class="column-two-thirds">
+              <div id="success-message-container">
+                  {% message_box heading="Account created" description="We've sent a confirmation email." heading_level='h1' %}
+              </div>
           </div>
       </div>
   </section>
@@ -17,7 +19,7 @@
   <section id="next-container">
     <div class="container">
       <h2 class="heading-medium">Next steps</h2>
-      <a class="link" href="{{ services_urls.exred }}">Go to great.gov.uk home</a>
+      <a class="link" href="{% url 'find-a-buyer' %}">Go to your account</a>
     </div>
   </section>
 

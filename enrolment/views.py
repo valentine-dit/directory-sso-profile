@@ -115,6 +115,40 @@ class UserAccountEnrolmentHandlerMixin:
         return response
 
 
+class CreateCompanyProfileMixin:
+    def serialize_form_list(self, form_list):
+        data = {}
+        for form in form_list:
+            data.update(form.cleaned_data)
+        whitelist = [
+            'address_line_1',
+            'address_line_2',
+            'company_name',
+            'company_number',
+            'date_of_creation',
+            'family_name',
+            'given_name',
+            'industry',
+            'job_title',
+            'phone_number',
+            'postal_code',
+            'sic',
+            'website_address',
+        ]
+        return {
+            key: value for key, value in data.items()
+            if value and key in whitelist
+        }
+
+    def create_company_profile(self, data):
+        helpers.create_company_profile({
+            'sso_id': self.request.sso_user.id,
+            'company_email': self.request.sso_user.email,
+            'contact_email_address': self.request.sso_user.email,
+            **data,
+        })
+
+
 class BusinessTypeRoutingView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin, FormView
 ):
@@ -168,6 +202,7 @@ class BaseEnrolmentWizardView(
     UserAccountEnrolmentHandlerMixin,
     core.mixins.PreventCaptchaRevalidationMixin,
     ProgressIndicatorMixin,
+    CreateCompanyProfileMixin,
     NamedUrlSessionWizardView
 ):
     def get_template_names(self):
@@ -221,6 +256,12 @@ class CompaniesHouseEnrolmentView(BaseEnrolmentWizardView):
             )
         return context
 
+    def serialize_form_list(self, form_list):
+        return {
+            'company_type': 'COMPANIES_HOUSE',
+            **super().serialize_form_list(form_list)
+        }
+
     def done(self, form_list, **kwargs):
         data = self.serialize_form_list(form_list)
         is_enrolled = helpers.get_is_enrolled(
@@ -235,34 +276,8 @@ class CompaniesHouseEnrolmentView(BaseEnrolmentWizardView):
                 form_url=self.request.path,
             )
         else:
-            helpers.create_company_profile({
-                'sso_id': self.request.sso_user.id,
-                'company_email': self.request.sso_user.email,
-                'contact_email_address': self.request.sso_user.email,
-                **data,
-            })
+            self.create_company_profile(data)
         return TemplateResponse(self.request, self.templates[FINISHED])
-
-    def serialize_form_list(self, form_list):
-        data = {}
-        for form in form_list:
-            data.update(form.cleaned_data)
-        whitelist = [
-            'address_line_1',
-            'address_line_2',
-            'company_name',
-            'company_number',
-            'date_of_creation',
-            'family_name',
-            'given_name',
-            'industry',
-            'job_title',
-            'phone_number',
-            'postal_code',
-            'sic',
-            'website_address',
-        ]
-        return {key: value for key, value in data.items() if key in whitelist}
 
 
 class SoleTraderEnrolmentView(BaseEnrolmentWizardView):
@@ -302,5 +317,12 @@ class SoleTraderEnrolmentView(BaseEnrolmentWizardView):
         return context
 
     def done(self, form_list, **kwargs):
-        # TODO: support sole trader enrolment
+        data = self.serialize_form_list(form_list)
+        self.create_company_profile(data)
         return TemplateResponse(self.request, self.templates[FINISHED])
+
+    def serialize_form_list(self, form_list):
+        return {
+            'company_type': 'SOLE_TRADER',
+            **super().serialize_form_list(form_list)
+        }
