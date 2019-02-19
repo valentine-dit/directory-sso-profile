@@ -32,16 +32,19 @@ class BusinessType(forms.Form):
             (
                 'I’m a sole trader or I represent another type of UK' 
                 'business not registered with Companies House '
-
             )
         ),
         (
             constants.NOT_COMPANY,
-            'I\'m a UK taxpayer but do not represent a business'
+            (
+                'I\'m a UK taxpayer but do not represent a business'
+            )
         ),
         (
             constants.OVERSEAS_COMPANY,
-            'My business or organisation is not registered in the UK'
+            (
+                'My business or organisation is not registered in the UK'
+            )
         ),
     )
     choice = fields.ChoiceField(
