@@ -291,3 +291,9 @@ class SoleTraderBusinessDetails(forms.Form):
             self.add_prefix(field_name),
             [self.initial[field_name]]
         )
+
+    def clean_address(self):
+        address_parts = self.cleaned_data['address'].split('\n')
+        self.cleaned_data['address_line_1'] = address_parts[0].strip()
+        self.cleaned_data['address_line_2'] = address_parts[1].strip()
+        return self.cleaned_data['address']
