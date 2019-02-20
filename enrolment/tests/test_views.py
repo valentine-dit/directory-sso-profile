@@ -418,11 +418,11 @@ def test_companies_house_enrolment_submit_end_to_end(
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'industry': 'AEROSPACE',
-        'website_address': '',
         'given_name': 'Foo',
         'family_name': 'Example',
         'job_title': 'Exampler',
         'phone_number': '1232342',
+        'company_type': 'COMPANIES_HOUSE',
     })
 
 
@@ -480,11 +480,11 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'industry': 'AEROSPACE',
-        'website_address': '',
         'given_name': 'Foo',
         'family_name': 'Example',
         'job_title': 'Exampler',
         'phone_number': '1232342',
+        'company_type': 'COMPANIES_HOUSE',
     })
 
 
@@ -756,7 +756,7 @@ def test_sole_trader_enrolment_expose_company(
     response = submit_sole_trader_step({
         'company_name': 'Test company',
         'postal_code': 'EEA 3AD',
-        'address': '555 fake street',
+        'address': '555 fake street, London',
     })
 
     assert response.status_code == 302
@@ -764,7 +764,7 @@ def test_sole_trader_enrolment_expose_company(
     response = submit_sole_trader_step({
         'company_name': 'Test company',
         'postal_code': 'EEA 3AD',
-        'address': '555 fake street',
+        'address': '555 fake street, London',
         'industry': 'AEROSPACE',
     })
     assert response.status_code == 302
@@ -774,7 +774,9 @@ def test_sole_trader_enrolment_expose_company(
     assert response.context_data['company'] == {
         'company_name': 'Test company',
         'postal_code': 'EEA 3AD',
-        'address': '555 fake street',
+        'address': '555 fake street\nLondon',
+        'address_line_1': '555 fake street',
+        'address_line_2': 'London',
         'industry': 'AEROSPACE',
         'website_address': ''
     }
@@ -791,7 +793,8 @@ def test_sole_trader_enrolment_redirect_to_start(client):
 
 
 def test_sole_trader_enrolment_submit_end_to_end_logged_in(
-    client, submit_sole_trader_step, mock_session_user, steps_data
+    client, submit_sole_trader_step, mock_session_user, steps_data,
+    mock_enrolment_send
 ):
     mock_session_user.login()
 
@@ -804,7 +807,7 @@ def test_sole_trader_enrolment_submit_end_to_end_logged_in(
         {
             'company_name': 'Test company',
             'postal_code': 'EEA 3AD',
-            'address': '555 fake street',
+            'address': '555 fake street, London',
         },
         step_name=resolve(response.url).kwargs['step'],
     )
@@ -815,7 +818,7 @@ def test_sole_trader_enrolment_submit_end_to_end_logged_in(
         {
             'company_name': 'Test company',
             'postal_code': 'EEA 3AD',
-            'address': '555 fake street',
+            'address': '555 fake street, London',
             'industry': 'AEROSPACE',
         },
         step_name=resolve(response.url).kwargs['step']
@@ -832,6 +835,22 @@ def test_sole_trader_enrolment_submit_end_to_end_logged_in(
 
     assert response.status_code == 200
     assert response.template_name == 'enrolment/success-sole-trader.html'
+    assert mock_enrolment_send.call_count == 1
+    assert mock_enrolment_send.call_args == mock.call({
+        'sso_id': '123',
+        'company_email': 'test@a.com',
+        'contact_email_address': 'test@a.com',
+        'company_name': 'Test company',
+        'postal_code': 'EEA 3AD',
+        'address_line_1': '555 fake street',
+        'address_line_2': 'London',
+        'industry': 'AEROSPACE',
+        'given_name': 'Foo',
+        'family_name': 'Example',
+        'job_title': 'Exampler',
+        'phone_number': '1232342',
+        'company_type': 'SOLE_TRADER',
+    })
 
 
 @pytest.mark.parametrize(
