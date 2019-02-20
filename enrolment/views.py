@@ -212,6 +212,10 @@ class BaseEnrolmentWizardView(
         context = super().get_context_data(*args, **kwargs)
         if self.steps.current == PERSONAL_INFO:
             context['company'] = self.get_cleaned_data_for_step(BUSINESS_INFO)
+        elif self.steps.current == VERIFICATION:
+            context['verification_missing_url'] = urls.build_great_url(
+                'contact/triage/great-account/verification-missing/'
+            )
         return context
 
 

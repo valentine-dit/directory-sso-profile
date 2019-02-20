@@ -585,6 +585,21 @@ def test_companies_house_search_has_company_not_found_url(
     assert response.context_data['company_not_found_url'] == not_found_url
 
 
+def test_verification_missing_url(
+    submit_companies_house_step, mock_session_user, client, steps_data
+):
+    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = client.get(response.url)
+
+    verification_missing_url = constants_url.build_great_url(
+        'contact/triage/great-account/verification-missing/'
+    )
+
+    assert response.context_data[
+               'verification_missing_url'
+           ] == verification_missing_url
+
+
 def test_disable_select_company(client, settings):
     settings.FEATURE_FLAGS[
         'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ON'
