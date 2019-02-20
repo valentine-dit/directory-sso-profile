@@ -22,25 +22,29 @@ class BusinessType(forms.Form):
         (
             constants.COMPANIES_HOUSE_COMPANY,
             (
-                'A business registered with Companies House, for example, a '
-                'limited company (ltd), a public limited company (PLC) or a '
-                'Royal Charter company (RC)'
+                'My business is registered with Companies House.  '
+                'For example, a limited company (Ltd), a public limited  '
+                'company (PLC) or a Royal Charter company'
             )
         ),
         (
             constants.SOLE_TRADER,
             (
-                'A UK sole trader or another type of UK business not '
-                'registered with Companies House'
+                'I\'m a sole trader or I represent another type of UK '
+                'business not registered with Companies House'
             )
         ),
         (
             constants.NOT_COMPANY,
-            'I\'m a UK taxpayer but don\'t represent a business'
+            (
+                'I\'m a UK taxpayer but do not represent a business'
+            )
         ),
         (
             constants.OVERSEAS_COMPANY,
-            'My business or organisation is not registered in the UK'
+            (
+                'My business or organisation is not registered in the UK'
+            )
         ),
     )
     choice = fields.ChoiceField(
@@ -118,11 +122,11 @@ class UserAccountVerification(forms.Form):
 
 class CompaniesHouseSearch(forms.Form):
     MESSAGE_COMPANY_NOT_FOUND = (
-        "<p>Your company name can't be found.</p>"
-        "<p>Check that you entered the registered company name correctly "
-        "and select the matching company name from the list.</p>"
-        "<p>If your company is not registered with Companies House "
-        "<a href='{url}'>change type of business</a></p>"
+        "<p>Your business name is not listed.</p>"
+        "<p>Check that you've entered the right name.</p>"
+        "<p>Or "
+        "<a href='{url}'>change type of business</a>"
+        "if your business is not registered with Companies House.</p>"
     )
 
     company_name = fields.CharField(
@@ -170,7 +174,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
         choices=INDUSTRY_CHOICES,
     )
     website_address = fields.URLField(
-        label='Company website (optional)',
+        label='What\'s your business web address (optional)',
         help_text='The website address must start with http:// or https://',
         required=False,
     )
