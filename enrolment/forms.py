@@ -119,7 +119,7 @@ class UserAccountVerification(forms.Form):
 class CompaniesHouseSearch(forms.Form):
     MESSAGE_COMPANY_NOT_FOUND = (
         "<p>Your business name is not listed.</p>"
-        "<p>Check that you’ve entered the right name.</p>"
+        "<p>Check that you've entered the right name.</p>"
         "<p>Or "
         "<a href='{url}'>change type of business</a>"
         "if your business is not registered with Companies House.</p>"
