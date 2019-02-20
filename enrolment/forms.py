@@ -30,7 +30,7 @@ class BusinessType(forms.Form):
         (
             constants.SOLE_TRADER,
             (
-                'I\'m a sole trader or I represent another type of UK' 
+                'I\'m a sole trader or I represent another type of UK '
                 'business not registered with Companies House '
             )
         ),
