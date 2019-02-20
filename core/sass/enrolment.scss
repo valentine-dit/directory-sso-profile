@@ -21,8 +21,6 @@ body.js-enabled {
   }
 }
 
-CompaniesHouseEnrolmentView
-
 #id_business-details-company_number-container,
 #id_business-details-sic-container,
 #id_business-details-date_of_creation-container,
@@ -50,43 +48,45 @@ CompaniesHouseEnrolmentView
 }
 
 #content {
-    
-    form {
-        margin-top: 50px;
-        input, select {
-            width: 80%;
-        }
-        button {
-            margin-top: 40px;
-        }
+  .container {
+    overflow: hidden;
+  }
+  form {
+    margin-top: 50px;
+    input, select {
+      width: 80%;
     }
+    button {
+      margin-top: 40px;
+    }
+  }
 
-    .breadcrumbs {
-        padding-top: 0;
-    }
+  .breadcrumbs {
+    padding-top: 0;
+  }
 
-    #id_user-account-captcha-container {
-        margin-bottom: 20px;
-    }
+  #id_user-account-captcha-container {
+    margin-bottom: 20px;
+  }
 
-    #user-account-verification-header-container {
-        margin-bottom: 50px;
-    }
-    #id_verification-code-container {
-        margin-bottom: 10px;
-    }
+  #user-account-verification-header-container {
+    margin-bottom: 50px;
+  }
+  #id_verification-code-container {
+    margin-bottom: 10px;
+  }
 
-    .grey-information-box {
-        border: 2px solid #DFD5C3;
-        background: #F5F2EC;
-        padding: 20px;
-        h2 {
-            margin: 0;
-        }
-        p {
-            margin-bottom: 5px;
-        }
+  .grey-information-box {
+    border: 2px solid #DFD5C3;
+    background: #F5F2EC;
+    padding: 20px;
+    h2 {
+      margin: 0;
     }
+    p {
+      margin-bottom: 5px;
+    }
+  }
 }
 
 
@@ -158,4 +158,28 @@ CompaniesHouseEnrolmentView
 
 #start-page-progress-indicator {
   font-size: 1.5em;
+}
+
+#success-message-container {
+  margin-top: 80px;
+  .message-box {
+    position: relative;
+    border-left-width: 100px;
+    &:before {
+      content: '✓';
+      color: white;
+      position: absolute;
+      left: -70px;
+      font-weight: bold;
+      font-size: 50px;
+      top: 0;
+      line-height: 2.5em;
+    }
+  }
+}
+
+#next-container {
+  h2 {
+    margin: 0;
+  }
 }

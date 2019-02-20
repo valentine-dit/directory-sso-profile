@@ -59,15 +59,15 @@ class UserAccount(forms.Form):
         '<p>Your password must:</p>'
         '<ul class="list list-bullet">'
         '<li>be at least 10 characters</li>'
-        '<li>contain at least one letter</li>'
-        '<li>contain at least one number</li>'
+        '<li>contain at least 1 letter</li>'
+        '<li>contain at least 1 number</li>'
         '<li>not contain the word "password"</li>'
         '</ul>'
     )
     MESSAGE_NOT_MATCH = "Passwords don't match"
 
     email = fields.EmailField(
-        label='Your email'
+        label='Your email address'
     )
     password = fields.CharField(
         help_text=mark_safe(PASSWORD_HELP_TEXT),
@@ -122,11 +122,11 @@ class UserAccountVerification(forms.Form):
 
 class CompaniesHouseSearch(forms.Form):
     MESSAGE_COMPANY_NOT_FOUND = (
-        "<p>Your company name can't be found.</p>"
-        "<p>Check that you entered the registered company name correctly "
-        "and select the matching company name from the list.</p>"
-        "<p>If your company is not registered with Companies House "
-        "<a href='{url}'>change type of business</a></p>"
+        "<p>Your business name is not listed.</p>"
+        "<p>Check that you've entered the right name.</p>"
+        "<p>Or "
+        "<a href='{url}'>change type of business</a>"
+        "if your business is not registered with Companies House.</p>"
     )
 
     company_name = fields.CharField(
@@ -295,3 +295,9 @@ class SoleTraderBusinessDetails(forms.Form):
             self.add_prefix(field_name),
             [self.initial[field_name]]
         )
+
+    def clean_address(self):
+        address_parts = self.cleaned_data['address'].split('\n')
+        self.cleaned_data['address_line_1'] = address_parts[0].strip()
+        self.cleaned_data['address_line_2'] = address_parts[1].strip()
+        return self.cleaned_data['address']
