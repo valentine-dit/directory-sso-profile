@@ -55,15 +55,15 @@ class UserAccount(forms.Form):
         '<p>Your password must:</p>'
         '<ul class="list list-bullet">'
         '<li>be at least 10 characters</li>'
-        '<li>contain at least one letter</li>'
-        '<li>contain at least one number</li>'
+        '<li>contain at least 1 letter</li>'
+        '<li>contain at least 1 number</li>'
         '<li>not contain the word "password"</li>'
         '</ul>'
     )
     MESSAGE_NOT_MATCH = "Passwords don't match"
 
     email = fields.EmailField(
-        label='Your email'
+        label='Your email address'
     )
     password = fields.CharField(
         help_text=mark_safe(PASSWORD_HELP_TEXT),
