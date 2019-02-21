@@ -1,6 +1,5 @@
 from http import cookies
 from datetime import datetime
-import time
 
 from django.utils import formats
 from django.utils.dateparse import parse_datetime
@@ -178,17 +177,8 @@ class CompanyProfileFormatter:
             return self.data['registered_office_address']['postal_code']
 
 
-def cookiekjar_to_simple_cookie(cookiejar):
+def parse_set_cookie_header(headers):
     simple_cookies = cookies.SimpleCookie()
-    for cookie in cookiejar:
-        simple_cookies[cookie.name] = cookie.value
-        for attr in ('path', 'comment', 'domain', 'secure', 'version'):
-            simple_cookies[cookie.name][attr] = getattr(cookie, attr)
-        # Cookies thinks an int expires x seconds in future,
-        # cookielib thinks it is x seconds from epoch,
-        # so doing the conversion to string for Cookies
-        simple_cookies[cookie.name]['expires'] = time.strftime(
-            '%a, %d %b %Y %H:%M:%S GMT',
-            time.gmtime(cookie.expires)
-        )
+    # multiple headers are comma delimited
+    simple_cookies.load(headers.replace('/, ', '/ '))
     return simple_cookies

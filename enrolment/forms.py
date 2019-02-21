@@ -114,8 +114,8 @@ class UserAccountVerification(forms.Form):
             else:
                 raise
         else:
-            self.cleaned_data['cookies'] = helpers.cookiekjar_to_simple_cookie(
-                response.cookies
+            self.cleaned_data['cookies'] = helpers.parse_set_cookie_header(
+                response.headers['set-cookie']
             )
         return None
 
