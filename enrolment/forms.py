@@ -162,7 +162,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
         required=False,
     )
     postal_code = fields.CharField(
-        label='Address finder',
+        label='Business postcode',
         required=False,
     )
     address = fields.CharField(
@@ -251,7 +251,7 @@ class SoleTraderSearch(forms.Form):
     company_name = fields.CharField(
         label='Business name'
     )
-    postal_code = fields.CharField()
+    postal_code = fields.CharField(label='Business postcode')
     address = fields.CharField()
 
 
