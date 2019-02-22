@@ -126,7 +126,7 @@ class CompaniesHouseSearch(forms.Form):
         "<p>Check that you've entered the right name.</p>"
         "<p>Or "
         "<a href='{url}'>change type of business</a>"
-        "if your business is not registered with Companies House.</p>"
+        " if your business is not registered with Companies House.</p>"
     )
 
     company_name = fields.CharField(
