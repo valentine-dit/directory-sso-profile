@@ -8,7 +8,7 @@ beautifulsoup4==4.6.0     # via directory-components
 certifi==2018.4.16        # via requests
 chardet==3.0.4            # via requests
 contextlib2==0.5.5        # via raven
-directory-api-client==11.2.0
+directory-api-client==12.0.0
 directory-ch-client==1.0.0
 directory-client-core==4.4.0
 directory-components==4.1.2
@@ -24,7 +24,7 @@ django-health-check==3.8.0  # via directory-healthcheck
 django-ipware==2.1.0      # via django-admin-ip-restrictor
 django-recaptcha==1.2.0
 django-redis==4.8.0
-django==1.11.18
+django==1.11.20
 djangorestframework==3.4.7
 export-elements==1.0.0    # via directory-components
 gunicorn==19.5.0

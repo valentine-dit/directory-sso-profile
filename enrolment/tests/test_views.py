@@ -2,7 +2,6 @@ from unittest import mock
 
 from freezegun import freeze_time
 import pytest
-from requests.cookies import RequestsCookieJar
 from requests.exceptions import HTTPError
 
 from django.urls import resolve, reverse
@@ -170,9 +169,19 @@ def mock_confirm_verification_code():
         helpers.sso_api_client.user, 'verify_verification_code',
         return_value=response
     )
-    response.cookies = RequestsCookieJar()
-    response.cookies['debug_sso_session_cookie'] = 'a'
-    response.cookies['sso_display_logged_in'] = 'true'
+    response.headers['set-cookie'] = (
+        'debug_sso_session_cookie=foo-bar; '
+        'Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; '
+        'HttpOnly; '
+        'Max-Age=1209600; '
+        'Path=/, '
+        'sso_display_logged_in=true; '
+        'Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; '
+        'Max-Age=1209600; '
+        'Path=/'
+    )
     yield patch.start()
     patch.stop()
 
@@ -683,18 +692,13 @@ def test_user_verification_passes_cookies(
     assert response.status_code == 302
 
     assert str(response.cookies['debug_sso_session_cookie']) == (
-        'Set-Cookie: debug_sso_session_cookie=a; '
-        'Comment=None; '
-        'expires=Sat, 14 Jan 2012 12:00:02 GMT; '
-        'Path=/; '
-        'Version=0'
+        'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
+        'Path=/'
     )
     assert str(response.cookies['sso_display_logged_in']) == (
-        'Set-Cookie: sso_display_logged_in=true; '
-        'Comment=None; '
-        'expires=Sat, 14 Jan 2012 12:00:02 GMT; '
-        'Path=/; '
-        'Version=0'
+        'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
     )
 
 
