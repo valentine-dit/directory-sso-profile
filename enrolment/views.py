@@ -332,3 +332,21 @@ class SoleTraderEnrolmentView(BaseEnrolmentWizardView):
             'company_type': 'SOLE_TRADER',
             **super().serialize_form_list(form_list)
         }
+
+
+class ResendVerificationCodeView(FormView):
+    template_name = 'enrolment/user-account-resend-verification.html'
+    form_class = forms.ResendVerificationCode
+    success_url = reverse_lazy('enrolment-start')
+
+    def form_valid(self, form):
+        registered_email = form.cleaned_data['email']
+        regen_code = helpers.regenerate_verification_code(registered_email)
+        if regen_code:
+            helpers.send_verification_code_email(
+                email=registered_email,
+                verification_code=regen_code,
+                form_url=self.request.path,
+            )
+        return super(ResendVerificationCodeView, self).form_valid(form)
+

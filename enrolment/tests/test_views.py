@@ -178,6 +178,20 @@ def mock_confirm_verification_code():
 
 
 @pytest.fixture(autouse=True)
+def mock_regenerate_verification_code():
+    response = create_response(200, {
+        'code': '12345',
+        'expiration_date': '2018-01-17T12:00:01Z'
+    })
+    patch = mock.patch.object(
+        helpers.sso_api_client.user, 'regenerate_verification_code',
+        return_value=response
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
 def mock_notify_already_registered():
     patch = mock.patch.object(helpers, 'notify_already_registered')
     yield patch.start()
@@ -744,17 +758,81 @@ def test_confirm_user_verify_code(
     mock_session_user.return_value = create_response(404)
 
     response = submit_step(steps_data[views.USER_ACCOUNT])
-    assert response.status_code == 302
+    assert response.status_code == 200
 
     response = submit_step(steps_data[views.VERIFICATION])
 
     mock_session_user.login()
 
-    assert response.status_code == 302
+    assert response.status_code == 200
     assert mock_confirm_verification_code.call_count == 1
     assert mock_confirm_verification_code.call_args == mock.call({
         'email': 'test@a.com', 'code': '12345'
     })
+
+
+def test_confirm_user_resend_verification_code(
+        client,
+        mock_regenerate_verification_code,
+        mock_send_verification_code_email,
+    ):
+
+    url = reverse('resend-verification')
+    response = client.post(url, {'email': 'test@a.com'})
+
+    assert response.status_code == 302
+
+    assert mock_regenerate_verification_code.call_count == 1
+    assert mock_regenerate_verification_code.call_args == mock.call({
+        'email': 'test@a.com',
+    })
+
+    assert mock_send_verification_code_email.call_count == 1
+    assert mock_send_verification_code_email.call_args == mock.call(
+        email='test@a.com',
+        form_url=url,
+        verification_code={
+            'code': '12345', 'expiration_date': '2018-01-17T12:00:01Z'
+        },
+    )
+
+
+def test_confirm_user_resend_verification_code_no_user(
+        client,
+        mock_regenerate_verification_code,
+        mock_send_verification_code_email,
+    ):
+    mock_regenerate_verification_code.return_value = create_response(404)
+    url = reverse('resend-verification')
+    response = client.post(url, {'email': 'test@a.com'})
+
+    assert response.status_code == 302
+
+    assert mock_regenerate_verification_code.call_count == 1
+    assert mock_regenerate_verification_code.call_args == mock.call({
+        'email': 'test@a.com',
+    })
+
+    assert mock_send_verification_code_email.call_count == 0
+
+
+def test_confirm_user_resend_verification_code_user_verified(
+        client,
+        mock_regenerate_verification_code,
+        mock_send_verification_code_email,
+    ):
+    mock_regenerate_verification_code.return_value = create_response(400)
+    url = reverse('resend-verification')
+    response = client.post(url, {'email': 'test@a.com'})
+
+    assert response.status_code == 302
+
+    assert mock_regenerate_verification_code.call_count == 1
+    assert mock_regenerate_verification_code.call_args == mock.call({
+        'email': 'test@a.com',
+    })
+
+    assert mock_send_verification_code_email.call_count == 0
 
 
 def test_sole_trader_enrolment_expose_company(

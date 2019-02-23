@@ -77,10 +77,12 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
+    '''
     captcha = ReCaptchaField(
         label='',
         label_suffix='',
     )
+    '''
     terms_agreed = fields.BooleanField(
         label=mark_safe(
             'Tick this box to accept the '
@@ -301,3 +303,10 @@ class SoleTraderBusinessDetails(forms.Form):
         self.cleaned_data['address_line_1'] = address_parts[0].strip()
         self.cleaned_data['address_line_2'] = address_parts[1].strip()
         return self.cleaned_data['address']
+
+
+class ResendVerificationCode(forms.Form):
+    email = fields.EmailField(
+        label='Your email address'
+    )
+
