@@ -22,6 +22,7 @@ PROGRESS_STEP_LABELS = (
     'Enter your details',
 )
 
+RESEND_VERIFICATION = 'resend'
 USER_ACCOUNT = 'user-account'
 VERIFICATION = 'verification'
 COMPANY_SEARCH = 'search'
@@ -334,19 +335,56 @@ class SoleTraderEnrolmentView(BaseEnrolmentWizardView):
         }
 
 
-class ResendVerificationCodeView(FormView):
-    template_name = 'enrolment/user-account-resend-verification.html'
-    form_class = forms.ResendVerificationCode
-    success_url = reverse_lazy('enrolment-start')
+class ResendVerificationCodeView(NamedUrlSessionWizardView):
 
-    def form_valid(self, form):
-        registered_email = form.cleaned_data['email']
-        regen_code = helpers.regenerate_verification_code(registered_email)
-        if regen_code:
-            helpers.send_verification_code_email(
-                email=registered_email,
-                verification_code=regen_code,
-                form_url=self.request.path,
+    form_list = (
+        (RESEND_VERIFICATION, forms.ResendVerificationCode),
+        (VERIFICATION, forms.UserAccountVerification),
+    )
+
+    templates = {
+        RESEND_VERIFICATION: 'enrolment/user-account-resend-verification.html',
+        VERIFICATION: 'enrolment/user-account-verification.html',
+        FINISHED: EnrolmentStartView.template_name,
+    }
+
+    def get_template_names(self):
+        return [self.templates[self.steps.current]]
+
+    def done(self, form_list, **kwargs):
+        data = self.get_cleaned_data_for_step(VERIFICATION)['cookies']
+        response = TemplateResponse(self.request, self.templates[FINISHED])
+        response.cookies.update(data)
+        return response
+
+    def render_next_step(self, form, **kwargs):
+        response = super().render_next_step(form, **kwargs)
+        if form.prefix == RESEND_VERIFICATION:
+            registered_email = form.cleaned_data['email']
+            regen_code = helpers.regenerate_verification_code(registered_email)
+            if regen_code:
+                helpers.send_verification_code_email(
+                    email=registered_email,
+                    verification_code=regen_code,
+                    form_url=self.request.path,
+                )
+        elif form.prefix == VERIFICATION:
+            response.cookies.update(form.cleaned_data['cookies'])
+        return response
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['verification_missing_url'] = urls.build_great_url(
+            'contact/triage/great-account/verification-missing/'
             )
-        return super(ResendVerificationCodeView, self).form_valid(form)
+        return context
+
+    def get_form_initial(self, step):
+        form_initial = super().get_form_initial(step)
+        if step == VERIFICATION:
+            data = self.get_cleaned_data_for_step(RESEND_VERIFICATION)
+            if data:
+                form_initial['email'] = data['email']
+        return form_initial
+
 

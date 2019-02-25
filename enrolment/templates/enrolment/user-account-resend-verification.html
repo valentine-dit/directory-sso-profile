@@ -1,27 +1,17 @@
-{% extends 'enrolment/base.html' %}
-
-{% load render_form from directory_components_tags %}
+{% extends 'enrolment/wizard.html' %}
 
 {% load static from static %}
-{% block content %}
-	{% block above_form %}
-		<div id="user-account-verification-header-container">
-			<h1 class="heading-large">Resend Verification</h1>
-			<p>Enter the email address you used to register</p>
-		</div>
-	{% endblock %}
 
-	{% block the_form %}
 
-	<form action="" method="post">
-		{% csrf_token %}
-		{{ form }}
-		<input type="submit" value="Resend Code">
-	</form>
-
-	{% endblock %}
-
-	{% block below_form %}
-		<p><a class="link" href="{{ verification_missing_url }}">If the resent code doesn't work</a></p>
-	{% endblock %}
+{% block above_form %}
+	<div id="user-account-verification-header-container">
+		<h1 class="heading-large">Resend Verification</h1>
+		<p>Enter the email address you used to register</p>
+	</div>
 {% endblock %}
+
+
+{% block below_form %}
+	<p><a class="link" href="{{ verification_missing_url }}">If the resent code doesn't work</a></p>
+{% endblock %}
+

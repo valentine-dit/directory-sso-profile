@@ -69,6 +69,15 @@ def submit_step_builder(submit_companies_house_step, submit_sole_trader_step):
     return inner
 
 
+@pytest.fixture
+def submit_resend_verification_house_step(client):
+    return submit_step_factory(
+        client=client,
+        url_name='resend',
+        view_name='resend_verification_view',
+        view_class=views.ResendVerificationCodeView,
+    )
+
 @pytest.fixture(autouse=True)
 def mock_get_company_profile():
     patch = mock.patch.object(helpers, 'get_company_profile', return_value={
@@ -221,6 +230,9 @@ def steps_data(captcha_stub):
             'confirmed_background_checks': True,
         },
         views.VERIFICATION: {
+            'code': '12345',
+        },
+        views.RESEND_VERIFICATION: {
             'code': '12345',
         },
     }
@@ -758,13 +770,13 @@ def test_confirm_user_verify_code(
     mock_session_user.return_value = create_response(404)
 
     response = submit_step(steps_data[views.USER_ACCOUNT])
-    assert response.status_code == 200
+    assert response.status_code == 302
 
     response = submit_step(steps_data[views.VERIFICATION])
 
     mock_session_user.login()
 
-    assert response.status_code == 200
+    assert response.status_code == 302
     assert mock_confirm_verification_code.call_count == 1
     assert mock_confirm_verification_code.call_args == mock.call({
         'email': 'test@a.com', 'code': '12345'
@@ -775,10 +787,13 @@ def test_confirm_user_resend_verification_code(
         client,
         mock_regenerate_verification_code,
         mock_send_verification_code_email,
-    ):
+        submit_resend_verification_house_step,
+        steps_data,
+):
 
-    url = reverse('resend-verification')
-    response = client.post(url, {'email': 'test@a.com'})
+    response = submit_resend_verification_house_step(
+        steps_data[views.RESEND_VERIFICATION]
+    )
 
     assert response.status_code == 302
 
@@ -795,44 +810,6 @@ def test_confirm_user_resend_verification_code(
             'code': '12345', 'expiration_date': '2018-01-17T12:00:01Z'
         },
     )
-
-
-def test_confirm_user_resend_verification_code_no_user(
-        client,
-        mock_regenerate_verification_code,
-        mock_send_verification_code_email,
-    ):
-    mock_regenerate_verification_code.return_value = create_response(404)
-    url = reverse('resend-verification')
-    response = client.post(url, {'email': 'test@a.com'})
-
-    assert response.status_code == 302
-
-    assert mock_regenerate_verification_code.call_count == 1
-    assert mock_regenerate_verification_code.call_args == mock.call({
-        'email': 'test@a.com',
-    })
-
-    assert mock_send_verification_code_email.call_count == 0
-
-
-def test_confirm_user_resend_verification_code_user_verified(
-        client,
-        mock_regenerate_verification_code,
-        mock_send_verification_code_email,
-    ):
-    mock_regenerate_verification_code.return_value = create_response(400)
-    url = reverse('resend-verification')
-    response = client.post(url, {'email': 'test@a.com'})
-
-    assert response.status_code == 302
-
-    assert mock_regenerate_verification_code.call_count == 1
-    assert mock_regenerate_verification_code.call_args == mock.call({
-        'email': 'test@a.com',
-    })
-
-    assert mock_send_verification_code_email.call_count == 0
 
 
 def test_sole_trader_enrolment_expose_company(
