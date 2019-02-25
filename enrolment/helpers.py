@@ -17,6 +17,17 @@ SESSION_KEY_PUBLIC_COMPANY_PROFILE = 'PUBLIC_COMPANY_PROFILE'
 SESSION_KEY_IS_ENROLLED = 'IS_ENROLLED'
 
 
+def claim_company(self, enrolment_key, personal_name, sso_session_id):
+    response = api_client.enrolment.claim_prepeveried_company(
+        data={
+            'key': enrolment_key,
+            'name': personal_name,
+        },
+        sso_session_id=sso_session_id,
+    )
+    response.raise_for_status()
+
+
 def get_company_profile(number, session):
     session_key = f'{SESSION_KEY_COMPANY_PROFILE}-{number}'
     if session_key not in session:
