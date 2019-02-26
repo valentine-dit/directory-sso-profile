@@ -103,10 +103,10 @@ urlpatterns = [
     url(
         r'^enrol/resend-verification/(?P<step>.+)/$',
         enrolment.views.ResendVerificationCodeView.as_view(
-            url_name='resend',
+            url_name='resend-verification',
             done_step_name='finished'
         ),
-        name='resend'
+        name='resend-verification'
     ),
     url(
         r'^find-a-buyer/$',

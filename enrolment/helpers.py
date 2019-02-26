@@ -118,6 +118,7 @@ def confirm_verification_code(email, verification_code):
     response.raise_for_status()
     return response
 
+
 def regenerate_verification_code(email):
     response = sso_api_client.user.regenerate_verification_code({
         'email': email,

@@ -77,12 +77,10 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
-
     captcha = ReCaptchaField(
         label='',
         label_suffix='',
     )
-
     terms_agreed = fields.BooleanField(
         label=mark_safe(
             'Tick this box to accept the '
@@ -309,4 +307,3 @@ class ResendVerificationCode(forms.Form):
     email = fields.EmailField(
         label='Your email address'
     )
-

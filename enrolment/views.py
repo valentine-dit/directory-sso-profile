@@ -387,5 +387,3 @@ class ResendVerificationCodeView(NamedUrlSessionWizardView):
             if data:
                 form_initial['email'] = data['email']
         return form_initial
-
-
