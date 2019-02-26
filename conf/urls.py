@@ -119,7 +119,14 @@ urlpatterns = [
             query_string=True,
         )
     ),
-
+    url(
+        r'^enrol/resend-verification/(?P<step>.+)/$',
+        enrolment.views.ResendVerificationCodeView.as_view(
+            url_name='resend-verification',
+            done_step_name='finished'
+        ),
+        name='resend-verification'
+    ),
     url(
         r'^find-a-buyer/$',
         profile.fab.views.FindABuyerView.as_view(),
