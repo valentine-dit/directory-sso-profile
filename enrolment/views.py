@@ -368,8 +368,6 @@ class ResendVerificationCodeView(NamedUrlSessionWizardView):
                     verification_code=regen_code,
                     form_url=self.request.path,
                 )
-        elif form.prefix == VERIFICATION:
-            response.cookies.update(form.cleaned_data['cookies'])
         return response
 
     def get_context_data(self, *args, **kwargs):

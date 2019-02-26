@@ -856,6 +856,43 @@ def test_confirm_user_resend_verification_code_no_user(
     assert mock_send_verification_code_email.call_count == 0
 
 
+def test_confirm_user_resend_verification_code_complete(
+        submit_resend_verification_house_step,
+        steps_data,
+):
+
+    response = submit_resend_verification_house_step(
+        steps_data[views.RESEND_VERIFICATION]
+    )
+
+    assert response.status_code == 302
+
+    response = submit_resend_verification_house_step(
+        steps_data[views.VERIFICATION]
+    )
+
+    assert response.status_code == 302
+
+
+def test_confirm_user_resend_verification_context_urls(
+        client
+):
+        url = reverse(
+            'resend-verification', kwargs={'step': views.RESEND_VERIFICATION}
+        )
+
+        response = client.get(url)
+
+        missing_url = constants_url.build_great_url(
+            'contact/triage/great-account/verification-missing/'
+        )
+        contact_url = constants_url.build_great_url('contact/')
+        assert response.status_code == 200
+
+        assert response.context_data['contact_url'] == contact_url
+        assert response.context_data['verification_missing_url'] == missing_url
+
+
 def test_sole_trader_enrolment_expose_company(
     client, submit_sole_trader_step, mock_session_user, steps_data
 ):
