@@ -118,6 +118,18 @@ def confirm_verification_code(email, verification_code):
     return response
 
 
+def regenerate_verification_code(email):
+    response = sso_api_client.user.regenerate_verification_code({
+        'email': email,
+    })
+    if response.status_code == 400 or response.status_code == 404:
+        # 400 indicates the email is already verified
+        # 404 is returned if the email account doesn't exist
+        return None
+    response.raise_for_status()
+    return response.json()
+
+
 def request_collaboration(company_number, email, name, form_url):
     response = api_client.company.request_collaboration(
         company_number=company_number,

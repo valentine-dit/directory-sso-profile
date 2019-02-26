@@ -133,6 +133,17 @@ def test_confirm_verification_code(mock_confirm_code):
     })
 
 
+@mock.patch.object(helpers.sso_api_client.user, 'regenerate_verification_code')
+def test_confirm_regenerate_code(mock_regenerate_code):
+    helpers.regenerate_verification_code(
+        email='test@example.com',
+     )
+    assert mock_regenerate_code.call_count == 1
+    assert mock_regenerate_code.call_args == mock.call({
+        'email': 'test@example.com',
+    })
+
+
 @mock.patch(
     'directory_forms_api_client.client.forms_api_client.submit_generic'
 )
