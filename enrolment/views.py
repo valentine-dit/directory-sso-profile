@@ -55,6 +55,7 @@ class ProgressIndicatorMixin:
         COMPANY_SEARCH: 4,
         BUSINESS_INFO: 4,
         PERSONAL_INFO: 5,
+        RESEND_VERIFICATION: 2,
     }
 
     def get_context_data(self, *args, **kwargs):
@@ -335,7 +336,13 @@ class SoleTraderEnrolmentView(BaseEnrolmentWizardView):
         }
 
 
-class ResendVerificationCodeView(NamedUrlSessionWizardView):
+class ResendVerificationCodeView(
+    NotFoundOnDisabledFeature,
+    RedirectAlreadyEnrolledMixin,
+    RestartOnStepSkipped,
+    ProgressIndicatorMixin,
+    NamedUrlSessionWizardView
+):
 
     form_list = (
         (RESEND_VERIFICATION, forms.ResendVerificationCode),
@@ -345,7 +352,7 @@ class ResendVerificationCodeView(NamedUrlSessionWizardView):
     templates = {
         RESEND_VERIFICATION: 'enrolment/user-account-resend-verification.html',
         VERIFICATION: 'enrolment/user-account-verification.html',
-        FINISHED: EnrolmentStartView.template_name,
+        FINISHED: 'enrolment/start.html',
     }
 
     def get_template_names(self):
@@ -361,11 +368,14 @@ class ResendVerificationCodeView(NamedUrlSessionWizardView):
         response = super().render_next_step(form, **kwargs)
         if form.prefix == RESEND_VERIFICATION:
             registered_email = form.cleaned_data['email']
-            regen_code = helpers.regenerate_verification_code(registered_email)
-            if regen_code:
+            verification_code = helpers.regenerate_verification_code(
+                registered_email
+            )
+
+            if verification_code:
                 helpers.send_verification_code_email(
                     email=registered_email,
-                    verification_code=regen_code,
+                    verification_code=verification_code,
                     form_url=self.request.path,
                 )
         return response
@@ -374,7 +384,7 @@ class ResendVerificationCodeView(NamedUrlSessionWizardView):
         context = super().get_context_data(*args, **kwargs)
         context['verification_missing_url'] = urls.build_great_url(
             'contact/triage/great-account/verification-missing/'
-            )
+        )
         context['contact_url'] = urls.build_great_url('contact/')
         return context
 
