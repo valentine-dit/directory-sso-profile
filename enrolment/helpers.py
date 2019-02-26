@@ -17,7 +17,7 @@ SESSION_KEY_PUBLIC_COMPANY_PROFILE = 'PUBLIC_COMPANY_PROFILE'
 SESSION_KEY_IS_ENROLLED = 'IS_ENROLLED'
 
 
-def claim_company(self, enrolment_key, personal_name, sso_session_id):
+def claim_company(enrolment_key, personal_name, sso_session_id):
     response = api_client.enrolment.claim_prepeveried_company(
         data={
             'key': enrolment_key,

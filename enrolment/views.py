@@ -367,12 +367,12 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
         try:
             self.claim_company(data)
         except HTTPError:
-            return TemplateResponse(self.request, self.templates[FINISHED])
-        else:
             return TemplateResponse(self.request, self.templates[FAILURE])
+        else:
+            return TemplateResponse(self.request, self.templates[FINISHED])
 
     def claim_company(self, data):
-        personal_name=f'{data["given_name"]} {data["last_name"]}'
+        personal_name=f'{data["given_name"]} {data["family_name"]}'
         helpers.claim_company(
             enrolment_key=self.request.session[SESSION_KEY_ENROL_KEY],
             personal_name=personal_name,
