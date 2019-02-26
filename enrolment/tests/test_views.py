@@ -233,7 +233,7 @@ def steps_data(captcha_stub):
             'code': '12345',
         },
         views.RESEND_VERIFICATION: {
-            'code': '12345',
+            'email': 'test@testa.com',
         },
     }
     return data
@@ -791,7 +791,12 @@ def test_confirm_user_resend_verification_code(
         steps_data,
 ):
 
-    response = submit_resend_verification_house_step(
+    url = reverse(
+        'resend', kwargs={'step': views.RESEND_VERIFICATION}
+    )
+    response = client.get(url)
+
+    response = client.post(url,
         steps_data[views.RESEND_VERIFICATION]
     )
 

@@ -377,6 +377,7 @@ class ResendVerificationCodeView(NamedUrlSessionWizardView):
         context['verification_missing_url'] = urls.build_great_url(
             'contact/triage/great-account/verification-missing/'
             )
+        context['contact_url'] = urls.build_great_url('contact/')
         return context
 
     def get_form_initial(self, step):

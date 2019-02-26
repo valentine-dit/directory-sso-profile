@@ -2,7 +2,6 @@
 
 {% load static from static %}
 
-
 {% block above_form %}
 	<div id="user-account-verification-header-container">
 		<h1 class="heading-large">Resend Verification</h1>
@@ -12,6 +11,6 @@
 
 
 {% block below_form %}
-	<p><a class="link" href="{{ verification_missing_url }}">If the resent code doesn't work</a></p>
+	<p><a class="link" href="{{ contact_url }}">If the resent code doesn't work</a></p>
 {% endblock %}
 
