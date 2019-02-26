@@ -860,7 +860,9 @@ def test_confirm_user_resend_verification_code_no_user(
     assert mock_send_verification_code_email.call_count == 0
 
 
+@freeze_time('2012-01-14 12:00:02')
 def test_confirm_user_resend_verification_code_complete(
+        client,
         submit_resend_verification_house_step,
         steps_data,
 ):
@@ -872,10 +874,23 @@ def test_confirm_user_resend_verification_code_complete(
     assert response.status_code == 302
 
     response = submit_resend_verification_house_step(
-        steps_data[views.VERIFICATION]
+        steps_data[views.VERIFICATION],
+        step_name=resolve(response.url).kwargs['step']
     )
-
     assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.status_code == 200
+    assert str(response.cookies['debug_sso_session_cookie']) == (
+        'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
+        'Path=/'
+    )
+    assert str(response.cookies['sso_display_logged_in']) == (
+        'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
+    )
 
 
 def test_confirm_user_resend_verification_context_urls(client):
