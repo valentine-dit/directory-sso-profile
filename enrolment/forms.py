@@ -126,7 +126,7 @@ class CompaniesHouseSearch(forms.Form):
         "<p>Check that you've entered the right name.</p>"
         "<p>Or "
         "<a href='{url}'>change type of business</a>"
-        "if your business is not registered with Companies House.</p>"
+        " if your business is not registered with Companies House.</p>"
     )
 
     company_name = fields.CharField(
@@ -162,7 +162,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
         required=False,
     )
     postal_code = fields.CharField(
-        label='Address finder',
+        label='Business postcode',
         required=False,
     )
     address = fields.CharField(
@@ -251,7 +251,7 @@ class SoleTraderSearch(forms.Form):
     company_name = fields.CharField(
         label='Business name'
     )
-    postal_code = fields.CharField()
+    postal_code = fields.CharField(label='Business postcode')
     address = fields.CharField()
 
 
