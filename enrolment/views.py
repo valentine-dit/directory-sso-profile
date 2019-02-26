@@ -341,7 +341,6 @@ class SoleTraderEnrolmentView(
         }
 
 
-<<<<<<< HEAD
 class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
 
     form_list = (
@@ -363,6 +362,8 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
             key = self.request.GET.get('key')
             if key:
                 self.request.session[SESSION_KEY_ENROL_KEY] = key
+            else:
+                return redirect(reverse('enrolment-start'))
         return super().get(*args, **kwargs)
 
     def done(self, form_list, **kwargs):
@@ -375,10 +376,9 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
             return TemplateResponse(self.request, self.templates[FINISHED])
 
     def claim_company(self, data):
-        personal_name=f'{data["given_name"]} {data["family_name"]}'
         helpers.claim_company(
             enrolment_key=self.request.session[SESSION_KEY_ENROL_KEY],
-            personal_name=personal_name,
+            personal_name=f'{data["given_name"]} {data["family_name"]}',
             sso_session_id=self.request.sso_user.session_id,
         )
 
@@ -387,7 +387,8 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
         for form in form_list:
             data.update(form.cleaned_data)
         return data
-=======
+
+
 class ResendVerificationCodeView(
     NotFoundOnDisabledFeature,
     RedirectAlreadyEnrolledMixin,
@@ -447,4 +448,3 @@ class ResendVerificationCodeView(
             if data:
                 form_initial['email'] = data['email']
         return form_initial
->>>>>>> 9f793b559804752728d07f19edcc17fb973eb64b
