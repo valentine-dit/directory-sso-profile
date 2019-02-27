@@ -1,4 +1,5 @@
 from formtools.wizard.views import NamedUrlSessionWizardView
+from requests.exceptions import HTTPError
 
 from django.conf import settings
 from django.http import Http404
@@ -12,7 +13,7 @@ from enrolment import constants, forms, helpers
 from directory_constants.constants import urls
 
 
-SESSION_KEY_ENROL_EMAIL = 'ENROL_EMAIL'
+SESSION_KEY_ENROL_KEY = 'SESSION_KEY_ENROL_KEY'
 
 PROGRESS_STEP_LABELS = (
     'Select your business type',
@@ -29,6 +30,7 @@ COMPANY_SEARCH = 'search'
 BUSINESS_INFO = 'business-details'
 PERSONAL_INFO = 'personal-details'
 FINISHED = 'finished'
+FAILURE = 'FAILURE'
 
 
 class NotFoundOnDisabledFeature:
@@ -204,7 +206,6 @@ class BaseEnrolmentWizardView(
     UserAccountEnrolmentHandlerMixin,
     core.mixins.PreventCaptchaRevalidationMixin,
     ProgressIndicatorMixin,
-    CreateCompanyProfileMixin,
     NamedUrlSessionWizardView
 ):
     def get_template_names(self):
@@ -221,7 +222,9 @@ class BaseEnrolmentWizardView(
         return context
 
 
-class CompaniesHouseEnrolmentView(BaseEnrolmentWizardView):
+class CompaniesHouseEnrolmentView(
+    CreateCompanyProfileMixin, BaseEnrolmentWizardView
+):
     form_list = (
         (USER_ACCOUNT, forms.UserAccount),
         (VERIFICATION, forms.UserAccountVerification),
@@ -286,7 +289,9 @@ class CompaniesHouseEnrolmentView(BaseEnrolmentWizardView):
         return TemplateResponse(self.request, self.templates[FINISHED])
 
 
-class SoleTraderEnrolmentView(BaseEnrolmentWizardView):
+class SoleTraderEnrolmentView(
+    CreateCompanyProfileMixin, BaseEnrolmentWizardView
+):
 
     form_list = (
         (USER_ACCOUNT, forms.UserAccount),
@@ -334,6 +339,54 @@ class SoleTraderEnrolmentView(BaseEnrolmentWizardView):
             'company_type': 'SOLE_TRADER',
             **super().serialize_form_list(form_list)
         }
+
+
+class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
+
+    form_list = (
+        (USER_ACCOUNT, forms.UserAccount),
+        (VERIFICATION, forms.UserAccountVerification),
+        (PERSONAL_INFO, forms.PersonalDetails),
+    )
+
+    templates = {
+        USER_ACCOUNT: 'enrolment/user-account.html',
+        VERIFICATION: 'enrolment/user-account-verification.html',
+        PERSONAL_INFO: 'enrolment/preverified-personal-details.html',
+        FINISHED: 'enrolment/success-pre-verified.html',
+        FAILURE: 'enrolment/failure-pre-verified.html',
+    }
+
+    def get(self, *args, **kwargs):
+        if self.steps.current == USER_ACCOUNT:
+            key = self.request.GET.get('key')
+            if key:
+                self.request.session[SESSION_KEY_ENROL_KEY] = key
+            else:
+                return redirect(reverse('enrolment-start'))
+        return super().get(*args, **kwargs)
+
+    def done(self, form_list, **kwargs):
+        data = self.serialize_form_list(form_list)
+        try:
+            self.claim_company(data)
+        except HTTPError:
+            return TemplateResponse(self.request, self.templates[FAILURE])
+        else:
+            return TemplateResponse(self.request, self.templates[FINISHED])
+
+    def claim_company(self, data):
+        helpers.claim_company(
+            enrolment_key=self.request.session[SESSION_KEY_ENROL_KEY],
+            personal_name=f'{data["given_name"]} {data["family_name"]}',
+            sso_session_id=self.request.sso_user.session_id,
+        )
+
+    def serialize_form_list(self, form_list):
+        data = {}
+        for form in form_list:
+            data.update(form.cleaned_data)
+        return data
 
 
 class ResendVerificationCodeView(
