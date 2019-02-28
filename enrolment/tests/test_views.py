@@ -881,7 +881,7 @@ def test_confirm_user_resend_verification_code_complete(
 
     response = client.get(response.url)
 
-    assert response.status_code == 200
+    assert response.status_code == 302
     assert str(response.cookies['debug_sso_session_cookie']) == (
         'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
@@ -903,10 +903,7 @@ def test_confirm_user_resend_verification_context_urls(client):
     missing_url = constants_url.build_great_url(
         'contact/triage/great-account/verification-missing/'
     )
-    contact_url = constants_url.build_great_url('contact/')
     assert response.status_code == 200
-
-    assert response.context_data['contact_url'] == contact_url
     assert response.context_data['verification_missing_url'] == missing_url
 
 

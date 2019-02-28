@@ -163,6 +163,8 @@ class BusinessTypeRoutingView(
     url_sole_trader_enrolment = reverse_lazy(
         'enrolment-sole-trader', kwargs={'step': USER_ACCOUNT}
     )
+    'enrolment-companies-house'
+    step = 'search'
 
     def dispatch(self, *args, **kwargs):
         flag = settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ON']
@@ -352,7 +354,7 @@ class ResendVerificationCodeView(
     templates = {
         RESEND_VERIFICATION: 'enrolment/user-account-resend-verification.html',
         VERIFICATION: 'enrolment/user-account-verification.html',
-        FINISHED: 'enrolment/start.html',
+        FINISHED: 'enrolment/business-type.html',
     }
 
     def get_template_names(self):
@@ -360,7 +362,10 @@ class ResendVerificationCodeView(
 
     def done(self, form_list, **kwargs):
         data = self.get_cleaned_data_for_step(VERIFICATION)['cookies']
-        response = TemplateResponse(self.request, self.templates[FINISHED])
+        url_companies_house_enrolment = reverse_lazy(
+            'enrolment-companies-house', kwargs={'step': COMPANY_SEARCH}
+        )
+        response = redirect(url_companies_house_enrolment)
         response.cookies.update(data)
         return response
 
@@ -385,7 +390,6 @@ class ResendVerificationCodeView(
         context['verification_missing_url'] = urls.build_great_url(
             'contact/triage/great-account/verification-missing/'
         )
-        context['contact_url'] = urls.build_great_url('contact/')
         return context
 
     def get_form_initial(self, step):
