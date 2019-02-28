@@ -1,14 +1,27 @@
+from io import BytesIO
 import http
 from unittest import mock
 
 from directory_api_client.client import api_client
 import pytest
+from PIL import Image, ImageDraw
 from requests.exceptions import HTTPError
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
 from core.tests.helpers import create_response
 from profile.fab import views
+
+
+def create_test_image(extension):
+    image = Image.new("RGB", (300, 50))
+    draw = ImageDraw.Draw(image)
+    draw.text((0, 0), "This text is drawn on image")
+    byte_io = BytesIO()
+    image.save(byte_io, extension)
+    byte_io.seek(0)
+    return byte_io
 
 
 @pytest.fixture
@@ -160,7 +173,7 @@ edit_data = (
         'facebook_url': 'https://www.facebook.com/thing/',
         'twitter_url': 'https://www.twitter.com/thing/',
         'linkedin_url': 'https://www.linkedin.com/thing/',
-    }
+    },
 )
 
 
@@ -185,6 +198,30 @@ def test_edit_page_submmit_success(
     assert mock_update_company.call_args == mock.call(
         sso_session_id=sso_user.session_id,
         data=data
+    )
+
+
+def test_edit_page_logo_submmit_success(
+    returned_client, mock_update_company, sso_user,
+    sso_user_middleware
+):
+    url = reverse('find-a-buyer-logo')
+    data = {
+        'logo': SimpleUploadedFile(
+            name='image.png',
+            content=create_test_image('png').read(),
+            content_type='image/png',
+        )
+    }
+
+    response = returned_client.post(url, data)
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
+    assert mock_update_company.call_count == 1
+    assert mock_update_company.call_args == mock.call(
+        sso_session_id=sso_user.session_id,
+        data={'logo': mock.ANY}
     )
 
 
