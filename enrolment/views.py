@@ -181,8 +181,12 @@ class BusinessTypeRoutingView(
 
     def form_valid(self, form):
         if form.cleaned_data['choice'] == constants.COMPANIES_HOUSE_COMPANY:
+            self.request.session[
+                'company_choice'] = constants.COMPANIES_HOUSE_COMPANY
             return redirect(self.url_companies_house_enrolment)
         elif form.cleaned_data['choice'] == constants.SOLE_TRADER:
+            self.request.session[
+                'company_choice'] = constants.SOLE_TRADER
             return redirect(self.url_sole_trader_enrolment)
         raise NotImplementedError()
 
@@ -345,7 +349,12 @@ class ResendVerificationCodeView(
     ProgressIndicatorMixin,
     NamedUrlSessionWizardView
 ):
-
+    url_companies_house_enrolment = reverse_lazy(
+        'enrolment-companies-house', kwargs={'step': USER_ACCOUNT}
+    )
+    url_sole_trader_enrolment = reverse_lazy(
+        'enrolment-sole-trader', kwargs={'step': USER_ACCOUNT}
+    )
     form_list = (
         (RESEND_VERIFICATION, forms.ResendVerificationCode),
         (VERIFICATION, forms.UserAccountVerification),
@@ -354,7 +363,7 @@ class ResendVerificationCodeView(
     templates = {
         RESEND_VERIFICATION: 'enrolment/user-account-resend-verification.html',
         VERIFICATION: 'enrolment/user-account-verification.html',
-        FINISHED: 'enrolment/business-type.html',
+        FINISHED: 'enrolment/start.html',
     }
 
     def get_template_names(self):
@@ -362,10 +371,14 @@ class ResendVerificationCodeView(
 
     def done(self, form_list, **kwargs):
         data = self.get_cleaned_data_for_step(VERIFICATION)['cookies']
-        url_companies_house_enrolment = reverse_lazy(
-            'enrolment-companies-house', kwargs={'step': COMPANY_SEARCH}
-        )
-        response = redirect(url_companies_house_enrolment)
+        company_choice = self.request.session.get('company_choice')
+
+        if company_choice == constants.COMPANIES_HOUSE_COMPANY:
+            response = redirect(self.url_companies_house_enrolment)
+        elif company_choice == constants.SOLE_TRADER:
+            response = redirect(self.url_sole_trader_enrolment)
+        else:
+            response = TemplateResponse(self.request, self.templates[FINISHED])
         response.cookies.update(data)
         return response
 
