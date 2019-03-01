@@ -71,8 +71,6 @@ class ProgressIndicatorMixin:
 
 class RestartOnStepSkipped:
     def render(self, *args, **kwargs):
-        
-        
         prev = self.steps.prev
         if prev and not self.get_cleaned_data_for_step(prev):
             return redirect(reverse('enrolment-business-type'))
@@ -195,6 +193,7 @@ class BusinessTypeRoutingView(
             )
             return redirect(self.url_sole_trader_enrolment)
         raise NotImplementedError()
+
 
 class EnrolmentStartView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin, TemplateView
