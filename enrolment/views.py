@@ -71,6 +71,8 @@ class ProgressIndicatorMixin:
 
 class RestartOnStepSkipped:
     def render(self, *args, **kwargs):
+        
+        
         prev = self.steps.prev
         if prev and not self.get_cleaned_data_for_step(prev):
             return redirect(reverse('enrolment-business-type'))
@@ -165,7 +167,7 @@ class BusinessTypeRoutingView(
     url_sole_trader_enrolment = reverse_lazy(
         'enrolment-sole-trader', kwargs={'step': USER_ACCOUNT}
     )
-    'enrolment-companies-house'
+
     step = 'search'
 
     def dispatch(self, *args, **kwargs):
@@ -183,15 +185,16 @@ class BusinessTypeRoutingView(
 
     def form_valid(self, form):
         if form.cleaned_data['choice'] == constants.COMPANIES_HOUSE_COMPANY:
-            self.request.session[
-                'company_choice'] = constants.COMPANIES_HOUSE_COMPANY
+            self.request.session['company_choice'] = (
+                constants.COMPANIES_HOUSE_COMPANY
+            )
             return redirect(self.url_companies_house_enrolment)
         elif form.cleaned_data['choice'] == constants.SOLE_TRADER:
-            self.request.session[
-                'company_choice'] = constants.SOLE_TRADER
+            self.request.session['company_choice'] = (
+                constants.SOLE_TRADER
+            )
             return redirect(self.url_sole_trader_enrolment)
         raise NotImplementedError()
-
 
 class EnrolmentStartView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin, TemplateView
