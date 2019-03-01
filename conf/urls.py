@@ -1,6 +1,8 @@
 import directory_healthcheck.views
 
 from django.conf.urls import include, url
+from django.urls import reverse_lazy
+from django.views.generic import RedirectView
 
 import core.views
 import enrolment.views
@@ -101,6 +103,23 @@ urlpatterns = [
         name='enrolment-sole-trader'
     ),
     url(
+        r'^enrol/pre-verified/(?P<step>.+)/$',
+        enrolment.views.PreVerifiedEnrolmentView.as_view(
+            url_name='enrolment-pre-verified',
+            done_step_name='finished'
+        ),
+        name='enrolment-pre-verified'
+    ),
+    url(
+        r'^enrol/pre-verified/$',
+        RedirectView.as_view(
+            url=reverse_lazy(
+                'enrolment-pre-verified', kwargs={'step': 'user-account'}
+            ),
+            query_string=True,
+        )
+    ),
+    url(
         r'^enrol/resend-verification/(?P<step>.+)/$',
         enrolment.views.ResendVerificationCodeView.as_view(
             url_name='resend-verification',
@@ -127,5 +146,10 @@ urlpatterns = [
         r'^find-a-buyer/description/$',
         profile.fab.views.DescriptionFormView.as_view(),
         name='find-a-buyer-description'
+    ),
+    url(
+        r'^find-a-buyer/logo/$',
+        profile.fab.views.LogoFormView.as_view(),
+        name='find-a-buyer-logo'
     ),
 ]

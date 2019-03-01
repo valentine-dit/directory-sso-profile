@@ -60,6 +60,16 @@ def submit_sole_trader_step(client):
 
 
 @pytest.fixture
+def submit_pre_verified_step(client):
+    return submit_step_factory(
+        client=client,
+        url_name='enrolment-pre-verified',
+        view_name='pre_verified_enrolment_view',
+        view_class=views.PreVerifiedEnrolmentView,
+    )
+
+
+@pytest.fixture
 def submit_step_builder(submit_companies_house_step, submit_sole_trader_step):
     def inner(choice):
         if choice == constants.COMPANIES_HOUSE_COMPANY:
@@ -144,6 +154,16 @@ def mock_enrolment_send(client):
     patch = mock.patch.object(
         helpers.api_client.enrolment, 'send_form',
         return_value=create_response(201)
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_claim_company(client):
+    patch = mock.patch.object(
+        helpers.api_client.enrolment, 'claim_prepeveried_company',
+        return_value=create_response(200)
     )
     yield patch.start()
     patch.stop()
@@ -1163,3 +1183,73 @@ def test_sole_trader_search_address_not_found_url(
         'contact/triage/great-account/sole-trader-address-not-found/'
     )
     assert response.context_data['address_not_found_url'] == not_found_url
+
+
+def test_claim_preverified_no_key(client):
+    url = reverse('enrolment-pre-verified', kwargs={'step': 'user-account'})
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('enrolment-start')
+
+
+def test_claim_preverified_success(
+    submit_pre_verified_step, mock_claim_company, client, steps_data,
+    mock_session_user
+):
+    url = reverse('enrolment-pre-verified', kwargs={'step': 'user-account'})
+    response = client.get(url, {'key': 'some-key'})
+
+    assert response.status_code == 200
+
+    response = submit_pre_verified_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_pre_verified_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    mock_session_user.login()
+
+    response = submit_pre_verified_step(steps_data[views.PERSONAL_INFO])
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.status_code == 200
+    assert response.template_name == 'enrolment/success-pre-verified.html'
+    assert mock_claim_company.call_count == 1
+    assert mock_claim_company.call_args == mock.call(
+        data={
+            'key': 'some-key',
+            'name': 'Foo Example',
+        },
+        sso_session_id='foo-bar',
+    )
+
+
+def test_claim_preverified_failure(
+    submit_pre_verified_step, mock_claim_company, client, steps_data,
+    mock_session_user
+):
+    mock_claim_company.return_value = create_response(400)
+
+    url = reverse('enrolment-pre-verified', kwargs={'step': 'user-account'})
+    response = client.get(url, {'key': 'some-key'})
+
+    assert response.status_code == 200
+
+    response = submit_pre_verified_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_pre_verified_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    mock_session_user.login()
+
+    response = submit_pre_verified_step(steps_data[views.PERSONAL_INFO])
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.status_code == 200
+    assert response.template_name == 'enrolment/failure-pre-verified.html'
