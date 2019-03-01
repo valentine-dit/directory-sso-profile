@@ -172,11 +172,16 @@
 #case-studies {
   li {
     display: table;
+    margin-bottom: 10px;
     span {
       display: table-cell;
       vertical-align: middle;
       padding-left: 20px;
       font-weight: bold;
+    }
+    a {
+      margin-left: 40px;
+      vertical-align: super;
     }
   }
 }

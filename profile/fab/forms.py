@@ -1,15 +1,9 @@
-<<<<<<< HEAD
 from directory_constants.constants import choices
-=======
->>>>>>> origin
 from directory_components import fields, forms
 import directory_validators.company
 import directory_validators.enrolment
 
-<<<<<<< HEAD
-=======
 from django.conf import settings
->>>>>>> origin
 from django.forms import ImageField, Textarea
 
 from profile.fab import validators
@@ -76,8 +70,6 @@ class DescriptionForm(forms.Form):
     )
 
 
-<<<<<<< HEAD
-
 class CaseStudyBasicInfoForm(forms.Form):
     title = fields.CharField(
         label='Showcase title',
@@ -138,7 +130,6 @@ class CaseStudyBasicInfoForm(forms.Form):
             directory_validators.company.no_html,
         ]
     )
-
 
 
 class DynamicHelptextFieldsMixin:

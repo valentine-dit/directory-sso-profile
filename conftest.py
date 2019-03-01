@@ -1,13 +1,14 @@
 from copy import deepcopy
 import os
 import http
-from unittest.mock import patch
+from unittest import mock
 
 import pytest
 import requests
 
 from django.contrib.sessions.backends import signed_cookies
 
+from core.tests.helpers import create_response
 from sso.utils import SSOUser
 from profile.eig_apps.constants import HAS_VISITED_ABOUT_PAGE_SESSION_KEY
 
@@ -55,7 +56,7 @@ def sso_user_middleware(sso_user):
     def process_request(self, request):
         request.sso_user = sso_user
 
-    stub = patch(
+    stub = mock.patch(
         'sso.middleware.SSOUserMiddleware.process_request',
         process_request
     )
@@ -69,7 +70,7 @@ def sso_user_middleware_unauthenticated():
     def process_request(self, request):
         request.sso_user = None
 
-    stub = patch(
+    stub = mock.patch(
         'sso.middleware.SSOUserMiddleware.process_request',
         process_request
     )
@@ -103,3 +104,21 @@ def captcha_stub():
     os.environ['RECAPTCHA_TESTING'] = 'True'
     yield 'PASSED'
     os.environ['RECAPTCHA_TESTING'] = 'False'
+
+
+@pytest.fixture(autouse=True)
+def mock_session_user(client, settings):
+    client.cookies[settings.SSO_SESSION_COOKIE] = '123'
+    patch = mock.patch(
+        'directory_sso_api_client.client.sso_api_client.user.get_session_user',
+        return_value=create_response(404)
+    )
+
+    def login():
+        started.return_value = create_response(
+            200, {'id': '123', 'email': 'test@a.com'}
+        )
+    started = patch.start()
+    started.login = login
+    yield started
+    patch.stop()

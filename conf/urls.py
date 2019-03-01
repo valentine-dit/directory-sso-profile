@@ -153,17 +153,17 @@ urlpatterns = [
         name='find-a-buyer-logo'
     ),
     url(
-        r'^find-a-buyer/case-study/(?P<step>.+)/$',
-        profile.fab.views.CaseStudyWizardCreateView.as_view(
-            url_name='find-a-buyer-case-study',
-        ),
-        name='find-a-buyer-case-study'
-    ),
-    url(
         r'^find-a-buyer/case-study/(?P<id>[0-9]+)/(?P<step>.+)/$',
         profile.fab.views.CaseStudyWizardEditView.as_view(
             url_name='find-a-buyer-case-study-edit'
         ),
         name='find-a-buyer-case-study-edit'
+    ),
+    url(
+        r'^find-a-buyer/case-study/(?P<step>.+)/$',
+        profile.fab.views.CaseStudyWizardCreateView.as_view(
+            url_name='find-a-buyer-case-study'
+        ),
+        name='find-a-buyer-case-study'
     ),
 ]
