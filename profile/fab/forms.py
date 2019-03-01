@@ -1,8 +1,15 @@
+<<<<<<< HEAD
 from directory_constants.constants import choices
+=======
+>>>>>>> origin
 from directory_components import fields, forms
 import directory_validators.company
 import directory_validators.enrolment
 
+<<<<<<< HEAD
+=======
+from django.conf import settings
+>>>>>>> origin
 from django.forms import ImageField, Textarea
 
 from profile.fab import validators
@@ -69,6 +76,7 @@ class DescriptionForm(forms.Form):
     )
 
 
+<<<<<<< HEAD
 
 class CaseStudyBasicInfoForm(forms.Form):
     title = fields.CharField(
@@ -280,4 +288,20 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
         max_length=255,
         required=False,
         validators=[directory_validators.company.no_html],
+    )
+
+
+class LogoForm(forms.Form):
+    logo = ImageField(
+        help_text=(
+            'For best results this should be a transparent PNG file of 600 x '
+            '600 pixels and no more than 2MB'.format(
+                int(settings.VALIDATOR_MAX_LOGO_SIZE_BYTES / 1024 / 1014)
+            )
+        ),
+        required=True,
+        validators=[
+            directory_validators.enrolment.logo_filesize,
+            directory_validators.company.image_format,
+        ]
     )

@@ -139,6 +139,11 @@ class DescriptionFormView(BaseFormView):
     template_name = 'fab/description-form.html'
 
 
+class LogoFormView(BaseFormView):
+    form_class = forms.LogoForm
+    template_name = 'fab/logo-form.html'
+
+
 class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
     done_step_name = 'finished'
 

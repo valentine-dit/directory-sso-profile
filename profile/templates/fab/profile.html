@@ -42,9 +42,10 @@
 
             <div id="logo-container">
                 {% if not company.logo %}
-                    <a id="add-image" href="#" class="link">Add a logo</a>
+                    <a id="add-image" href="{% url 'find-a-buyer-logo' %}" class="link">Add a logo</a>
                 {% else %}
                     <img alt="{{ company.name }}" src="{{ company.logo }}" />
+                    <a id="edit-image" href="{% url 'find-a-buyer-logo' %}" class="link pencil-link">Edit</a>
                 {% endif %}
             </div>
 
