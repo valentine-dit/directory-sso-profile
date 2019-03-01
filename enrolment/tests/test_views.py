@@ -10,6 +10,7 @@ from core.tests.helpers import create_response, submit_step_factory
 
 from enrolment import constants, helpers, views
 from directory_constants.constants import urls as constants_url
+from django.contrib.sessions.backends import signed_cookies
 
 
 urls = (
@@ -270,6 +271,19 @@ def test_200_feature_on(url, client, settings):
     response = client.get(url)
 
     assert response.status_code == 200
+
+
+@pytest.fixture
+def session_client_company_factory(client, settings):
+
+    def session_client(company_choice):
+        session = signed_cookies.SessionStore()
+        session.save()
+        session['company_choice'] = company_choice
+        session.save()
+        client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
+        return client
+    return session_client
 
 
 @pytest.mark.parametrize('choice,expected_url', (
@@ -865,8 +879,91 @@ def test_confirm_user_resend_verification_code_complete(
     assert response.status_code == 302
 
     response = client.get(response.url)
+    assert response.status_code == 302
+    assert response.url == reverse('enrolment-business-type')
 
-    assert response.status_code == 200
+    assert str(response.cookies['debug_sso_session_cookie']) == (
+        'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
+        'Path=/'
+    )
+    assert str(response.cookies['sso_display_logged_in']) == (
+        'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
+    )
+
+
+@freeze_time('2012-01-14 12:00:02')
+def test_confirm_user_resend_verification_code_choice_companies_house(
+        session_client_company_factory,
+        submit_resend_verification_house_step,
+        steps_data,
+):
+    client_session = session_client_company_factory(
+        constants.COMPANIES_HOUSE_COMPANY
+    )
+
+    response = submit_resend_verification_house_step(
+        steps_data[views.RESEND_VERIFICATION]
+    )
+
+    assert response.status_code == 302
+
+    response = submit_resend_verification_house_step(
+        steps_data[views.VERIFICATION],
+        step_name=resolve(response.url).kwargs['step'],
+    )
+    assert response.status_code == 302
+
+    response = client_session.get(response.url)
+
+    assert response.status_code == 302
+
+    assert response.url == reverse(
+        'enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}
+    )
+
+    assert str(response.cookies['debug_sso_session_cookie']) == (
+        'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
+        'Path=/'
+    )
+    assert str(response.cookies['sso_display_logged_in']) == (
+        'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
+    )
+
+
+@freeze_time('2012-01-14 12:00:02')
+def test_confirm_user_resend_verification_code_choice_sole_trader(
+        session_client_company_factory,
+        submit_resend_verification_house_step,
+        steps_data,
+):
+    client_session = session_client_company_factory(
+        constants.SOLE_TRADER
+    )
+
+    response = submit_resend_verification_house_step(
+        steps_data[views.RESEND_VERIFICATION]
+    )
+
+    assert response.status_code == 302
+
+    response = submit_resend_verification_house_step(
+        steps_data[views.VERIFICATION],
+        step_name=resolve(response.url).kwargs['step'],
+    )
+    assert response.status_code == 302
+
+    response = client_session.get(response.url)
+
+    assert response.status_code == 302
+
+    assert response.url == reverse(
+        'enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}
+    )
+
     assert str(response.cookies['debug_sso_session_cookie']) == (
         'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
@@ -888,10 +985,7 @@ def test_confirm_user_resend_verification_context_urls(client):
     missing_url = constants_url.build_great_url(
         'contact/triage/great-account/verification-missing/'
     )
-    contact_url = constants_url.build_great_url('contact/')
     assert response.status_code == 200
-
-    assert response.context_data['contact_url'] == contact_url
     assert response.context_data['verification_missing_url'] == missing_url
 
 
