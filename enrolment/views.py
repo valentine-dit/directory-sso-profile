@@ -411,7 +411,7 @@ class ResendVerificationCodeView(
         'enrolment-sole-trader', kwargs={'step': USER_ACCOUNT}
     )
     url_business_type = reverse_lazy('enrolment-business-type')
-    
+
     form_list = (
         (RESEND_VERIFICATION, forms.ResendVerificationCode),
         (VERIFICATION, forms.UserAccountVerification),
