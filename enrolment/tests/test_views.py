@@ -916,7 +916,7 @@ def test_confirm_user_resend_verification_code_complete(
     response = client.get(response.url)
     assert response.status_code == 302
     assert response.url == reverse('enrolment-business-type')
-    
+
     assert str(response.cookies['debug_sso_session_cookie']) == (
         'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
