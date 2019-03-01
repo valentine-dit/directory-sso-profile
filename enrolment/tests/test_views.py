@@ -914,7 +914,6 @@ def test_confirm_user_resend_verification_code_complete(
     assert response.status_code == 302
 
     response = client.get(response.url)
-    
     assert response.status_code == 302
     assert response.url == reverse('enrolment-business-type')
     
