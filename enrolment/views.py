@@ -166,8 +166,6 @@ class BusinessTypeRoutingView(
         'enrolment-sole-trader', kwargs={'step': USER_ACCOUNT}
     )
 
-    step = 'search'
-
     def dispatch(self, *args, **kwargs):
         flag = settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ON']
         if not flag:
