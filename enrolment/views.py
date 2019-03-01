@@ -410,6 +410,8 @@ class ResendVerificationCodeView(
     url_sole_trader_enrolment = reverse_lazy(
         'enrolment-sole-trader', kwargs={'step': USER_ACCOUNT}
     )
+    url_business_type = reverse_lazy('enrolment-business-type')
+    
     form_list = (
         (RESEND_VERIFICATION, forms.ResendVerificationCode),
         (VERIFICATION, forms.UserAccountVerification),
@@ -433,7 +435,7 @@ class ResendVerificationCodeView(
         elif company_choice == constants.SOLE_TRADER:
             response = redirect(self.url_sole_trader_enrolment)
         else:
-            response = TemplateResponse(self.request, self.templates[FINISHED])
+            response = response = redirect(self.url_business_type)
         response.cookies.update(data)
         return response
 
