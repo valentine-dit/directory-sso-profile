@@ -432,3 +432,13 @@ DIRECTORY_API_CLIENT_DEFAULT_TIMEOUT = env.str(
 
 # directory client core
 DIRECTORY_CLIENT_CORE_CACHE_EXPIRE_SECONDS = 60 * 60 * 24 * 30  # 30 days
+
+
+# parity with nginx config for maximum request body
+DATA_UPLOAD_MAX_MEMORY_SIZE = 6 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 6 * 1024 * 1024
+
+# directory validators
+VALIDATOR_MAX_LOGO_SIZE_BYTES = env.int(
+    'VALIDATOR_MAX_LOGO_SIZE_BYTES', 2 * 1024 * 1024
+)

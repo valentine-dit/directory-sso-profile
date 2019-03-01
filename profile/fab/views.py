@@ -133,3 +133,8 @@ class EmailAddressFormView(BaseFormView):
 class DescriptionFormView(BaseFormView):
     form_class = forms.DescriptionForm
     template_name = 'fab/description-form.html'
+
+
+class LogoFormView(BaseFormView):
+    form_class = forms.LogoForm
+    template_name = 'fab/logo-form.html'

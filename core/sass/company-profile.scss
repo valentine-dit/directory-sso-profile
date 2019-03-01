@@ -3,6 +3,7 @@
 @import 'partials/buttons';
 @import 'partials/errors';
 @import 'partials/responsive';
+@import 'partials/colours';
 
 #alerts-top {
   margin-bottom: 15px;
@@ -70,16 +71,30 @@
   max-width: 250px;
   background-color: white;
   border: 1px solid #999;
+  position: relative;
   img {
     width: 100%;
     vertical-align: middle;
   }
   display: table;
-  a {
+  #add-image {
     display: table-cell;
     vertical-align: middle;
     height: 250px;
     width: 250px;
+  }
+  #edit-image {
+    position: absolute;
+    right: 0;
+    color: white;
+    background: $active-blue;
+    padding: 10px;
+    &:before {
+      content: '✏';
+      transform: rotate(135deg);
+      display: inline-block;
+      margin-right: 10px;
+    }
   }
 }
 

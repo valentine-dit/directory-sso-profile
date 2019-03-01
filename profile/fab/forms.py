@@ -1,8 +1,9 @@
-import directory_validators.company
-
 from directory_components import fields, forms
+import directory_validators.company
+import directory_validators.enrolment
 
-from django.forms import Textarea
+from django.conf import settings
+from django.forms import ImageField, Textarea
 
 from profile.fab import validators
 
@@ -65,4 +66,20 @@ class DescriptionForm(forms.Form):
             validators.does_not_contain_email,
             directory_validators.company.no_html,
         ],
+    )
+
+
+class LogoForm(forms.Form):
+    logo = ImageField(
+        help_text=(
+            'For best results this should be a transparent PNG file of 600 x '
+            '600 pixels and no more than 2MB'.format(
+                int(settings.VALIDATOR_MAX_LOGO_SIZE_BYTES / 1024 / 1014)
+            )
+        ),
+        required=True,
+        validators=[
+            directory_validators.enrolment.logo_filesize,
+            directory_validators.company.image_format,
+        ]
     )

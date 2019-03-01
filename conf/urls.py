@@ -147,4 +147,9 @@ urlpatterns = [
         profile.fab.views.DescriptionFormView.as_view(),
         name='find-a-buyer-description'
     ),
+    url(
+        r'^find-a-buyer/logo/$',
+        profile.fab.views.LogoFormView.as_view(),
+        name='find-a-buyer-logo'
+    ),
 ]
