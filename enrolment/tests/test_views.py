@@ -928,7 +928,7 @@ def test_confirm_user_resend_verification_code_complete_choice(
 
 
 @freeze_time('2012-01-14 12:00:02')
-def test_confirm_user_resend_verification_code_session_choice_ch(
+def test_confirm_user_resend_verification_code_complete_choice(
         session_client_company_factory,
         submit_resend_verification_house_step,
         steps_data,
@@ -969,7 +969,7 @@ def test_confirm_user_resend_verification_code_session_choice_ch(
 
 
 @freeze_time('2012-01-14 12:00:02')
-def test_confirm_user_resend_verification_code_session_choice_st(
+def test_confirm_user_resend_verification_code_choice_companies_house(
         session_client_company_factory,
         submit_resend_verification_house_step,
         steps_data,
