@@ -27,7 +27,7 @@ def api_response_ok_bad_json(*args, **kwargs):
     return response
 
 
-def api_response_bad():
+def api_response_bad(*args, **kw):
     return Mock(ok=False)
 
 
@@ -37,12 +37,17 @@ def test_sso_middleware_installed(settings):
 
 @patch('directory_sso_api_client.client.sso_api_client.user.get_session_user')
 def test_sso_middleware_no_cookie(
-    mock_get_session_user, settings, client
+    mock_get_session_user, settings, client, mock_session_user
 ):
-    settings.MIDDLEWARE_CLASSES = ['sso.middleware.SSOUserMiddleware']
+    del client.cookies[settings.SSO_SESSION_COOKIE]
+    mock_session_user.stop()
+    settings.MIDDLEWARE_CLASSES = [
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'sso.middleware.SSOUserMiddleware',
+    ]
     response = client.get(reverse('find-a-buyer'))
 
-    mock_get_session_user.assert_not_called()
+    assert mock_get_session_user.call_count == 0
 
     assert response.status_code == http.client.FOUND
 
