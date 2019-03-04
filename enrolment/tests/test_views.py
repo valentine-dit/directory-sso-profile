@@ -6,7 +6,8 @@ from requests.exceptions import HTTPError
 
 from django.urls import resolve, reverse
 
-from core.tests.helpers import create_response
+from core.tests.helpers import create_response, submit_step_factory
+
 from enrolment import constants, helpers, views
 from directory_constants.constants import urls as constants_url
 from django.contrib.sessions.backends import signed_cookies
@@ -19,24 +20,6 @@ urls = (
     reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}),
 )
 company_types = (constants.COMPANIES_HOUSE_COMPANY, constants.SOLE_TRADER)
-
-
-@pytest.fixture(autouse=True)
-def mock_session_user(client, settings):
-    client.cookies[settings.SSO_SESSION_COOKIE] = '123'
-    patch = mock.patch(
-        'directory_sso_api_client.client.sso_api_client.user.get_session_user',
-        return_value=create_response(404)
-    )
-
-    def login():
-        started.return_value = create_response(
-            200, {'id': '123', 'email': 'test@a.com'}
-        )
-    started = patch.start()
-    started.login = login
-    yield started
-    patch.stop()
 
 
 @pytest.fixture
@@ -301,24 +284,6 @@ def session_client_company_factory(client, settings):
         client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
         return client
     return session_client
-
-
-def submit_step_factory(client, url_name, view_name, view_class):
-    step_names = iter([name for name, form in view_class.form_list])
-
-    def submit_step(data, step_name=None):
-        step_name = step_name or next(step_names)
-        return client.post(
-            reverse(url_name, kwargs={'step': step_name}),
-            {
-                view_name + '-current_step': step_name,
-                **{
-                    step_name + '-' + key: value
-                    for key, value in data.items()
-                }
-            },
-        )
-    return submit_step
 
 
 @pytest.mark.parametrize('choice,expected_url', (

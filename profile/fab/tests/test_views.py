@@ -10,7 +10,7 @@ from requests.exceptions import HTTPError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
-from core.tests.helpers import create_response
+from core.tests.helpers import create_response, submit_step_factory
 from profile.fab import views
 
 
@@ -27,6 +27,47 @@ def create_test_image(extension):
 @pytest.fixture
 def default_company_profile():
     return {'name': 'Cool Company'}
+
+
+@pytest.fixture
+def default_private_case_study(case_study_data):
+    return {
+        **case_study_data[views.BASIC],
+        **case_study_data[views.MEDIA],
+        'image_one': 'https://example.com/image-one.png',
+        'image_two': 'https://example.com/image-two.png',
+        'image_three': 'https://example.com/image-three.png',
+    }
+
+
+@pytest.fixture(autouse=True)
+def mock_retrieve_private_case_study(default_private_case_study):
+    patch = mock.patch.object(
+        api_client.company, 'retrieve_private_case_study',
+        return_value=create_response(200, default_private_case_study)
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_update_case_study():
+    patch = mock.patch.object(
+        api_client.company, 'update_case_study',
+        return_value=create_response(200)
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_create_case_study():
+    patch = mock.patch.object(
+        api_client.company, 'create_case_study',
+        return_value=create_response(201)
+    )
+    yield patch.start()
+    patch.stop()
 
 
 @pytest.fixture(autouse=True)
@@ -57,6 +98,69 @@ def mock_retrieve_supplier():
     )
     yield patch.start()
     patch.stop()
+
+
+@pytest.fixture
+def submit_case_study_create_step(client):
+    return submit_step_factory(
+        client=client,
+        url_name='find-a-buyer-case-study',
+        view_name='case_study_wizard_create_view',
+        view_class=views.CaseStudyWizardCreateView,
+    )
+
+
+@pytest.fixture
+def submit_case_study_edit_step(client):
+    url_name = 'find-a-buyer-case-study-edit'
+    view_name = 'case_study_wizard_edit_view'
+    view_class = views.CaseStudyWizardEditView
+    step_names = iter([name for name, form in view_class.form_list])
+
+    def submit_step(data, step_name=None):
+        step_name = step_name or next(step_names)
+        return client.post(
+            reverse(url_name, kwargs={'step': step_name, 'id': 1}),
+            {
+                view_name + '-current_step': step_name,
+                **{step_name + '-' + key: value for key, value in data.items()}
+            },
+        )
+    return submit_step
+
+
+@pytest.fixture
+def case_study_data():
+    return {
+        views.BASIC: {
+            'title': 'Example',
+            'description': 'Great',
+            'short_summary': 'Nice',
+            'sector': 'AEROSPACE',
+            'website': 'http://www.example.com',
+            'keywords': 'good, great',
+        },
+        views.MEDIA: {
+            'testimonial': 'Great',
+            'testimonial_name': 'Neville',
+            'testimonial_job_title': 'Abstract hat maker',
+            'testimonial_company': 'Imaginary hats Ltd',
+            'image_one': SimpleUploadedFile(
+                name='image-one.png',
+                content=create_test_image('png').read(),
+                content_type='image/png',
+            ),
+            'image_two': SimpleUploadedFile(
+                name='image-two.png',
+                content=create_test_image('png').read(),
+                content_type='image/png',
+            ),
+            'image_three': None,
+            'image_one_caption': 'nice image',
+            'image_two_caption': 'thing',
+            'image_three_caption': 'thing',
+        }
+    }
 
 
 def test_find_a_buyer_redirect_first_time_user(sso_user_middleware, client):
@@ -233,3 +337,80 @@ def test_edit_page_submmit_error(
 
     with pytest.raises(HTTPError):
         returned_client.post(url, data)
+
+
+def test_case_study_create(
+    submit_case_study_create_step, mock_create_case_study, mock_session_user,
+    case_study_data, client
+):
+    mock_session_user.login()
+
+    response = submit_case_study_create_step(case_study_data[views.BASIC])
+    assert response.status_code == 302
+
+    response = submit_case_study_create_step(case_study_data[views.MEDIA])
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.url == reverse('find-a-buyer')
+
+    assert mock_create_case_study.call_count == 1
+
+
+def test_case_study_edit(
+    submit_case_study_edit_step, mock_retrieve_private_case_study, client,
+    mock_update_case_study, mock_session_user, case_study_data,
+    default_private_case_study
+):
+    mock_session_user.login()
+
+    response = submit_case_study_edit_step(case_study_data[views.BASIC])
+    assert response.status_code == 302
+
+    response = submit_case_study_edit_step(case_study_data[views.MEDIA])
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.url == reverse('find-a-buyer')
+    assert mock_update_case_study.call_count == 1
+    data = {
+        **default_private_case_study,
+        'image_one': mock.ANY,
+        'image_two': mock.ANY,
+    }
+    del data['image_three']
+    assert mock_update_case_study.call_args == mock.call(
+        case_study_id='1',
+        data=data,
+        sso_session_id='123'
+    )
+
+
+def test_case_study_edit_not_found(
+    mock_retrieve_private_case_study, client, mock_session_user
+):
+    mock_retrieve_private_case_study.return_value = create_response(404)
+
+    mock_session_user.login()
+    url = reverse(
+        'find-a-buyer-case-study-edit', kwargs={'id': '1', 'step': views.BASIC}
+    )
+
+    response = client.get(url)
+
+    assert response.status_code == 404
+
+
+def test_case_study_edit_found(
+    mock_retrieve_private_case_study, client, mock_session_user
+):
+    mock_session_user.login()
+    url = reverse(
+        'find-a-buyer-case-study-edit', kwargs={'id': '1', 'step': views.BASIC}
+    )
+
+    response = client.get(url)
+
+    assert response.status_code == 200

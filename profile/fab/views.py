@@ -1,15 +1,24 @@
+import os
+
 from directory_api_client.client import api_client
+from formtools.wizard.views import NamedUrlSessionWizardView
 from raven.contrib.django.raven_compat.models import client as sentry_client
 from requests.exceptions import HTTPError
 
 from django.conf import settings
-from django.shortcuts import redirect
+from django.urls import reverse
+from django.core.files.storage import FileSystemStorage
+from django.shortcuts import redirect, Http404
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView, FormView
 
 from profile.eig_apps.views import RedirectToAboutPageMixin
 from profile.fab import forms, helpers
 from sso.utils import SSOLoginRequiredMixin
+
+
+BASIC = 'details'
+MEDIA = 'images'
 
 
 class CompanyProfileMixin:
@@ -138,3 +147,72 @@ class DescriptionFormView(BaseFormView):
 class LogoFormView(BaseFormView):
     form_class = forms.LogoForm
     template_name = 'fab/logo-form.html'
+
+
+class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
+    done_step_name = 'finished'
+
+    file_storage = FileSystemStorage(
+        location=os.path.join(settings.MEDIA_ROOT, 'tmp-supplier-media')
+    )
+
+    form_list = (
+        (BASIC, forms.CaseStudyBasicInfoForm),
+        (MEDIA, forms.CaseStudyRichMediaForm),
+    )
+    templates = {
+        BASIC: 'fab/case-study-basic-form.html',
+        MEDIA: 'fab/case-study-media-form.html',
+    }
+
+    def get_template_names(self):
+        return [self.templates[self.steps.current]]
+
+    def serialize_form_list(self, form_list):
+        data = {}
+        for form in form_list:
+            data.update(form.cleaned_data)
+        # the case studies edit view pre-populates the image fields with the
+        # url of the existing value (rather than the real file). Things would
+        # get confused if we send a string instead of a file here.
+        for field in ['image_one', 'image_two', 'image_three']:
+            value = data.get(field)
+            if not value or isinstance(value, str):
+                del data[field]
+        return data
+
+
+class CaseStudyWizardEditView(BaseCaseStudyWizardView):
+    def get_form_initial(self, step):
+        response = api_client.company.retrieve_private_case_study(
+            sso_session_id=self.request.sso_user.session_id,
+            case_study_id=self.kwargs['id'],
+        )
+        if response.status_code == 404:
+            raise Http404()
+        response.raise_for_status()
+        return response.json()
+
+    def done(self, form_list, *args, **kwags):
+        response = api_client.company.update_case_study(
+            data=self.serialize_form_list(form_list),
+            case_study_id=self.kwargs['id'],
+            sso_session_id=self.request.sso_user.session_id,
+        )
+        response.raise_for_status()
+        return redirect('find-a-buyer')
+
+    def get_step_url(self, step):
+        return reverse(
+            self.url_name, kwargs={'step': step, 'id': self.kwargs['id']}
+        )
+
+
+class CaseStudyWizardCreateView(BaseCaseStudyWizardView):
+    def done(self, form_list, *args, **kwags):
+        response = api_client.company.create_case_study(
+            sso_session_id=self.request.sso_user.session_id,
+            data=self.serialize_form_list(form_list),
+        )
+        response.raise_for_status()
+        return redirect('find-a-buyer')
