@@ -141,7 +141,7 @@
                   <p class="mid-grey-text font-xsmall">Add images and success case studies to promote your products and services.</p>
                   <ul id="case-studies">
                       {% for case_study in company.supplier_case_studies %}
-                          <li>
+                          <li id="case-study-{{ case_study.pk }}">
                             <img src="{{ case_study.image_one }}" width="60" />
                             <span>{{ case_study.title }}</span>
                             <a id="edit-image-{{ case_study.pk }}" href="{% url 'find-a-buyer-case-study-edit' id=case_study.pk step='basic' %}" class="link pencil-link">Edit</a>
