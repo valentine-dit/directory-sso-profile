@@ -647,7 +647,7 @@ def test_disable_select_company(client, settings):
     assert response.url == reverse(
         'enrolment-companies-house', kwargs={'step': 'user-account'}
     )
-    
+
     response = client.get(response.url)
     assert response.status_code == 200
 
@@ -988,8 +988,13 @@ def test_confirm_user_resend_verification_context_urls(client):
     missing_url = constants_url.build_great_url(
         'contact/triage/great-account/verification-missing/'
     )
+    contact_url = constants_url.build_great_url(
+        'contact/domestic/'
+    )
+
     assert response.status_code == 200
     assert response.context_data['verification_missing_url'] == missing_url
+    assert response.context_data['contact_url'] == contact_url
 
 
 def test_sole_trader_enrolment_expose_company(
