@@ -71,21 +71,15 @@ class ProgressIndicatorMixin:
 
 class RestartOnStepSkipped:
     def render(self, *args, **kwargs):
-        try:
-            prev = self.steps.prev
-        except ValueError:
-            pass
-        else:
-            if prev and not self.get_cleaned_data_for_step(prev):
-                return redirect(reverse('enrolment-business-type'))
+        prev = self.steps.prev
+        if prev and not self.get_cleaned_data_for_step(prev):
+            return redirect(reverse('enrolment-business-type'))
         return super().render(*args, **kwargs)
 
 
 class UserAccountEnrolmentHandlerMixin:
 
     def user_account_condition(self):
-        # import pdb
-        # pdb.set_trace()
         return self.request.sso_user is None
 
     condition_dict = {
