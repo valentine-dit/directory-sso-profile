@@ -682,6 +682,8 @@ def test_disable_select_company(client, settings):
     assert response.url == reverse(
         'enrolment-companies-house', kwargs={'step': 'user-account'}
     )
+    response = client.get(response.url)
+    assert response.status_code == 200
 
 
 def test_user_has_company_redirect_on_start(
