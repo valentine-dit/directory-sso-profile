@@ -144,7 +144,7 @@
                           <li>
                             <img src="{{ case_study.image_one }}" width="60" />
                             <span>{{ case_study.title }}</span>
-                            <a id="edit-image" href="{% url 'find-a-buyer-case-study-edit' id=case_study.pk step='basic' %}" class="link pencil-link">Edit</a>
+                            <a id="edit-image-{{ case_study.pk }}" href="{% url 'find-a-buyer-case-study-edit' id=case_study.pk step='basic' %}" class="link pencil-link">Edit</a>
                         </li>
                       {% endfor %}
                   </ul>
