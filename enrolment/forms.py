@@ -240,12 +240,12 @@ class PersonalDetails(forms.Form):
         label='Phone number (optional)',
         required=False
     )
-
     confirmed_is_company_representative = fields.BooleanField(
-        label='I verify that I am an official representative of...'
-    )
-    confirmed_background_checks = fields.BooleanField(
-        label='I understand that DIT may run background checks...'
+        label=(
+            'I confirm that I have the right to act for this business. I '
+            'understand that great.gov.uk might write to this business to '
+            'confirm I can create an account.'
+        )
     )
 
 
