@@ -433,7 +433,7 @@ class ResendVerificationCodeView(
         elif company_choice == constants.SOLE_TRADER:
             response = redirect(self.url_sole_trader_enrolment)
         else:
-            response = response = redirect(self.url_business_type)
+            response = redirect(self.url_business_type)
         response.cookies.update(data)
         return response
 
@@ -458,6 +458,10 @@ class ResendVerificationCodeView(
         context['verification_missing_url'] = urls.build_great_url(
             'contact/triage/great-account/verification-missing/'
         )
+        context['contact_url'] = urls.build_great_url(
+            'contact/domestic/'
+        )
+
         return context
 
     def get_form_initial(self, step):
