@@ -73,7 +73,7 @@ def submit_resend_verification_house_step(client):
 
 
 @pytest.fixture(autouse=True)
-def mock_retrieve_prepeveried_company():
+def mock_retrieve_preverified_company():
     data = {
         'address_line_1': '23 Example lane',
         'address_line_2': 'Example land',
@@ -1186,11 +1186,11 @@ def test_claim_preverified_no_key(client):
     assert response.url == reverse('enrolment-start')
 
 
-def test_claim_preverified_bad_key(client, mock_retrieve_prepeveried_company):
-    mock_retrieve_prepeveried_company.return_value = create_response(404)
+def test_claim_preverified_bad_key(client, mock_retrieve_preverified_company):
+    mock_retrieve_preverified_company.return_value = create_response(404)
 
     url = reverse('enrolment-pre-verified', kwargs={'step': 'user-account'})
-    response = client.get(url)
+    response = client.get(url, {'key': '123'})
 
     assert response.status_code == 302
     assert response.url == reverse('enrolment-start')

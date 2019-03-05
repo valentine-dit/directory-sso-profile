@@ -60,18 +60,6 @@ def user_has_company(sso_session_id):
     response.raise_for_status()
 
 
-def get_public_company_profile(company_number, session):
-    session_key = f'{SESSION_KEY_PUBLIC_COMPANY_PROFILE}-{company_number}'
-    if session_key not in session:
-        response = api_client.company.retrieve_public_profile(company_number)
-        if response.status_code == 404:
-            session[session_key] = None
-        else:
-            response.raise_for_status()
-            session[session_key] = response.json()
-    return session[session_key]
-
-
 def get_is_enrolled(company_number, session):
     session_key = f'{SESSION_KEY_IS_ENROLLED}-{company_number}'
     if session_key not in session:
