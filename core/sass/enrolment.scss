@@ -21,6 +21,10 @@ body.js-enabled {
   }
 }
 
+textarea.form-control {
+  width: 80%;
+}
+
 #id_business-details-company_number-container,
 #id_business-details-sic-container,
 #id_business-details-date_of_creation-container,

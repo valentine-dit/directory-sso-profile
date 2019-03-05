@@ -14,16 +14,27 @@
 {% endblock %}
 
 {% block below_form %}
-    <p><a class="link" href="{{ address_not_found_url }}">I cannot find my business address</a></p>
+    <p><a class="link js-enabled-only" href="javascript:void(0);" id="cannot-find-address">I cannot find my business address</a></p>
 {% endblock %}
 
 {% block body_js %}
     {{ block.super }}
     <script src="{% static 'directory_components/js/dit.components.company-lookup.js' %}"></script>
     <script type="text/javascript">
+        var cannotFindAddress = document.getElementById('cannot-find-address');
         var postcodeFinderContainer = document.getElementById('id_search-postal_code-container');
         var addressFinder = document.getElementById('id_search-postal_code');
         var address = document.getElementById('id_search-address');
+        var addressContainer = document.getElementById('id_search-address-container');
+
+        function handleToggleAddress() {
+          addressContainer.style.display = 'block';
+          cannotFindAddress.style.display = 'none';
+        }
+
+        if (addressContainer.className.indexOf('form-group-error') > -1) {
+          handleToggleAddress();
+        }
 
         postcodeFinderContainer.style.display = 'block';
 
@@ -31,6 +42,8 @@
           "click.SelectiveLookupCloseAll",
           dit.components.lookup.SelectiveLookup.closeAll
         );
+
+        cannotFindAddress.addEventListener('click', handleToggleAddress)
 
         function PostcodeLookup($input, $field, url, options) {
           var instance = this;

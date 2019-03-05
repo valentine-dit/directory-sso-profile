@@ -250,11 +250,28 @@ class PersonalDetails(forms.Form):
 
 
 class SoleTraderSearch(forms.Form):
+
+    MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
+
     company_name = fields.CharField(
         label='Business name'
     )
-    postal_code = fields.CharField(label='Business postcode')
-    address = fields.CharField()
+    postal_code = fields.CharField(
+        label='Business postcode',
+    )
+    address = fields.CharField(
+        help_text='Type your business address',
+        widget=Textarea(attrs={'rows': 4}),
+    )
+
+    def clean_address(self):
+        value = self.cleaned_data['address'].strip().replace(', ', '\n')
+        postal_code = self.cleaned_data['postal_code']
+        if value.count('\n') == 0:
+            raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
+        if postal_code not in value:
+            value = f'{value}\n{postal_code}'
+        return value
 
 
 class SoleTraderBusinessDetails(forms.Form):
