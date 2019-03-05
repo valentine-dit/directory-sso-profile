@@ -326,15 +326,6 @@ class SoleTraderEnrolmentView(
                 form_initial['company_name'] = data['company_name']
         return form_initial
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        if self.steps.current == COMPANY_SEARCH:
-            context['address_not_found_url'] = urls.build_great_url(
-                'contact/triage/great-account/sole-trader-address-not-found/'
-            )
-
-        return context
-
     def done(self, form_list, **kwargs):
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
