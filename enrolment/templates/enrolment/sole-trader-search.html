@@ -3,18 +3,18 @@
 {% load static from static %}
 
 {% block above_form %}
-    <div class="grey-information-box">
+    <div class="grey-information-box" id="business-type-information-box">
         <h2 class="heading-medium">Your business type</h2>
-        <p>A business registered with Companies House</p>
-        <a href="{% url 'enrolment-business-type' %}" class="link">Change</a>
+        <p id="business-type">A business registered with Companies House</p>
+        <a href="{% url 'enrolment-business-type' %}" class="link" id="change-business-type">Change</a>
     </div>
-    <div id="form-step-body-text">
+    <div id="form-step-body-text" id="business-details-information-box">
         <h1 class="heading-large">Enter your business details</h1>
     </div>
 {% endblock %}
 
 {% block below_form %}
-    <p><a class="link" href="{{ address_not_found_url }}">I cannot find my business address</a></p>
+    <p><a class="link" href="{{ address_not_found_url }}" id="cannot-find-business-address">I cannot find my business address</a></p>
 {% endblock %}
 
 {% block body_js %}
