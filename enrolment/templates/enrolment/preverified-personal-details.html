@@ -3,6 +3,23 @@
 {% load static from static %}
 
 {% block above_form %}
+    <div class="grey-information-box">
+        <h2 class="heading-medium">Your business type</h2>
+        {% if company.company_type == 'COMPANIES_HOUSE' %}
+            <p>A business registered with Companies House</p>
+        {% else %}
+            <p>Sole trader</p>
+        {% endif %}
+        <a href="{{ services_urls.feedback }}" class="link">Report error</a>
+    </div>
+    <br>
+    <div class="grey-information-box">
+        <h2 class="heading-medium">Your business details</h2>
+        <p>{{ company.name }}</p>
+        <p>{{ company.address_line_1 }}, {{ company.address_line_2 }}, {{ company.postal_code }}</p>
+        <a href="{{ services_urls.feedback }}" class="link">Report error</a>
+    </div>
+
     <div id="form-step-body-text">
         <h1 class="heading-large">Enter your details</h1>
     </div>

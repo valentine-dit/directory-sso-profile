@@ -1141,8 +1141,38 @@ def test_sole_trader_enrolment_has_company_error(
         client.get(url)
 
 
-def test_claim_preverified_no_key(client):
-    url = reverse('enrolment-pre-verified', kwargs={'step': 'user-account'})
+def test_sole_trader_search_address_not_found_url(
+    submit_sole_trader_step, mock_session_user, client, steps_data
+):
+    response = submit_sole_trader_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_sole_trader_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    mock_session_user.login()
+    response = client.get(response.url)
+
+    not_found_url = constants_url.build_great_url(
+        'contact/triage/great-account/sole-trader-address-not-found/'
+    )
+    assert response.context_data['address_not_found_url'] == not_found_url
+
+
+def test_claim_preverified_no_key(
+    client, submit_pre_verified_step, steps_data, mock_session_user
+):
+    response = submit_pre_verified_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_pre_verified_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    mock_session_user.login()
+
+    url = reverse(
+        'enrolment-pre-verified', kwargs={'step': views.PERSONAL_INFO}
+    )
     response = client.get(url)
 
     assert response.status_code == 302
