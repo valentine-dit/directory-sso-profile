@@ -73,6 +73,25 @@ def submit_resend_verification_house_step(client):
 
 
 @pytest.fixture(autouse=True)
+def mock_retrieve_preverified_company():
+    data = {
+        'address_line_1': '23 Example lane',
+        'address_line_2': 'Example land',
+        'company_type': 'COMPANIES_HOUSE',
+        'name': 'Example corp',
+        'number': '1234567',
+        'po_box': '',
+        'postal_code': 'EE3 3EE',
+    }
+    patch = mock.patch.object(
+        helpers.api_client.enrolment, 'retrieve_prepeveried_company',
+        return_value=create_response(200, data)
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
 def mock_get_company_profile():
     patch = mock.patch.object(helpers, 'get_company_profile', return_value={
         'company_number': '12345678',
@@ -241,7 +260,6 @@ def steps_data(captcha_stub):
             'job_title': 'Exampler',
             'phone_number': '1232342',
             'confirmed_is_company_representative': True,
-            'confirmed_background_checks': True,
         },
         views.VERIFICATION: {
             'code': '12345',
@@ -1029,7 +1047,7 @@ def test_sole_trader_enrolment_expose_company(
     assert response.context_data['company'] == {
         'company_name': 'Test company',
         'postal_code': 'EEA 3AD',
-        'address': '555 fake street\nLondon',
+        'address': '555 fake street\nLondon\nEEA 3AD',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'industry': 'AEROSPACE',
@@ -1141,27 +1159,19 @@ def test_sole_trader_enrolment_has_company_error(
         client.get(url)
 
 
-def test_sole_trader_search_address_not_found_url(
-    submit_sole_trader_step, mock_session_user, client, steps_data
-):
-    response = submit_sole_trader_step(steps_data[views.USER_ACCOUNT])
-    assert response.status_code == 302
-
-    response = submit_sole_trader_step(steps_data[views.VERIFICATION])
-    assert response.status_code == 302
-
-    mock_session_user.login()
-    response = client.get(response.url)
-
-    not_found_url = constants_url.build_great_url(
-        'contact/triage/great-account/sole-trader-address-not-found/'
-    )
-    assert response.context_data['address_not_found_url'] == not_found_url
-
-
 def test_claim_preverified_no_key(client):
     url = reverse('enrolment-pre-verified', kwargs={'step': 'user-account'})
     response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('enrolment-start')
+
+
+def test_claim_preverified_bad_key(client, mock_retrieve_preverified_company):
+    mock_retrieve_preverified_company.return_value = create_response(404)
+
+    url = reverse('enrolment-pre-verified', kwargs={'step': 'user-account'})
+    response = client.get(url, {'key': '123'})
 
     assert response.status_code == 302
     assert response.url == reverse('enrolment-start')
@@ -1193,10 +1203,8 @@ def test_claim_preverified_success(
     assert response.template_name == 'enrolment/success-pre-verified.html'
     assert mock_claim_company.call_count == 1
     assert mock_claim_company.call_args == mock.call(
-        data={
-            'key': 'some-key',
-            'name': 'Foo Example',
-        },
+        data={'name': 'Foo Example'},
+        key='some-key',
         sso_session_id='foo-bar',
     )
 

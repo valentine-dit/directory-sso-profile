@@ -240,21 +240,38 @@ class PersonalDetails(forms.Form):
         label='Phone number (optional)',
         required=False
     )
-
     confirmed_is_company_representative = fields.BooleanField(
-        label='I verify that I am an official representative of...'
-    )
-    confirmed_background_checks = fields.BooleanField(
-        label='I understand that DIT may run background checks...'
+        label=(
+            'I confirm that I have the right to act for this business. I '
+            'understand that great.gov.uk might write to this business to '
+            'confirm I can create an account.'
+        )
     )
 
 
 class SoleTraderSearch(forms.Form):
+
+    MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
+
     company_name = fields.CharField(
         label='Business name'
     )
-    postal_code = fields.CharField(label='Business postcode')
-    address = fields.CharField()
+    postal_code = fields.CharField(
+        label='Business postcode',
+    )
+    address = fields.CharField(
+        help_text='Type your business address',
+        widget=Textarea(attrs={'rows': 4}),
+    )
+
+    def clean_address(self):
+        value = self.cleaned_data['address'].strip().replace(', ', '\n')
+        postal_code = self.cleaned_data['postal_code']
+        if value.count('\n') == 0:
+            raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
+        if postal_code not in value:
+            value = f'{value}\n{postal_code}'
+        return value
 
 
 class SoleTraderBusinessDetails(forms.Form):
