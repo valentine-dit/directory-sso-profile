@@ -3,10 +3,10 @@
 {% load static from static %}
 
 {% block above_form %}
-    <div class="grey-information-box">
+    <div class="grey-information-box" id="business-type-information-box">
         <h2 class="heading-medium">Your business type</h2>
-        <p>A business registered with Companies House</p>
-        <a href="{% url 'enrolment-business-type' %}" class="link">Change</a>
+        <p id="business-type">A business registered with Companies House</p>
+        <a href="{% url 'enrolment-business-type' %}" class="link" id="change-business-type">Change</a>
     </div>
     <div id="form-step-body-text">
         <h1 class="heading-large">Enter your business details</h1>

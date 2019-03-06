@@ -3,17 +3,17 @@
 {% load static from static %}
 
 {% block above_form %}
-    <div class="grey-information-box">
+    <div class="grey-information-box" id="business-type-information-box">
         <h2 class="heading-medium">Your business type</h2>
-        <p>Sole trader</p>
-        <a href="{% url 'enrolment-business-type' %}" class="link">Change</a>
+        <p id="business-type">Sole trader</p>
+        <a href="{% url 'enrolment-business-type' %}" class="link" id="change-business-type">Change</a>
     </div>
     <br>
-    <div class="grey-information-box">
+    <div class="grey-information-box" id="business-details-information-box">
         <h2 class="heading-medium">Your business details</h2>
-        <p>{{ company.company_name }}</p>
-        <p>{{ company.address }}</p>
-        <a href="{% url 'enrolment-sole-trader' step='search' %}" class="link">Change</a>
+        <p id="company-name">{{ company.company_name }}</p>
+        <p id="company-address">{{ company.address }}</p>
+        <a href="{% url 'enrolment-sole-trader' step='search' %}" class="link" id="change-business-details">Change</a>
     </div>
 
     <div id="form-step-body-text">
@@ -22,5 +22,5 @@
 {% endblock %}
 
 {% block below_form %}
-    <p><a class="link" href="#">View the list of background checks here</a></p>
+    <p><a class="link" href="#" id="list-background-checks">View the list of background checks here</a></p>
 {% endblock %}
