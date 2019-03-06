@@ -13,13 +13,8 @@ from enrolment import constants, forms, helpers
 from directory_constants.constants import urls
 
 
-<<<<<<< Updated upstream
-SESSION_KEY_ENROL_KEY = 'SESSION_KEY_ENROL_KEY'
-
-=======
 SESSION_KEY_ENROL_KEY = 'ENROL_KEY'
 SESSION_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
->>>>>>> Stashed changes
 PROGRESS_STEP_LABELS = (
     'Select your business type',
     'Enter your business email address and set a password',
