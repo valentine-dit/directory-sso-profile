@@ -8,7 +8,7 @@
         {% if company.company_type == 'COMPANIES_HOUSE' %}
             <p id="business-type">A business registered with Companies House</p>
         {% else %}
-            <p>Sole trader</p>
+            <p id="business-type">Sole trader</p>
         {% endif %}
         <a href="{{ services_urls.feedback }}" class="link" id="report-error-with-business-type">Report error</a>
     </div>
