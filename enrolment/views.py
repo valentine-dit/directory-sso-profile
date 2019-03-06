@@ -14,7 +14,7 @@ from directory_constants.constants import urls
 
 
 SESSION_KEY_ENROL_KEY = 'ENROL_KEY'
-SESSION_KEY_ENROL_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
+SESSION_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
 PROGRESS_STEP_LABELS = (
     'Select your business type',
     'Enter your business email address and set a password',
@@ -355,16 +355,27 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
     }
 
     def get(self, *args, **kwargs):
-        if self.steps.current == USER_ACCOUNT:
-            key = self.request.GET.get('key')
-            if not key:
+        key = self.request.GET.get('key')
+        if key:
+            data = helpers.retrieve_preverified_company(key)
+            if data:
+                self.request.session[SESSION_KEY_COMPANY_DATA] = data
+                self.request.session[SESSION_KEY_ENROL_KEY] = key
+                self.request.session.save()
+            else:
                 return redirect(reverse('enrolment-start'))
-            details = helpers.retrieve_preverified_company(key)
-            if not details:
+        if self.steps.current == PERSONAL_INFO:
+            if not self.request.session.get(SESSION_KEY_COMPANY_DATA):
                 return redirect(reverse('enrolment-start'))
-            self.request.session[SESSION_KEY_ENROL_KEY_COMPANY_DATA] = details
-            self.request.session[SESSION_KEY_ENROL_KEY] = key
         return super().get(*args, **kwargs)
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        if self.steps.current == PERSONAL_INFO:
+            context['company'] = (
+                self.request.session[SESSION_KEY_COMPANY_DATA]
+            )
+        return context
 
     def done(self, form_list, **kwargs):
         data = self.serialize_form_list(form_list)

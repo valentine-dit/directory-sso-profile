@@ -72,9 +72,9 @@ def submit_resend_verification_house_step(client):
     )
 
 
-@pytest.fixture(autouse=True)
-def mock_retrieve_preverified_company():
-    data = {
+@pytest.fixture
+def preverified_company_data():
+    return {
         'address_line_1': '23 Example lane',
         'address_line_2': 'Example land',
         'company_type': 'COMPANIES_HOUSE',
@@ -83,9 +83,13 @@ def mock_retrieve_preverified_company():
         'po_box': '',
         'postal_code': 'EE3 3EE',
     }
+
+
+@pytest.fixture(autouse=True)
+def mock_retrieve_preverified_company(preverified_company_data):
     patch = mock.patch.object(
         helpers.api_client.enrolment, 'retrieve_prepeveried_company',
-        return_value=create_response(200, data)
+        return_value=create_response(200, preverified_company_data)
     )
     yield patch.start()
     patch.stop()
@@ -1159,8 +1163,20 @@ def test_sole_trader_enrolment_has_company_error(
         client.get(url)
 
 
-def test_claim_preverified_no_key(client):
-    url = reverse('enrolment-pre-verified', kwargs={'step': 'user-account'})
+def test_claim_preverified_no_key(
+    client, submit_pre_verified_step, steps_data, mock_session_user
+):
+    response = submit_pre_verified_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_pre_verified_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    mock_session_user.login()
+
+    url = reverse(
+        'enrolment-pre-verified', kwargs={'step': views.PERSONAL_INFO}
+    )
     response = client.get(url)
 
     assert response.status_code == 302
@@ -1175,6 +1191,32 @@ def test_claim_preverified_bad_key(client, mock_retrieve_preverified_company):
 
     assert response.status_code == 302
     assert response.url == reverse('enrolment-start')
+
+
+def test_claim_preverified_exposes_company(
+    submit_pre_verified_step, mock_claim_company, client, steps_data,
+    mock_session_user, preverified_company_data
+):
+    url = reverse('enrolment-pre-verified', kwargs={'step': 'user-account'})
+    response = client.get(url, {'key': 'some-key'})
+
+    assert response.status_code == 200
+
+    response = submit_pre_verified_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_pre_verified_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    mock_session_user.login()
+
+    url = reverse(
+        'enrolment-pre-verified', kwargs={'step': views.PERSONAL_INFO}
+    )
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['company'] == preverified_company_data
 
 
 def test_claim_preverified_success(
