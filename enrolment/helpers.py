@@ -17,12 +17,18 @@ SESSION_KEY_PUBLIC_COMPANY_PROFILE = 'PUBLIC_COMPANY_PROFILE'
 SESSION_KEY_IS_ENROLLED = 'IS_ENROLLED'
 
 
+def retrieve_preverified_company(enrolment_key):
+    response = api_client.enrolment.retrieve_prepeveried_company(enrolment_key)
+    if response.status_code == 404:
+        return None
+    response.raise_for_status()
+    return response.json()
+
+
 def claim_company(enrolment_key, personal_name, sso_session_id):
     response = api_client.enrolment.claim_prepeveried_company(
-        data={
-            'key': enrolment_key,
-            'name': personal_name,
-        },
+        data={'name': personal_name},
+        key=enrolment_key,
         sso_session_id=sso_session_id,
     )
     response.raise_for_status()
@@ -52,18 +58,6 @@ def user_has_company(sso_session_id):
     elif response.status_code == 200:
         return True
     response.raise_for_status()
-
-
-def get_public_company_profile(company_number, session):
-    session_key = f'{SESSION_KEY_PUBLIC_COMPANY_PROFILE}-{company_number}'
-    if session_key not in session:
-        response = api_client.company.retrieve_public_profile(company_number)
-        if response.status_code == 404:
-            session[session_key] = None
-        else:
-            response.raise_for_status()
-            session[session_key] = response.json()
-    return session[session_key]
 
 
 def get_is_enrolled(company_number, session):
