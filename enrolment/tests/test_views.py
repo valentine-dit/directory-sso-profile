@@ -260,7 +260,6 @@ def steps_data(captcha_stub):
             'job_title': 'Exampler',
             'phone_number': '1232342',
             'confirmed_is_company_representative': True,
-            'confirmed_background_checks': True,
         },
         views.VERIFICATION: {
             'code': '12345',
