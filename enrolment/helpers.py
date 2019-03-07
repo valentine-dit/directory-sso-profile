@@ -1,3 +1,4 @@
+import collections
 from http import cookies
 from datetime import datetime
 
@@ -13,8 +14,16 @@ from directory_constants.constants import urls
 
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
 SESSION_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'
-SESSION_KEY_PUBLIC_COMPANY_PROFILE = 'PUBLIC_COMPANY_PROFILE'
 SESSION_KEY_IS_ENROLLED = 'IS_ENROLLED'
+
+
+StepsListConf = collections.namedtuple(
+    'StepsListConf', ['form_labels_user', 'form_labels_anon']
+)
+ProgressIndicatorConf = collections.namedtuple(
+    'ProgressIndicatorConf',
+    ['step_counter_user', 'step_counter_anon', 'first_step']
+)
 
 
 def retrieve_preverified_company(enrolment_key):
