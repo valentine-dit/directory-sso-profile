@@ -16,9 +16,11 @@ from directory_constants.constants import urls
 
 
 SESSION_KEY_ENROL_KEY = 'ENROL_KEY'
+
 SESSION_KEY_ENROL_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
 SESSION_KEY_INGRESS_ANON = 'ANON_INGRESS'
 SESSION_KEY_COMPANY_CHOICE = 'COMPANY_CHOICE'
+SESSION_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
 
 PROGRESS_STEP_LABEL_USER_ACCOUNT = (
     'Enter your business email address and set a password'
@@ -77,7 +79,7 @@ class StepsListMixin(abc.ABC):
     @property
     @abc.abstractmethod
     def steps_list_conf(self):
-        pass
+        pass  # pragma: no cover
 
     def should_show_anon_progress_indicator(self):
         return self.request.sso_user is None
@@ -85,9 +87,9 @@ class StepsListMixin(abc.ABC):
     @property
     def step_labels(self):
         if self.should_show_anon_progress_indicator():
-            labels = self.steps_list_conf.form_labels_anon
+            labels = self.steps_list_conf.form_labels_anon[:]
         else:
-            labels = self.steps_list_conf.form_labels_user
+            labels = self.steps_list_conf.form_labels_user[:]
         if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
             labels.remove(PROGRESS_STEP_LABEL_BUSINESS_TYPE)
         return labels
@@ -111,7 +113,7 @@ class ProgressIndicatorMixin:
     @property
     @abc.abstractmethod
     def progress_conf(self):
-        pass
+        pass  # pragma: no cover
 
     def get(self, *args, **kwargs):
         if self.steps.current == self.progress_conf.first_step:
@@ -120,9 +122,9 @@ class ProgressIndicatorMixin:
             )
         return super().get(*args, **kwargs)
 
-    def done(self, *args, **kwargs):
+    def render_done(self, *args, **kwargs):
         self.request.session.pop(SESSION_KEY_INGRESS_ANON, None)
-        return super().done(*args, **kwargs)
+        return super().render_done(*args, **kwargs)
 
     def should_show_anon_progress_indicator(self):
         if self.request.session.get(SESSION_KEY_INGRESS_ANON):
@@ -525,16 +527,27 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
     }
 
     def get(self, *args, **kwargs):
-        if self.steps.current == USER_ACCOUNT:
-            key = self.request.GET.get('key')
-            if not key:
+        key = self.request.GET.get('key')
+        if key:
+            data = helpers.retrieve_preverified_company(key)
+            if data:
+                self.request.session[SESSION_KEY_COMPANY_DATA] = data
+                self.request.session[SESSION_KEY_ENROL_KEY] = key
+                self.request.session.save()
+            else:
                 return redirect(reverse('enrolment-start'))
-            details = helpers.retrieve_preverified_company(key)
-            if not details:
+        if self.steps.current == PERSONAL_INFO:
+            if not self.request.session.get(SESSION_KEY_COMPANY_DATA):
                 return redirect(reverse('enrolment-start'))
-            self.request.session[SESSION_KEY_ENROL_KEY_COMPANY_DATA] = details
-            self.request.session[SESSION_KEY_ENROL_KEY] = key
         return super().get(*args, **kwargs)
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        if self.steps.current == PERSONAL_INFO:
+            context['company'] = (
+                self.request.session[SESSION_KEY_COMPANY_DATA]
+            )
+        return context
 
     def done(self, form_list, **kwargs):
         try:
