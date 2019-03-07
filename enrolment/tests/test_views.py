@@ -1,14 +1,16 @@
 from unittest import mock
 
+from formtools.wizard.views import NamedUrlSessionWizardView
 from freezegun import freeze_time
 import pytest
 from requests.exceptions import HTTPError
 
 from django.urls import resolve, reverse
+from django.views.generic import TemplateView
 
 from core.tests.helpers import create_response, submit_step_factory
 
-from enrolment import constants, helpers, views
+from enrolment import constants, forms, helpers, views
 from directory_constants.constants import urls as constants_url
 from django.contrib.sessions.backends import signed_cookies
 
@@ -308,11 +310,11 @@ def session_client_company_factory(client, settings):
 @pytest.mark.parametrize('choice,expected_url', (
     (
         constants.COMPANIES_HOUSE_COMPANY,
-        views.BusinessTypeRoutingView.url_companies_house_enrolment
+        views.URL_COMPANIES_HOUSE_ENROLMENT
     ),
     (
         constants.SOLE_TRADER,
-        views.BusinessTypeRoutingView.url_sole_trader_enrolment
+        views.URL_SOLE_TRADER_ENROLMENT
     ),
 ))
 def test_enrolment_routing(client, choice, expected_url):
@@ -655,9 +657,7 @@ def test_verification_missing_url(
 
 
 def test_disable_select_company(client, settings):
-    settings.FEATURE_FLAGS[
-        'NEW_ACCOUNT_JOURNEY_SELECT_BUSINESS_ON'
-    ] = False
+    settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = False
 
     url = reverse('enrolment-business-type')
     response = client.get(url)
@@ -997,6 +997,19 @@ def test_confirm_user_resend_verification_code_choice_sole_trader(
     )
 
 
+def test_confirm_user_resend_verification_logged_in(client, mock_session_user):
+    mock_session_user.login()
+
+    url = reverse(
+        'resend-verification', kwargs={'step': views.RESEND_VERIFICATION}
+    )
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('about')
+
+
 def test_confirm_user_resend_verification_context_urls(client):
     url = reverse(
         'resend-verification', kwargs={'step': views.RESEND_VERIFICATION}
@@ -1236,3 +1249,102 @@ def test_claim_preverified_failure(
 
     assert response.status_code == 200
     assert response.template_name == 'enrolment/failure-pre-verified.html'
+
+
+@pytest.mark.parametrize('is_anon,is_feature_enabled,expected', (
+    (
+        True,
+        True,
+        [
+            views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+        ]
+    ),
+    (
+        True,
+        False,
+        [
+            views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+        ]
+    ),
+    (
+        False,
+        True,
+        [
+            views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            views.PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
+        ],
+    ),
+    (
+        False,
+        False,
+        [
+            views.PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
+        ]
+    )
+))
+def test_steps_list_mixin(
+    is_anon, is_feature_enabled, expected, rf, settings
+):
+    settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = is_feature_enabled
+
+    class TestView(views.StepsListMixin, TemplateView):
+        template_name = 'directory_components/base.html'
+
+        steps_list_conf = helpers.StepsListConf(
+            form_labels_user=[
+                views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+                views.PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
+            ],
+            form_labels_anon=[
+                views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+                views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+                views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+            ],
+        )
+
+    request = rf.get('/')
+    request.sso_user = None if is_anon else mock.Mock()
+    view = TestView.as_view()
+
+    response = view(request)
+    assert response.context_data['step_labels'] == expected
+
+
+@pytest.mark.parametrize('is_anon,is_feature_enabled,expected', (
+    (True, True, 2),
+    (True, False, 1),
+    (False, True, 2),
+    (False, False, 1),
+))
+def test_wizard_progress_indicator_mixin(
+    is_anon, is_feature_enabled, expected, rf, settings, client
+):
+    settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = is_feature_enabled
+
+    class TestView(views.ProgressIndicatorMixin, NamedUrlSessionWizardView):
+        def get_template_names(self):
+            return ['enrolment/user-account-resend-verification.html']
+
+        form_list = (
+            (views.USER_ACCOUNT, forms.UserAccount),
+            (views.COMPANY_SEARCH, forms.UserAccount),
+        )
+
+        progress_conf = helpers.ProgressIndicatorConf(
+            step_counter_user={views.USER_ACCOUNT: 2},
+            step_counter_anon={views.USER_ACCOUNT: 2},
+            first_step=views.USER_ACCOUNT,
+        )
+
+    request = rf.get('/')
+    request.session = client.session
+    request.sso_user = None if is_anon else mock.Mock()
+    view = TestView.as_view(
+        url_name='enrolment-companies-house'
+    )
+    response = view(request, step=views.USER_ACCOUNT)
+
+    assert response.context_data['step_number'] == expected
