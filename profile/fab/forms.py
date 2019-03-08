@@ -296,3 +296,7 @@ class LogoForm(forms.Form):
             directory_validators.company.image_format,
         ]
     )
+
+
+class PublishForm(forms.Form):
+    pass

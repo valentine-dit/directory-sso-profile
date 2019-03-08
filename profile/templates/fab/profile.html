@@ -17,22 +17,48 @@
             </div>
             <div class="column-one-half right-column">
                 <a class="background-light-blue font-xsmall pill" href="#">Admin view</a>
-                <span class="divider"></span>
-                <a href="#">View profile</a>
+                {% if not company.is_published %}
+                    <span class="divider"></span>
+                    <a href="{{ services_urls.fas }}/suppliers/{{ company.number }}/">View profile</a>
+                {% endif %}
             </div>
         </div>
         <hr>
     </div>
     {% endif %}
-    {% if not company.email_address %}
+    {% if not company.email_address or not company.description %}
     <div id="alerts-top" class="grid-row alerts-container">
         {% if not company.email_address %}
             <div class="column-two-thirds flag-red-text">
-                <h2 class="heading-medium">Your business profile has no contact email</h2>
-                <p>This lets international buyers contact you on business profile</p>
+                <h2 class="heading-medium">Add a business email address</h2>
+                <p>Enter the email address you want overseas buyers to use.</p>
             </div>
             <div class="column-one-third alerts-button-container">
-                <a class="button button-ghost-white">Set your email address</a>
+                <a class="button button-ghost-white" href="{% url 'find-a-buyer-email' %}">Add a business email address</a>
+            </div>
+        {% elif not company.description %}
+            <div class="column-two-thirds flag-red-text">
+                <h2 class="heading-medium">Add a business description</h2>
+                <p>Enter a description of your business for overseas buyers to see.</p>
+            </div>
+            <div class="column-one-third alerts-button-container">
+                <a class="button button-ghost-white" href="{% url 'find-a-buyer-description' %}">Add a business description</a>
+            </div>
+        {% elif not company.is_verified %}
+            <div class="column-two-thirds flag-red-text">
+                <h2 class="heading-medium">Confirm your identity</h2>
+                <p>For security reasons, we need to check you're who you say you are.</p>
+            </div>
+            <div class="column-one-third alerts-button-container">
+                <a class="button button-ghost-white" href="{{ services_urls.fab }}/verify/">Confirm your identity</a>
+            </div>
+        {% elif not company.is_published %}
+            <div class="column-two-thirds flag-red-text">
+                <h2 class="heading-medium">Publish business profile</h2>
+                <p>You can now publish your business profile.</p>
+            </div>
+            <div class="column-one-third alerts-button-container">
+                <a class="button button-ghost-white" href="{% url 'find-a-buyer-publish' %}">Publish your business profile</a>
             </div>
         {% endif %}
     </div>
@@ -153,20 +179,6 @@
             </div>
         </div>
     </div>
-
-    {% if not company.email_address %}
-    <div id="alerts-bottom" class="grid-row alerts-container">
-        {% if not company.email_address %}
-        <div class="column-two-thirds flag-red-text">
-            <h2 class="heading-medium">Your business profile has no contact email</h2>
-            <p>This lets international buyers contact you on business profile</p>
-        </div>
-        <div class="column-one-third alerts-button-container">
-            <a class="button button-ghost-white">Set your email address</a>
-        </div>
-        {% endif %}
-    </div>
-    {% endif %}
 
 {% endblock %}
 
