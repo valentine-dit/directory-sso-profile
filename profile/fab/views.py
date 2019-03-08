@@ -149,6 +149,14 @@ class LogoFormView(BaseFormView):
     template_name = 'fab/logo-form.html'
 
 
+class PublishFormView(BaseFormView):
+    form_class = forms.PublishForm
+    template_name = 'fab/find-a-buyer-publsh.html'
+
+    def serialize_form(self, form):
+        return {'is_published': True}
+
+
 class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
     done_step_name = 'finished'
 

@@ -305,6 +305,22 @@ def test_edit_page_submmit_success(
     )
 
 
+def test_edit_page_submmit_publish_success(
+    returned_client, mock_update_company, sso_user, sso_user_middleware
+):
+    url = reverse('find-a-buyer-publish')
+
+    response = returned_client.post(url, {})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
+    assert mock_update_company.call_count == 1
+    assert mock_update_company.call_args == mock.call(
+        sso_session_id=sso_user.session_id,
+        data={'is_published': True}
+    )
+
+
 def test_edit_page_logo_submmit_success(
     returned_client, mock_update_company, sso_user,
     sso_user_middleware

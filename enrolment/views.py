@@ -330,8 +330,8 @@ class CompaniesHouseEnrolmentView(
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
             COMPANY_SEARCH: 2,
-            BUSINESS_INFO: 3,
-            PERSONAL_INFO: 4,
+            BUSINESS_INFO: 2,
+            PERSONAL_INFO: 3,
         },
         step_counter_anon={
             USER_ACCOUNT: 2,

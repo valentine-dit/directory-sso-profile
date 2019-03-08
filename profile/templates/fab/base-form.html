@@ -15,7 +15,9 @@
                 {% block form_contents %}
                     <form method="post" enctype="multipart/form-data">
                         {% render_form form %}
-                        <button class="button">Save and continue</button>
+                        {% block submit_button %}
+                            <button class="button">Save and continue</button>
+                        {% endblock %}
                         <div>
                             <br>
                             <a class="link" href="{% url 'find-a-buyer' %}">Back</a>
