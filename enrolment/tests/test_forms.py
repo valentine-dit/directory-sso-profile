@@ -1,17 +1,81 @@
 import pytest
+from unittest import mock
+from core.tests.helpers import create_response
 
 from django.urls import reverse
 
-from enrolment import forms
+from enrolment import forms, helpers
 
 
 def test_password_verify_password_not_matching():
     form = forms.UserAccount(
-        data={'password': 'password', 'password_confirmed': 'drowssap'}
+        data={
+            'email': 'test@test.com',
+            'password': 'password',
+            'password_confirmed': 'drowssap',
+         }
     )
 
     assert form.is_valid() is False
     assert "Passwords don't match" in form.errors['password_confirmed']
+
+
+@pytest.fixture(autouse=True)
+def mock_clean():
+    patch = mock.patch('captcha.fields.ReCaptchaField.clean')
+    yield patch.start()
+    patch.stop()
+
+
+@mock.patch.object(helpers.sso_api_client.user, 'create_user')
+def test_create_user_password_invalid(mock_create_user):
+    mock_create_user.return_value = create_response(404)
+
+    form = forms.UserAccount(
+        data={
+            'email': 'test@test.com',
+            'password': '12P',
+            'password_confirmed': '12P',
+        }
+    )
+
+    assert form.is_valid() is False
+    assert "Invalid Password" in form.errors['password']
+
+
+@mock.patch.object(helpers.sso_api_client.user, 'create_user')
+def test_create_user_password_existing_user(mock_create_user):
+    mock_create_user.return_value = create_response(200)
+
+    form = forms.UserAccount(
+        data={
+            'email': 'test@test.com',
+            'password': '12P',
+            'password_confirmed': '12P',
+            'terms_agreed': True,
+        }
+    )
+    form.is_valid()
+    assert form.is_valid() is True
+    assert not form.cleaned_data['user_details']
+
+
+@mock.patch.object(helpers.sso_api_client.user, 'create_user')
+def test_create_user(mock_create_user):
+    data = {'email': 'test@test.com', 'verification_code': '12345'}
+    mock_create_user.return_value = create_response(201, data)
+
+    form = forms.UserAccount(
+        data={
+            'email': 'test@test.com',
+            'password': 'ABCdefg12345',
+            'password_confirmed': 'ABCdefg12345',
+            'terms_agreed': True,
+        }
+    )
+
+    assert form.is_valid() is True
+    assert form.cleaned_data["user_details"] == data
 
 
 def test_companies_house_search_company_number_empty():

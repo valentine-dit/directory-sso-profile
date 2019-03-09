@@ -178,14 +178,11 @@ class UserAccountEnrolmentHandlerMixin:
     def render_next_step(self, form, **kwargs):
         response = super().render_next_step(form, **kwargs)
         if form.prefix == USER_ACCOUNT:
-            user_details = helpers.create_user(
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password'],
-            )
             # Check if we have a user, else the user is already registered
-            if user_details:
+            if form.cleaned_data['user_details']:
+                user_details = form.cleaned_data['user_details']
                 helpers.send_verification_code_email(
-                    email=form.cleaned_data['email'],
+                    email=user_details['email'],
                     verification_code=user_details['verification_code'],
                     form_url=self.request.path,
                 )

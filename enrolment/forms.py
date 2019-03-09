@@ -65,6 +65,7 @@ class UserAccount(forms.Form):
         '</ul>'
     )
     MESSAGE_NOT_MATCH = "Passwords don't match"
+    MESSAGE_PASSWORD_INVALID = 'Invalid Password'
 
     email = fields.EmailField(
         label='Your email address'
@@ -96,6 +97,20 @@ class UserAccount(forms.Form):
         if value != self.cleaned_data['password']:
             raise ValidationError(self.MESSAGE_NOT_MATCH)
         return value
+
+    def clean(self):
+        cleaned_data = super().clean()
+        try:
+            cleaned_data['user_details'] = helpers.create_user(
+                email=cleaned_data['email'],
+                password=cleaned_data['password'],
+            )
+        except HTTPError as error:
+            if error.response.status_code == 404:
+                self.add_error('password', self.MESSAGE_PASSWORD_INVALID)
+            else:
+                raise
+        return None
 
 
 class UserAccountVerification(forms.Form):
