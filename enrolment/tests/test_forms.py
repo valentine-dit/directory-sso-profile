@@ -3,12 +3,20 @@ from unittest import mock
 from core.tests.helpers import create_response
 
 from django.urls import reverse
+from requests.exceptions import HTTPError
 
 from enrolment import forms, helpers
 
 
+@pytest.fixture(autouse=True)
+def mock_clean():
+    patch = mock.patch('captcha.fields.ReCaptchaField.clean')
+    yield patch.start()
+    patch.stop()
+
+
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
-def test_password_verify_password_not_matching(mock_create_user):
+def test_create_user_password_invalid_not_matching(mock_create_user):
     mock_create_user.return_value = create_response(404)
     form = forms.UserAccount(
         data={
@@ -20,13 +28,6 @@ def test_password_verify_password_not_matching(mock_create_user):
 
     assert form.is_valid() is False
     assert "Passwords don't match" in form.errors['password_confirmed']
-
-
-@pytest.fixture(autouse=True)
-def mock_clean():
-    patch = mock.patch('captcha.fields.ReCaptchaField.clean')
-    yield patch.start()
-    patch.stop()
 
 
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
@@ -47,7 +48,7 @@ def test_create_user_password_invalid(mock_create_user):
 
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
 def test_create_user_password_existing_user(mock_create_user):
-    mock_create_user.return_value = create_response(200)
+    mock_create_user.return_value = create_response(400)
 
     form = forms.UserAccount(
         data={
@@ -57,9 +58,25 @@ def test_create_user_password_existing_user(mock_create_user):
             'terms_agreed': True,
         }
     )
-    form.is_valid()
     assert form.is_valid() is True
     assert not form.cleaned_data['user_details']
+
+
+@mock.patch.object(helpers.sso_api_client.user, 'create_user')
+def test_create_user_error(mock_create_user):
+
+    mock_create_user.return_value = create_response(401)
+    form = forms.UserAccount(
+        data={
+            'email': 'test@test.com',
+            'password': '12P',
+            'password_confirmed': '12P',
+            'terms_agreed': True,
+        }
+    )
+
+    with pytest.raises(HTTPError):
+        form.is_valid()
 
 
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
