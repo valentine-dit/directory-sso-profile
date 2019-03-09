@@ -7,7 +7,9 @@ from django.urls import reverse
 from enrolment import forms, helpers
 
 
-def test_password_verify_password_not_matching():
+@mock.patch.object(helpers.sso_api_client.user, 'create_user')
+def test_password_verify_password_not_matching(mock_create_user):
+    mock_create_user.return_value = create_response(404)
     form = forms.UserAccount(
         data={
             'email': 'test@test.com',
