@@ -55,8 +55,8 @@ def get_company_profile(number, session):
 def create_user(email, password):
     response = sso_api_client.user.create_user(email, password)
     if response.status_code == 400:
-    # Check for non-password errors and ignore since we want to proceed
-    # For example we don't want to inform user of existing accounts
+        # Check for non-password errors and ignore since we want to proceed
+        # For example we don't want to inform user of existing accounts
         if not response.json().get('password'):
             return None
     response.raise_for_status()
