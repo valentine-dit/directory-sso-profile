@@ -17,7 +17,7 @@ def mock_clean():
 
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
 def test_create_user_password_invalid_not_matching(mock_create_user):
-    mock_create_user.return_value = create_response(404)
+    mock_create_user.return_value = create_response(400)
     form = forms.UserAccount(
         data={
             'email': 'test@test.com',
@@ -32,7 +32,8 @@ def test_create_user_password_invalid_not_matching(mock_create_user):
 
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
 def test_create_user_password_invalid(mock_create_user):
-    mock_create_user.return_value = create_response(404)
+    data = {'password': 'validation error'}
+    mock_create_user.return_value = create_response(400, data)
 
     form = forms.UserAccount(
         data={

@@ -106,7 +106,7 @@ class UserAccount(forms.Form):
                 password=cleaned_data['password'],
             )
         except HTTPError as error:
-            if error.response.status_code == 404:
+            if error.response.status_code == 400:
                 self.add_error('password', self.MESSAGE_PASSWORD_INVALID)
             else:
                 raise
