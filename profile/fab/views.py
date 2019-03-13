@@ -153,8 +153,9 @@ class PublishFormView(BaseFormView):
     form_class = forms.PublishForm
     template_name = 'fab/find-a-buyer-publsh.html'
 
-    def serialize_form(self, form):
-        return {'is_published': True}
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        return {**kwargs, 'company': self.company}
 
 
 class BaseCaseStudyWizardView(NamedUrlSessionWizardView):

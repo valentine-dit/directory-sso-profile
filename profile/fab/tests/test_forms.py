@@ -1,6 +1,8 @@
 from profile.fab import forms
 from profile.fab import validators
 
+import pytest
+
 
 def test_description_form_contains_enmail():
     form = forms.DescriptionForm({
@@ -67,3 +69,29 @@ def test_case_study_rich_media_image_three_create_help_text():
 
     assert form['image_three'].label == expected_values['create_label']
     assert form['image_three'].help_text == expected_values['create_help_text']
+
+
+@pytest.mark.parametrize('is_published,expected', (
+    (True, forms.PublishForm.LABEL_UNPUBLISH),
+    (False, forms.PublishForm.LABEL_ISD)
+))
+def test_label_is_published_investment_support_directory(
+    is_published, expected
+):
+    company = {'is_published_investment_support_directory': is_published}
+    form = forms.PublishForm(company=company)
+    field = form.fields['is_published_investment_support_directory']
+
+    assert field.widget.label == expected
+
+
+@pytest.mark.parametrize('is_published,expected', (
+    (True, forms.PublishForm.LABEL_UNPUBLISH),
+    (False, forms.PublishForm.LABEL_FAS),
+))
+def test_label_is_published_find_a_supplier(is_published, expected):
+    company = {'is_published_find_a_supplier': is_published}
+    form = forms.PublishForm(company=company)
+    field = form.fields['is_published_find_a_supplier']
+
+    assert field.widget.label == expected

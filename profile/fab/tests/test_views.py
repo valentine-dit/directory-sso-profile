@@ -309,15 +309,18 @@ def test_edit_page_submmit_publish_success(
     returned_client, mock_update_company, sso_user, sso_user_middleware
 ):
     url = reverse('find-a-buyer-publish')
-
-    response = returned_client.post(url, {})
+    data = {
+        'is_published_investment_support_directory': True,
+        'is_published_find_a_supplier': True,
+    }
+    response = returned_client.post(url, data)
 
     assert response.status_code == 302
     assert response.url == reverse('find-a-buyer')
     assert mock_update_company.call_count == 1
     assert mock_update_company.call_args == mock.call(
         sso_session_id=sso_user.session_id,
-        data={'is_published': True}
+        data=data
     )
 
 
