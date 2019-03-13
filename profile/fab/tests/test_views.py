@@ -186,11 +186,29 @@ def test_find_a_buyer_exposes_context(
 
 
 def test_find_a_buyer_unauthenticated(
-    sso_user_middleware_unauthenticated, returned_client
+    sso_user_middleware_unauthenticated, returned_client, settings
 ):
+    settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON'] = False
+
     response = returned_client.get(reverse('find-a-buyer'))
 
     assert response.status_code == http.client.FOUND
+
+    assert response.url == (
+        'http://sso.trade.great:8004/accounts/login/'
+        '?next=http%3A//testserver/profile/find-a-buyer/'
+    )
+
+
+def test_find_a_buyer_unauthenticated_enrolment(
+    sso_user_middleware_unauthenticated, returned_client, settings
+):
+    settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON'] = True
+
+    response = returned_client.get(reverse('find-a-buyer'))
+
+    assert response.status_code == http.client.FOUND
+    assert response.url == reverse('enrolment-start')
 
 
 def test_supplier_company_retrieve_not_found(
