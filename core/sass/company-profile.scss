@@ -134,6 +134,8 @@
 
 #main-content {
   .message-box {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
     padding: 20px;
     position: relative;
     border-width: 2px;
