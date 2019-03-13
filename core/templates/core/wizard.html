@@ -32,9 +32,11 @@
             </form>
         </div>
         <div class="column-one-third" id="progress-column">
-            <span>Part of:</span>
-            <a class="link heading-medium" href="{% url 'enrolment-start' %}">Create a great.gov.uk account</a>
-            {% include 'enrolment/progress.html' %}
+            {% if step_labels %}
+                <span>Part of:</span>
+                <a class="link heading-medium" href="{% url 'enrolment-start' %}">Create a great.gov.uk account</a>
+                {% include 'enrolment/progress.html' %}
+            {% endif %}
         </div>
     </section>
 {% endblock %}
