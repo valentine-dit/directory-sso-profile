@@ -91,7 +91,8 @@ class StepsListMixin(abc.ABC):
         else:
             labels = self.steps_list_conf.form_labels_user[:]
         if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
-            labels.remove(PROGRESS_STEP_LABEL_BUSINESS_TYPE)
+            if PROGRESS_STEP_LABEL_BUSINESS_TYPE in labels:
+                labels.remove(PROGRESS_STEP_LABEL_BUSINESS_TYPE)
         return labels
 
     def get_context_data(self, *args, **kwargs):
