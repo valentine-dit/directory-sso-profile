@@ -1324,7 +1324,7 @@ def test_claim_preverified_failure(
         [
             views.PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
         ]
-    )
+    ),
 ))
 def test_steps_list_mixin(
     is_anon, is_feature_enabled, expected, rf, settings
@@ -1352,6 +1352,33 @@ def test_steps_list_mixin(
 
     response = view(request)
     assert response.context_data['step_labels'] == expected
+
+
+def test_steps_list_mixin_no_business_type(rf, settings):
+    settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = False
+
+    class TestView(views.StepsListMixin, TemplateView):
+        template_name = 'directory_components/base.html'
+
+        steps_list_conf = helpers.StepsListConf(
+            form_labels_user=[
+                views.PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
+            ],
+            form_labels_anon=[
+                views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+                views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+            ],
+        )
+
+    request = rf.get('/')
+    request.sso_user = None
+    view = TestView.as_view()
+
+    response = view(request)
+    assert response.context_data['step_labels'] == [
+        views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+        views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+    ]
 
 
 @pytest.mark.parametrize('is_anon,is_feature_enabled,expected', (
