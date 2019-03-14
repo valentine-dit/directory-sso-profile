@@ -231,6 +231,23 @@ class CreateCompanyProfileMixin:
         })
 
 
+class CreateUserProfileMixin:
+
+    def serialize_user_profile(self, form):
+        return {
+            'first_name': form.cleaned_data['given_name'],
+            'last_name': form.cleaned_data['family_name'],
+            'job_title': form.cleaned_data['job_title'],
+            'mobile_phone_number': form.cleaned_data.get('phone_number'),
+        }
+
+    def create_user_profile(self, form):
+        helpers.create_user_profile(
+            sso_session_id=self.request.sso_user.session_id,
+            data=self.serialize_user_profile(form),
+        )
+
+
 class BusinessTypeRoutingView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin,
     StepsListMixin, FormView
@@ -323,7 +340,7 @@ class BaseEnrolmentWizardView(
 
 
 class CompaniesHouseEnrolmentView(
-    CreateCompanyProfileMixin, BaseEnrolmentWizardView
+    CreateUserProfileMixin, CreateCompanyProfileMixin, BaseEnrolmentWizardView
 ):
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
@@ -403,7 +420,8 @@ class CompaniesHouseEnrolmentView(
             **super().serialize_form_list(form_list)
         }
 
-    def done(self, form_list, **kwargs):
+    def done(self, form_list, form_dict, **kwargs):
+        self.create_user_profile(form_dict[PERSONAL_INFO])
         data = self.serialize_form_list(form_list)
         is_enrolled = helpers.get_is_enrolled(
             company_number=data['company_number'],
@@ -422,7 +440,7 @@ class CompaniesHouseEnrolmentView(
 
 
 class SoleTraderEnrolmentView(
-    CreateCompanyProfileMixin, BaseEnrolmentWizardView
+    CreateUserProfileMixin, CreateCompanyProfileMixin, BaseEnrolmentWizardView
 ):
     steps_list_conf = helpers.StepsListConf(
         form_labels_user=[
@@ -481,7 +499,8 @@ class SoleTraderEnrolmentView(
                 form_initial['company_name'] = data['company_name']
         return form_initial
 
-    def done(self, form_list, **kwargs):
+    def done(self, form_list, form_dict, **kwargs):
+        self.create_user_profile(form_dict[PERSONAL_INFO])
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
         return TemplateResponse(self.request, self.templates[FINISHED])

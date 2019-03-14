@@ -63,6 +63,14 @@ def create_user(email, password):
     return response.json()
 
 
+def create_user_profile(sso_session_id, data):
+    response = sso_api_client.user.create_user_profile(
+        sso_session_id=sso_session_id, data=data
+    )
+    response.raise_for_status()
+    return response
+
+
 def user_has_company(sso_session_id):
     response = api_client.company.retrieve_private_profile(sso_session_id)
     if response.status_code == 404:
