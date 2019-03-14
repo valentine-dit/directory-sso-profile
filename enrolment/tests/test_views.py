@@ -108,6 +108,7 @@ def mock_get_company_profile():
             'address_line_1': '555 fake street, London',
             'postal_code': 'EDG 4DF'
         },
+        'company_status': 'active',
     })
     yield patch.start()
     patch.stop()

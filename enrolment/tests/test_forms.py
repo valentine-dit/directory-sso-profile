@@ -98,8 +98,11 @@ def test_create_user(mock_create_user):
     assert form.cleaned_data["user_details"] == data
 
 
-def test_companies_house_search_company_number_empty():
-    form = forms.CompaniesHouseSearch(data={'company_name': 'Thing'})
+def test_companies_house_search_company_number_empty(client):
+    form = forms.CompaniesHouseSearch(
+        data={'company_name': 'Thing'},
+        session=client.session
+    )
 
     assert form.is_valid() is False
 
@@ -107,6 +110,31 @@ def test_companies_house_search_company_number_empty():
     assert form.errors['company_name'] == [
         form.MESSAGE_COMPANY_NOT_FOUND.format(url=url)
     ]
+
+
+@mock.patch.object(helpers, 'get_company_profile', return_value={
+    'company_status': 'dissolved',
+})
+def test_companies_house_search_company_dissolved(client):
+    form = forms.CompaniesHouseSearch(
+        data={'company_name': 'Thing', 'company_number': '1234'},
+        session=client.session
+    )
+
+    assert form.is_valid() is False
+    assert form.errors['company_name'] == [form.MESSAGE_COMPANY_NOT_ACTIVE]
+
+
+@mock.patch.object(helpers, 'get_company_profile', return_value={
+    'company_status': 'active',
+})
+def test_companies_house_search_company_active(client):
+    form = forms.CompaniesHouseSearch(
+        data={'company_name': 'Thing', 'company_number': '1234'},
+        session=client.session
+    )
+
+    assert form.is_valid() is True
 
 
 @pytest.mark.parametrize('address,expected', (
