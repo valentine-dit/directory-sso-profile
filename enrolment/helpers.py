@@ -203,7 +203,7 @@ class CompanyProfileFormatter:
     @property
     def postcode(self):
         if self.data.get('registered_office_address'):
-            return self.data['registered_office_address']['postal_code']
+            return self.data['registered_office_address'].get('postal_code')
 
 
 def parse_set_cookie_header(headers):
