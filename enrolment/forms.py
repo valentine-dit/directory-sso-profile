@@ -145,15 +145,29 @@ class CompaniesHouseSearch(forms.Form):
         "<a href='{url}'>change type of business</a>"
         " if your business is not registered with Companies House.</p>"
     )
+    MESSAGE_COMPANY_NOT_ACTIVE = 'Company not active.'
 
     company_name = fields.CharField(
         label='Registered company name'
     )
     company_number = fields.CharField()
 
+    def __init__(self, session, *args, **kwargs):
+        self.session = session
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
-        if 'company_number' not in cleaned_data:
+        if 'company_number' in cleaned_data:
+            company_data = helpers.get_company_profile(
+                number=self.cleaned_data['company_number'],
+                session=self.session,
+            )
+            if company_data['company_status'] != 'active':
+                raise ValidationError(
+                    {'company_name': self.MESSAGE_COMPANY_NOT_ACTIVE}
+                )
+        else:
             url = reverse('enrolment-business-type')
             message = self.MESSAGE_COMPANY_NOT_FOUND.format(url=url)
             raise ValidationError({'company_name': mark_safe(message)})

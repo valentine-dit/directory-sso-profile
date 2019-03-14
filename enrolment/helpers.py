@@ -63,6 +63,14 @@ def create_user(email, password):
     return response.json()
 
 
+def create_user_profile(sso_session_id, data):
+    response = sso_api_client.user.create_user_profile(
+        sso_session_id=sso_session_id, data=data
+    )
+    response.raise_for_status()
+    return response
+
+
 def user_has_company(sso_session_id):
     response = api_client.company.retrieve_private_profile(sso_session_id)
     if response.status_code == 404:
@@ -203,7 +211,7 @@ class CompanyProfileFormatter:
     @property
     def postcode(self):
         if self.data.get('registered_office_address'):
-            return self.data['registered_office_address']['postal_code']
+            return self.data['registered_office_address'].get('postal_code')
 
 
 def parse_set_cookie_header(headers):

@@ -79,7 +79,8 @@ DEBUG_SET_ENV_VARS := \
 	export DIRECTORY_FORMS_API_BASE_URL=http://forms.trade.great:8011; \
 	export DIRECTORY_API_CLIENT_BASE_URL=http://api.trade.great:8000; \
 	export DIRECTORY_API_CLIENT_API_KEY=debug; \
-	export FEATURE_BUSINESS_PROFILE_ENABLED=true
+	export FEATURE_BUSINESS_PROFILE_ENABLED=true; \
+	export FEATURE_ADMIN_PANEL_ENABLED=true
 
 DEBUG_TEST_SET_ENV_VARS := \
 	export EXPORTING_OPPORTUNITIES_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \

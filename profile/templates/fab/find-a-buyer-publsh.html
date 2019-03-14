@@ -11,22 +11,28 @@
 {% block form_contents %}
     {% include 'fab/breadcrumbs.html' with label='Publish your profile' %}
     <h1 class="heading-large">Publishing your profile on great.gov.uk</h1>
-    <p>Great.gov.uk has two services you can publish your profile on. ISD and great.gov.uk/trade/, you can publish to either or just one.</p>
+    {% if company.is_uk_isd_company %}
+        <p>You can publish your profile on 2 great.gov.uk platforms – great.gov.uk/trade and great.gov.uk Investment Support Directory.</p>
+        <p>You can publish on either or both of these.</p>
+        <p>Choose where you want to publish below.</p>
+    {% endif %}
     {{ block.super }}
 {% endblock %}
 
 {% block form %}
-    {% with company.is_published_investment_support_directory as is_published %}
-        <div class="publish-box border-medium {{ is_published|yesno:'border-teal,border-stone-60' }}">
-            <h2 class="heading-small">{{ is_published|yesno:"Already published on great.gov.uk ISD,Publish on great.gov.uk ISD" }}</h2>
-            <p>This business profile is ready to be published on UK Investment Support Directory on great.gov.uk. We'll email you when it goes live.</p>
-            {% include 'directory_components/form_widgets/form_field.html' with field=form.is_published_investment_support_directory %}
-        </div>
-    {% endwith %}
+    {% if company.is_uk_isd_company %}
+        {% with company.is_published_investment_support_directory as is_published %}
+            <div class="publish-box border-medium {{ is_published|yesno:'border-teal,border-stone-60' }}">
+                <h2 class="heading-small">{{ is_published|yesno:"Already published on great.gov.uk Investment Support Directory,Publish on great.gov.uk Investment Support Directory" }}</h2>
+                <p>This business profile is ready to be published on UK Investment Support Directory on great.gov.uk. We'll email you when it goes live.</p>
+                {% include 'directory_components/form_widgets/form_field.html' with field=form.is_published_investment_support_directory %}
+            </div>
+        {% endwith %}
+    {% endif %}
     {% with company.is_published_find_a_supplier as is_published %}
         <div class="publish-box border-medium {{ is_published|yesno:'border-teal,border-stone-60' }}">
             <h2 class="heading-small">{{ is_published|yesno:"Already published on great.gov.uk/trade/,Publish on great.gov.uk/trade/" }}</h2>
-            <p>This business profile is ready to be published on UK Find a Supplier on great.gov.uk/trade.</p>
+            <p>This business profile can be published now on the Find a Supplier service on trade.gov.uk.</p>
             {% include 'directory_components/form_widgets/form_field.html' with field=form.is_published_find_a_supplier %}
         </div>
     {% endwith %}

@@ -108,6 +108,7 @@ def mock_get_company_profile():
             'address_line_1': '555 fake street, London',
             'postal_code': 'EDG 4DF'
         },
+        'company_status': 'active',
     })
     yield patch.start()
     patch.stop()
@@ -185,6 +186,22 @@ def mock_create_user():
     })
     patch = mock.patch.object(
         helpers.sso_api_client.user, 'create_user',
+        return_value=response
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_create_user_profile():
+    response = create_response(200, {
+        'first_name': 'First Name',
+        'last_name': 'Last Name',
+        'job_title': 'Director',
+        'mobile_phone_number': '08888888888',
+    })
+    patch = mock.patch.object(
+        helpers.sso_api_client.user, 'create_user_profile',
         return_value=response
     )
     yield patch.start()
