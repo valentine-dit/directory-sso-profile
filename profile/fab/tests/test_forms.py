@@ -72,7 +72,7 @@ def test_case_study_rich_media_image_three_create_help_text():
 
 
 @pytest.mark.parametrize('is_published,expected', (
-    (True, forms.PublishForm.LABEL_UNPUBLISH),
+    (True, forms.PublishForm.LABEL_UNPUBLISH_ISD),
     (False, forms.PublishForm.LABEL_ISD)
 ))
 def test_label_is_published_investment_support_directory(
@@ -86,7 +86,7 @@ def test_label_is_published_investment_support_directory(
 
 
 @pytest.mark.parametrize('is_published,expected', (
-    (True, forms.PublishForm.LABEL_UNPUBLISH),
+    (True, forms.PublishForm.LABEL_UNPUBLISH_FAS),
     (False, forms.PublishForm.LABEL_FAS),
 ))
 def test_label_is_published_find_a_supplier(is_published, expected):

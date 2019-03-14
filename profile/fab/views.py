@@ -160,6 +160,9 @@ class PublishFormView(BaseFormView):
         kwargs = super().get_form_kwargs()
         return {**kwargs, 'company': self.company}
 
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs, company=self.company)
+
 
 class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
     done_step_name = 'finished'
