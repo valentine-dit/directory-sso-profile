@@ -9,23 +9,30 @@
 
 {% block tab_content %}
 
-    {% if is_profile_owner %}
-    <div id="user-mode-container">
-        <div class="grid-row" >
-            <div class="column-one-half">
-                <a href="#">Admin tools</a>
+    {% if features.ADMIN_PANEL_ON %}
+        {% if is_profile_owner %}
+        <div id="user-mode-container">
+            <div class="grid-row" >
+                <div class="column-one-half">
+                    <a href="#">Admin tools</a>
+                </div>
+                <div class="column-one-half right-column">
+                    <a class="background-light-blue font-xsmall pill" href="#">Admin view</a>
+                    {% if not company.is_published %}
+                        <span class="divider"></span>
+                        <a href="{{ services_urls.fas }}/suppliers/{{ company.number }}/">View profile</a>
+                    {% endif %}
+                </div>
             </div>
-            <div class="column-one-half right-column">
-                <a class="background-light-blue font-xsmall pill" href="#">Admin view</a>
-                {% if not company.is_published %}
-                    <span class="divider"></span>
-                    <a href="{{ services_urls.fas }}/suppliers/{{ company.number }}/">View profile</a>
-                {% endif %}
-            </div>
+            <hr>
         </div>
-        <hr>
-    </div>
+        {% endif %}
     {% endif %}
+
+    {% if success_message %}
+        <div class="sso-profile-success-message">{{ success_message }}</div>
+    {% endif %}
+
     {% if not company.email_address or not company.description or not company.is_verified or not company.is_published %}
     <div id="alerts-top" class="grid-row alerts-container">
         {% if not company.email_address %}
@@ -93,11 +100,19 @@
                         <dd>{{ company.website }}</dd>
                     {% endif %}
                     <dt>Business type</dt>
-                    <dd>UK private or public limited company</dd>
-                    <dt>Number of employees</dt>
-                    <dd>{{ company.employees }} employees</dd>
-                    <dt>Core industry</dt>
-                    <dd>{{ company.sectors.0|title }}</dd>
+                    {% if company.company_type == 'COMPANIES_HOUSE' %}
+                        <dd>UK private or public limited company</dd>
+                    {% else %}
+                        <dd>Sole trader</dd>
+                    {% endif %}
+                    {% if company.employees %}
+                        <dt>Number of employees</dt>
+                        <dd>{{ company.employees }} employees</dd>
+                    {% endif %}
+                    {% if company.sectors %}
+                        <dt>Core industry</dt>
+                        <dd>{{ company.sectors.0|title }}</dd>
+                    {% endif %}
                     <dt>UK address</dt>
                     <dd>{{ company.address_line_1 }}, {{ company.address_line_2 }}</dd>
                 </dl>
