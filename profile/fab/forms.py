@@ -300,18 +300,19 @@ class LogoForm(forms.Form):
 
 class PublishForm(forms.Form):
 
-    LABEL_UNPUBLISH = 'Untick to remove your profile from this service'
-    LABEL_ISD = 'Publish profile on great.gov.uk ISD'
+    LABEL_UNPUBLISH_FAS = 'Untick to remove your profile from this service'
+    LABEL_UNPUBLISH_ISD = 'Untick the box to cancel publication'
+    LABEL_ISD = 'Ready to publish on UK Investment Support Directory'
     LABEL_FAS = 'Publish profile on great.gov.uk/trade/'
 
     def __init__(self, company, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if company.get('is_published_investment_support_directory'):
             field = self.fields['is_published_investment_support_directory']
-            field.widget.label = self.LABEL_UNPUBLISH
+            field.widget.label = self.LABEL_UNPUBLISH_ISD
         if company.get('is_published_find_a_supplier'):
             field = self.fields['is_published_find_a_supplier']
-            field.widget.label = self.LABEL_UNPUBLISH
+            field.widget.label = self.LABEL_UNPUBLISH_FAS
 
     is_published_investment_support_directory = fields.BooleanField(
         label=LABEL_ISD,

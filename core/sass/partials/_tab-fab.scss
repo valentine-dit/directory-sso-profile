@@ -1,3 +1,5 @@
+@import 'partials/colours';
+
 
 /* FAB tab content
 **********************/
@@ -12,10 +14,11 @@
 }
 
 .sso-profile-success-message {
-  background: #28a197;
+  background: $active-blue;
   padding: 20px;
   margin-top: 20px;
   color: white;
+  font-weight: bold;
   font-size: 18px;
 }
 
