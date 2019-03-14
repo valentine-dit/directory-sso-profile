@@ -314,8 +314,10 @@ class PublishForm(forms.Form):
             field.widget.label = self.LABEL_UNPUBLISH
 
     is_published_investment_support_directory = fields.BooleanField(
-        label=LABEL_ISD
+        label=LABEL_ISD,
+        required=False
     )
     is_published_find_a_supplier = fields.BooleanField(
-        label=LABEL_FAS
+        label=LABEL_FAS,
+        required=False
     )

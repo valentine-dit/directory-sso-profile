@@ -26,7 +26,7 @@
         <hr>
     </div>
     {% endif %}
-    {% if not company.email_address or not company.description %}
+    {% if not company.email_address or not company.description or not company.is_verified or not company.is_published %}
     <div id="alerts-top" class="grid-row alerts-container">
         {% if not company.email_address %}
             <div class="column-two-thirds flag-red-text">
@@ -53,13 +53,23 @@
                 <a class="button button-ghost-white" href="{{ services_urls.fab }}/verify/">Confirm your identity</a>
             </div>
         {% elif not company.is_published %}
-            <div class="column-two-thirds flag-red-text">
-                <h2 class="heading-medium">Publish business profile</h2>
-                <p>You can now publish your business profile.</p>
-            </div>
-            <div class="column-one-third alerts-button-container">
-                <a class="button button-ghost-white" href="{% url 'find-a-buyer-publish' %}">Publish your business profile</a>
-            </div>
+            {% if company.is_uk_isd_company %}
+                <div class="column-two-thirds flag-red-text">
+                    <h2 class="heading-medium">Profile ready to publish</h2>
+                    <p>Your profile is also ready to be published on the UK Investment Support Directory.</p>
+                </div>
+                <div class="column-one-third alerts-button-container">
+                    <a class="button button-ghost-white" href="{% url 'find-a-buyer-publish' %}">Schedule publication</a>
+                </div>
+            {% else %}
+                <div class="column-two-thirds flag-red-text">
+                    <h2 class="heading-medium">Publish business profile</h2>
+                    <p>You can now publish your business profile.</p>
+                </div>
+                <div class="column-one-third alerts-button-container">
+                    <a class="button button-ghost-white" href="{% url 'find-a-buyer-publish' %}">Publish your business profile</a>
+                </div>
+            {% endif %}
         {% endif %}
     </div>
     {% endif %}
