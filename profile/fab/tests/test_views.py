@@ -342,6 +342,17 @@ def test_edit_page_submmit_publish_success(
     )
 
 
+def test_edit_page_submmit_publish_context(
+    returned_client, sso_user_middleware, default_company_profile
+):
+    url = reverse('find-a-buyer-publish')
+
+    response = returned_client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['company'] == default_company_profile
+
+
 def test_edit_page_logo_submmit_success(
     returned_client, mock_update_company, sso_user,
     sso_user_middleware
