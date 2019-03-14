@@ -88,7 +88,9 @@ def test_create_user_profile(mock_create_user_profile):
         data=data
     )
     assert mock_create_user_profile.call_count == 1
-    assert mock_create_user_profile.call_args == mock.call(1, data,)
+    assert mock_create_user_profile.call_args == mock.call(
+        sso_session_id=1, data=data
+    )
 
 
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')

@@ -233,32 +233,18 @@ class CreateCompanyProfileMixin:
 
 class CreateUserProfileMixin:
 
-    def getprofiledata(self, form_list):
-        data = {}
-        for form in form_list:
-            data.update(form.cleaned_data)
-        whitelist = [
-            'given_name',
-            'family_name',
-            'job_title',
-            'phone_number'
-        ]
-        data = {
-            key: value for key, value in data.items()
-            if value and key in whitelist
-        }
+    def serialize_user_profile(self, form):
         return {
-            'first_name': data['given_name'],
-            'last_name': data['family_name'],
-            'job_title': data['family_name'],
-            'mobile_phone_number': data.get('phone_number'),
-            }
+            'first_name': form.cleaned_data['given_name'],
+            'last_name': form.cleaned_data['family_name'],
+            'job_title': form.cleaned_data['job_title'],
+            'mobile_phone_number': form.cleaned_data.get('phone_number'),
+        }
 
-    def create_user_profile(self, form_list):
-        data = self.getprofiledata(form_list)
+    def create_user_profile(self, form):
         helpers.create_user_profile(
-            sso_session_id=self.request.sso_user.id,
-            data={**data},
+            sso_session_id=self.request.sso_user.session_id,
+            data=self.serialize_user_profile(form),
         )
 
 
@@ -432,8 +418,8 @@ class CompaniesHouseEnrolmentView(
             **super().serialize_form_list(form_list)
         }
 
-    def done(self, form_list, **kwargs):
-        self.create_user_profile(form_list)
+    def done(self, form_list, form_dict, **kwargs):
+        self.create_user_profile(form_dict[PERSONAL_INFO])
         data = self.serialize_form_list(form_list)
         is_enrolled = helpers.get_is_enrolled(
             company_number=data['company_number'],
@@ -511,8 +497,8 @@ class SoleTraderEnrolmentView(
                 form_initial['company_name'] = data['company_name']
         return form_initial
 
-    def done(self, form_list, **kwargs):
-        self.create_user_profile(form_list)
+    def done(self, form_list, form_dict, **kwargs):
+        self.create_user_profile(form_dict[PERSONAL_INFO])
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
         return TemplateResponse(self.request, self.templates[FINISHED])
