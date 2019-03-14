@@ -47,7 +47,10 @@ class FindABuyerView(
 
     def dispatch(self, request, *args, **kwargs):
         if request.sso_user is None:
-            return self.handle_no_permission()
+            if settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON']:
+                return redirect('enrolment-start')
+            else:
+                return self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)
 
     def get_template_names(self, *args, **kwargs):
