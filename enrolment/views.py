@@ -303,8 +303,8 @@ class BaseEnrolmentWizardView(
     RestartOnStepSkipped,
     UserAccountEnrolmentHandlerMixin,
     core.mixins.PreventCaptchaRevalidationMixin,
-    StepsListMixin,
     ProgressIndicatorMixin,
+    StepsListMixin,
     NamedUrlSessionWizardView
 ):
 
@@ -574,8 +574,8 @@ class ResendVerificationCodeView(
     NotFoundOnDisabledFeature,
     RedirectLoggedInMixin,
     RestartOnStepSkipped,
-    StepsListMixin,
     ProgressIndicatorMixin,
+    StepsListMixin,
     NamedUrlSessionWizardView
 ):
 
