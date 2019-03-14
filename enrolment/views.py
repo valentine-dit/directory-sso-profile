@@ -231,6 +231,37 @@ class CreateCompanyProfileMixin:
         })
 
 
+class CreateUserProfileMixin:
+
+    def getprofiledata(self, form_list):
+        data = {}
+        for form in form_list:
+            data.update(form.cleaned_data)
+        whitelist = [
+            'given_name',
+            'family_name',
+            'job_title',
+            'phone_number'
+        ]
+        data = {
+            key: value for key, value in data.items()
+            if value and key in whitelist
+        }
+        return {
+            'first_name': data['given_name'],
+            'last_name': data['family_name'],
+            'job_title': data['family_name'],
+            'mobile_phone_number': data.get('phone_number'),
+            }
+
+    def create_user_profile(self, form_list):
+        data = self.getprofiledata(form_list)
+        helpers.create_user_profile(
+            sso_session_id=self.request.sso_user.id,
+            data={**data},
+        )
+
+
 class BusinessTypeRoutingView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin,
     StepsListMixin, FormView
@@ -323,7 +354,7 @@ class BaseEnrolmentWizardView(
 
 
 class CompaniesHouseEnrolmentView(
-    CreateCompanyProfileMixin, BaseEnrolmentWizardView
+    CreateUserProfileMixin, CreateCompanyProfileMixin, BaseEnrolmentWizardView
 ):
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
@@ -402,6 +433,7 @@ class CompaniesHouseEnrolmentView(
         }
 
     def done(self, form_list, **kwargs):
+        self.create_user_profile(form_list)
         data = self.serialize_form_list(form_list)
         is_enrolled = helpers.get_is_enrolled(
             company_number=data['company_number'],
@@ -420,7 +452,7 @@ class CompaniesHouseEnrolmentView(
 
 
 class SoleTraderEnrolmentView(
-    CreateCompanyProfileMixin, BaseEnrolmentWizardView
+    CreateUserProfileMixin, CreateCompanyProfileMixin, BaseEnrolmentWizardView
 ):
     steps_list_conf = helpers.StepsListConf(
         form_labels_user=[
@@ -480,6 +512,7 @@ class SoleTraderEnrolmentView(
         return form_initial
 
     def done(self, form_list, **kwargs):
+        self.create_user_profile(form_list)
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
         return TemplateResponse(self.request, self.templates[FINISHED])
