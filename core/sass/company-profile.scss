@@ -213,3 +213,26 @@
   margin-bottom: 20px;
   clear: both;
 }
+
+#online-profiles {
+  overflow: hidden;
+  h3 {
+    margin-top: 0;
+  }
+  li {
+    a {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      img {
+        margin-right: 16px;
+      }
+      span {
+        vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}

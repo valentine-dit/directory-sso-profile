@@ -121,33 +121,60 @@
                     <a href="#" class="link">Add website</a>
                 {% endif %}
                 <hr>
-                <h3 class="heading-medium">Online profiles</h3>
-                <ul>
-                    <li>
-                        <img alt="with Facebook" height="36px" src="{% static 'directory_components/icons/twitter.svg' %}" width="36px" />
-                        {% if company.facebook_url %}
-                            <a class="link" href="{{ company.facebook_url }}">{{ company.facebook_url }}</a>
-                        {% else %}
-                            <a class="link" href="{% url 'find-a-buyer-social' %}">Add Facebook</a>
-                        {% endif %}
-                    </li>
-                    <li>
-                        <img alt="with Twitter" height="36px" src="{% static 'directory_components/icons/facebook.svg' %}" width="36px" />                            
-                        {% if company.twitter_url %}
-                            <a class="link" href="{{ company.twitter_url }}">{{ company.twitter_url }}</a>
-                        {% else %}
-                            <a class="link" href="{% url 'find-a-buyer-social' %}">Add Twitter</a>
-                        {% endif %}
-                    </li>
-                    <li>
-                        <img alt="with LinkedIn" height="36px" src="{% static 'directory_components/icons/linkedin.svg' %}" width="36px" />                            
-                        {% if company.linkedin_url %}
-                            <a class="link" href="{{ company.linkedin_url }}">{{ company.linkedin_url }}</a>
-                        {% else %}
-                            <a class="link" href="{% url 'find-a-buyer-social' %}">Add Linkedin</a>
-                        {% endif %}
-                    </li>
-                </ul>
+
+                <section id="online-profiles">
+                    <div class="grid-row">
+                        <h3 class="column-two-thirds heading-medium">Online profiles</h3>
+                        <div class="column-one-third right-column">
+                            {% if company.facebook_url and company.twitter_url and company.linkedin_url %}
+                                <a href="{% url 'find-a-buyer-social' %}" class="link pencil-link">Edit</a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <ul>
+                        <li>
+                            
+                            {% if company.facebook_url %}
+                                <a class="link" href="{{ company.facebook_url }}">
+                                    <img alt="with Facebook" height="36px" src="{% static 'directory_components/icons/facebook.svg' %}" width="36px" />
+                                    <span>{{ company.facebook_url }}</span>
+                                </a>
+                            {% else %}
+                                <a class="link" href="{% url 'find-a-buyer-social' %}">
+                                    <img alt="with Facebook" height="36px" src="{% static 'directory_components/icons/facebook.svg' %}" width="36px" />
+                                    <span>Add Facebook</span>
+                                </a>
+                            {% endif %}
+                        </li>
+                        <li>
+                            {% if company.twitter_url %}
+                                <a class="link" href="{{ company.twitter_url }}">
+                                    <img alt="with Twitter" height="36px" src="{% static 'directory_components/icons/twitter.svg' %}" width="36px" />
+                                    <span>{{ company.twitter_url }}</span>
+                                </a>
+                            {% else %}
+                                <a class="link" href="{% url 'find-a-buyer-social' %}">
+                                    <img alt="with Twitter" height="36px" src="{% static 'directory_components/icons/twitter.svg' %}" width="36px" />
+                                    <span>Add Twitter</span>
+                                </a>
+                            {% endif %}
+                        </li>
+                        <li>
+                            {% if company.linkedin_url %}
+                                <a class="link" href="{{ company.linkedin_url }}">
+                                    <img alt="with LinkedIn" height="36px" src="{% static 'directory_components/icons/linkedin.svg' %}" width="36px" />                            
+                                    <span>{{ company.linkedin_url }}</span>
+                                </a>
+                            {% else %}
+                                <a class="link" href="{% url 'find-a-buyer-social' %}">
+                                    <img alt="with LinkedIn" height="36px" src="{% static 'directory_components/icons/linkedin.svg' %}" width="36px" />
+                                    <span>Add Linkedin</span>
+                                </a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </section>
             </div>
         </div>
         <div class="column-two-thirds">
