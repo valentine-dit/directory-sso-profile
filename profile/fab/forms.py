@@ -298,6 +298,26 @@ class LogoForm(forms.Form):
     )
 
 
+class ProductsServicesForm(forms.Form):
+    keywords = fields.CharField(
+        label=(
+            'Enter up to 10 keywords that describe your company '
+            '(separated by commas):'
+        ),
+        help_text=(
+            'These keywords will be used to help potential overseas buyers '
+            'find your company.'
+        ),
+        widget=Textarea,
+        max_length=1000,
+        validators=[
+            directory_validators.company.keywords_word_limit,
+            directory_validators.company.keywords_special_characters,
+            directory_validators.company.no_html,
+        ]
+    )
+
+
 class PublishForm(forms.Form):
 
     LABEL_UNPUBLISH_FAS = 'Untick to remove your profile from this service'

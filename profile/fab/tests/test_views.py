@@ -286,6 +286,7 @@ edit_urls = (
     reverse('find-a-buyer-description'),
     reverse('find-a-buyer-email'),
     reverse('find-a-buyer-social'),
+    reverse('find-a-buyer-products-and-services'),
 )
 
 edit_data = (
@@ -296,6 +297,7 @@ edit_data = (
         'twitter_url': 'https://www.twitter.com/thing/',
         'linkedin_url': 'https://www.linkedin.com/thing/',
     },
+    {'keywords': 'foo, bar, baz'},
 )
 
 

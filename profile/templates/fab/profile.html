@@ -203,11 +203,27 @@
                 </div>
               </div>
 
-              <p class="mid-grey-text font-xsmall">This will be the email address international buyers will contact you from the business profile.</p>
+              <p class="mid-grey-text font-xsmall">Tell overseas companies more about your business.</p>
               {% if company.description %}
                 <span>{{ company.description }}</span>
               {% else %}
                 <a href="{% url 'find-a-buyer-description' %}" class="link">Add description</a>
+              {% endif %}
+            </div>
+
+            <div class="{% if not company.keywords %}primary-action-required{% endif %} message-box border-medium border-black background-white">
+              <div class="grid-row">
+                <h3 class="box-heading heading-medium black-text column-one-half">Products and services</h3>
+                <div class="column-one-half right-column">
+                    {% if company.keywords %}<a href="{% url 'find-a-buyer-products-and-services' %}" class="link pencil-link">Edit</a>{% endif %}
+                </div>
+              </div>
+
+              <p class="mid-grey-text font-xsmall">Add search words to describe the core things your business offers.</p>
+              {% if company.keywords %}
+                <span>{{ company.keywords }}</span>
+              {% else %}
+                <a href="{% url 'find-a-buyer-products-and-services' %}" class="link">Add products and services</a>
               {% endif %}
             </div>
 

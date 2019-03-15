@@ -153,6 +153,11 @@ urlpatterns = [
         name='find-a-buyer-logo'
     ),
     url(
+        r'^find-a-buyer/products-and-services/$',
+        profile.fab.views.ProductsServicesFormView.as_view(),
+        name='find-a-buyer-products-and-services'
+    ),
+    url(
         r'^find-a-buyer/publish/$',
         profile.fab.views.PublishFormView.as_view(),
         name='find-a-buyer-publish'
