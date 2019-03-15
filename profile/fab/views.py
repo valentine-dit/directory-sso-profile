@@ -152,6 +152,11 @@ class LogoFormView(BaseFormView):
     template_name = 'fab/logo-form.html'
 
 
+class ProductsServicesFormView(BaseFormView):
+    form_class = forms.ProductsServicesForm
+    template_name = 'fab/products-services-form.html'
+
+
 class PublishFormView(BaseFormView):
     form_class = forms.PublishForm
     template_name = 'fab/find-a-buyer-publsh.html'
