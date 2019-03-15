@@ -11,7 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
 from core.tests.helpers import create_response, submit_step_factory
-from profile.fab import views
+from profile.fab import helpers, views
 
 
 def create_test_image(extension):
@@ -212,8 +212,10 @@ def test_find_a_buyer_unauthenticated_enrolment(
 
 
 def test_supplier_company_retrieve_not_found(
-    mock_retrieve_company, sso_user_middleware, returned_client
+    mock_retrieve_company, sso_user_middleware, returned_client, settings
 ):
+    settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = False
+
     mock_retrieve_company.return_value = create_response(404)
     expected_template_name = views.FindABuyerView.template_name_not_fab_user
 
@@ -305,8 +307,12 @@ edit_data = (
 def test_edit_page_initial_data(
     returned_client, url, default_company_profile, sso_user_middleware
 ):
+    company = helpers.ProfileParser(default_company_profile)
+
     response = returned_client.get(url)
-    assert response.context_data['form'].initial == default_company_profile
+    assert response.context_data['form'].initial == (
+        company.serialize_for_form()
+    )
 
 
 @pytest.mark.parametrize('url,data', zip(edit_urls, edit_data))
@@ -347,12 +353,13 @@ def test_edit_page_submmit_publish_success(
 def test_edit_page_submmit_publish_context(
     returned_client, sso_user_middleware, default_company_profile
 ):
-    url = reverse('find-a-buyer-publish')
+    company = helpers.ProfileParser(default_company_profile)
 
+    url = reverse('find-a-buyer-publish')
     response = returned_client.get(url)
 
     assert response.status_code == 200
-    assert response.context_data['company'] == default_company_profile
+    assert response.context_data['company'] == company.serialize_for_template()
 
 
 def test_edit_page_logo_submmit_success(

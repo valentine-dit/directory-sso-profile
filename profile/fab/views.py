@@ -3,7 +3,7 @@ import os
 from directory_api_client.client import api_client
 from formtools.wizard.views import NamedUrlSessionWizardView
 from raven.contrib.django.raven_compat.models import client as sentry_client
-from requests.exceptions import HTTPError
+from requests.exceptions import RequestException
 
 from django.conf import settings
 from django.urls import reverse
@@ -24,7 +24,8 @@ MEDIA = 'images'
 class CompanyProfileMixin:
     @cached_property
     def company(self):
-        return helpers.get_company_profile(self.request.sso_user.session_id)
+        data = helpers.get_company_profile(self.request.sso_user.session_id)
+        return helpers.ProfileParser(data)
 
 
 class FindABuyerView(
@@ -54,7 +55,7 @@ class FindABuyerView(
         return super().dispatch(request, *args, **kwargs)
 
     def get_template_names(self, *args, **kwargs):
-        if self.company is not None:
+        if self.company:
             if settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON']:
                 template_name = 'fab/profile.html'
             else:
@@ -77,7 +78,7 @@ class FindABuyerView(
         return {
             'fab_tab_classes': 'active',
             'is_profile_owner': self.is_company_profile_owner(),
-            'company': self.company,
+            'company': self.company.serialize_for_template(),
             'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
             'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
             'FAB_ADD_CASE_STUDY_URL': settings.FAB_ADD_CASE_STUDY_URL,
@@ -96,16 +97,16 @@ class FindABuyerView(
 
 class BaseFormView(CompanyProfileMixin, FormView):
     def get_initial(self):
-        return self.company
+        return self.company.serialize_for_form()
 
     def form_valid(self, form):
-        response = api_client.company.update_profile(
-            sso_session_id=self.request.sso_user.session_id,
-            data=self.serialize_form(form)
-        )
         try:
+            response = api_client.company.update_profile(
+                sso_session_id=self.request.sso_user.session_id,
+                data=self.serialize_form(form)
+            )
             response.raise_for_status()
-        except HTTPError:
+        except RequestException:
             self.send_update_error_to_sentry(
                 sso_user=self.request.sso_user,
                 api_response=response
@@ -157,16 +158,28 @@ class ProductsServicesFormView(BaseFormView):
     template_name = 'fab/products-services-form.html'
 
 
+class BusinessDetailsFormView(BaseFormView):
+    template_name = 'fab/business-details-form.html'
+
+    def get_form_class(self):
+        if self.company.is_sole_trader:
+            return forms.CompaniesHouseBusinessDetailsForm
+        return forms.SoleTraderBusinessDetailsForm
+
+
 class PublishFormView(BaseFormView):
     form_class = forms.PublishForm
     template_name = 'fab/find-a-buyer-publsh.html'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        return {**kwargs, 'company': self.company}
+        return {**kwargs, 'company': self.company.serialize_for_form()}
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs, company=self.company)
+        return super().get_context_data(
+            **kwargs,
+            company=self.company.serialize_for_template()
+        )
 
 
 class BaseCaseStudyWizardView(NamedUrlSessionWizardView):

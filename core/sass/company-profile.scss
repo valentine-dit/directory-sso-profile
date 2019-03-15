@@ -245,3 +245,37 @@
     line-height: 40px;
   }
 }
+
+#about-company-container {
+  margin-top: 2em;
+  h3 {
+    margin-top: 0
+  }
+}
+
+#business-details-form {
+  #id_number-container,
+  #id_sic-container,
+  #id_date_of_creation-container,
+  #id_address-container {
+    padding-bottom: 10px;
+    margin-bottom: 0;
+    border-left: 5px solid #0858CD;
+    padding-left: 15px;
+    label {
+      font-weight: bold;
+    }
+    input, textarea {
+      background: transparent;
+      border: 0;
+      padding: 0;
+    }
+    textarea {
+      overflow: hidden;
+      resize: none;
+    }
+  }
+  #id_address-container {
+    margin-bottom: 20px;
+  }
+}
