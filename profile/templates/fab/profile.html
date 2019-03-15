@@ -178,8 +178,10 @@
             </div>
         </div>
         <div class="column-two-thirds">
-            <h2 class="heading-large">{{ company.name }}</h2>
-
+            <h2 class="heading-large" id="company-name">
+                {{ company.name }}
+                <a href="{% url 'find-a-buyer-email' %}" class="link pencil-link">Edit</a>
+            </h2>
             <div class="{% if not company.email_address %}primary-action-required{% endif %} message-box border-medium border-black background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Profile email</h3>
