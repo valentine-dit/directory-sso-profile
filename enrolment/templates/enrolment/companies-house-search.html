@@ -15,16 +15,19 @@
     </div>
 {% endblock %}
 
-{% block below_form %}
-    <p><a class="link" href="{{ company_not_found_url }}" id="cannot-find-business-address">I cannot find my business name</a></p>
-{% endblock %}
-
 {% block body_js %}
     {{ block.super }}
     <script src="{% static 'directory_components/js/dit.components.company-lookup.js' %}"></script>
     <script type="text/javascript">
       var companyName = document.getElementById('id_search-company_name');
       var companyNumber = document.getElementById('id_search-company_number');
+
+      $(companyNumber.form).on("submit.CompaniesHouseNameLookup", function(event) {
+        if (companyNumber.value == '') {
+          event.stopImmediatePropagation();
+          return false;
+        }
+      })
       $(document.body).on(
         "click.SelectiveLookupCloseAll",
         dit.components.lookup.SelectiveLookup.closeAll

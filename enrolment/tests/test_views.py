@@ -642,25 +642,6 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     )
 
 
-def test_companies_house_search_has_company_not_found_url(
-    submit_companies_house_step, mock_session_user, client, steps_data
-):
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
-    assert response.status_code == 302
-
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
-    assert response.status_code == 302
-
-    mock_session_user.login()
-    response = client.get(response.url)
-
-    not_found_url = constants_url.build_great_url(
-        'contact/triage/great-account/company-not-found/'
-    )
-
-    assert response.context_data['company_not_found_url'] == not_found_url
-
-
 def test_verification_missing_url(
     submit_companies_house_step, mock_session_user, client, steps_data
 ):
