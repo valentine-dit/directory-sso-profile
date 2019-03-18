@@ -11,7 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
 from core.tests.helpers import create_response, submit_step_factory
-from profile.fab import helpers, views
+from profile.fab import forms, helpers, views
 
 
 def create_test_image(extension):
@@ -495,3 +495,39 @@ def test_admin_tools(
         settings.FAB_TRANSFER_ACCOUNT_URL
     )
     assert response.context_data['company'] == company.serialize_for_template()
+
+
+def test_business_details_sole_trader(
+    settings, mock_session_user, mock_retrieve_company, client
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200, {'company_type': 'SOLE_TRADER'}
+    )
+
+    url = reverse('find-a-buyer-business-details')
+
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert isinstance(
+        response.context_data['form'], forms.SoleTraderBusinessDetailsForm
+    )
+
+
+def test_business_details_companies_house(
+    settings, mock_session_user, client, mock_retrieve_company
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200, {'company_type': 'COMPANIES_HOUSE'}
+    )
+
+    url = reverse('find-a-buyer-business-details')
+
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert isinstance(
+        response.context_data['form'], forms.CompaniesHouseBusinessDetailsForm
+    )

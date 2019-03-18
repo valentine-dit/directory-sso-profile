@@ -166,8 +166,8 @@ class BusinessDetailsFormView(BaseFormView):
 
     def get_form_class(self):
         if self.company.is_sole_trader:
-            return forms.CompaniesHouseBusinessDetailsForm
-        return forms.SoleTraderBusinessDetailsForm
+            return forms.SoleTraderBusinessDetailsForm
+        return forms.CompaniesHouseBusinessDetailsForm
 
 
 class PublishFormView(BaseFormView):
