@@ -342,7 +342,7 @@ def test_edit_page_submmit_publish_success(
     response = returned_client.post(url, data)
 
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer')
+    assert response.url == reverse('find-a-buyer') + '?published'
     assert mock_update_company.call_count == 1
     assert mock_update_company.call_args == mock.call(
         sso_session_id=sso_user.session_id,
@@ -473,8 +473,12 @@ def test_case_study_edit_found(
     assert response.status_code == 200
 
 
-def test_admin_tools(settings, client, mock_session_user):
+def test_admin_tools(
+    settings, client, mock_session_user, default_company_profile
+):
     mock_session_user.login()
+
+    company = helpers.ProfileParser(default_company_profile)
 
     url = reverse('find-a-buyer-admin-tools')
 
@@ -487,7 +491,7 @@ def test_admin_tools(settings, client, mock_session_user):
     assert response.context_data['FAB_REMOVE_USER_URL'] == (
         settings.FAB_REMOVE_USER_URL
     )
-
     assert response.context_data['FAB_TRANSFER_ACCOUNT_URL'] == (
         settings.FAB_TRANSFER_ACCOUNT_URL
     )
+    assert response.context_data['company'] == company.serialize_for_template()

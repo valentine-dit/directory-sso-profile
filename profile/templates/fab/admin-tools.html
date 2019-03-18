@@ -25,10 +25,14 @@
 
     <section class="container">
         <h2 class="heading-medium">Manage business profile</h2>
-        {% if company.is_published %}
-            <a href="{% url 'find-a-buyer-publish' %}" class="link great-red-text">Unpublish business profile</a>
+        {% if company.is_uk_isd_company %}
+            <a href="{% url 'find-a-buyer-publish' %}" class="link great-red-text">View or change where your profile is published</a>
         {% else %}
-            <a href="{% url 'find-a-buyer-publish' %}" class="link great-red-text">Publish business profile</a>
+            {% if company.is_published %}
+                <a href="{% url 'find-a-buyer-publish' %}" class="link great-red-text">Unpublish business profile</a>
+            {% else %}
+                <a href="{% url 'find-a-buyer-publish' %}" class="link">Publish business profile</a>
+            {% endif %}
         {% endif %}
     </section>
 

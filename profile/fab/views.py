@@ -258,7 +258,7 @@ class CaseStudyWizardCreateView(BaseCaseStudyWizardView):
         return redirect('find-a-buyer')
 
 
-class AdminToolsView(TemplateView):
+class AdminToolsView(CompanyProfileMixin, TemplateView):
     template_name = 'fab/admin-tools.html'
 
     def get_context_data(self, **kwargs):
@@ -266,5 +266,6 @@ class AdminToolsView(TemplateView):
             FAB_ADD_USER_URL=settings.FAB_ADD_USER_URL,
             FAB_REMOVE_USER_URL=settings.FAB_REMOVE_USER_URL,
             FAB_TRANSFER_ACCOUNT_URL=settings.FAB_TRANSFER_ACCOUNT_URL,
+            company=self.company.serialize_for_template(),
             **kwargs,
         )

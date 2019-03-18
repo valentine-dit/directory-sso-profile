@@ -357,7 +357,7 @@ class CompaniesHouseBusinessDetailsForm(forms.Form):
     )
     date_of_creation = DateField(
         label='Incorporated on',
-        input_formats=['%m %B %Y'],
+        input_formats=['%d %B %Y'],
         disabled=True,
         required=False,
     )
