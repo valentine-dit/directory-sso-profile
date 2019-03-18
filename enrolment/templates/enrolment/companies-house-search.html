@@ -22,12 +22,13 @@
       var companyName = document.getElementById('id_search-company_name');
       var companyNumber = document.getElementById('id_search-company_number');
 
-      $(companyNumber.form).on("submit.CompaniesHouseNameLookup", function(event) {
-        if (companyNumber.value == '') {
+      $(companyName).on("keydown.SelectiveLookup", function(event) {
+        if (event.keyCode == 13) {
           event.stopImmediatePropagation();
           return false;
         }
-      })
+      });
+
       $(document.body).on(
         "click.SelectiveLookupCloseAll",
         dit.components.lookup.SelectiveLookup.closeAll
