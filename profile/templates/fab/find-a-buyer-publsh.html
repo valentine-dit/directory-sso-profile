@@ -12,7 +12,7 @@
     {% include 'fab/breadcrumbs.html' with label='Publish your profile' %}
     <h1 class="heading-large">Publishing your profile on great.gov.uk</h1>
     {% if company.is_uk_isd_company %}
-        <p>You can publish your profile on 2 great.gov.uk platforms – great.gov.uk/trade and great.gov.uk Investment Support Directory.</p>
+        <p>You can publish your profile on 2 great.gov.uk platforms – great.gov.uk/trade and great.gov.uk UK Investment Support Directory.</p>
         <p>You can publish on either or both of these.</p>
         <p>Choose where you want to publish below.</p>
     {% endif %}
@@ -23,7 +23,7 @@
     {% if company.is_uk_isd_company %}
         {% with company.is_published_investment_support_directory as is_published %}
             <div class="publish-box border-medium {{ is_published|yesno:'border-teal,border-stone-60' }}">
-                <h2 class="heading-small">{{ is_published|yesno:"Already published on great.gov.uk Investment Support Directory,Publish on great.gov.uk Investment Support Directory" }}</h2>
+                <h2 class="heading-small">{{ is_published|yesno:"Already published on great.gov.uk UK Investment Support Directory,Publish on great.gov.uk UK Investment Support Directory" }}</h2>
                 <p>This business profile is ready to be published on UK Investment Support Directory on great.gov.uk. We'll email you when it goes live.</p>
                 {% include 'directory_components/form_widgets/form_field.html' with field=form.is_published_investment_support_directory %}
             </div>
@@ -39,6 +39,5 @@
     <div>
         <br>
         <p>By publishing, you're confirming that you're responsible for the accuracy of the content you publish.</p>
-        <p>We'll send you a letter to this business to confirm publication.</p>
     </div>
 {% endblock %}
