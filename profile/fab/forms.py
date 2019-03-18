@@ -5,6 +5,7 @@ import directory_validators.enrolment
 
 from django.conf import settings
 from django.forms import ImageField, Textarea
+from django.utils.safestring import mark_safe
 
 from enrolment.fields import DateField
 from profile.fab import validators
@@ -155,11 +156,11 @@ class DynamicHelptextFieldsMixin:
                 help_text = help_text_map['update_help_text'].format(
                     initial_value=self.initial.get(field.name)
                 )
-                field.help_text = help_text
-                field.label = help_text_map['update_label']
+                field.help_text = mark_safe(help_text)
+                field.label = mark_safe(help_text_map['update_label'])
             else:
-                field.help_text = help_text_map['create_help_text']
-                field.label = help_text_map['create_label']
+                field.help_text = mark_safe(help_text_map['create_help_text'])
+                field.label = mark_safe(help_text_map['create_label'])
 
 
 class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
@@ -171,8 +172,8 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
     )
     image_help_text_update = (
         'Select a different image to replace the '
-        '<a href="{initial_value}" target="_blank" alt="View current image">'
-        'current one</a>. ' + image_help_text_create
+        '<a class="link" href="{initial_value}" target="_blank" '
+        'alt="View current image">current one</a>. ' + image_help_text_create
     )
     help_text_maps = [
         {
