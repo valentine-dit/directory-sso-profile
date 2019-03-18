@@ -2,7 +2,6 @@ import pytest
 from unittest import mock
 from core.tests.helpers import create_response
 
-from django.urls import reverse
 from requests.exceptions import HTTPError
 
 from enrolment import forms, helpers
@@ -105,11 +104,17 @@ def test_companies_house_search_company_number_empty(client):
     )
 
     assert form.is_valid() is False
+    assert form.errors['company_name'] == [form.MESSAGE_COMPANY_NOT_FOUND]
 
-    url = reverse('enrolment-business-type')
-    assert form.errors['company_name'] == [
-        form.MESSAGE_COMPANY_NOT_FOUND.format(url=url)
-    ]
+
+def test_companies_house_search_company_name_empty(client):
+    form = forms.CompaniesHouseSearch(
+        data={},
+        session=client.session
+    )
+
+    assert form.is_valid() is False
+    assert form.errors['company_name'] == ['This field is required.']
 
 
 @mock.patch.object(helpers, 'get_company_profile', return_value={
