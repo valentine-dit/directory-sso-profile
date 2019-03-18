@@ -3,10 +3,10 @@ import os
 from directory_api_client.client import api_client
 from formtools.wizard.views import NamedUrlSessionWizardView
 from raven.contrib.django.raven_compat.models import client as sentry_client
-from requests.exceptions import HTTPError
+from requests.exceptions import RequestException
 
 from django.conf import settings
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import redirect, Http404
 from django.utils.functional import cached_property
@@ -24,7 +24,8 @@ MEDIA = 'images'
 class CompanyProfileMixin:
     @cached_property
     def company(self):
-        return helpers.get_company_profile(self.request.sso_user.session_id)
+        data = helpers.get_company_profile(self.request.sso_user.session_id)
+        return helpers.ProfileParser(data)
 
 
 class FindABuyerView(
@@ -42,7 +43,8 @@ class FindABuyerView(
             'We’ve sent an invitation to the user you want added to your '
             'profile.'
         ),
-        'user-removed': 'User successfully removed from your profile.'
+        'user-removed': 'User successfully removed from your profile.',
+        'published': 'Published status successfully changed.'
     }
 
     def dispatch(self, request, *args, **kwargs):
@@ -54,7 +56,7 @@ class FindABuyerView(
         return super().dispatch(request, *args, **kwargs)
 
     def get_template_names(self, *args, **kwargs):
-        if self.company is not None:
+        if self.company:
             if settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON']:
                 template_name = 'fab/profile.html'
             else:
@@ -77,7 +79,7 @@ class FindABuyerView(
         return {
             'fab_tab_classes': 'active',
             'is_profile_owner': self.is_company_profile_owner(),
-            'company': self.company,
+            'company': self.company.serialize_for_template(),
             'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
             'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
             'FAB_ADD_CASE_STUDY_URL': settings.FAB_ADD_CASE_STUDY_URL,
@@ -95,24 +97,26 @@ class FindABuyerView(
 
 
 class BaseFormView(CompanyProfileMixin, FormView):
+    success_url = reverse_lazy('find-a-buyer')
+
     def get_initial(self):
-        return self.company
+        return self.company.serialize_for_form()
 
     def form_valid(self, form):
-        response = api_client.company.update_profile(
-            sso_session_id=self.request.sso_user.session_id,
-            data=self.serialize_form(form)
-        )
         try:
+            response = api_client.company.update_profile(
+                sso_session_id=self.request.sso_user.session_id,
+                data=self.serialize_form(form)
+            )
             response.raise_for_status()
-        except HTTPError:
+        except RequestException:
             self.send_update_error_to_sentry(
                 sso_user=self.request.sso_user,
                 api_response=response
             )
             raise
         else:
-            return redirect('find-a-buyer')
+            return redirect(self.success_url)
 
     def serialize_form(self, form):
         return form.cleaned_data
@@ -157,16 +161,32 @@ class ProductsServicesFormView(BaseFormView):
     template_name = 'fab/products-services-form.html'
 
 
+class BusinessDetailsFormView(BaseFormView):
+    template_name = 'fab/business-details-form.html'
+
+    def get_form_class(self):
+        if self.company.is_sole_trader:
+            return forms.SoleTraderBusinessDetailsForm
+        return forms.CompaniesHouseBusinessDetailsForm
+
+
 class PublishFormView(BaseFormView):
     form_class = forms.PublishForm
     template_name = 'fab/find-a-buyer-publsh.html'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        return {**kwargs, 'company': self.company}
+        return {**kwargs, 'company': self.company.serialize_for_form()}
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs, company=self.company)
+        return super().get_context_data(
+            **kwargs,
+            company=self.company.serialize_for_template()
+        )
+
+    @property
+    def success_url(self):
+        return reverse('find-a-buyer') + '?published'
 
 
 class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
@@ -236,3 +256,16 @@ class CaseStudyWizardCreateView(BaseCaseStudyWizardView):
         )
         response.raise_for_status()
         return redirect('find-a-buyer')
+
+
+class AdminToolsView(CompanyProfileMixin, TemplateView):
+    template_name = 'fab/admin-tools.html'
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            FAB_ADD_USER_URL=settings.FAB_ADD_USER_URL,
+            FAB_REMOVE_USER_URL=settings.FAB_REMOVE_USER_URL,
+            FAB_TRANSFER_ACCOUNT_URL=settings.FAB_TRANSFER_ACCOUNT_URL,
+            company=self.company.serialize_for_template(),
+            **kwargs,
+        )

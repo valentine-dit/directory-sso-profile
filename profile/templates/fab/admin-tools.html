@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% load static from staticfiles %}
+
+{% block head_css %}
+    {{ block.super }}
+    <link href="{% static 'css/company-profile.css' %}" media="all" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+    <div class="container" id="associated-accounts-container">
+        {% include 'fab/breadcrumbs.html' with label='Admin tools' %}
+        <h1 class="heading-large">Admin tools</h1>
+        <h2 class="heading-medium">Associated accounts</h2>
+        <p>Accounts linked to your business profile:</p>
+        
+        <p class="active-blue-text font-xsmall">Your account - administrator</p>
+        <p>{{ request.sso_user.email }}</p>
+        <hr class="background-light-grey">
+        <p class="active-blue-text font-xsmall">Editors</p>
+        <p><a class="link" href="{{ FAB_ADD_USER_URL }}">Add an editor</a></p>
+        <p><a class="link" href="{{ FAB_TRANSFER_ACCOUNT_URL }}">Make administrator</a></p>
+        <p><a class="link great-red-text" href="{{ FAB_REMOVE_USER_URL }}">Remove editor</a></p>
+    </div>
+
+    <section class="container">
+        <h2 class="heading-medium">Manage business profile</h2>
+        {% if company.is_uk_isd_company %}
+            <a href="{% url 'find-a-buyer-publish' %}" class="link great-red-text">View or change where your profile is published</a>
+        {% else %}
+            {% if company.is_published %}
+                <a href="{% url 'find-a-buyer-publish' %}" class="link great-red-text">Unpublish business profile</a>
+            {% else %}
+                <a href="{% url 'find-a-buyer-publish' %}" class="link">Publish business profile</a>
+            {% endif %}
+        {% endif %}
+    </section>
+
+    <section class="container">
+        <a href="{% url 'find-a-buyer' %}">Back</a>
+    </section>
+
+{% endblock %}
+

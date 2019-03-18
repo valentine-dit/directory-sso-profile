@@ -9,24 +9,22 @@
 
 {% block tab_content %}
 
-    {% if features.ADMIN_PANEL_ON %}
-        {% if is_profile_owner %}
-        <div id="user-mode-container">
-            <div class="grid-row" >
-                <div class="column-one-half">
-                    <a href="#">Admin tools</a>
-                </div>
-                <div class="column-one-half right-column">
-                    <a class="background-light-blue font-xsmall pill" href="#">Admin view</a>
-                    {% if not company.is_published %}
-                        <span class="divider"></span>
-                        <a href="{{ services_urls.fas }}/suppliers/{{ company.number }}/">View profile</a>
-                    {% endif %}
-                </div>
+    {% if is_profile_owner %}
+    <div id="user-mode-container">
+        <div class="grid-row" >
+            <div class="column-one-half">
+                <a href="{% url 'find-a-buyer-admin-tools' %}">Admin tools</a>
             </div>
-            <hr>
+            <div class="column-one-half right-column">
+                <a class="background-light-blue font-xsmall pill" href="{% url 'find-a-buyer-admin-tools' %}">Admin view</a>
+                {% if company.is_published and not company.is_uk_isd_company %}
+                    <span class="divider"></span>
+                    <a href="{{ services_urls.fas }}/suppliers/{{ company.number }}/">View profile</a>
+                {% endif %}
+            </div>
         </div>
-        {% endif %}
+        <hr>
+    </div>
     {% endif %}
 
     {% if success_message %}
@@ -93,7 +91,13 @@
             </div>
 
             <div>
-                <h3 class="heading-medium">About company</h3>
+                <div class="grid-row" id="about-company-container">
+                    <h3 class="column-two-thirds heading-medium">About company</h3>
+                    <div class="column-one-third right-column">
+                        <a href="{% url 'find-a-buyer-business-details' %}" class="link pencil-link">Edit</a>
+                    </div>
+                </div>
+
                 <dl>
                     {% if company.website %}
                         <dt>Website</dt>
@@ -178,8 +182,10 @@
             </div>
         </div>
         <div class="column-two-thirds">
-            <h2 class="heading-large">{{ company.name }}</h2>
-
+            <h2 class="heading-large" id="company-name">
+                {{ company.name }}
+                <a href="{% url 'find-a-buyer-business-details' %}" class="link pencil-link">Edit</a>
+            </h2>
             <div class="{% if not company.email_address %}primary-action-required{% endif %} message-box border-medium border-black background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Profile email</h3>

@@ -95,3 +95,17 @@ def test_label_is_published_find_a_supplier(is_published, expected):
     field = form.fields['is_published_find_a_supplier']
 
     assert field.widget.label == expected
+
+
+def test_companies_house_business_details_form():
+    form = forms.CompaniesHouseBusinessDetailsForm(data={'sectors': 'MINING'})
+
+    form.is_valid()
+    assert form.cleaned_data['sectors'] == ['MINING']
+
+
+def test_sole_trader_business_details_form():
+    form = forms.SoleTraderBusinessDetailsForm(data={'sectors': 'MINING'})
+
+    form.is_valid()
+    assert form.cleaned_data['sectors'] == ['MINING']

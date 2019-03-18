@@ -11,7 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
 from core.tests.helpers import create_response, submit_step_factory
-from profile.fab import views
+from profile.fab import forms, helpers, views
 
 
 def create_test_image(extension):
@@ -212,8 +212,10 @@ def test_find_a_buyer_unauthenticated_enrolment(
 
 
 def test_supplier_company_retrieve_not_found(
-    mock_retrieve_company, sso_user_middleware, returned_client
+    mock_retrieve_company, sso_user_middleware, returned_client, settings
 ):
+    settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = False
+
     mock_retrieve_company.return_value = create_response(404)
     expected_template_name = views.FindABuyerView.template_name_not_fab_user
 
@@ -227,7 +229,7 @@ def test_supplier_company_retrieve_found(
 ):
     settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = False
 
-    mock_retrieve_company.return_value = create_response(200)
+    mock_retrieve_company.return_value = create_response(200, {'a': 'b'})
     expected_template_name = views.FindABuyerView.template_name_fab_user
 
     response = returned_client.get(reverse('find-a-buyer'))
@@ -240,7 +242,7 @@ def test_supplier_company_retrieve_found_business_profile_on(
 ):
     settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = True
 
-    mock_retrieve_company.return_value = create_response(200)
+    mock_retrieve_company.return_value = create_response(200, {'a': 'b'})
 
     response = returned_client.get(reverse('find-a-buyer'))
 
@@ -305,8 +307,12 @@ edit_data = (
 def test_edit_page_initial_data(
     returned_client, url, default_company_profile, sso_user_middleware
 ):
+    company = helpers.ProfileParser(default_company_profile)
+
     response = returned_client.get(url)
-    assert response.context_data['form'].initial == default_company_profile
+    assert response.context_data['form'].initial == (
+        company.serialize_for_form()
+    )
 
 
 @pytest.mark.parametrize('url,data', zip(edit_urls, edit_data))
@@ -336,7 +342,7 @@ def test_edit_page_submmit_publish_success(
     response = returned_client.post(url, data)
 
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer')
+    assert response.url == reverse('find-a-buyer') + '?published'
     assert mock_update_company.call_count == 1
     assert mock_update_company.call_args == mock.call(
         sso_session_id=sso_user.session_id,
@@ -347,12 +353,13 @@ def test_edit_page_submmit_publish_success(
 def test_edit_page_submmit_publish_context(
     returned_client, sso_user_middleware, default_company_profile
 ):
-    url = reverse('find-a-buyer-publish')
+    company = helpers.ProfileParser(default_company_profile)
 
+    url = reverse('find-a-buyer-publish')
     response = returned_client.get(url)
 
     assert response.status_code == 200
-    assert response.context_data['company'] == default_company_profile
+    assert response.context_data['company'] == company.serialize_for_template()
 
 
 def test_edit_page_logo_submmit_success(
@@ -464,3 +471,63 @@ def test_case_study_edit_found(
     response = client.get(url)
 
     assert response.status_code == 200
+
+
+def test_admin_tools(
+    settings, client, mock_session_user, default_company_profile
+):
+    mock_session_user.login()
+
+    company = helpers.ProfileParser(default_company_profile)
+
+    url = reverse('find-a-buyer-admin-tools')
+
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['FAB_ADD_USER_URL'] == (
+        settings.FAB_ADD_USER_URL
+    )
+    assert response.context_data['FAB_REMOVE_USER_URL'] == (
+        settings.FAB_REMOVE_USER_URL
+    )
+    assert response.context_data['FAB_TRANSFER_ACCOUNT_URL'] == (
+        settings.FAB_TRANSFER_ACCOUNT_URL
+    )
+    assert response.context_data['company'] == company.serialize_for_template()
+
+
+def test_business_details_sole_trader(
+    settings, mock_session_user, mock_retrieve_company, client
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200, {'company_type': 'SOLE_TRADER'}
+    )
+
+    url = reverse('find-a-buyer-business-details')
+
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert isinstance(
+        response.context_data['form'], forms.SoleTraderBusinessDetailsForm
+    )
+
+
+def test_business_details_companies_house(
+    settings, mock_session_user, client, mock_retrieve_company
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200, {'company_type': 'COMPANIES_HOUSE'}
+    )
+
+    url = reverse('find-a-buyer-business-details')
+
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert isinstance(
+        response.context_data['form'], forms.CompaniesHouseBusinessDetailsForm
+    )
