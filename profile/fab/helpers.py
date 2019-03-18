@@ -33,7 +33,7 @@ class ProfileParser:
     def date_of_creation(self):
         if self.data.get('date_of_creation'):
             date = datetime.strptime(self.data['date_of_creation'], '%Y-%m-%d')
-            return date.strftime('%m %B %Y')
+            return date.strftime('%d %B %Y')
 
     @property
     def address(self):
@@ -54,19 +54,19 @@ class ProfileParser:
         return []
 
     @property
-    def sectors(self):
+    def sectors_label(self):
         if self.data.get('sectors'):
             return [SECTOR_CHOICES.get(item) for item in self.data['sectors']]
         return []
 
     @property
-    def employees(self):
+    def employees_label(self):
         if self.data.get('employees'):
             return EMPLOYEE_CHOICES.get(self.data['employees'])
 
     @property
     def is_sole_trader(self):
-        return self.data['company_type'] == 'COMPANIES_HOUSE'
+        return self.data['company_type'] != 'COMPANIES_HOUSE'
 
     def serialize_for_template(self):
         if not self.data:
@@ -75,9 +75,9 @@ class ProfileParser:
             **self.data,
             'date_of_creation': self.date_of_creation,
             'address': self.address,
-            'sectors': self.sectors,
+            'sectors': self.sectors_label,
             'keywords': self.keywords,
-            'employees': self.employees,
+            'employees': self.employees_label,
         }
 
     def serialize_for_form(self):

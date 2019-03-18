@@ -229,7 +229,7 @@ def test_supplier_company_retrieve_found(
 ):
     settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = False
 
-    mock_retrieve_company.return_value = create_response(200)
+    mock_retrieve_company.return_value = create_response(200, {'a': 'b'})
     expected_template_name = views.FindABuyerView.template_name_fab_user
 
     response = returned_client.get(reverse('find-a-buyer'))
@@ -242,7 +242,7 @@ def test_supplier_company_retrieve_found_business_profile_on(
 ):
     settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = True
 
-    mock_retrieve_company.return_value = create_response(200)
+    mock_retrieve_company.return_value = create_response(200, {'a': 'b'})
 
     response = returned_client.get(reverse('find-a-buyer'))
 
