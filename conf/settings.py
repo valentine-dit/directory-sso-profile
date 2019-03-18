@@ -332,8 +332,6 @@ FEATURE_FLAGS = {
     'ENROLMENT_SELECT_BUSINESS_ON': env.bool(
         'FEATURE_ENROLMENT_SELECT_BUSINESS_ENABLED', True
     ),
-    'ADMIN_PANEL_ON': env.bool('FEATURE_ADMIN_PANEL_ENABLED', False)
-
 }
 
 # Healthcheck

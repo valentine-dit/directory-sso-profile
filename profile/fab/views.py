@@ -6,7 +6,7 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 from requests.exceptions import RequestException
 
 from django.conf import settings
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import redirect, Http404
 from django.utils.functional import cached_property
@@ -43,7 +43,8 @@ class FindABuyerView(
             'We’ve sent an invitation to the user you want added to your '
             'profile.'
         ),
-        'user-removed': 'User successfully removed from your profile.'
+        'user-removed': 'User successfully removed from your profile.',
+        'published': 'Published status successfully changed.'
     }
 
     def dispatch(self, request, *args, **kwargs):
@@ -96,6 +97,8 @@ class FindABuyerView(
 
 
 class BaseFormView(CompanyProfileMixin, FormView):
+    success_url = reverse_lazy('find-a-buyer')
+
     def get_initial(self):
         return self.company.serialize_for_form()
 
@@ -113,7 +116,7 @@ class BaseFormView(CompanyProfileMixin, FormView):
             )
             raise
         else:
-            return redirect('find-a-buyer')
+            return redirect(self.success_url)
 
     def serialize_form(self, form):
         return form.cleaned_data
@@ -180,6 +183,10 @@ class PublishFormView(BaseFormView):
             **kwargs,
             company=self.company.serialize_for_template()
         )
+
+    @property
+    def success_url(self):
+        return reverse('find-a-buyer') + '?published'
 
 
 class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
@@ -249,3 +256,15 @@ class CaseStudyWizardCreateView(BaseCaseStudyWizardView):
         )
         response.raise_for_status()
         return redirect('find-a-buyer')
+
+
+class AdminToolsView(TemplateView):
+    template_name = 'fab/admin-tools.html'
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            FAB_ADD_USER_URL=settings.FAB_ADD_USER_URL,
+            FAB_REMOVE_USER_URL=settings.FAB_REMOVE_USER_URL,
+            FAB_TRANSFER_ACCOUNT_URL=settings.FAB_TRANSFER_ACCOUNT_URL,
+            **kwargs,
+        )

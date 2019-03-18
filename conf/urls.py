@@ -181,4 +181,9 @@ urlpatterns = [
         ),
         name='find-a-buyer-case-study'
     ),
+    url(
+        r'^find-a-buyer/admin/$',
+        profile.fab.views.AdminToolsView.as_view(),
+        name='find-a-buyer-admin-tools'
+    ),
 ]

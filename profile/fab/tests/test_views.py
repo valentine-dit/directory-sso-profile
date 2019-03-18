@@ -471,3 +471,23 @@ def test_case_study_edit_found(
     response = client.get(url)
 
     assert response.status_code == 200
+
+
+def test_admin_tools(settings, client, mock_session_user):
+    mock_session_user.login()
+
+    url = reverse('find-a-buyer-admin-tools')
+
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['FAB_ADD_USER_URL'] == (
+        settings.FAB_ADD_USER_URL
+    )
+    assert response.context_data['FAB_REMOVE_USER_URL'] == (
+        settings.FAB_REMOVE_USER_URL
+    )
+
+    assert response.context_data['FAB_TRANSFER_ACCOUNT_URL'] == (
+        settings.FAB_TRANSFER_ACCOUNT_URL
+    )
