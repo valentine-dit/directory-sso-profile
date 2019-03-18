@@ -39,6 +39,7 @@ def test_create_user_password_invalid(mock_create_user):
             'email': 'test@test.com',
             'password': '12P',
             'password_confirmed': '12P',
+            'terms_agreed': True,
         }
     )
 
