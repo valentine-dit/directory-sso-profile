@@ -406,14 +406,6 @@ class CompaniesHouseEnrolmentView(
             form_kwargs['session'] = self.request.session
         return form_kwargs
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        if self.steps.current == COMPANY_SEARCH:
-            context['company_not_found_url'] = urls.build_great_url(
-                'contact/triage/great-account/company-not-found/'
-            )
-        return context
-
     def serialize_form_list(self, form_list):
         return {
             'company_type': 'COMPANIES_HOUSE',

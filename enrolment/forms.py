@@ -4,7 +4,6 @@ from directory_constants.constants import choices, urls
 from requests.exceptions import HTTPError
 
 from django.forms import HiddenInput, PasswordInput, Textarea, ValidationError
-from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.http.request import QueryDict
 
@@ -141,14 +140,10 @@ class CompaniesHouseSearch(forms.Form):
     MESSAGE_COMPANY_NOT_FOUND = (
         "<p>Your business name is not listed.</p>"
         "<p>Check that you've entered the right name.</p>"
-        "<p>Or "
-        "<a href='{url}'>change type of business</a>"
-        " if your business is not registered with Companies House.</p>"
     )
     MESSAGE_COMPANY_NOT_ACTIVE = 'Company not active.'
-
     company_name = fields.CharField(
-        label='Registered company name'
+        label='Registered company name',
     )
     company_number = fields.CharField()
 
@@ -167,10 +162,10 @@ class CompaniesHouseSearch(forms.Form):
                 raise ValidationError(
                     {'company_name': self.MESSAGE_COMPANY_NOT_ACTIVE}
                 )
-        else:
-            url = reverse('enrolment-business-type')
-            message = self.MESSAGE_COMPANY_NOT_FOUND.format(url=url)
-            raise ValidationError({'company_name': mark_safe(message)})
+        elif 'company_name' in cleaned_data:
+            raise ValidationError(
+                {'company_name': mark_safe(self.MESSAGE_COMPANY_NOT_FOUND)}
+            )
 
 
 class CompaniesHouseBusinessDetails(forms.Form):
