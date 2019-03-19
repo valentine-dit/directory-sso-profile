@@ -184,7 +184,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
         disabled=True,
         required=False,
     )
-    industry = fields.ChoiceField(
+    sectors = fields.ChoiceField(
         label='What industry is your company in?',
         choices=INDUSTRY_CHOICES,
     )
@@ -212,7 +212,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
                 self.initial_to_data('postal_code')
 
     def delete_already_enrolled_fields(self):
-        del self.fields['industry']
+        del self.fields['sectors']
         del self.fields['website_address']
 
     def set_form_initial(self, company_profile):
@@ -238,6 +238,9 @@ class CompaniesHouseBusinessDetails(forms.Form):
         self.cleaned_data['address_line_1'] = address_parts[0].strip()
         self.cleaned_data['address_line_2'] = address_parts[1].strip()
         return self.cleaned_data['address']
+
+    def clean_sectors(self):
+        return [self.cleaned_data['sectors']]
 
 
 class PersonalDetails(forms.Form):
@@ -301,7 +304,7 @@ class SoleTraderBusinessDetails(forms.Form):
         required=False,
         widget=Textarea(attrs={'rows': 3}),
     )
-    industry = fields.ChoiceField(
+    sectors = fields.ChoiceField(
         label='What industry is your business in?',
         choices=INDUSTRY_CHOICES,
     )
@@ -333,6 +336,9 @@ class SoleTraderBusinessDetails(forms.Form):
         self.cleaned_data['address_line_1'] = address_parts[0].strip()
         self.cleaned_data['address_line_2'] = address_parts[1].strip()
         return self.cleaned_data['address']
+
+    def clean_sectors(self):
+        return [self.cleaned_data['sectors']]
 
 
 class ResendVerificationCode(forms.Form):
