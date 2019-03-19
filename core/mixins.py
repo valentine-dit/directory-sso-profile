@@ -1,3 +1,6 @@
+from django.utils.functional import cached_property
+
+
 class PreventCaptchaRevalidationMixin:
     """When get_all_cleaned_data() is called the forms are revalidated,
     which causes captcha to fail becuase the same captcha response from google
@@ -9,14 +12,16 @@ class PreventCaptchaRevalidationMixin:
 
     """
 
-    should_ignore_captcha = False
-
-    def render_done(self, *args, **kwargs):
-        self.should_ignore_captcha = True
-        return super().render_done(*args, **kwargs)
+    @cached_property
+    def captcha_step_index(self):
+        for step_name, form_class in self.get_form_list().items():
+            if 'captcha' in form_class.base_fields:
+                return self.get_step_index(step_name)
+        raise NotImplementedError
 
     def get_form(self, step=None, *args, **kwargs):
         form = super().get_form(step=step, *args, **kwargs)
-        if self.should_ignore_captcha:
-            form.fields.pop('captcha', None)
+        fields = form.fields
+        if 'captcha' in fields and self.steps.index > self.captcha_step_index:
+            del fields['captcha']
         return form

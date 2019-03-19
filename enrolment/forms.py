@@ -88,7 +88,7 @@ class UserAccount(forms.Form):
             'Tick this box to accept the '
             f'<a href="{urls.TERMS_AND_CONDITIONS}" target="_blank">terms and '
             'conditions</a> of the great.gov.uk service.'
-        )
+        ),
     )
 
     def clean_password_confirmed(self):
@@ -99,16 +99,17 @@ class UserAccount(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        try:
-            cleaned_data['user_details'] = helpers.create_user(
-                email=cleaned_data['email'],
-                password=cleaned_data['password'],
-            )
-        except HTTPError as error:
-            if error.response.status_code == 400:
-                self.add_error('password', self.MESSAGE_PASSWORD_INVALID)
-            else:
-                raise
+        if not self.errors:
+            try:
+                cleaned_data['user_details'] = helpers.create_user(
+                    email=cleaned_data['email'],
+                    password=cleaned_data['password'],
+                )
+            except HTTPError as error:
+                if error.response.status_code == 400:
+                    self.add_error('password', self.MESSAGE_PASSWORD_INVALID)
+                else:
+                    raise
         return None
 
 
