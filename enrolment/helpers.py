@@ -217,6 +217,6 @@ class CompanyProfileFormatter:
 
 def parse_set_cookie_header(cookie_header):
     simple_cookies = cookies.SimpleCookie()
-    for cookie_value in re.split(', (?=\w*=)', cookie_header):
+    for cookie_value in re.split(r', (?=\w*=)', cookie_header):
         simple_cookies.load(cookie_value)
     return simple_cookies
