@@ -363,7 +363,7 @@ def test_companies_house_enrolment(
 
     response = submit_companies_house_step({
         'company_name': 'Example corp',
-        'industry': 'AEROSPACE',
+        'sectors': 'AEROSPACE',
     })
     assert response.status_code == 302
 
@@ -388,7 +388,7 @@ def test_companies_house_enrolment_change_company_name(
     # given the user has submitted their company details
     response = submit_companies_house_step({
         'company_name': 'Example corp',
-        'industry': 'AEROSPACE',
+        'sectors': 'AEROSPACE',
     })
     assert response.status_code == 302
 
@@ -424,7 +424,7 @@ def test_companies_house_enrolment_expose_company(
 
     response = submit_companies_house_step({
         'company_name': 'Example corp',
-        'industry': 'AEROSPACE',
+        'sectors': 'AEROSPACE',
     })
     assert response.status_code == 302
 
@@ -439,7 +439,7 @@ def test_companies_house_enrolment_expose_company(
         'address': '555 fake street, London',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
-        'industry': 'AEROSPACE',
+        'sectors': ['AEROSPACE'],
         'website_address': ''
     }
 
@@ -471,7 +471,7 @@ def test_companies_house_enrolment_submit_end_to_end(
 
     response = submit_companies_house_step({
         'company_name': 'Example corp',
-        'industry': 'AEROSPACE',
+        'sectors': 'AEROSPACE',
     })
     assert response.status_code == 302
 
@@ -494,7 +494,7 @@ def test_companies_house_enrolment_submit_end_to_end(
         'postal_code': 'EDG 4DF',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
-        'industry': 'AEROSPACE',
+        'sectors': ['AEROSPACE'],
         'given_name': 'Foo',
         'family_name': 'Example',
         'job_title': 'Exampler',
@@ -529,7 +529,7 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
     step = resolve(response.url).kwargs['step']
     response = submit_companies_house_step({
         'company_name': 'Example corp',
-        'industry': 'AEROSPACE',
+        'sectors': 'AEROSPACE',
     }, step_name=step)
     assert response.status_code == 302
 
@@ -556,7 +556,7 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
         'postal_code': 'EDG 4DF',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
-        'industry': 'AEROSPACE',
+        'sectors': ['AEROSPACE'],
         'given_name': 'Foo',
         'family_name': 'Example',
         'job_title': 'Exampler',
@@ -619,7 +619,7 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
 
     response = submit_companies_house_step({
         'company_name': 'Example corp',
-        'industry': 'AEROSPACE',
+        'sectors': 'AEROSPACE',
     })
     assert response.status_code == 302
 
@@ -1043,7 +1043,7 @@ def test_sole_trader_enrolment_expose_company(
         'company_name': 'Test company',
         'postal_code': 'EEA 3AD',
         'address': '555 fake street, London',
-        'industry': 'AEROSPACE',
+        'sectors': 'AEROSPACE',
     })
     assert response.status_code == 302
 
@@ -1055,7 +1055,7 @@ def test_sole_trader_enrolment_expose_company(
         'address': '555 fake street\nLondon\nEEA 3AD',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
-        'industry': 'AEROSPACE',
+        'sectors': ['AEROSPACE'],
         'website_address': ''
     }
 
@@ -1097,7 +1097,7 @@ def test_sole_trader_enrolment_submit_end_to_end_logged_in(
             'company_name': 'Test company',
             'postal_code': 'EEA 3AD',
             'address': '555 fake street, London',
-            'industry': 'AEROSPACE',
+            'sectors': 'AEROSPACE',
         },
         step_name=resolve(response.url).kwargs['step']
     )
@@ -1122,7 +1122,7 @@ def test_sole_trader_enrolment_submit_end_to_end_logged_in(
         'postal_code': 'EEA 3AD',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
-        'industry': 'AEROSPACE',
+        'sectors': ['AEROSPACE'],
         'given_name': 'Foo',
         'family_name': 'Example',
         'job_title': 'Exampler',

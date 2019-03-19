@@ -235,7 +235,7 @@ class CreateCompanyProfileMixin:
             'date_of_creation',
             'family_name',
             'given_name',
-            'industry',
+            'sectors',
             'job_title',
             'phone_number',
             'postal_code',
