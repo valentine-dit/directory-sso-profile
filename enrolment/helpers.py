@@ -1,6 +1,7 @@
 import collections
 from http import cookies
 from datetime import datetime
+import re
 
 from django.utils import formats
 from django.utils.dateparse import parse_datetime
@@ -214,8 +215,13 @@ class CompanyProfileFormatter:
             return self.data['registered_office_address'].get('postal_code')
 
 
-def parse_set_cookie_header(headers):
+def parse_set_cookie_header(cookie_header):
+    # parse a `set-cookies` header, returning http.cookies.SimpleCookie
     simple_cookies = cookies.SimpleCookie()
-    # multiple headers are comma delimited
-    simple_cookies.load(headers.replace('/, ', '/ '))
+    # set-cookie header can contain multiple cookies, but `SimpleCookie.load`
+    # expects only one cookie, so loop over them.
+    # split on any ", " that is followed by any word character and =
+    split = re.split(r', (?=\w*=)', cookie_header)
+    for cookie in split:
+        simple_cookies.load(cookie)
     return simple_cookies

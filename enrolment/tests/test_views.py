@@ -231,7 +231,8 @@ def mock_confirm_verification_code():
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; '
         'HttpOnly; '
         'Max-Age=1209600; '
-        'Path=/, '
+        'Path=/; '
+        'Secure, '
         'sso_display_logged_in=true; '
         'Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; '
@@ -743,7 +744,7 @@ def test_user_verification_passes_cookies(
     assert str(response.cookies['debug_sso_session_cookie']) == (
         'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
-        'Path=/'
+        'Path=/; Secure'
     )
     assert str(response.cookies['sso_display_logged_in']) == (
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
@@ -907,7 +908,7 @@ def test_confirm_user_resend_verification_code_complete(
     assert str(response.cookies['debug_sso_session_cookie']) == (
         'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
-        'Path=/'
+        'Path=/; Secure'
     )
     assert str(response.cookies['sso_display_logged_in']) == (
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
@@ -943,7 +944,7 @@ def test_confirm_user_resend_verification_code_choice_companies_house(
     assert str(response.cookies['debug_sso_session_cookie']) == (
         'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
-        'Path=/'
+        'Path=/; Secure'
     )
     assert str(response.cookies['sso_display_logged_in']) == (
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
@@ -979,7 +980,7 @@ def test_confirm_user_resend_verification_code_choice_sole_trader(
     assert str(response.cookies['debug_sso_session_cookie']) == (
         'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
-        'Path=/'
+        'Path=/; Secure'
     )
     assert str(response.cookies['sso_display_logged_in']) == (
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '

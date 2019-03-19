@@ -77,7 +77,6 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
-
     captcha = ReCaptchaField(
         label='',
         label_suffix='',
