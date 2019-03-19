@@ -12,7 +12,6 @@ from django.shortcuts import redirect, Http404
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView, FormView
 
-from profile.eig_apps.views import RedirectToAboutPageMixin
 from profile.fab import forms, helpers
 from sso.utils import SSOLoginRequiredMixin
 
@@ -28,10 +27,7 @@ class CompanyProfileMixin:
         return helpers.ProfileParser(data)
 
 
-class FindABuyerView(
-    RedirectToAboutPageMixin, SSOLoginRequiredMixin, CompanyProfileMixin,
-    TemplateView
-):
+class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
     template_name_fab_user = 'fab/is-fab-user.html'
     template_name_not_fab_user = 'fab/is-not-fab-user.html'
 

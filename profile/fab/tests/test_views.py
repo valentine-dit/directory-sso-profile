@@ -163,13 +163,6 @@ def case_study_data():
     }
 
 
-def test_find_a_buyer_redirect_first_time_user(sso_user_middleware, client):
-    response = client.get(reverse('find-a-buyer'))
-
-    assert response.status_code == http.client.FOUND
-    assert response.get('Location') == reverse('about')
-
-
 def test_find_a_buyer_exposes_context(
     returned_client, sso_user_middleware, settings
 ):
