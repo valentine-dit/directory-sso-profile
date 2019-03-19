@@ -216,7 +216,12 @@ class CompanyProfileFormatter:
 
 
 def parse_set_cookie_header(cookie_header):
+    # parse a `set-cookies` header, returning http.cookies.SimpleCookie
     simple_cookies = cookies.SimpleCookie()
-    for cookie_value in re.split(r', (?=\w*=)', cookie_header):
-        simple_cookies.load(cookie_value)
+    # set-cookie header can contain multiple cookies, but `SimpleCookie.load`
+    # expects only one cookie, so loop over them.
+    # split on any ", " that is followed by any word character and =
+    split = re.split(r', (?=\w*=)', cookie_header)
+    for cookie in split:
+        simple_cookies.load(cookie)
     return simple_cookies
