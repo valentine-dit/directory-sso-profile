@@ -193,8 +193,33 @@ class UserAccountEnrolmentHandlerMixin:
                     form_url=self.request.path
                 )
         elif form.prefix == VERIFICATION:
-            response.cookies.update(form.cleaned_data['cookies'])
+            response = self.validate_code(form=form, response=response)
         return response
+
+    def validate_code(self, form, response):
+        try:
+            upstream_response = helpers.confirm_verification_code(
+                email=form.cleaned_data['email'],
+                verification_code=form.cleaned_data['code'],
+            )
+        except HTTPError as error:
+            if error.response.status_code == 400:
+                self.storage.set_step_data(
+                    VERIFICATION,
+                    {form.add_prefix('code'): [None]}
+                )
+                return self.render_revalidation_failure(
+                    failed_step=VERIFICATION,
+                    form=form
+                )
+            else:
+                raise
+        else:
+            cookies = helpers.parse_set_cookie_header(
+                upstream_response.headers['set-cookie']
+            )
+            response.cookies.update(cookies)
+            return response
 
 
 class CreateCompanyProfileMixin:
@@ -589,6 +614,7 @@ class ResendVerificationCodeView(
     RestartOnStepSkipped,
     ProgressIndicatorMixin,
     StepsListMixin,
+    UserAccountEnrolmentHandlerMixin,
     NamedUrlSessionWizardView
 ):
 
@@ -621,17 +647,18 @@ class ResendVerificationCodeView(
     def get_template_names(self):
         return [self.templates[self.steps.current]]
 
-    def done(self, form_list, **kwargs):
-        cookies = self.get_cleaned_data_for_step(VERIFICATION)['cookies']
-        choice = self.request.session.get('company_choice')
+    def render_done(self, form, **kwargs):
+        choice = self.request.session.get(SESSION_KEY_COMPANY_CHOICE)
         if choice == constants.COMPANIES_HOUSE_COMPANY:
             url = URL_COMPANIES_HOUSE_ENROLMENT
         elif choice == constants.SOLE_TRADER:
             url = URL_SOLE_TRADER_ENROLMENT
         else:
             url = reverse('enrolment-business-type')
-        response = redirect(url)
-        response.cookies.update(cookies)
+        response = self.validate_code(
+            form=form,
+            response=redirect(url)
+        )
         return response
 
     def render_next_step(self, form, **kwargs):
