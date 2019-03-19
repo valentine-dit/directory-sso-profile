@@ -77,7 +77,6 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
-
     captcha = ReCaptchaField(
         label='',
         label_suffix='',
@@ -114,27 +113,16 @@ class UserAccount(forms.Form):
 
 
 class UserAccountVerification(forms.Form):
+
     MESSAGE_INVALID_CODE = 'Invalid code'
 
     email = fields.CharField(label='', widget=HiddenInput, disabled=True)
-    code = fields.CharField(label='', min_length=5, max_length=5)
-
-    def clean_code(self):
-        try:
-            response = helpers.confirm_verification_code(
-                email=self.cleaned_data['email'],
-                verification_code=self.cleaned_data['code'],
-            )
-        except HTTPError as error:
-            if error.response.status_code == 400:
-                self.add_error('code', self.MESSAGE_INVALID_CODE)
-            else:
-                raise
-        else:
-            self.cleaned_data['cookies'] = helpers.parse_set_cookie_header(
-                response.headers['set-cookie']
-            )
-        return None
+    code = fields.CharField(
+        label='',
+        min_length=5,
+        max_length=5,
+        error_messages={'required': MESSAGE_INVALID_CODE}
+    )
 
 
 class CompaniesHouseSearch(forms.Form):

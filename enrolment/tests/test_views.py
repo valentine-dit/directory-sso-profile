@@ -231,7 +231,8 @@ def mock_confirm_verification_code():
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; '
         'HttpOnly; '
         'Max-Age=1209600; '
-        'Path=/, '
+        'Path=/; '
+        'Secure, '
         'sso_display_logged_in=true; '
         'Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; '
@@ -320,7 +321,7 @@ def session_client_company_factory(client, settings):
     def session_client(company_choice):
         session = signed_cookies.SessionStore()
         session.save()
-        session['company_choice'] = company_choice
+        session[views.SESSION_KEY_COMPANY_CHOICE] = company_choice
         session.save()
         client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
         return client
@@ -743,7 +744,7 @@ def test_user_verification_passes_cookies(
     assert str(response.cookies['debug_sso_session_cookie']) == (
         'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
-        'Path=/'
+        'Path=/; Secure'
     )
     assert str(response.cookies['sso_display_logged_in']) == (
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
@@ -766,7 +767,9 @@ def test_confirm_user_verify_code_incorrect_code(
 
     response = submit_step(steps_data[views.VERIFICATION])
 
-    assert response.status_code == 200
+    assert response.status_code == 302
+
+    response = client.get(response.url)
     assert response.context_data['form'].errors['code'] == ['Invalid code']
 
 
@@ -900,15 +903,12 @@ def test_confirm_user_resend_verification_code_complete(
         step_name=resolve(response.url).kwargs['step']
     )
     assert response.status_code == 302
-
-    response = client.get(response.url)
-    assert response.status_code == 302
     assert response.url == reverse('enrolment-business-type')
 
     assert str(response.cookies['debug_sso_session_cookie']) == (
         'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
-        'Path=/'
+        'Path=/; Secure'
     )
     assert str(response.cookies['sso_display_logged_in']) == (
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
@@ -922,9 +922,7 @@ def test_confirm_user_resend_verification_code_choice_companies_house(
         submit_resend_verification_house_step,
         steps_data,
 ):
-    client_session = session_client_company_factory(
-        constants.COMPANIES_HOUSE_COMPANY
-    )
+    session_client_company_factory(constants.COMPANIES_HOUSE_COMPANY)
 
     response = submit_resend_verification_house_step(
         steps_data[views.RESEND_VERIFICATION]
@@ -936,9 +934,6 @@ def test_confirm_user_resend_verification_code_choice_companies_house(
         steps_data[views.VERIFICATION],
         step_name=resolve(response.url).kwargs['step'],
     )
-    assert response.status_code == 302
-
-    response = client_session.get(response.url)
 
     assert response.status_code == 302
 
@@ -949,7 +944,7 @@ def test_confirm_user_resend_verification_code_choice_companies_house(
     assert str(response.cookies['debug_sso_session_cookie']) == (
         'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
-        'Path=/'
+        'Path=/; Secure'
     )
     assert str(response.cookies['sso_display_logged_in']) == (
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
@@ -963,9 +958,7 @@ def test_confirm_user_resend_verification_code_choice_sole_trader(
         submit_resend_verification_house_step,
         steps_data,
 ):
-    client_session = session_client_company_factory(
-        constants.SOLE_TRADER
-    )
+    session_client_company_factory(constants.SOLE_TRADER)
 
     response = submit_resend_verification_house_step(
         steps_data[views.RESEND_VERIFICATION]
@@ -977,9 +970,6 @@ def test_confirm_user_resend_verification_code_choice_sole_trader(
         steps_data[views.VERIFICATION],
         step_name=resolve(response.url).kwargs['step'],
     )
-    assert response.status_code == 302
-
-    response = client_session.get(response.url)
 
     assert response.status_code == 302
 
@@ -990,7 +980,7 @@ def test_confirm_user_resend_verification_code_choice_sole_trader(
     assert str(response.cookies['debug_sso_session_cookie']) == (
         'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
-        'Path=/'
+        'Path=/; Secure'
     )
     assert str(response.cookies['sso_display_logged_in']) == (
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
