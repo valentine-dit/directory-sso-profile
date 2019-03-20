@@ -50,8 +50,8 @@ class ProfileParser:
     @property
     def keywords(self):
         if self.data.get('keywords'):
-            return tokenize_keywords(self.data['keywords'])
-        return []
+            return ', '.join(tokenize_keywords(self.data['keywords']))
+        return ''
 
     @property
     def sectors_label(self):
