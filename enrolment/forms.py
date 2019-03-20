@@ -2,6 +2,12 @@ from captcha.fields import ReCaptchaField
 from directory_components import forms, fields, widgets
 from directory_constants.constants import choices, urls
 from requests.exceptions import HTTPError
+from directory_validators.company import (
+    no_company_with_insufficient_companies_house_data as compant_type_validator
+)
+from directory_validators.enrolment import (
+    company_number as company_number_validator
+)
 
 from django.forms import HiddenInput, PasswordInput, Textarea, ValidationError
 from django.utils.safestring import mark_safe
@@ -134,7 +140,9 @@ class CompaniesHouseSearch(forms.Form):
     company_name = fields.CharField(
         label='Registered company name',
     )
-    company_number = fields.CharField()
+    company_number = fields.CharField(
+        validators=[company_number_validator],
+    )
 
     def __init__(self, session, *args, **kwargs):
         self.session = session
@@ -143,6 +151,12 @@ class CompaniesHouseSearch(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         if 'company_number' in cleaned_data:
+            try:
+                compant_type_validator(cleaned_data['company_number'])
+            except ValidationError as error:
+                raise ValidationError({
+                    'company_name': error
+                })
             company_data = helpers.get_company_profile(
                 number=self.cleaned_data['company_number'],
                 session=self.session,

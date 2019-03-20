@@ -98,6 +98,20 @@ def test_create_user(mock_create_user):
     assert form.cleaned_data["user_details"] == data
 
 
+@mock.patch.object(helpers, 'get_company_profile', return_value={
+    'company_status': 'active',
+})
+def test_companies_house_search_company_number_incomplete_data(client):
+    expected = 'Please contact support to register a Royal Charter Company.'
+    form = forms.CompaniesHouseSearch(
+        data={'company_name': 'Thing', 'company_number': 'RC232323'},
+        session=client.session
+    )
+
+    assert form.is_valid() is False
+    assert form.errors['company_name'] == [expected]
+
+
 def test_companies_house_search_company_number_empty(client):
     form = forms.CompaniesHouseSearch(
         data={'company_name': 'Thing'},
@@ -123,7 +137,7 @@ def test_companies_house_search_company_name_empty(client):
 })
 def test_companies_house_search_company_dissolved(client):
     form = forms.CompaniesHouseSearch(
-        data={'company_name': 'Thing', 'company_number': '1234'},
+        data={'company_name': 'Thing', 'company_number': '23232323'},
         session=client.session
     )
 
@@ -136,7 +150,7 @@ def test_companies_house_search_company_dissolved(client):
 })
 def test_companies_house_search_company_active(client):
     form = forms.CompaniesHouseSearch(
-        data={'company_name': 'Thing', 'company_number': '1234'},
+        data={'company_name': 'Thing', 'company_number': '23232323'},
         session=client.session
     )
 
