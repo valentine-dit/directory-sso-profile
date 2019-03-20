@@ -67,6 +67,12 @@ def test_profile_parser_keywords(mock_tokenize_keywords):
     assert mock_tokenize_keywords.call_args == mock.call('thing,other')
 
 
+def test_profile_parser_keywords_joined():
+    parser = helpers.ProfileParser({'keywords': 'thing,other'})
+
+    assert parser.keywords == 'thing, other'
+
+
 @pytest.mark.parametrize('value,expected', (
     (None, []),
     ('', []),
