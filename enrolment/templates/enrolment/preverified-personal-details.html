@@ -10,14 +10,14 @@
         {% else %}
             <p id="business-type">Sole trader</p>
         {% endif %}
-        <a href="{{ services_urls.feedback }}" class="link" id="report-error-with-business-type">Report error</a>
+        <a href="{{ services_urls.feedback }}" class="link" id="report-error-with-business-type">This is not my business type</a>
     </div>
     <br>
     <div class="grey-information-box" id="business-details-information-box">
         <h2 class="heading-medium">Your business details</h2>
         <p id="company-name">{{ company.name }}</p>
         <p id="company-address">{{ company.address_line_1 }}, {{ company.address_line_2 }}, {{ company.postal_code }}</p>
-        <a href="{{ services_urls.feedback }}" class="link" id="report-error-with-business-details">Report error</a>
+        <a href="{{ services_urls.feedback }}" class="link" id="report-error-with-business-details">These are not my business details</a>
     </div>
 
     <div id="form-step-body-text">
