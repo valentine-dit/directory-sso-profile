@@ -1,5 +1,7 @@
+import collections
 from http import cookies
 from datetime import datetime
+import re
 
 from django.utils import formats
 from django.utils.dateparse import parse_datetime
@@ -13,8 +15,16 @@ from directory_constants.constants import urls
 
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
 SESSION_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'
-SESSION_KEY_PUBLIC_COMPANY_PROFILE = 'PUBLIC_COMPANY_PROFILE'
 SESSION_KEY_IS_ENROLLED = 'IS_ENROLLED'
+
+
+StepsListConf = collections.namedtuple(
+    'StepsListConf', ['form_labels_user', 'form_labels_anon']
+)
+ProgressIndicatorConf = collections.namedtuple(
+    'ProgressIndicatorConf',
+    ['step_counter_user', 'step_counter_anon', 'first_step']
+)
 
 
 def retrieve_preverified_company(enrolment_key):
@@ -46,9 +56,20 @@ def get_company_profile(number, session):
 def create_user(email, password):
     response = sso_api_client.user.create_user(email, password)
     if response.status_code == 400:
-        return None
+        # Check for non-password errors and ignore since we want to proceed
+        # For example we don't want to inform user of existing accounts
+        if not response.json().get('password'):
+            return None
     response.raise_for_status()
     return response.json()
+
+
+def create_user_profile(sso_session_id, data):
+    response = sso_api_client.user.create_user_profile(
+        sso_session_id=sso_session_id, data=data
+    )
+    response.raise_for_status()
+    return response
 
 
 def user_has_company(sso_session_id):
@@ -191,11 +212,16 @@ class CompanyProfileFormatter:
     @property
     def postcode(self):
         if self.data.get('registered_office_address'):
-            return self.data['registered_office_address']['postal_code']
+            return self.data['registered_office_address'].get('postal_code')
 
 
-def parse_set_cookie_header(headers):
+def parse_set_cookie_header(cookie_header):
+    # parse a `set-cookies` header, returning http.cookies.SimpleCookie
     simple_cookies = cookies.SimpleCookie()
-    # multiple headers are comma delimited
-    simple_cookies.load(headers.replace('/, ', '/ '))
+    # set-cookie header can contain multiple cookies, but `SimpleCookie.load`
+    # expects only one cookie, so loop over them.
+    # split on any ", " that is followed by any word character and =
+    split = re.split(r', (?=\w*=)', cookie_header)
+    for cookie in split:
+        simple_cookies.load(cookie)
     return simple_cookies

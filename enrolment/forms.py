@@ -4,7 +4,6 @@ from directory_constants.constants import choices, urls
 from requests.exceptions import HTTPError
 
 from django.forms import HiddenInput, PasswordInput, Textarea, ValidationError
-from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.http.request import QueryDict
 
@@ -65,6 +64,7 @@ class UserAccount(forms.Form):
         '</ul>'
     )
     MESSAGE_NOT_MATCH = "Passwords don't match"
+    MESSAGE_PASSWORD_INVALID = 'Invalid Password'
 
     email = fields.EmailField(
         label='Your email address'
@@ -77,7 +77,6 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
-
     captcha = ReCaptchaField(
         label='',
         label_suffix='',
@@ -88,7 +87,7 @@ class UserAccount(forms.Form):
             'Tick this box to accept the '
             f'<a href="{urls.TERMS_AND_CONDITIONS}" target="_blank">terms and '
             'conditions</a> of the great.gov.uk service.'
-        )
+        ),
     )
 
     def clean_password_confirmed(self):
@@ -97,51 +96,65 @@ class UserAccount(forms.Form):
             raise ValidationError(self.MESSAGE_NOT_MATCH)
         return value
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if not self.errors:
+            try:
+                cleaned_data['user_details'] = helpers.create_user(
+                    email=cleaned_data['email'],
+                    password=cleaned_data['password'],
+                )
+            except HTTPError as error:
+                if error.response.status_code == 400:
+                    self.add_error('password', self.MESSAGE_PASSWORD_INVALID)
+                else:
+                    raise
+        return None
+
 
 class UserAccountVerification(forms.Form):
+
     MESSAGE_INVALID_CODE = 'Invalid code'
 
     email = fields.CharField(label='', widget=HiddenInput, disabled=True)
-    code = fields.CharField(label='', min_length=5, max_length=5)
-
-    def clean_code(self):
-        try:
-            response = helpers.confirm_verification_code(
-                email=self.cleaned_data['email'],
-                verification_code=self.cleaned_data['code'],
-            )
-        except HTTPError as error:
-            if error.response.status_code == 400:
-                self.add_error('code', self.MESSAGE_INVALID_CODE)
-            else:
-                raise
-        else:
-            self.cleaned_data['cookies'] = helpers.parse_set_cookie_header(
-                response.headers['set-cookie']
-            )
-        return None
+    code = fields.CharField(
+        label='',
+        min_length=5,
+        max_length=5,
+        error_messages={'required': MESSAGE_INVALID_CODE}
+    )
 
 
 class CompaniesHouseSearch(forms.Form):
     MESSAGE_COMPANY_NOT_FOUND = (
         "<p>Your business name is not listed.</p>"
         "<p>Check that you've entered the right name.</p>"
-        "<p>Or "
-        "<a href='{url}'>change type of business</a>"
-        " if your business is not registered with Companies House.</p>"
     )
-
+    MESSAGE_COMPANY_NOT_ACTIVE = 'Company not active.'
     company_name = fields.CharField(
-        label='Registered company name'
+        label='Registered company name',
     )
     company_number = fields.CharField()
 
+    def __init__(self, session, *args, **kwargs):
+        self.session = session
+        super().__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
-        if 'company_number' not in cleaned_data:
-            url = reverse('enrolment-business-type')
-            message = self.MESSAGE_COMPANY_NOT_FOUND.format(url=url)
-            raise ValidationError({'company_name': mark_safe(message)})
+        if 'company_number' in cleaned_data:
+            company_data = helpers.get_company_profile(
+                number=self.cleaned_data['company_number'],
+                session=self.session,
+            )
+            if company_data['company_status'] != 'active':
+                raise ValidationError(
+                    {'company_name': self.MESSAGE_COMPANY_NOT_ACTIVE}
+                )
+        elif 'company_name' in cleaned_data:
+            raise ValidationError(
+                {'company_name': mark_safe(self.MESSAGE_COMPANY_NOT_FOUND)}
+            )
 
 
 class CompaniesHouseBusinessDetails(forms.Form):
@@ -171,7 +184,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
         disabled=True,
         required=False,
     )
-    industry = fields.ChoiceField(
+    sectors = fields.ChoiceField(
         label='What industry is your company in?',
         choices=INDUSTRY_CHOICES,
     )
@@ -199,7 +212,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
                 self.initial_to_data('postal_code')
 
     def delete_already_enrolled_fields(self):
-        del self.fields['industry']
+        del self.fields['sectors']
         del self.fields['website_address']
 
     def set_form_initial(self, company_profile):
@@ -225,6 +238,9 @@ class CompaniesHouseBusinessDetails(forms.Form):
         self.cleaned_data['address_line_1'] = address_parts[0].strip()
         self.cleaned_data['address_line_2'] = address_parts[1].strip()
         return self.cleaned_data['address']
+
+    def clean_sectors(self):
+        return [self.cleaned_data['sectors']]
 
 
 class PersonalDetails(forms.Form):
@@ -288,7 +304,7 @@ class SoleTraderBusinessDetails(forms.Form):
         required=False,
         widget=Textarea(attrs={'rows': 3}),
     )
-    industry = fields.ChoiceField(
+    sectors = fields.ChoiceField(
         label='What industry is your business in?',
         choices=INDUSTRY_CHOICES,
     )
@@ -320,6 +336,9 @@ class SoleTraderBusinessDetails(forms.Form):
         self.cleaned_data['address_line_1'] = address_parts[0].strip()
         self.cleaned_data['address_line_2'] = address_parts[1].strip()
         return self.cleaned_data['address']
+
+    def clean_sectors(self):
+        return [self.cleaned_data['sectors']]
 
 
 class ResendVerificationCode(forms.Form):

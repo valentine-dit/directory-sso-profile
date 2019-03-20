@@ -1,13 +1,10 @@
 from django.conf import settings
 from django.views.generic import TemplateView
 
-from profile.eig_apps.views import RedirectToAboutPageMixin
 from sso.utils import SSOLoginRequiredMixin
 
 
-class SellingOnlineOverseasView(
-    RedirectToAboutPageMixin, SSOLoginRequiredMixin, TemplateView
-):
+class SellingOnlineOverseasView(SSOLoginRequiredMixin, TemplateView):
     template_name = 'selling-online-overseas.html'
 
     def get_context_data(self):

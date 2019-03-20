@@ -5,8 +5,13 @@ import directory_validators.enrolment
 
 from django.conf import settings
 from django.forms import ImageField, Textarea
+from django.utils.safestring import mark_safe
 
+from enrolment.fields import DateField
 from profile.fab import validators
+
+
+INDUSTRY_CHOICES = [('', 'Select Industry')] + list(choices.INDUSTRIES)
 
 
 class SocialLinksForm(forms.Form):
@@ -105,7 +110,7 @@ class CaseStudyBasicInfoForm(forms.Form):
     )
     sector = fields.ChoiceField(
         label='Industry most relevant to your showcase',
-        choices=[('', 'Select Sector')] + list(choices.INDUSTRIES)
+        choices=INDUSTRY_CHOICES
     )
     website = fields.URLField(
         label='The web address for your case study (optional)',
@@ -151,11 +156,11 @@ class DynamicHelptextFieldsMixin:
                 help_text = help_text_map['update_help_text'].format(
                     initial_value=self.initial.get(field.name)
                 )
-                field.help_text = help_text
-                field.label = help_text_map['update_label']
+                field.help_text = mark_safe(help_text)
+                field.label = mark_safe(help_text_map['update_label'])
             else:
-                field.help_text = help_text_map['create_help_text']
-                field.label = help_text_map['create_label']
+                field.help_text = mark_safe(help_text_map['create_help_text'])
+                field.label = mark_safe(help_text_map['create_label'])
 
 
 class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
@@ -167,8 +172,8 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
     )
     image_help_text_update = (
         'Select a different image to replace the '
-        '<a href="{initial_value}" target="_blank" alt="View current image">'
-        'current one</a>. ' + image_help_text_create
+        '<a class="link" href="{initial_value}" target="_blank" '
+        'alt="View current image">current one</a>. ' + image_help_text_create
     )
     help_text_maps = [
         {
@@ -296,3 +301,124 @@ class LogoForm(forms.Form):
             directory_validators.company.image_format,
         ]
     )
+
+
+class ProductsServicesForm(forms.Form):
+    keywords = fields.CharField(
+        label=(
+            'Enter up to 10 keywords that describe your company '
+            '(separated by commas):'
+        ),
+        help_text=(
+            'These keywords will be used to help potential overseas buyers '
+            'find your company.'
+        ),
+        widget=Textarea,
+        max_length=1000,
+        validators=[
+            directory_validators.company.keywords_word_limit,
+            directory_validators.company.keywords_special_characters,
+            directory_validators.company.no_html,
+        ]
+    )
+
+
+class PublishForm(forms.Form):
+
+    LABEL_UNPUBLISH_FAS = 'Untick to remove your profile from this service'
+    LABEL_UNPUBLISH_ISD = 'Untick the box to cancel publication'
+    LABEL_ISD = 'Ready to publish on UK Investment Support Directory'
+    LABEL_FAS = 'Publish profile on great.gov.uk/trade/'
+
+    def __init__(self, company, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if company.get('is_published_investment_support_directory'):
+            field = self.fields['is_published_investment_support_directory']
+            field.widget.label = self.LABEL_UNPUBLISH_ISD
+        if company.get('is_published_find_a_supplier'):
+            field = self.fields['is_published_find_a_supplier']
+            field.widget.label = self.LABEL_UNPUBLISH_FAS
+
+    is_published_investment_support_directory = fields.BooleanField(
+        label=LABEL_ISD,
+        required=False
+    )
+    is_published_find_a_supplier = fields.BooleanField(
+        label=LABEL_FAS,
+        required=False
+    )
+
+
+class CompaniesHouseBusinessDetailsForm(forms.Form):
+    name = fields.CharField(
+        label='Trading name'
+    )
+    number = fields.CharField(
+        disabled=True,
+    )
+    date_of_creation = DateField(
+        label='Incorporated on',
+        input_formats=['%d %B %Y'],
+        disabled=True,
+        required=False,
+    )
+    address = fields.CharField(
+        disabled=True,
+        required=False,
+    )
+    website = fields.URLField(
+        label='Business URL (optional)',
+        help_text='The website address must start with http:// or https://',
+        required=False,
+    )
+    employees = fields.ChoiceField(
+        choices=choices.EMPLOYEES,
+        label='How many employees are in your business?',
+    )
+    sectors = fields.ChoiceField(
+        label='What industry is your business in?',
+        choices=INDUSTRY_CHOICES,
+    )
+
+    def clean_sectors(self):
+        return [self.cleaned_data['sectors']]
+
+    def clean(self):
+        super().clean()
+        self.cleaned_data.pop('clean_number', None)
+        self.cleaned_data.pop('date_of_creation', None)
+
+
+class SoleTraderBusinessDetailsForm(forms.Form):
+    name = fields.CharField(
+        label='Trading name'
+    )
+    address_line_1 = fields.CharField(
+        required=False,
+    )
+    address_line_2 = fields.CharField(
+        required=False,
+    )
+    locality = fields.CharField(
+        required=False,
+    )
+    postal_code = fields.CharField(
+        required=False,
+    )
+
+    website_address = fields.URLField(
+        label='Business URL (optional)',
+        help_text='The website address must start with http:// or https://',
+        required=False,
+    )
+    employees = fields.ChoiceField(
+        choices=choices.EMPLOYEES,
+        label='How many employees are in your business?',
+    )
+    sectors = fields.ChoiceField(
+        label='What industry is your business in?',
+        choices=INDUSTRY_CHOICES,
+    )
+
+    def clean_sectors(self):
+        return [self.cleaned_data['sectors']]

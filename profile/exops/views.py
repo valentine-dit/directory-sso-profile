@@ -3,14 +3,11 @@ from requests.exceptions import HTTPError
 from django.conf import settings
 from django.views.generic import TemplateView
 
-from profile.eig_apps.views import RedirectToAboutPageMixin
 from profile.exops import helpers
 from sso.utils import SSOLoginRequiredMixin
 
 
-class ExportOpportunitiesBaseView(
-    RedirectToAboutPageMixin, SSOLoginRequiredMixin, TemplateView
-):
+class ExportOpportunitiesBaseView(SSOLoginRequiredMixin, TemplateView):
     template_name_not_exops_user = 'exops/is-not-exops-user.html'
     template_name_error = 'exops/opportunities-retrieve-error.html'
 

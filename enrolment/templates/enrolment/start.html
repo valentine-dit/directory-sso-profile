@@ -12,18 +12,19 @@
             <div class="steps-progress-indicator" id="start-page-progress-indicator" aria-label="Process steps">
               <p id="steps-progress-explanation" class="visually-hidden">List of steps required to complete the process:</p>
               <ol aria-labelledby="steps-progress-explanation">
-                <li class="current">
-                    <span class="visually-hidden">Current:</span>
-                    <span>
-                        Select your business type
-                        <a id="start-now-button" class="button" href="{% url 'enrolment-business-type' %}">Start now</a>
-                    </span>
-                    
-                </li>
-                <li><span>Enter your business email address and set a password</span></li>
-                <li><span>Enter your confirmation code</span></li>
-                <li><span>Enter your business details</span></li>
-                <li><span>Enter your details</span></li>
+                {% for label in step_labels %}
+                    {% if step_number == forloop.counter %}
+                        <li class="current">
+                            <span class="visually-hidden">Current:</span>
+                            <span>
+                                {{ label }}
+                                <a id="start-now-button" class="button" href="{% url 'enrolment-business-type' %}">Start now</a>
+                            </span>
+                        </li>
+                    {% else %}
+                        <li><span>{{ label }}</span></li>
+                    {% endif %}
+                {% endfor %}
               </ol>
             </div>
         </div>

@@ -153,6 +153,21 @@ urlpatterns = [
         name='find-a-buyer-logo'
     ),
     url(
+        r'^find-a-buyer/products-and-services/$',
+        profile.fab.views.ProductsServicesFormView.as_view(),
+        name='find-a-buyer-products-and-services'
+    ),
+    url(
+        r'^find-a-buyer/publish/$',
+        profile.fab.views.PublishFormView.as_view(),
+        name='find-a-buyer-publish'
+    ),
+    url(
+        r'^find-a-buyer/business-details/$',
+        profile.fab.views.BusinessDetailsFormView.as_view(),
+        name='find-a-buyer-business-details'
+    ),
+    url(
         r'^find-a-buyer/case-study/(?P<id>[0-9]+)/(?P<step>.+)/$',
         profile.fab.views.CaseStudyWizardEditView.as_view(
             url_name='find-a-buyer-case-study-edit'
@@ -165,5 +180,10 @@ urlpatterns = [
             url_name='find-a-buyer-case-study'
         ),
         name='find-a-buyer-case-study'
+    ),
+    url(
+        r'^find-a-buyer/admin/$',
+        profile.fab.views.AdminToolsView.as_view(),
+        name='find-a-buyer-admin-tools'
     ),
 ]

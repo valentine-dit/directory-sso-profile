@@ -3,12 +3,14 @@
 {% load static from static %}
 
 {% block above_form %}
+    {% if features.ENROLMENT_SELECT_BUSINESS_ON %}
     <div class="grey-information-box" id="business-type-information-box">
         <h2 class="heading-medium">Your business type</h2>
         <p id="business-type">A business registered with Companies House</p>
         <a href="{% url 'enrolment-business-type' %}" class="link" id="change-business-type">Change</a>
     </div>
     <br>
+    {% endif %}
     <div class="grey-information-box" id="business-details-information-box">
         <h2 class="heading-medium">Your business details</h2>
         <p id="company-name">{{ company.company_name }}</p>
@@ -19,8 +21,4 @@
     <div id="form-step-body-text">
         <h1 class="heading-large">Enter your details</h1>
     </div>
-{% endblock %}
-
-{% block below_form %}
-    <p><a class="link" href="#" id="list-background-checks">View the list of background checks here</a></p>
 {% endblock %}

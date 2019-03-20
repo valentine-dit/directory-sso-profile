@@ -10,7 +10,7 @@
       <div class="grid-row">
           <div class="column-two-thirds">
               <div id="success-message-container">
-                  {% message_box heading="Account created" description="We've sent a confirmation email." heading_level='h1' %}
+                  {% message_box heading="Account created" description="Your account has been created." heading_level='h1' %}
               </div>
           </div>
       </div>
@@ -19,7 +19,13 @@
   <section id="next-container">
     <div class="container">
       <h2 class="heading-medium">Next steps</h2>
-      <a class="link" href="{% url 'find-a-buyer' %}">Go to your account</a>
+        <p>You can now:</p>
+        <ul class="list list-bullet">
+          <li><a href="{% url 'find-a-buyer' %}">publish your business profile</a> to promote your business to overseas buyers</li>
+          <li><a href="{{ services_urls.exopps }}">find export opportunities</a> from our list of current sales leads</li>
+          <li><a href="{{ services_urls.soo }}">sell online overseas </a> by finding the right market for your goods</li>
+          <li><a href="{{ services_urls.events }}">find events and visits </a> that can help promote your business</li>
+        </ul>
     </div>
   </section>
 

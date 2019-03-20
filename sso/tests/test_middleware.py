@@ -56,20 +56,19 @@ def test_sso_middleware_no_cookie(
 @patch('directory_sso_api_client.client.sso_api_client.user.get_session_user')
 def test_sso_middleware_api_response_ok(
     mock_get_session_user, mock_retrieve_supplier_company, settings,
-    returned_client
+    returned_client, rf
 ):
     mock_retrieve_supplier_company.return_value = api_response_ok()
     mock_get_session_user.return_value = api_response_ok()
-    returned_client.cookies[settings.SSO_SESSION_COOKIE] = '123'
-    settings.MIDDLEWARE_CLASSES = [
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'sso.middleware.SSOUserMiddleware'
-    ]
-    response = returned_client.get(reverse('find-a-buyer'))
+
+    request = rf.get(reverse('find-a-buyer'))
+    request.COOKIES[settings.SSO_SESSION_COOKIE] = '123'
+
+    middleware.SSOUserMiddleware().process_request(request)
 
     mock_get_session_user.assert_called_with('123')
-    assert response._request.sso_user.id == 1
-    assert response._request.sso_user.email == 'jim@example.com'
+    assert request.sso_user.id == 1
+    assert request.sso_user.email == 'jim@example.com'
 
 
 @patch(

@@ -6,24 +6,6 @@ from django.core.urlresolvers import reverse
 from profile.exops import views
 
 
-def test_export_opportunities_applications_redirect_first_time_user(
-    sso_user_middleware, client
-):
-    response = client.get(reverse('export-opportunities-applications'))
-
-    assert response.status_code == http.client.FOUND
-    assert response.get('Location') == reverse('about')
-
-
-def test_export_opportunities_alerts_redirect_first_time_user(
-    sso_user_middleware, client
-):
-    response = client.get(reverse('export-opportunities-email-alerts'))
-
-    assert response.status_code == http.client.FOUND
-    assert response.get('Location') == reverse('about')
-
-
 def test_export_opportunities_applications_exposes_context(
     returned_client, sso_user_middleware, settings
 ):

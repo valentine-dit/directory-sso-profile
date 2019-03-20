@@ -1,5 +1,3 @@
-import http
-
 from django.core.urlresolvers import reverse
 
 from profile.eig_apps import views
@@ -21,13 +19,6 @@ def test_about_view_sets_session(client):
     session_key = constants.HAS_VISITED_ABOUT_PAGE_SESSION_KEY
 
     assert client.session[session_key] == 'true'
-
-
-def test_landing_page_redirect(client):
-    response = client.get(reverse('index'))
-
-    assert response.status_code == http.client.FOUND
-    assert response.get('Location') == reverse('about')
 
 
 def test_signed_in_as_displays_email(client, sso_user_middleware, settings):
