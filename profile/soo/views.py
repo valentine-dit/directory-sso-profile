@@ -8,5 +8,5 @@ class SellingOnlineOverseasView(SSOLoginRequiredMixin, TemplateView):
 
     def get_context_data(self):
         return {
-            'soo_tab_classes': 'active',
+            'soo_tab_classes': 'active'
         }
