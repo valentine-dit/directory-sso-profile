@@ -17,7 +17,7 @@
             </div>
             <div class="column-one-half right-column">
                 <a class="background-light-blue font-xsmall pill" href="{% url 'find-a-buyer-admin-tools' %}">Admin view</a>
-                {% if company.is_published and not company.is_uk_isd_company %}
+                {% if company.is_published_find_a_supplier %}
                     <span class="divider"></span>
                     <a href="{{ services_urls.fas }}suppliers/{{ company.number }}/">View profile</a>
                 {% endif %}

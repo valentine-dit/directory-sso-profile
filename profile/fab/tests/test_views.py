@@ -26,7 +26,7 @@ def create_test_image(extension):
 
 @pytest.fixture
 def default_company_profile():
-    return {'name': 'Cool Company', 'is_verified': True}
+    return {'name': 'Cool Company', 'is_publishable': True}
 
 
 @pytest.fixture
@@ -324,13 +324,13 @@ def test_edit_page_submmit_success(
     )
 
 
-def test_publish_not_verified(
+def test_publish_not_publishable(
     returned_client, sso_user, sso_user_middleware, mock_retrieve_company,
     default_company_profile
 ):
     mock_retrieve_company.return_value = create_response(
         200,
-        {**default_company_profile, 'is_verified': False}
+        {**default_company_profile, 'is_publishable': False}
     )
 
     url = reverse('find-a-buyer-publish')
@@ -341,7 +341,7 @@ def test_publish_not_verified(
     assert response.url == reverse('find-a-buyer')
 
 
-def test_publish_verified(
+def test_publish_publishable(
     returned_client, sso_user, sso_user_middleware, mock_retrieve_company
 ):
 

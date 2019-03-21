@@ -171,7 +171,7 @@ class PublishFormView(BaseFormView):
     template_name = 'fab/find-a-buyer-publsh.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if not self.company.is_verified:
+        if not self.company.is_publishable:
             return redirect('find-a-buyer')
         return super().dispatch(request, *args, **kwargs)
 
