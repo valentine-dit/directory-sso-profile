@@ -30,8 +30,8 @@ class ProfileParser:
         return bool(self.data)
 
     @property
-    def is_verified(self):
-        return self.data['is_verified']
+    def is_publishable(self):
+        return self.data['is_publishable']
 
     @property
     def date_of_creation(self):

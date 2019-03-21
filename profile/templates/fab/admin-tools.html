@@ -23,7 +23,7 @@
         <p><a class="link great-red-text" href="{{ FAB_REMOVE_USER_URL }}">Remove editor</a></p>
     </div>
 
-    {% if company.is_verified %}
+    {% if company.is_publishable %}
         <section class="container">
             <h2 class="heading-medium">Manage business profile</h2>
             {% if company.is_uk_isd_company %}
