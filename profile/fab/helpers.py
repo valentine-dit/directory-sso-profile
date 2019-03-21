@@ -30,6 +30,10 @@ class ProfileParser:
         return bool(self.data)
 
     @property
+    def is_verified(self):
+        return self.data['is_verified']
+
+    @property
     def date_of_creation(self):
         if self.data.get('date_of_creation'):
             date = datetime.strptime(self.data['date_of_creation'], '%Y-%m-%d')

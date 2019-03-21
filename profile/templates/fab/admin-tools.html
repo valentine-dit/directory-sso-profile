@@ -23,18 +23,20 @@
         <p><a class="link great-red-text" href="{{ FAB_REMOVE_USER_URL }}">Remove editor</a></p>
     </div>
 
-    <section class="container">
-        <h2 class="heading-medium">Manage business profile</h2>
-        {% if company.is_uk_isd_company %}
-            <a href="{% url 'find-a-buyer-publish' %}" class="link great-red-text">View or change where your profile is published</a>
-        {% else %}
-            {% if company.is_published %}
-                <a href="{% url 'find-a-buyer-publish' %}" class="link great-red-text">Unpublish business profile</a>
+    {% if company.is_verified %}
+        <section class="container">
+            <h2 class="heading-medium">Manage business profile</h2>
+            {% if company.is_uk_isd_company %}
+                <a href="{% url 'find-a-buyer-publish' %}" class="link great-red-text">View or change where your profile is published</a>
             {% else %}
-                <a href="{% url 'find-a-buyer-publish' %}" class="link">Publish business profile</a>
+                {% if company.is_published %}
+                    <a href="{% url 'find-a-buyer-publish' %}" class="link great-red-text">Unpublish business profile</a>
+                {% else %}
+                    <a href="{% url 'find-a-buyer-publish' %}" class="link">Publish business profile</a>
+                {% endif %}
             {% endif %}
-        {% endif %}
-    </section>
+        </section>
+    {% endif %}
 
     <section class="container">
         <a href="{% url 'find-a-buyer' %}">Back</a>

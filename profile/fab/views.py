@@ -170,6 +170,11 @@ class PublishFormView(BaseFormView):
     form_class = forms.PublishForm
     template_name = 'fab/find-a-buyer-publsh.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        if not self.company.is_verified:
+            return redirect('find-a-buyer')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         return {**kwargs, 'company': self.company.serialize_for_form()}
