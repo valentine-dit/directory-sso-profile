@@ -12,6 +12,7 @@ from profile.fab import validators
 
 
 INDUSTRY_CHOICES = [('', 'Select Industry')] + list(choices.INDUSTRIES)
+EMPLOYEES_CHOICES = [('', 'Select Employees')] + list(choices.EMPLOYEES)
 
 
 class SocialLinksForm(forms.Form):
@@ -372,7 +373,7 @@ class CompaniesHouseBusinessDetailsForm(forms.Form):
         required=False,
     )
     employees = fields.ChoiceField(
-        choices=choices.EMPLOYEES,
+        choices=EMPLOYEES_CHOICES,
         label='How many employees are in your business?',
     )
     sectors = fields.ChoiceField(
@@ -412,7 +413,7 @@ class SoleTraderBusinessDetailsForm(forms.Form):
         required=False,
     )
     employees = fields.ChoiceField(
-        choices=choices.EMPLOYEES,
+        choices=EMPLOYEES_CHOICES,
         label='How many employees are in your business?',
     )
     sectors = fields.ChoiceField(
