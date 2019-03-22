@@ -14,3 +14,10 @@
     <p>Describe something significant your company has done that will be relevant to international buyers. For example, you could add details of significant collaboration on a recent international project or a major export deal.</p>
     {{ block.super }}
 {% endblock %}
+
+{% block below_submit_button %}
+    <div>
+        <br>
+        <a class="link" href="{% url 'find-a-buyer' %}">Back</a>
+    </div>
+{% endblock %}
