@@ -11,8 +11,8 @@ contextlib2==0.5.5        # via raven
 directory-api-client==12.2.0
 directory-ch-client==1.0.0
 directory-client-core==4.4.0
-directory-components==4.1.2
-directory-constants==12.1.0  # via directory-components
+directory-components==7.2.0
+directory-constants==14.4.0  # via directory-components
 directory-forms-api-client==3.3.0
 directory-healthcheck==1.0.1
 directory-sso-api-client==4.1.1
@@ -26,7 +26,6 @@ django-recaptcha==1.2.0
 django-redis==4.8.0
 django==1.11.20
 djangorestframework==3.4.7
-export-elements==1.0.0    # via directory-components
 gunicorn==19.5.0
 idna==2.6                 # via requests
 mohawk==0.3.4             # via directory-components, sigauth
