@@ -99,11 +99,11 @@
                 </div>
 
                 <dl>
-					{% if company.website %}
-						<dt>Website</dt>
-						<dd>
-							<a class="link" href="{{ company.website }}">{ company.website }}</a>
-						</dd>
+                    {% if company.website %}
+                        <dt>Website</dt>
+                        <dd>
+                            <a class="link" href="{{ company.website }}">{ company.website }}</a>
+                        </dd>
                     {% endif %}
                     <dt>Business type</dt>
                     {% if company.company_type == 'COMPANIES_HOUSE' %}
