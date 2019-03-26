@@ -9,6 +9,7 @@ from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView
 from django.template.response import TemplateResponse
+from django.template import Context
 
 import core.mixins
 from enrolment import constants, forms, helpers
@@ -21,6 +22,7 @@ SESSION_KEY_ENROL_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
 SESSION_KEY_INGRESS_ANON = 'ANON_INGRESS'
 SESSION_KEY_COMPANY_CHOICE = 'COMPANY_CHOICE'
 SESSION_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
+SESSION_KEY_REFERRER = 'REFERRER_URL'
 
 PROGRESS_STEP_LABEL_USER_ACCOUNT = (
     'Enter your business email address and set a password'
@@ -313,7 +315,7 @@ class BusinessTypeRoutingView(
 
 class EnrolmentStartView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin,
-    StepsListMixin, TemplateView
+    StepsListMixin, TemplateView,
 ):
     template_name = 'enrolment/start.html'
 
@@ -336,6 +338,10 @@ class EnrolmentStartView(
         if request.sso_user:
             if helpers.user_has_company(request.sso_user.session_id):
                 return redirect('find-a-buyer')
+
+        self.request.session[SESSION_KEY_REFERRER] = request.META.get(
+            'HTTP_REFERER'
+        )
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -347,7 +353,7 @@ class BaseEnrolmentWizardView(
     core.mixins.PreventCaptchaRevalidationMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
-    NamedUrlSessionWizardView
+    NamedUrlSessionWizardView,
 ):
 
     def get_template_names(self):
@@ -362,6 +368,10 @@ class BaseEnrolmentWizardView(
                 'contact/triage/great-account/verification-missing/'
             )
         return context
+
+    def get_referrer_context(self):
+        if self.request.session.get(SESSION_KEY_REFERRER) == urls.SERVICES_FAB:
+            return {'fab_referrer': True}
 
 
 class CompaniesHouseEnrolmentView(
@@ -520,7 +530,11 @@ class SoleTraderEnrolmentView(
         self.create_user_profile(form_dict[PERSONAL_INFO])
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
-        return TemplateResponse(self.request, self.templates[FINISHED])
+        return TemplateResponse(
+            self.request,
+            self.templates[FINISHED],
+            context=self.get_referrer_context()
+        )
 
     def serialize_form_list(self, form_list):
         return {
