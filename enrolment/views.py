@@ -274,7 +274,7 @@ class CreateUserProfileMixin:
         )
 
 
-class ReferrerMixin:
+class ServicesRefererDetectorMixin:
     def get_referrer_context(self):
         context = {}
         referrer_url = self.request.session.get(SESSION_KEY_REFERRER)
@@ -331,7 +331,7 @@ class BusinessTypeRoutingView(
 
 class EnrolmentStartView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin,
-    StepsListMixin, ReferrerMixin, TemplateView
+    StepsListMixin, ServicesRefererDetectorMixin, TemplateView
 ):
     template_name = 'enrolment/start.html'
 
@@ -365,7 +365,7 @@ class BaseEnrolmentWizardView(
     core.mixins.PreventCaptchaRevalidationMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
-    ReferrerMixin,
+    ServicesRefererDetectorMixin,
     NamedUrlSessionWizardView
 ):
 
