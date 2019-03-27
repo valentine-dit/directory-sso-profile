@@ -148,6 +148,11 @@ urlpatterns = [
         name='find-a-buyer-description'
     ),
     url(
+        r'^find-a-buyer/website/$',
+        profile.fab.views.WebsiteFormView.as_view(),
+        name='find-a-buyer-website'
+    ),
+    url(
         r'^find-a-buyer/logo/$',
         profile.fab.views.LogoFormView.as_view(),
         name='find-a-buyer-logo'

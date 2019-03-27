@@ -4,7 +4,7 @@ from profile.fab import validators
 import pytest
 
 
-def test_description_form_contains_enmail():
+def test_description_form_contains_email():
     form = forms.DescriptionForm({
         'summary': 'contact foo@example.com',
         'description': 'contact foo@example.com',
