@@ -274,6 +274,23 @@ class CreateUserProfileMixin:
         )
 
 
+class ReferrerMixin:
+    def get_referrer_context(self):
+        context = {}
+        referrer_url = self.request.session.get(SESSION_KEY_REFERRER)
+        if referrer_url and referrer_url.startswith(urls.SERVICES_FAB):
+            context = {'fab_referrer': True}
+        self.request.session.pop(SESSION_KEY_REFERRER, None)
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.session.get(SESSION_KEY_REFERRER) is None:
+            self.request.session[SESSION_KEY_REFERRER] = request.META.get(
+                'HTTP_REFERER'
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+
 class BusinessTypeRoutingView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin,
     StepsListMixin, FormView
@@ -314,7 +331,7 @@ class BusinessTypeRoutingView(
 
 class EnrolmentStartView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin,
-    StepsListMixin, TemplateView
+    StepsListMixin, ReferrerMixin, TemplateView
 ):
     template_name = 'enrolment/start.html'
 
@@ -337,9 +354,6 @@ class EnrolmentStartView(
         if request.sso_user:
             if helpers.user_has_company(request.sso_user.session_id):
                 return redirect('find-a-buyer')
-        self.request.session[SESSION_KEY_REFERRER] = request.META.get(
-            'HTTP_REFERER'
-        )
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -351,6 +365,7 @@ class BaseEnrolmentWizardView(
     core.mixins.PreventCaptchaRevalidationMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
+    ReferrerMixin,
     NamedUrlSessionWizardView
 ):
 
@@ -365,14 +380,6 @@ class BaseEnrolmentWizardView(
             context['verification_missing_url'] = urls.build_great_url(
                 'contact/triage/great-account/verification-missing/'
             )
-        return context
-
-    def get_referrer_context(self):
-        context = {}
-        referrer_url = self.request.session.get(SESSION_KEY_REFERRER)
-        if referrer_url and referrer_url.startswith(urls.SERVICES_FAB):
-            context = {'fab_referrer': True}
-        self.request.session.pop(SESSION_KEY_REFERRER, None)
         return context
 
 

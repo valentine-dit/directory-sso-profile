@@ -328,6 +328,19 @@ def session_client_company_factory(client, settings):
     return session_client
 
 
+@pytest.fixture
+def session_client_referrer_factory(client, settings):
+
+    def session_client(referrer_url):
+        session = signed_cookies.SessionStore()
+        session.save()
+        session[views.SESSION_KEY_REFERRER] = referrer_url
+        session.save()
+        client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
+        return client
+    return session_client
+
+
 @pytest.mark.parametrize('choice,expected_url', (
     (
         constants.COMPANIES_HOUSE_COMPANY,
@@ -456,8 +469,9 @@ def test_companies_house_enrolment_redirect_to_start(client):
 
 def test_companies_house_enrolment_submit_end_to_end(
     client, submit_companies_house_step, mock_session_user,
-    mock_enrolment_send, steps_data
+    mock_enrolment_send, steps_data, session_client_referrer_factory
 ):
+    session_client_referrer_factory(constants_url.SERVICES_FAB)
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
 
@@ -481,6 +495,7 @@ def test_companies_house_enrolment_submit_end_to_end(
     response = client.get(response.url)
 
     assert response.status_code == 200
+    assert response.context_data['fab_referrer'] is True
     assert response.template_name == 'enrolment/success-companies-house.html'
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
