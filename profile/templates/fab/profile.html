@@ -101,7 +101,9 @@
                 <dl>
                     {% if company.website %}
                         <dt>Website</dt>
-                        <dd>{{ company.website }}</dd>
+                        <dd>
+                            <a class="link" href="{{ company.website }}">{ company.website }}</a>
+                        </dd>
                     {% endif %}
                     <dt>Business type</dt>
                     {% if company.company_type == 'COMPANIES_HOUSE' %}
@@ -122,7 +124,7 @@
                 </dl>
 
                 {% if not company.website %}
-                    <a href="#" class="link">Add website</a>
+                    <a href="{% url 'find-a-buyer-website' %}" class="link">Add website</a>
                 {% endif %}
                 <hr>
 
