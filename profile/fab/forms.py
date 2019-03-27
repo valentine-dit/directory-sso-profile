@@ -76,6 +76,14 @@ class DescriptionForm(forms.Form):
     )
 
 
+class WebsiteForm(forms.Form):
+    website = fields.URLField(
+        label='Business URL',
+        help_text='Enter a full URL including http:// or https://',
+        max_length=255,
+    )
+
+
 class CaseStudyBasicInfoForm(forms.Form):
     title = fields.CharField(
         label='Showcase title',
