@@ -101,7 +101,9 @@
                 <dl>
                     {% if company.website %}
                         <dt>Website</dt>
-                        <dd>{{ company.website }}</dd>
+                        <dd>
+                            <a class="link" href="{{ company.website }}">{ company.website }}</a>
+                        </dd>
                     {% endif %}
                     <dt>Business type</dt>
                     {% if company.company_type == 'COMPANIES_HOUSE' %}
@@ -122,7 +124,7 @@
                 </dl>
 
                 {% if not company.website %}
-                    <a href="#" class="link">Add website</a>
+                    <a href="{% url 'find-a-buyer-website' %}" class="link">Add website</a>
                 {% endif %}
                 <hr>
 
@@ -130,7 +132,7 @@
                     <div class="grid-row">
                         <h3 class="column-two-thirds heading-medium">Online profiles</h3>
                         <div class="column-one-third right-column">
-                            {% if company.facebook_url and company.twitter_url and company.linkedin_url %}
+                            {% if company.facebook_url or company.twitter_url or company.linkedin_url %}
                                 <a href="{% url 'find-a-buyer-social' %}" class="link pencil-link">Edit</a>
                             {% endif %}
                         </div>

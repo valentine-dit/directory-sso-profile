@@ -147,6 +147,11 @@ class DescriptionFormView(BaseFormView):
     template_name = 'fab/description-form.html'
 
 
+class WebsiteFormView(BaseFormView):
+    form_class = forms.WebsiteForm
+    template_name = 'fab/website-form.html'
+
+
 class LogoFormView(BaseFormView):
     form_class = forms.LogoForm
     template_name = 'fab/logo-form.html'
