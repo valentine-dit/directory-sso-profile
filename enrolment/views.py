@@ -9,7 +9,6 @@ from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView
 from django.template.response import TemplateResponse
-from django.template import Context
 
 import core.mixins
 from enrolment import constants, forms, helpers
@@ -315,7 +314,7 @@ class BusinessTypeRoutingView(
 
 class EnrolmentStartView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin,
-    StepsListMixin, TemplateView,
+    StepsListMixin, TemplateView
 ):
     template_name = 'enrolment/start.html'
 
@@ -338,7 +337,6 @@ class EnrolmentStartView(
         if request.sso_user:
             if helpers.user_has_company(request.sso_user.session_id):
                 return redirect('find-a-buyer')
-
         self.request.session[SESSION_KEY_REFERRER] = request.META.get(
             'HTTP_REFERER'
         )
@@ -353,7 +351,7 @@ class BaseEnrolmentWizardView(
     core.mixins.PreventCaptchaRevalidationMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
-    NamedUrlSessionWizardView,
+    NamedUrlSessionWizardView
 ):
 
     def get_template_names(self):
@@ -370,8 +368,12 @@ class BaseEnrolmentWizardView(
         return context
 
     def get_referrer_context(self):
-        if self.request.session.get(SESSION_KEY_REFERRER) == urls.SERVICES_FAB:
-            return {'fab_referrer': True}
+        context = {}
+        referrer_url = self.request.session.get(SESSION_KEY_REFERRER)
+        if referrer_url and referrer_url.startswith(urls.SERVICES_FAB):
+            context = {'fab_referrer': True}
+        self.request.session.pop(SESSION_KEY_REFERRER, None)
+        return context
 
 
 class CompaniesHouseEnrolmentView(
@@ -463,7 +465,11 @@ class CompaniesHouseEnrolmentView(
             )
         else:
             self.create_company_profile(data)
-        return TemplateResponse(self.request, self.templates[FINISHED])
+        return TemplateResponse(
+            self.request,
+            self.templates[FINISHED],
+            context=self.get_referrer_context()
+        )
 
 
 class SoleTraderEnrolmentView(
