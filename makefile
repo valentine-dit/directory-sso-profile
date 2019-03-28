@@ -61,7 +61,6 @@ DEBUG_SET_ENV_VARS := \
 	export HEADER_FOOTER_URLS_CONTACT_US=http://contact.trade.great:8009/directory/; \
 	export PRIVACY_COOKIE_DOMAIN=.trade.great; \
 	export EXPORTING_OPPORTUNITIES_API_SECRET=debug; \
-	export FEATURE_URL_PREFIX_ENABLED=true; \
 	export DIRECTORY_CONSTANTS_URL_EXPORT_READINESS=http://exred.trade.great:8007/; \
 	export DIRECTORY_CONSTANTS_URL_FIND_A_BUYER=http://buyer.trade.great:8001/; \
 	export DIRECTORY_CONSTANTS_URL_SELLING_ONLINE_OVERSEAS=http://soo.trade.great:8008/selling-online-overseas/; \

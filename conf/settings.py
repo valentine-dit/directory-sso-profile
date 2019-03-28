@@ -68,12 +68,8 @@ MIDDLEWARE_CLASSES = [
     'directory_components.middleware.NoCacheMiddlware',
 ]
 
-FEATURE_URL_PREFIX_ENABLED = env.bool('FEATURE_URL_PREFIX_ENABLED', False)
-URL_PREFIX_DOMAIN = env.str('URL_PREFIX_DOMAIN', '')
-if FEATURE_URL_PREFIX_ENABLED:
-    ROOT_URLCONF = 'conf.urls_prefixed'
-else:
-    ROOT_URLCONF = 'conf.urls'
+
+ROOT_URLCONF = 'conf.urls'
 
 
 TEMPLATES = [

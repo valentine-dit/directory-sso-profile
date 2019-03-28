@@ -202,3 +202,10 @@ urlpatterns = [
         name='find-a-buyer-admin-tools'
     ),
 ]
+
+urlpatterns = [
+    url(
+        r'^profile/',
+        include(urlpatterns)
+    )
+]
