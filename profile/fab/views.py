@@ -160,6 +160,31 @@ class ProductsServicesFormView(BaseFormView):
     template_name = 'fab/products-services-form.html'
 
 
+class ExpertiseRoutingFormView(BaseFormView):
+    form_class = forms.ExpertiseRoutingForm
+    template_name = 'fab/expertise-routing-form.html'
+
+    def form_valid(self, form):
+        if form.cleaned_data['choice'] == form.REGIONAL:
+            url = 'find-a-buyer-expertise-regional'
+        else:
+            raise NotImplementedError
+        return redirect(url)
+
+
+class ExpertiseFeatureFlagMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON']:
+            raise Http404()
+        return super().dispatch(request, *args, **kwargs)
+
+
+
+class RegionalExpertiseFormView(BaseFormView):
+    form_class = forms.RegionalExpertiseForm
+    template_name = 'fab/regional-expertise-form.html'
+
+
 class BusinessDetailsFormView(BaseFormView):
     template_name = 'fab/business-details-form.html'
 
