@@ -160,7 +160,14 @@ class ProductsServicesFormView(BaseFormView):
     template_name = 'fab/products-services-form.html'
 
 
-class ExpertiseRoutingFormView(BaseFormView):
+class ExpertiseFeatureFlagMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON']:
+            raise Http404()
+        return super().dispatch(request, *args, **kwargs)
+
+
+class ExpertiseRoutingFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.ExpertiseRoutingForm
     template_name = 'fab/expertise-routing-form.html'
 
@@ -172,15 +179,7 @@ class ExpertiseRoutingFormView(BaseFormView):
         return redirect(url)
 
 
-class ExpertiseFeatureFlagMixin:
-    def dispatch(self, request, *args, **kwargs):
-        if settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON']:
-            raise Http404()
-        return super().dispatch(request, *args, **kwargs)
-
-
-
-class RegionalExpertiseFormView(BaseFormView):
+class RegionalExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.RegionalExpertiseForm
     template_name = 'fab/regional-expertise-form.html'
 
