@@ -286,8 +286,10 @@ class ServicesRefererDetectorMixin:
     def dispatch(self, request, *args, **kwargs):
         referrer_entry_points = [urls.SERVICES_FAB]
         referrer_url = request.META.get('HTTP_REFERER')
-        if referrer_url in referrer_entry_points:
-            self.request.session[SESSION_KEY_REFERRER] = referrer_url
+        if referrer_url:
+            for url in referrer_entry_points:
+                if referrer_url.startswith(url):
+                    self.request.session[SESSION_KEY_REFERRER] = referrer_url
         return super().dispatch(request, *args, **kwargs)
 
 

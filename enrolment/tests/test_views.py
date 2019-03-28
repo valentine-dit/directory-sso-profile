@@ -1419,3 +1419,33 @@ def test_wizard_progress_indicator_mixin(
     response = view(request, step=views.USER_ACCOUNT)
 
     assert response.context_data['step_number'] == expected
+
+
+def test_session_referral_mixin_allowed_entry(rf, client):
+
+    class TestView(views.ServicesRefererDetectorMixin, TemplateView):
+        template_name = 'enrolment/start.html'
+
+    request = rf.get('/')
+    request.session = client.session
+    request.META['HTTP_REFERER'] = constants_url.SERVICES_FAB
+    view = TestView.as_view()
+    view(request)
+
+    assert request.session[
+        views.SESSION_KEY_REFERRER
+    ] == constants_url.SERVICES_FAB
+
+
+def test_session_referral_mixin_not_allowed_entry(rf, client):
+
+    class TestView(views.ServicesRefererDetectorMixin, TemplateView):
+        template_name = 'enrolment/start.html'
+
+    request = rf.get('/')
+    request.session = client.session
+    request.META['HTTP_REFERER'] = constants_url.CONTACT_US
+    view = TestView.as_view()
+    view(request)
+
+    assert request.session.get(views.SESSION_KEY_REFERRER) is None
