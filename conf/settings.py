@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     'profile',
     'enrolment',
     'directory_healthcheck',
-    'export_elements',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -332,6 +331,10 @@ FEATURE_FLAGS = {
     'ENROLMENT_SELECT_BUSINESS_ON': env.bool(
         'FEATURE_ENROLMENT_SELECT_BUSINESS_ENABLED', True
     ),
+    'NEW_HEADER_FOOTER_ON': env.bool(
+        'FEATURE_NEW_HEADER_FOOTER_ENABLED', False
+    ),
+    'HEADER_SEARCH_ON': env.bool('FEATURE_HEADER_SEARCH_ENABLED', False)
 }
 
 # Healthcheck

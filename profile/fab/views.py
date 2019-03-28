@@ -1,5 +1,3 @@
-import os
-
 from directory_api_client.client import api_client
 from formtools.wizard.views import NamedUrlSessionWizardView
 from raven.contrib.django.raven_compat.models import client as sentry_client
@@ -7,7 +5,7 @@ from requests.exceptions import RequestException
 
 from django.conf import settings
 from django.urls import reverse, reverse_lazy
-from django.core.files.storage import FileSystemStorage
+from django.core.files.storage import DefaultStorage
 from django.shortcuts import redirect, Http404
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView, FormView
@@ -198,9 +196,7 @@ class PublishFormView(BaseFormView):
 class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
     done_step_name = 'finished'
 
-    file_storage = FileSystemStorage(
-        location=os.path.join(settings.MEDIA_ROOT, 'tmp-supplier-media')
-    )
+    file_storage = DefaultStorage()
 
     form_list = (
         (BASIC, forms.CaseStudyBasicInfoForm),

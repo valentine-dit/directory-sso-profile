@@ -21,6 +21,7 @@ SESSION_KEY_ENROL_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
 SESSION_KEY_INGRESS_ANON = 'ANON_INGRESS'
 SESSION_KEY_COMPANY_CHOICE = 'COMPANY_CHOICE'
 SESSION_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
+SESSION_KEY_REFERRER = 'REFERRER_URL'
 
 PROGRESS_STEP_LABEL_USER_ACCOUNT = (
     'Enter your business email address and set a password'
@@ -273,6 +274,23 @@ class CreateUserProfileMixin:
         )
 
 
+class ServicesRefererDetectorMixin:
+    def get_referrer_context(self):
+        context = {}
+        referrer_url = self.request.session.get(SESSION_KEY_REFERRER)
+        if referrer_url and referrer_url.startswith(urls.SERVICES_FAB):
+            context = {'fab_referrer': True}
+        self.request.session.pop(SESSION_KEY_REFERRER, None)
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.session.get(SESSION_KEY_REFERRER) is None:
+            self.request.session[SESSION_KEY_REFERRER] = request.META.get(
+                'HTTP_REFERER'
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+
 class BusinessTypeRoutingView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin,
     StepsListMixin, FormView
@@ -313,7 +331,7 @@ class BusinessTypeRoutingView(
 
 class EnrolmentStartView(
     NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin,
-    StepsListMixin, TemplateView
+    StepsListMixin, ServicesRefererDetectorMixin, TemplateView
 ):
     template_name = 'enrolment/start.html'
 
@@ -347,6 +365,7 @@ class BaseEnrolmentWizardView(
     core.mixins.PreventCaptchaRevalidationMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
+    ServicesRefererDetectorMixin,
     NamedUrlSessionWizardView
 ):
 
@@ -453,7 +472,11 @@ class CompaniesHouseEnrolmentView(
             )
         else:
             self.create_company_profile(data)
-        return TemplateResponse(self.request, self.templates[FINISHED])
+        return TemplateResponse(
+            self.request,
+            self.templates[FINISHED],
+            context=self.get_referrer_context()
+        )
 
 
 class SoleTraderEnrolmentView(
@@ -520,7 +543,11 @@ class SoleTraderEnrolmentView(
         self.create_user_profile(form_dict[PERSONAL_INFO])
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
-        return TemplateResponse(self.request, self.templates[FINISHED])
+        return TemplateResponse(
+            self.request,
+            self.templates[FINISHED],
+            context=self.get_referrer_context()
+        )
 
     def serialize_form_list(self, form_list):
         return {
