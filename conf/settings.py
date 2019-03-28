@@ -66,7 +66,6 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'sso.middleware.SSOUserMiddleware',
     'directory_components.middleware.NoCacheMiddlware',
-    'directory_components.middleware.RobotsIndexControlHeaderMiddlware',
 ]
 
 FEATURE_URL_PREFIX_ENABLED = env.bool('FEATURE_URL_PREFIX_ENABLED', False)
@@ -318,16 +317,6 @@ FEATURE_FLAGS = {
     'BUSINESS_PROFILE_ON': env.bool(
         'FEATURE_BUSINESS_PROFILE_ENABLED', False
     ),
-    'EXPORT_JOURNEY_ON': env.bool('FEATURE_EXPORT_JOURNEY_ENABLED', True),
-    # used by directory-components
-    'MAINTENANCE_MODE_ON': env.bool('FEATURE_MAINTENANCE_MODE_ENABLED', False),
-    # used by directory-components
-    'SEARCH_ENGINE_INDEXING_OFF': env.bool(
-        'FEATURE_SEARCH_ENGINE_INDEXING_DISABLED', False
-    ),
-    'NEW_ACCOUNT_JOURNEY_ON': env.bool(
-        'FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED', False
-    ),
     'ENROLMENT_SELECT_BUSINESS_ON': env.bool(
         'FEATURE_ENROLMENT_SELECT_BUSINESS_ENABLED', True
     ),
@@ -335,6 +324,13 @@ FEATURE_FLAGS = {
         'FEATURE_NEW_HEADER_FOOTER_ENABLED', False
     ),
     'HEADER_SEARCH_ON': env.bool('FEATURE_HEADER_SEARCH_ENABLED', False)
+    'EXPERTISE_FIELDS_ON': env.bool('FEATURE_EXPERTISE_FIELDS_ENABLED', False),
+    # used by directory-components
+    'MAINTENANCE_MODE_ON': env.bool('FEATURE_MAINTENANCE_MODE_ENABLED', False),
+    # used by directory-components
+    'NEW_ACCOUNT_JOURNEY_ON': env.bool(
+        'FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED', False
+    ),
 }
 
 # Healthcheck
