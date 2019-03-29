@@ -9,14 +9,118 @@
 {% endblock %}
 
 {% block form_contents %}
-	{% include 'fab/breadcrumbs.html' with label='Add regional expertise' %}
+    {% include 'fab/breadcrumbs.html' with label='Add regional expertise' %}
+    <div id="selected-values-container">
+      <h3 class="heading-small">International expertise selected</h3>
+      <div id="selected-values"></div>
+    </div>
     <h1 class="heading-large">Add regional expertise</h1>
-	<div id="business-details-form">
-    	{{ block.super }}
+    <div id="business-details-form">
+        {{ block.super }}
     </div>
 {% endblock %}
 
+{% block form_button %}
+    <div id="add-container" style="display: none;">
+        <a class="button" id="add">Add</a>
+        <br>
+        <br>
+    </div>
+    {{ block.super }}
+{% endblock %}
 
 {% block body_js %}
+    <link href="{% static 'directory_components/js/vendor/accessible-autocomplete.min.css' %}" media="all" rel="stylesheet" />
+    <script type="text/javascript" src="{% static 'directory_components/js/vendor/accessible-autocomplete.min.js' %}"></script>
+    <script type="text/javascript">
+      var addContianerElement = document.getElementById('add-container');
+      var expertiseElement = document.getElementById('id_expertise_regions');
+      var selectedValuesElement = document.getElementById('selected-values');
 
+      renderSelectedValues();
+
+      var element = document.createElement('span');
+      expertiseElement.parentNode.insertBefore(element, expertiseElement);
+
+      accessibleAutocomplete({
+        element: element,
+        selectElement: expertiseElement,
+        defaultValue: '',
+        confirmOnBlur: false,
+        showAllValues: true,
+        id: expertiseElement.id + '_autocomplete',
+        onConfirm: function(confirmed) {
+          addContianerElement.style.display = 'block';
+        },
+        source: function(query, populateResults) {
+          var filtered = [].filter.call(
+            expertiseElement.options, 
+            function(option) { return (option.selected === false)
+          });
+          var results = filtered
+            .map(function(option) { return option.textContent || option.innerText })
+            .filter(function(result) { return result.toLowerCase().indexOf(query.toLowerCase()) !== -1 }); 
+          populateResults(results);
+        }
+      });
+      expertiseElement.style.display = 'none'
+      var autocompleteInputElement = document.getElementById('id_expertise_regions_autocomplete');
+
+      function setOption(label, selected) {
+        for (var i = 0; i < expertiseElement.options.length; i++) {
+          if (expertiseElement.options[i].innerHTML == label) {
+            expertiseElement.options[i].selected = selected;
+          }
+        }
+      }
+
+      function handleAdd() {
+        addContianerElement.style.display = 'none';
+        setOption(autocompleteInputElement.value, true);
+        renderSelectedValues();
+        autocompleteInputElement.value = '';
+        setTimeout(function() {
+          autocompleteInputElement.focus();
+        }, 200);
+      }
+
+      function handleRemove(event) {
+        setOption(event.target.value, false);
+        renderSelectedValues();
+        autocompleteInputElement.focus();
+      }
+
+      function createSelectedValueElement(label) {
+        var element = document.createElement('output');
+        element.innerHTML = label;
+        element.addEventListener('click', handleRemove);
+        return element;
+      }
+
+      function buildNothingSelectedElement() {
+        var element = document.createElement('a');
+        element.href = '#' + autocompleteInputElement.id;
+        element.class = 'link';
+        element.innerHTML = 'No regions selected. Click to add some.';
+        return element;
+      }
+
+      function renderSelectedValues(selectedValues) {
+        selectedValuesElement.innerHTML = '';
+        var fragment = document.createDocumentFragment();
+        for (var i = 0; i < expertiseElement.options.length; i++) {
+          var option = expertiseElement.options[i];
+          if (option.selected) {
+            var element = createSelectedValueElement(option.innerHTML);
+            fragment.appendChild(element);
+          }
+        }
+        if (fragment.childNodes.length === 0) {
+          var element = buildNothingSelectedElement();
+          fragment.appendChild(element);
+        }
+        selectedValuesElement.appendChild(fragment);
+      }
+      addContianerElement.addEventListener('click', handleAdd);
+    </script>
 {% endblock %}
