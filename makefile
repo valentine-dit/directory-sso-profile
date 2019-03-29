@@ -81,7 +81,10 @@ DEBUG_SET_ENV_VARS := \
 	export DIRECTORY_API_CLIENT_API_KEY=debug; \
 	export FEATURE_BUSINESS_PROFILE_ENABLED=true; \
 	export FEATURE_NEW_HEADER_FOOTER_ENABLED=true; \
-	export FEATURE_HEADER_SEARCH_ENABLED=false
+	export FEATURE_HEADER_SEARCH_ENABLED=false; \
+	export STORAGE_CLASS_NAME=local-storage; \
+	export LOCAL_STORAGE_DOMAIN=http://0.0.0.0:8000
+
 
 DEBUG_TEST_SET_ENV_VARS := \
 	export EXPORTING_OPPORTUNITIES_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \
