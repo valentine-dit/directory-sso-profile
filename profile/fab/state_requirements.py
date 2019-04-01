@@ -18,10 +18,11 @@ class UserStateRule(abc.ABC):
         Return a HttpResponse due to the user not being in the required state.
 
         """
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def is_user_in_required_state(self):
-        pass
+        raise NotImplementedError()
 
 
 class RedirectUserStateRule(UserStateRule):
@@ -29,6 +30,7 @@ class RedirectUserStateRule(UserStateRule):
     @property
     def redirect_url(self):
         """ The url to redirect to"""
+        raise NotImplementedError()
 
     def handle_invalid_state(self):
         return redirect(self.redirect_url)
