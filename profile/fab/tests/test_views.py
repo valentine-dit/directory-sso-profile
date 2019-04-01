@@ -283,6 +283,7 @@ edit_urls = (
     reverse('find-a-buyer-social'),
     reverse('find-a-buyer-products-and-services'),
     reverse('find-a-buyer-website'),
+    reverse('find-a-buyer-expertise-regional')
 )
 
 edit_data = (
@@ -295,6 +296,7 @@ edit_data = (
     },
     {'keywords': 'foo, bar, baz'},
     {'website': 'https://www.mycompany.com/'},
+    {'expertise_regions': ['WEST_MIDLANDS']},
 )
 
 
@@ -554,3 +556,35 @@ def test_business_details_companies_house(
     assert isinstance(
         response.context_data['form'], forms.CompaniesHouseBusinessDetailsForm
     )
+
+
+@pytest.mark.parametrize('url', (
+    reverse('find-a-buyer-expertise-routing'),
+    reverse('find-a-buyer-expertise-regional'),
+))
+def test_add_expertise_feature_fag_off(settings, url, client):
+    settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON'] = False
+
+    response = client.get(url)
+
+    assert response.status_code == 404
+
+
+@pytest.mark.parametrize('choice,expected_url', (
+    (
+        forms.ExpertiseRoutingForm.REGIONAL,
+        reverse('find-a-buyer-expertise-regional')
+    ),
+))
+def test_add_expertise_routing(
+    settings, choice, expected_url, client, mock_session_user
+):
+    mock_session_user.login()
+    settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON'] = True
+
+    url = reverse('find-a-buyer-expertise-routing')
+
+    response = client.post(url, {'choice': choice})
+
+    assert response.status_code == 302
+    assert response.url == expected_url
