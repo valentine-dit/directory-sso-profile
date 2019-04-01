@@ -3,11 +3,12 @@
 [![code-climate-image]][code-climate]
 [![circle-ci-image]][circle-ci]
 [![codecov-image]][codecov]
-[![snyk-image]][snyk]
+[![gitflow-image]][gitflow]
+[![calver-image]][calver]
 
 ---
 
-**EIG Single User Dashboard (SUD) - the Department for International Trade (DIT) service for managing EIG profiles.**
+**SSO Profile - the Department for International Trade (DIT) service for managing EIG profiles.**
 
 ### See also:
 | [directory-api](https://github.com/uktrade/directory-api) | [directory-ui-buyer](https://github.com/uktrade/directory-ui-buyer) | [directory-ui-supplier](https://github.com/uktrade/directory-ui-supplier) | [directory-ui-export-readiness](https://github.com/uktrade/directory-ui-export-readiness) |
@@ -23,42 +24,40 @@ The back-end framework is Django 1.9. The front-end uses minimal Javascript. The
 We aim to follow [GDS service standards](https://www.gov.uk/service-manual/service-standard) and [GDS design principles](https://www.gov.uk/design-principles).
 
 ## Requirements
-[Python 3.5](https://www.python.org/downloads/release/python-352/)
+[Python 3.6](https://www.python.org/downloads/release/python-366/)
 
-[Docker >= 1.10](https://docs.docker.com/engine/installation/)
-
-[Docker Compose >= 1.8](https://docs.docker.com/compose/install/)
+[Redis]( https://redis.io/)
 
 ### SASS
 We use SASS CSS pre-compiler. If you're doing front-end work your local machine will also need the following dependencies:
 
-[node](https://nodejs.org/en/download/), [SASS](http://sass-lang.com/)
+[node](https://nodejs.org/en/download/)
 
-## Running locally with Docker
-This requires all host environment variables to be set.
-
-    $ make docker_run
-
-### Run debug webserver in Docker
-
-    $ make docker_debug
-
-### Run tests in Docker
-
-    $ make docker_test
-
-### Host environment variables for docker-compose
-``.env`` files will be automatically created (with ``env_writer.py`` based on ``env.json``) by ``make docker_test``, based on host environment variables with ``DIRECTORY_UI_BUYER_`` prefix.
+[SASS](http://sass-lang.com/)
 
 
-## Running locally without Docker
+## Running locally
 
 ### Installing
     $ git clone https://github.com/uktrade/directory-sso-profile
     $ cd directory-sso-profile
-    $ virtualenv .venv -p python3.5
+    $ virtualenv .venv -p python3.6
     $ source .venv/bin/activate
     $ pip install -r requirements_test.txt
+
+### Configuration
+
+Secrets such as API keys and environment specific configurations are placed in `conf/.env` - a file that is not added to version control. You will need to create that file locally in order for the project to run.
+
+Here is an example `conf/.env` with placeholder values to get you going:
+```
+EXPORTING_OPPORTUNITIES_API_BASE_URL=debug
+EXPORTING_OPPORTUNITIES_API_SECRET=debug
+EXPORTING_OPPORTUNITIES_SEARCH_URL=debug
+GET_ADDRESS_API_KEY=debug
+DIRECTORY_FORMS_API_API_KEY=debug
+DIRECTORY_FORMS_API_SENDER_ID=debug
+```
 
 ### Running the webserver
     $ source .venv/bin/activate
@@ -122,5 +121,8 @@ Therefore to make cookie sharing work in development we need the apps to be runn
 [codecov-image]: https://codecov.io/gh/uktrade/directory-sso-profile/branch/master/graph/badge.svg
 [codecov]: https://codecov.io/gh/uktrade/directory-sso-profile
 
-[snyk-image]: https://snyk.io/test/github/uktrade/directory-sso-profile/badge.svg
-[snyk]: https://snyk.io/test/github/uktrade/directory-sso-profile
+[gitflow-image]: https://img.shields.io/badge/Branching%20strategy-gitflow-5FBB1C.svg
+[gitflow]: https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
+
+[calver-image]: https://img.shields.io/badge/Versioning%20strategy-CalVer-5FBB1C.svg
+[calver]: https://calver.org

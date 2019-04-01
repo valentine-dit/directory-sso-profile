@@ -35,3 +35,12 @@ class SSOLoginRequiredMixin:
         login_url_parts[4] = querystring.urlencode(safe='/')
 
         return HttpResponseRedirect(urlunparse(login_url_parts))
+
+
+def build_url_with_next(redirect_url, next_url):
+    resolved_url = resolve_url(redirect_url)
+    login_url_parts = list(urlparse(resolved_url))
+    querystring = QueryDict(login_url_parts[4], mutable=True)
+    querystring[settings.SSO_PROXY_REDIRECT_FIELD_NAME] = next_url
+    login_url_parts[4] = querystring.urlencode(safe='/')
+    return urlunparse(login_url_parts)

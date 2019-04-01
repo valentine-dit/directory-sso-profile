@@ -431,3 +431,50 @@ class SoleTraderBusinessDetailsForm(forms.Form):
 
     def clean_sectors(self):
         return [self.cleaned_data['sectors']]
+
+
+class ExpertiseRoutingForm(forms.Form):
+    INDUSTRY = 'INDUSTRY'
+    REGIONAL = 'REGIONAL'
+    COUNTRIES = 'COUNTRIES'
+    LANGUAGE = 'LANGUAGE'
+
+    CHOICES = (
+        (INDUSTRY, 'Industry expertise'),
+        (REGIONAL, 'Regional expertise'),
+        (COUNTRIES, 'International expertise'),
+        (LANGUAGE, 'Language expertise'),
+    )
+
+    choice = fields.ChoiceField(
+        label='Choose the specialist skills or knowledge',
+        choices=CHOICES,
+    )
+
+
+class RegionalExpertiseForm(forms.Form):
+    CHOICES = (
+        ('NORTH_EAST', 'North East'),
+        ('NORTH_WEST', 'North West'),
+        ('YORKSHIRE_AND_HUMBER', 'Yorkshire and the Humber'),
+        ('EAST_MIDLANDS', 'East Midlands'),
+        ('WEST_MIDLANDS', 'West Midlands'),
+        ('EASTERN', 'Eastern'),
+        ('LONDON', 'London'),
+        ('SOUTH_EAST', 'South East'),
+        ('SOUTH_WEST', 'South West'),
+        ('SCOTLAND', 'Scotland'),
+        ('WALES', 'Wales'),
+    )
+
+    expertise_regions = fields.MultipleChoiceField(
+        label='Select the region you have experience in',
+        choices=CHOICES,
+    )
+
+
+class CountryExpertiseForm(forms.Form):
+    expertise_countries = fields.MultipleChoiceField(
+        label='Select the country you have experience in',
+        choices=choices.COUNTRY_CHOICES,
+    )

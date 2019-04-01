@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 
-from directory_components.constants import IP_RETRIEVER_NAME_GOV_UK
 import directory_healthcheck.backends
 import environ
 
@@ -58,7 +57,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE_CLASSES = [
     'directory_components.middleware.MaintenanceModeMiddleware',
-    'directory_components.middleware.IPRestrictorMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'core.middleware.PrefixUrlMiddleware',
@@ -66,15 +64,10 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'sso.middleware.SSOUserMiddleware',
     'directory_components.middleware.NoCacheMiddlware',
-    'directory_components.middleware.RobotsIndexControlHeaderMiddlware',
 ]
 
-FEATURE_URL_PREFIX_ENABLED = env.bool('FEATURE_URL_PREFIX_ENABLED', False)
-URL_PREFIX_DOMAIN = env.str('URL_PREFIX_DOMAIN', '')
-if FEATURE_URL_PREFIX_ENABLED:
-    ROOT_URLCONF = 'conf.urls_prefixed'
-else:
-    ROOT_URLCONF = 'conf.urls'
+
+ROOT_URLCONF = 'conf.urls'
 
 
 TEMPLATES = [
@@ -339,20 +332,13 @@ FAB_ADD_USER_URL = env.str('FAB_ADD_USER_URL')
 FAB_REMOVE_USER_URL = env.str('FAB_REMOVE_USER_URL')
 FAB_TRANSFER_ACCOUNT_URL = env.str('FAB_TRANSFER_ACCOUNT_URL')
 
+FEATURE_URL_PREFIX_ENABLED = True,
+URL_PREFIX_DOMAIN = env.str('URL_PREFIX_DOMAIN', '')
+
 # feature flags
 FEATURE_FLAGS = {
     'BUSINESS_PROFILE_ON': env.bool(
         'FEATURE_BUSINESS_PROFILE_ENABLED', False
-    ),
-    'EXPORT_JOURNEY_ON': env.bool('FEATURE_EXPORT_JOURNEY_ENABLED', True),
-    # used by directory-components
-    'MAINTENANCE_MODE_ON': env.bool('FEATURE_MAINTENANCE_MODE_ENABLED', False),
-    # used by directory-components
-    'SEARCH_ENGINE_INDEXING_OFF': env.bool(
-        'FEATURE_SEARCH_ENGINE_INDEXING_DISABLED', False
-    ),
-    'NEW_ACCOUNT_JOURNEY_ON': env.bool(
-        'FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED', False
     ),
     'ENROLMENT_SELECT_BUSINESS_ON': env.bool(
         'FEATURE_ENROLMENT_SELECT_BUSINESS_ENABLED', True
@@ -360,7 +346,14 @@ FEATURE_FLAGS = {
     'NEW_HEADER_FOOTER_ON': env.bool(
         'FEATURE_NEW_HEADER_FOOTER_ENABLED', False
     ),
-    'HEADER_SEARCH_ON': env.bool('FEATURE_HEADER_SEARCH_ENABLED', False)
+    'HEADER_SEARCH_ON': env.bool('FEATURE_HEADER_SEARCH_ENABLED', False),
+    'EXPERTISE_FIELDS_ON': env.bool('FEATURE_EXPERTISE_FIELDS_ENABLED', False),
+    # used by directory-components
+    'MAINTENANCE_MODE_ON': env.bool('FEATURE_MAINTENANCE_MODE_ENABLED', False),
+    # used by directory-components
+    'NEW_ACCOUNT_JOURNEY_ON': env.bool(
+        'FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED', False
+    ),
 }
 
 # Healthcheck
@@ -375,32 +368,6 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     )
 }
-
-# ip-restrictor
-IP_RESTRICTOR_SKIP_CHECK_ENABLED = env.bool(
-    'IP_RESTRICTOR_SKIP_CHECK_ENABLED', False
-)
-IP_RESTRICTOR_SKIP_CHECK_SENDER_ID = env.str(
-    'IP_RESTRICTOR_SKIP_CHECK_SENDER_ID', ''
-)
-IP_RESTRICTOR_SKIP_CHECK_SECRET = env.str(
-    'IP_RESTRICTOR_SKIP_CHECK_SECRET', ''
-)
-IP_RESTRICTOR_REMOTE_IP_ADDRESS_RETRIEVER = env.str(
-    'IP_RESTRICTOR_REMOTE_IP_ADDRESS_RETRIEVER',
-    IP_RETRIEVER_NAME_GOV_UK
-)
-RESTRICT_ADMIN = env.bool('IP_RESTRICTOR_RESTRICT_IPS', False)
-ALLOWED_ADMIN_IPS = env.list('IP_RESTRICTOR_ALLOWED_ADMIN_IPS', default=[])
-ALLOWED_ADMIN_IP_RANGES = env.list(
-    'IP_RESTRICTOR_ALLOWED_ADMIN_IP_RANGES', default=[]
-)
-RESTRICTED_APP_NAMES = env.list(
-    'IP_RESTRICTOR_RESTRICTED_APP_NAMES', default=['admin']
-)
-if env.bool('IP_RESTRICTOR_RESTRICT_UI', False):
-    # restrict all pages that are not in apps API, healthcheck, admin, etc
-    RESTRICTED_APP_NAMES.append('')
 
 # Google captcha
 RECAPTCHA_PUBLIC_KEY = env.str('RECAPTCHA_PUBLIC_KEY')

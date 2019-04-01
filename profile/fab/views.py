@@ -13,9 +13,17 @@ from django.views.generic import TemplateView, FormView
 from profile.fab import forms, helpers
 from sso.utils import SSOLoginRequiredMixin
 
+from profile.fab import state_requirements
 
 BASIC = 'details'
 MEDIA = 'images'
+
+
+class ExpertiseFeatureFlagMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if not settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON']:
+            raise Http404()
+        return super().dispatch(request, *args, **kwargs)
 
 
 class CompanyProfileMixin:
@@ -90,7 +98,15 @@ class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
                 return value
 
 
-class BaseFormView(CompanyProfileMixin, FormView):
+class BaseFormView(
+    state_requirements.UserStateRequirementHandlerMixin, CompanyProfileMixin,
+    FormView
+):
+    required_user_states = [
+        state_requirements.IsLoggedIn,
+        state_requirements.HasCompany,
+    ]
+
     success_url = reverse_lazy('find-a-buyer')
 
     def get_initial(self):
@@ -160,6 +176,39 @@ class ProductsServicesFormView(BaseFormView):
     template_name = 'fab/products-services-form.html'
 
 
+class ExpertiseRoutingFormView(
+    ExpertiseFeatureFlagMixin,
+    state_requirements.UserStateRequirementHandlerMixin,
+    CompanyProfileMixin, FormView
+):
+    required_user_states = [
+        state_requirements.IsLoggedIn,
+        state_requirements.HasCompany,
+    ]
+
+    form_class = forms.ExpertiseRoutingForm
+    template_name = 'fab/expertise-routing-form.html'
+
+    def form_valid(self, form):
+        if form.cleaned_data['choice'] == form.REGIONAL:
+            url = reverse('find-a-buyer-expertise-regional')
+        elif form.cleaned_data['choice'] == form.COUNTRIES:
+            url = reverse('find-a-buyer-expertise-countries')
+        else:
+            raise NotImplementedError
+        return redirect(url)
+
+
+class RegionalExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
+    form_class = forms.RegionalExpertiseForm
+    template_name = 'fab/expertise-regions-form.html'
+
+
+class CountryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
+    form_class = forms.CountryExpertiseForm
+    template_name = 'fab/expertise-countries-form.html'
+
+
 class BusinessDetailsFormView(BaseFormView):
     template_name = 'fab/business-details-form.html'
 
@@ -193,7 +242,16 @@ class PublishFormView(BaseFormView):
         return reverse('find-a-buyer') + '?published'
 
 
-class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
+class BaseCaseStudyWizardView(
+    state_requirements.UserStateRequirementHandlerMixin,
+    CompanyProfileMixin,
+    NamedUrlSessionWizardView
+):
+    required_user_states = [
+        state_requirements.IsLoggedIn,
+        state_requirements.HasCompany,
+    ]
+
     done_step_name = 'finished'
 
     file_storage = DefaultStorage()
@@ -225,6 +283,7 @@ class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
 
 
 class CaseStudyWizardEditView(BaseCaseStudyWizardView):
+
     def get_form_initial(self, step):
         response = api_client.company.retrieve_private_case_study(
             sso_session_id=self.request.sso_user.session_id,
@@ -260,7 +319,15 @@ class CaseStudyWizardCreateView(BaseCaseStudyWizardView):
         return redirect('find-a-buyer')
 
 
-class AdminToolsView(CompanyProfileMixin, TemplateView):
+class AdminToolsView(
+    CompanyProfileMixin, state_requirements.UserStateRequirementHandlerMixin,
+    TemplateView
+):
+    required_user_states = [
+        state_requirements.IsLoggedIn,
+        state_requirements.HasCompany,
+    ]
+
     template_name = 'fab/admin-tools.html'
 
     def get_context_data(self, **kwargs):

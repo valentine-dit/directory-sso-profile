@@ -293,3 +293,42 @@
   display: block;
   margin-right: 20px;
 }
+
+#selected-values-container {
+  padding: 30px;
+  background-color: $stone-40;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+  output {
+    background-color: $stone;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    padding: 2px 15px;
+    margin-right: 15px;
+    display: inline-block;
+    &:after {
+      content: '❌';
+      color: $mid-blue;
+      margin-left: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  }
+}
+
+#content form input.autocomplete__input {
+  z-index: auto;
+}
+
+#content .autocomplete__option {
+  height: 55px;
+  padding-top: 15px;
+  padding-left: 15px;
+}
+
+#add-container {
+  margin-bottom: 45px;
+}
