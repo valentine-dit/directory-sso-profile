@@ -192,9 +192,14 @@ urlpatterns = [
         name='find-a-buyer-expertise-routing'
     ),
     url(
-        r'^find-a-buyer/add-expertise/regional/$',
+        r'^find-a-buyer/add-expertise/regions/$',
         profile.fab.views.RegionalExpertiseFormView.as_view(),
         name='find-a-buyer-expertise-regional'
+    ),
+    url(
+        r'^find-a-buyer/add-expertise/countries/$',
+        profile.fab.views.CountryExpertiseFormView.as_view(),
+        name='find-a-buyer-expertise-countries'
     ),
     url(
         r'^find-a-buyer/admin/$',
