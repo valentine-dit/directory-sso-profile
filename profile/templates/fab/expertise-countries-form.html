@@ -11,7 +11,7 @@
 {% block form_contents %}
     {% include 'fab/breadcrumbs.html' with label='Add country expertise' %}
     <div id="selected-values-container" class="js-enabled-only">
-      <h3 class="heading-small">Country expertise selected</h3>
+      <h2 class="heading-small">Country expertise selected</h2>
       <div id="selected-values"></div>
     </div>
     <h1 class="heading-large">Add country expertise</h1>
@@ -23,8 +23,6 @@
 {% block form_button %}
     <div id="add-container" style="display: none;">
         <a class="button" id="add">Add</a>
-        <br>
-        <br>
     </div>
     {{ block.super }}
 {% endblock %}
