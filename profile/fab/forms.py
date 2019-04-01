@@ -436,13 +436,13 @@ class SoleTraderBusinessDetailsForm(forms.Form):
 class ExpertiseRoutingForm(forms.Form):
     INDUSTRY = 'INDUSTRY'
     REGIONAL = 'REGIONAL'
-    INTERNATIONAL = 'INTERNATIONAL'
+    COUNTRIES = 'COUNTRIES'
     LANGUAGE = 'LANGUAGE'
 
     CHOICES = (
         (INDUSTRY, 'Industry expertise'),
         (REGIONAL, 'Regional expertise'),
-        (INTERNATIONAL, 'International expertise'),
+        (COUNTRIES, 'International expertise'),
         (LANGUAGE, 'Language expertise'),
     )
 
@@ -470,4 +470,11 @@ class RegionalExpertiseForm(forms.Form):
     expertise_regions = fields.MultipleChoiceField(
         label='Select the region you have experience in',
         choices=CHOICES,
+    )
+
+
+class CountryExpertiseForm(forms.Form):
+    expertise_countries = fields.MultipleChoiceField(
+        label='Select the country you have experience in',
+        choices=choices.COUNTRY_CHOICES,
     )

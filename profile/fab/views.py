@@ -191,7 +191,9 @@ class ExpertiseRoutingFormView(
 
     def form_valid(self, form):
         if form.cleaned_data['choice'] == form.REGIONAL:
-            url = 'find-a-buyer-expertise-regional'
+            url = reverse('find-a-buyer-expertise-regional')
+        elif form.cleaned_data['choice'] == form.COUNTRIES:
+            url = reverse('find-a-buyer-expertise-countries')
         else:
             raise NotImplementedError
         return redirect(url)
@@ -199,7 +201,12 @@ class ExpertiseRoutingFormView(
 
 class RegionalExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.RegionalExpertiseForm
-    template_name = 'fab/regional-expertise-form.html'
+    template_name = 'fab/expertise-regions-form.html'
+
+
+class CountryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
+    form_class = forms.CountryExpertiseForm
+    template_name = 'fab/expertise-countries-form.html'
 
 
 class BusinessDetailsFormView(BaseFormView):
