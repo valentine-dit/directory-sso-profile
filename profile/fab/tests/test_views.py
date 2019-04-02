@@ -285,6 +285,8 @@ edit_urls = (
     reverse('find-a-buyer-website'),
     reverse('find-a-buyer-expertise-regional'),
     reverse('find-a-buyer-expertise-countries'),
+    reverse('find-a-buyer-expertise-industries'),
+    reverse('find-a-buyer-expertise-languages'),
 )
 
 edit_data = (
@@ -298,7 +300,9 @@ edit_data = (
     {'keywords': 'foo, bar, baz'},
     {'website': 'https://www.mycompany.com/'},
     {'expertise_regions': ['WEST_MIDLANDS']},
-    {'expertise_countries': ['AL']}
+    {'expertise_countries': ['AL']},
+    {'expertise_industries': ['AEROSPACE']},
+    {'expertise_languages', ['en-gb']},
 )
 
 
@@ -564,6 +568,7 @@ def test_business_details_companies_house(
     reverse('find-a-buyer-expertise-routing'),
     reverse('find-a-buyer-expertise-regional'),
     reverse('find-a-buyer-expertise-countries'),
+    reverse('find-a-buyer-expertise-languages'),
 ))
 def test_add_expertise_feature_fag_off(settings, url, client):
     settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON'] = False
@@ -575,13 +580,21 @@ def test_add_expertise_feature_fag_off(settings, url, client):
 
 @pytest.mark.parametrize('choice,expected_url', (
     (
-        forms.ExpertiseRoutingForm.REGIONAL,
+        forms.ExpertiseRoutingForm.REGION,
         reverse('find-a-buyer-expertise-regional')
     ),
     (
-        forms.ExpertiseRoutingForm.COUNTRIES,
+        forms.ExpertiseRoutingForm.COUNTRY,
         reverse('find-a-buyer-expertise-countries'),
-    )
+    ),
+    (
+        forms.ExpertiseRoutingForm.INDUSTRY,
+        reverse('find-a-buyer-expertise-industries'),
+    ),
+    (
+        forms.ExpertiseRoutingForm.COUNTRY,
+        reverse('find-a-buyer-expertise-languages'),
+    ),
 ))
 def test_add_expertise_routing(
     settings, choice, expected_url, client, mock_session_user

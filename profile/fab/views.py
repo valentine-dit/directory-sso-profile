@@ -190,13 +190,24 @@ class ExpertiseRoutingFormView(
     template_name = 'fab/expertise-routing-form.html'
 
     def form_valid(self, form):
-        if form.cleaned_data['choice'] == form.REGIONAL:
+        if form.cleaned_data['choice'] == form.REGION:
             url = reverse('find-a-buyer-expertise-regional')
-        elif form.cleaned_data['choice'] == form.COUNTRIES:
+        elif form.cleaned_data['choice'] == form.COUNTRY:
             url = reverse('find-a-buyer-expertise-countries')
+        elif form.cleaned_data['choice'] == form.INDUSTRY:
+            url = reverse('find-a-buyer-expertise-industries')
+        elif form.cleaned_data['choice'] == form.LANGUAGE:
+            url = reverse('find-a-buyer-expertise-languages')
         else:
             raise NotImplementedError
         return redirect(url)
+
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            company=self.company.serialize_for_template(),
+            **kwargs,
+        )
 
 
 class RegionalExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
@@ -207,6 +218,16 @@ class RegionalExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
 class CountryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.CountryExpertiseForm
     template_name = 'fab/expertise-countries-form.html'
+
+
+class IndustryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
+    form_class = forms.IndustryExpertiseForm
+    template_name = 'fab/expertise-industry-form.html'
+
+
+class LanguageExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
+    form_class = forms.LanguageExpertiseForm
+    template_name = 'fab/expertise-language-form.html'
 
 
 class BusinessDetailsFormView(BaseFormView):
