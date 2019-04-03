@@ -83,11 +83,12 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
+
     captcha = ReCaptchaField(
         label='',
         label_suffix='',
     )
-
+    
     terms_agreed = fields.BooleanField(
         label=mark_safe(
             'Tick this box to accept the '
@@ -249,8 +250,12 @@ class CompaniesHouseBusinessDetails(forms.Form):
 
     def clean_address(self):
         address_parts = self.cleaned_data['address'].split(',')
-        self.cleaned_data['address_line_1'] = address_parts[0].strip()
-        self.cleaned_data['address_line_2'] = address_parts[1].strip()
+        counter = 1
+        for address_part in address_parts:
+            self.cleaned_data[
+                'address_line_{}'.format(counter)
+            ] = address_part.strip()
+            counter += 1
         return self.cleaned_data['address']
 
     def clean_sectors(self):
