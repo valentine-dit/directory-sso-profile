@@ -57,11 +57,13 @@ dit.components.expertise = (function() {
 
     function handleRemove(event) {
       setOption(event.target.value, false);
-      autocompleteInputElement.focus();
     }
 
     function createSelectedValueElement(label) {
-      var element = document.createElement('output');
+      var element = document.createElement('button');
+      element.setAttribute('tabindex', 0);
+      element.setAttribute('title', 'Click to remove this expertise');
+      element.value = label;
       element.innerHTML = label;
       element.addEventListener('click', handleRemove);
       return element;
