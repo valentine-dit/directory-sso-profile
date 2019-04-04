@@ -169,6 +169,8 @@ class WebsiteFormView(BaseFormView):
 
 
 class LogoFormView(BaseFormView):
+    def get_initial(self):
+        return {}
     form_class = forms.LogoForm
     template_name = 'fab/logo-form.html'
     success_message = 'Logo updated'

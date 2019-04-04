@@ -109,3 +109,4 @@ def test_sole_trader_business_details_form():
 
     form.is_valid()
     assert form.cleaned_data['sectors'] == ['MINING']
+
