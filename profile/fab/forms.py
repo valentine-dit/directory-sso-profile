@@ -631,6 +631,7 @@ class RegionalExpertiseForm(forms.Form):
     expertise_regions = fields.MultipleChoiceField(
         label='Select the regions you have experience in',
         choices=REGION_CHOICES,
+        required=False,
     )
 
 
@@ -638,6 +639,7 @@ class CountryExpertiseForm(forms.Form):
     expertise_countries = fields.MultipleChoiceField(
         label='Select the countries you have experience in',
         choices=choices.COUNTRY_CHOICES,
+        required=False,
     )
 
 
@@ -645,6 +647,7 @@ class IndustryExpertiseForm(forms.Form):
     expertise_industries = fields.MultipleChoiceField(
         label='Select the industries you have experience in',
         choices=choices.INDUSTRIES,
+        required=False,
     )
 
 
@@ -652,4 +655,5 @@ class LanguageExpertiseForm(forms.Form):
     expertise_languages = fields.MultipleChoiceField(
         label='Select the languages you have experience in',
         choices=LANGUAGES_CHOICES,
+        required=False,
     )
