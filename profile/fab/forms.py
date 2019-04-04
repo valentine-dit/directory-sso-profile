@@ -4,7 +4,8 @@ import directory_validators.company
 import directory_validators.enrolment
 
 from django.conf import settings
-from django.forms import ImageField, Textarea
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.forms import ImageField, Textarea, ValidationError
 from django.utils.safestring import mark_safe
 
 from enrolment.fields import DateField
@@ -472,6 +473,7 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
 
 
 class LogoForm(forms.Form):
+    VALIDATION_REQUIRED_MSG = 'This field is required.'
     logo = ImageField(
         help_text=(
             'For best results this should be a transparent PNG file of 600 x '
@@ -485,6 +487,12 @@ class LogoForm(forms.Form):
             directory_validators.company.image_format,
         ]
     )
+
+    def clean_logo(self):
+        image = self.cleaned_data.get('logo')
+        if type(image) is not InMemoryUploadedFile:
+            raise ValidationError(self.VALIDATION_REQUIRED_MSG)
+        return image
 
 
 class ProductsServicesForm(forms.Form):

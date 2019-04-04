@@ -415,6 +415,23 @@ def test_edit_page_logo_submmit_success(
     )
 
 
+def test_edit_page_logo_submmit_unsuccessfull(
+    returned_client, mock_update_company, sso_user,
+    sso_user_middleware
+):
+    url = reverse('find-a-buyer-logo')
+    data = {
+        'logo': 'urltoimage'
+    }
+
+    response = returned_client.post(url, data)
+
+    assert response.status_code == 200
+    assert response.context_data[
+        'form'
+    ].errors['logo'] == ['This field is required.']
+
+
 @pytest.mark.parametrize('url,data', zip(edit_urls, edit_data))
 def test_edit_page_submmit_error(
     returned_client, mock_update_company, url, data, sso_user_middleware
