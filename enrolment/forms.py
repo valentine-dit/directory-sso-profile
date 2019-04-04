@@ -83,6 +83,7 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
+
     captcha = ReCaptchaField(
         label='',
         label_suffix='',
@@ -202,7 +203,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
         label='What industry is your company in?',
         choices=INDUSTRY_CHOICES,
     )
-    website_address = fields.URLField(
+    website = fields.URLField(
         label='What\'s your business web address (optional)',
         help_text='The website address must start with http:// or https://',
         required=False,
@@ -227,7 +228,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
 
     def delete_already_enrolled_fields(self):
         del self.fields['sectors']
-        del self.fields['website_address']
+        del self.fields['website']
 
     def set_form_initial(self, company_profile):
         company = helpers.CompanyProfileFormatter(company_profile)
@@ -249,8 +250,9 @@ class CompaniesHouseBusinessDetails(forms.Form):
 
     def clean_address(self):
         address_parts = self.cleaned_data['address'].split(',')
-        self.cleaned_data['address_line_1'] = address_parts[0].strip()
-        self.cleaned_data['address_line_2'] = address_parts[1].strip()
+        for i, address_part in enumerate(address_parts, start=1):
+            field_name = f'address_line_{i}'
+            self.cleaned_data[field_name] = address_part.strip()
         return self.cleaned_data['address']
 
     def clean_sectors(self):
@@ -322,7 +324,7 @@ class SoleTraderBusinessDetails(forms.Form):
         label='What industry is your business in?',
         choices=INDUSTRY_CHOICES,
     )
-    website_address = fields.URLField(
+    website = fields.URLField(
         label='What\'s your business web address (optional)',
         help_text='The website address must start with http:// or https://',
         required=False,
