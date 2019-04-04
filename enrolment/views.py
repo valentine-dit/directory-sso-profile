@@ -241,7 +241,7 @@ class CreateCompanyProfileMixin:
             'phone_number',
             'postal_code',
             'sic',
-            'website_address',
+            'website',
         ]
         return {
             key: value for key, value in data.items()
