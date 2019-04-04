@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.contenttypes',  # required by DRF, not using any DB
     'django.contrib.auth',
+    'django.contrib.messages',
     'captcha',
     'core',
     'directory_constants',
@@ -62,6 +63,7 @@ MIDDLEWARE_CLASSES = [
     'core.middleware.PrefixUrlMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'sso.middleware.SSOUserMiddleware',
     'directory_components.middleware.NoCacheMiddlware',
 ]
@@ -80,6 +82,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'sso.context_processors.sso_processor',
+                'django.contrib.messages.context_processors.messages',
                 'directory_components.context_processors.urls_processor',
                 ('directory_components.context_processors.'
                  'header_footer_processor'),

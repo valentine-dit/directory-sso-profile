@@ -3,12 +3,12 @@
 {% load static from staticfiles %}
 
 {% block form_contents %}
-    {% include 'fab/breadcrumbs.html' with label='Add regional expertise' %}
+    {% include 'fab/breadcrumbs.html' with label='Add industry expertise' %}
     <div id="selected-values-container" class="js-enabled-only">
-      <h2 class="heading-small">Regional expertise selected</h2>
+      <h2 class="heading-small">Industry expertise selected</h2>
       <div id="selected-values"></div>
     </div>
-    <h1 class="heading-large">Add regional expertise</h1>
+    <h1 class="heading-large">Add industry expertise</h1>
     <div id="business-details-form">
         {{ block.super }}
     </div>
@@ -20,9 +20,9 @@
     <script type="text/javascript" src="{% static 'js/expertise.js' %}"></script>
     <script type="text/javascript">
       dit.components.expertise({
-        multiselectElement: document.getElementById('id_expertise_regions'),
+        multiselectElement: document.getElementById('id_expertise_industries'),
         selectedValuesElement: document.getElementById('selected-values'),
-        noResultsLabel: 'No regions selected. Click to add some.',
+        noResultsLabel: 'No industries selected. Click to add some.',
       })
     </script>
 {% endblock %}

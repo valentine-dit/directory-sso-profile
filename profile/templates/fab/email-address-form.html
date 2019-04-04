@@ -1,13 +1,5 @@
 {% extends 'fab/base-form.html' %}
 
-{% load render_form from directory_components_tags %}
-{% load static from staticfiles %}
-
-{% block head_css %}
-    {{ block.super }}
-    <link href="{% static 'css/company-profile.css' %}" media="all" rel="stylesheet" />
-{% endblock %}
-
 {% block form_contents %}
     {% include 'fab/breadcrumbs.html' with label='Email address' %}
     <h1 class="heading-large">Business profile email address</h1>

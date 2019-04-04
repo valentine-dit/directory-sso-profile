@@ -271,10 +271,8 @@ def test_success_message(
 
     url = reverse('find-a-buyer')
     response = returned_client.get(url, {param: True})
-
-    assert response.context_data['success_message'] == (
-        views.FindABuyerView.SUCCESS_MESSAGES[param]
-    )
+    for message in response.context['messages']:
+        assert str(message) == views.FindABuyerView.SUCCESS_MESSAGES[param]
 
 
 edit_urls = (
@@ -285,6 +283,8 @@ edit_urls = (
     reverse('find-a-buyer-website'),
     reverse('find-a-buyer-expertise-regional'),
     reverse('find-a-buyer-expertise-countries'),
+    reverse('find-a-buyer-expertise-industries'),
+    reverse('find-a-buyer-expertise-languages'),
 )
 
 edit_data = (
@@ -298,7 +298,9 @@ edit_data = (
     {'keywords': 'foo, bar, baz'},
     {'website': 'https://www.mycompany.com/'},
     {'expertise_regions': ['WEST_MIDLANDS']},
-    {'expertise_countries': ['AL']}
+    {'expertise_countries': ['AL']},
+    {'expertise_industries': ['POWER']},
+    {'expertise_languages': ['ab']},
 )
 
 
@@ -369,7 +371,7 @@ def test_edit_page_submmit_publish_success(
     response = returned_client.post(url, data)
 
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer') + '?published'
+    assert response.url == reverse('find-a-buyer')
     assert mock_update_company.call_count == 1
     assert mock_update_company.call_args == mock.call(
         sso_session_id=sso_user.session_id,
@@ -564,6 +566,7 @@ def test_business_details_companies_house(
     reverse('find-a-buyer-expertise-routing'),
     reverse('find-a-buyer-expertise-regional'),
     reverse('find-a-buyer-expertise-countries'),
+    reverse('find-a-buyer-expertise-languages'),
 ))
 def test_add_expertise_feature_fag_off(settings, url, client):
     settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON'] = False
@@ -575,13 +578,21 @@ def test_add_expertise_feature_fag_off(settings, url, client):
 
 @pytest.mark.parametrize('choice,expected_url', (
     (
-        forms.ExpertiseRoutingForm.REGIONAL,
+        forms.ExpertiseRoutingForm.REGION,
         reverse('find-a-buyer-expertise-regional')
     ),
     (
-        forms.ExpertiseRoutingForm.COUNTRIES,
+        forms.ExpertiseRoutingForm.COUNTRY,
         reverse('find-a-buyer-expertise-countries'),
-    )
+    ),
+    (
+        forms.ExpertiseRoutingForm.INDUSTRY,
+        reverse('find-a-buyer-expertise-industries'),
+    ),
+    (
+        forms.ExpertiseRoutingForm.LANGUAGE,
+        reverse('find-a-buyer-expertise-languages'),
+    ),
 ))
 def test_add_expertise_routing(
     settings, choice, expected_url, client, mock_session_user
@@ -595,3 +606,12 @@ def test_add_expertise_routing(
 
     assert response.status_code == 302
     assert response.url == expected_url
+
+
+def test_expertise_routing_form(client, settings, sso_user_middleware):
+    url = reverse('find-a-buyer-expertise-routing')
+
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['company']

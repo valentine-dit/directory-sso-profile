@@ -5,7 +5,6 @@ dit.components.expertise = (function() {
   function ExpertiseTypeahead(options) {
 
     var multiselectElement = options.multiselectElement;
-    var addButtonContainerElement = options.addButtonContainerElement;
     var selectedValuesElement = options.selectedValuesElement;
     var noResultsLabel = options.noResultsLabel;
     var autocompleteId = multiselectElement.id + '_autocomplete';
@@ -19,9 +18,7 @@ dit.components.expertise = (function() {
       confirmOnBlur: false,
       showAllValues: true,
       id: autocompleteId,
-      onConfirm: function(confirmed) {
-        addButtonContainerElement.style.display = 'block';
-      },
+      onConfirm: handleAdd,
       source: function(query, populateResults) {
         var filtered = [].filter.call(
           multiselectElement.options, 
@@ -43,21 +40,23 @@ dit.components.expertise = (function() {
           multiselectElement.options[i].selected = selected;
         }
       }
+      renderSelectedValues();
     }
 
-    function handleAdd() {
-      addButtonContainerElement.style.display = 'none';
-      setOption(autocompleteInputElement.value, true);
-      renderSelectedValues();
-      autocompleteInputElement.value = '';
+    function handleAdd(value) {
+      setOption(value, true);
+      // hack to clear the input box. delay 150ms to allow the react component
+      // to render iwth the new value first.
+      // hide the selected value by making it the same colour as the input box
+      autocompleteInputElement.style.color = 'white';
       setTimeout(function() {
-        autocompleteInputElement.focus();
-      }, 200);
+        autocompleteInputElement.value = '';
+        autocompleteInputElement.style.color = 'black';
+      }, 150);
     }
 
     function handleRemove(event) {
       setOption(event.target.value, false);
-      renderSelectedValues();
       autocompleteInputElement.focus();
     }
 
@@ -76,7 +75,7 @@ dit.components.expertise = (function() {
       return element;
     }
 
-    function renderSelectedValues(selectedValues) {
+    function renderSelectedValues() {
       selectedValuesElement.innerHTML = '';
       var fragment = document.createDocumentFragment();
       for (var i = 0; i < multiselectElement.options.length; i++) {
@@ -92,7 +91,6 @@ dit.components.expertise = (function() {
       }
       selectedValuesElement.appendChild(fragment);
     }
-    addButtonContainerElement.addEventListener('click', handleAdd);
 
   }
   return function(options) {

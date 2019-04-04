@@ -4,6 +4,7 @@ from raven.contrib.django.raven_compat.models import client as sentry_client
 from requests.exceptions import RequestException
 
 from django.conf import settings
+from django.contrib import messages
 from django.urls import reverse, reverse_lazy
 from django.core.files.storage import DefaultStorage
 from django.shortcuts import redirect, Http404
@@ -41,12 +42,8 @@ class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
         'owner-transferred': (
             'We’ve sent a confirmation email to the new profile owner.'
         ),
-        'user-added': (
-            'We’ve sent an invitation to the user you want added to your '
-            'profile.'
-        ),
+        'user-added': 'We’ve emailed the user you want added to your profile.',
         'user-removed': 'User successfully removed from your profile.',
-        'published': 'Published status successfully changed.'
     }
 
     def dispatch(self, request, *args, **kwargs):
@@ -56,6 +53,12 @@ class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
             else:
                 return self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)
+
+    def get(self, *args, **kwargs):
+        for key, message in self.SUCCESS_MESSAGES.items():
+            if key in self.request.GET:
+                messages.add_message(self.request, messages.SUCCESS, message)
+        return super().get(*args, **kwargs)
 
     def get_template_names(self, *args, **kwargs):
         if self.company:
@@ -89,13 +92,7 @@ class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
             'FAB_ADD_USER_URL': settings.FAB_ADD_USER_URL,
             'FAB_REMOVE_USER_URL': settings.FAB_REMOVE_USER_URL,
             'FAB_TRANSFER_ACCOUNT_URL': settings.FAB_TRANSFER_ACCOUNT_URL,
-            'success_message': self.get_success_messages()
         }
-
-    def get_success_messages(self):
-        for key, value in self.SUCCESS_MESSAGES.items():
-            if key in self.request.GET:
-                return value
 
 
 class BaseFormView(
@@ -126,6 +123,7 @@ class BaseFormView(
             )
             raise
         else:
+            messages.success(self.request, self.success_message)
             return redirect(self.success_url)
 
     def serialize_form(self, form):
@@ -149,31 +147,37 @@ class BaseFormView(
 class SocialLinksFormView(BaseFormView):
     template_name = 'fab/social-links-form.html'
     form_class = forms.SocialLinksForm
+    success_message = 'Social links updated'
 
 
 class EmailAddressFormView(BaseFormView):
     template_name = 'fab/email-address-form.html'
     form_class = forms.EmailAddressForm
+    success_message = 'Email address updated'
 
 
 class DescriptionFormView(BaseFormView):
     form_class = forms.DescriptionForm
     template_name = 'fab/description-form.html'
+    success_message = 'Description updated'
 
 
 class WebsiteFormView(BaseFormView):
     form_class = forms.WebsiteForm
     template_name = 'fab/website-form.html'
+    success_message = 'Website updated'
 
 
 class LogoFormView(BaseFormView):
     form_class = forms.LogoForm
     template_name = 'fab/logo-form.html'
+    success_message = 'Logo updated'
 
 
 class ProductsServicesFormView(BaseFormView):
     form_class = forms.ProductsServicesForm
     template_name = 'fab/products-services-form.html'
+    success_message = 'Products and services updated'
 
 
 class ExpertiseRoutingFormView(
@@ -190,23 +194,47 @@ class ExpertiseRoutingFormView(
     template_name = 'fab/expertise-routing-form.html'
 
     def form_valid(self, form):
-        if form.cleaned_data['choice'] == form.REGIONAL:
+        if form.cleaned_data['choice'] == form.REGION:
             url = reverse('find-a-buyer-expertise-regional')
-        elif form.cleaned_data['choice'] == form.COUNTRIES:
+        elif form.cleaned_data['choice'] == form.COUNTRY:
             url = reverse('find-a-buyer-expertise-countries')
+        elif form.cleaned_data['choice'] == form.INDUSTRY:
+            url = reverse('find-a-buyer-expertise-industries')
+        elif form.cleaned_data['choice'] == form.LANGUAGE:
+            url = reverse('find-a-buyer-expertise-languages')
         else:
             raise NotImplementedError
         return redirect(url)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            company=self.company.serialize_for_template(),
+            **kwargs,
+        )
 
 
 class RegionalExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.RegionalExpertiseForm
     template_name = 'fab/expertise-regions-form.html'
+    success_message = 'Regional expertise updated'
 
 
 class CountryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.CountryExpertiseForm
     template_name = 'fab/expertise-countries-form.html'
+    success_message = 'International expertise updated'
+
+
+class IndustryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
+    form_class = forms.IndustryExpertiseForm
+    template_name = 'fab/expertise-industry-form.html'
+    success_message = 'Industry expertise updated'
+
+
+class LanguageExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
+    form_class = forms.LanguageExpertiseForm
+    template_name = 'fab/expertise-language-form.html'
+    success_message = 'Language expertise updated'
 
 
 class BusinessDetailsFormView(BaseFormView):
@@ -217,10 +245,14 @@ class BusinessDetailsFormView(BaseFormView):
             return forms.SoleTraderBusinessDetailsForm
         return forms.CompaniesHouseBusinessDetailsForm
 
+    success_message = 'Business details updated'
+
 
 class PublishFormView(BaseFormView):
     form_class = forms.PublishForm
     template_name = 'fab/find-a-buyer-publsh.html'
+    success_url = reverse_lazy('find-a-buyer')
+    success_message = 'Published status successfully changed'
 
     def dispatch(self, request, *args, **kwargs):
         if not self.company.is_publishable:
@@ -236,10 +268,6 @@ class PublishFormView(BaseFormView):
             **kwargs,
             company=self.company.serialize_for_template()
         )
-
-    @property
-    def success_url(self):
-        return reverse('find-a-buyer') + '?published'
 
 
 class BaseCaseStudyWizardView(

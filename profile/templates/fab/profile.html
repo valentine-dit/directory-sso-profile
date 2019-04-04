@@ -27,8 +27,16 @@
     </div>
     {% endif %}
 
-    {% if success_message %}
-        <div class="sso-profile-success-message">{{ success_message }}</div>
+    {% if messages %}
+        <div>
+        {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                <div class="success-message-box border-teal teal-text">
+                    <h2 class="heading-large margin-30">{{ message }}</h2>
+                </div>
+            {% endif %}
+        {% endfor %}
+        </div>
     {% endif %}
 
     {% if not company.email_address or not company.description or not company.is_verified or not company.is_published %}
@@ -117,7 +125,7 @@
                     {% endif %}
                     {% if company.sectors %}
                         <dt>Core industry</dt>
-                        <dd>{{ company.sectors.0|title }}</dd>
+                        <dd>{{ company.sectors|title }}</dd>
                     {% endif %}
                     <dt>UK address</dt>
                     <dd>{{ company.address_line_1 }}, {{ company.address_line_2 }}</dd>
@@ -234,6 +242,42 @@
                 <a href="{% url 'find-a-buyer-products-and-services' %}" class="link">Add products and services</a>
               {% endif %}
             </div>
+
+            <div id="profile-expertise-container" class="message-box action-required border-medium border-black background-white">
+              <div class="grid-row">
+                <h3 class="box-heading heading-medium black-text column-one-half">
+                    Expertise
+                </h3>
+                <div class="column-one-half right-column">
+                    {% if company.has_expertise %}<a href="{% url 'find-a-buyer-expertise-routing' %}" class="link pencil-link">Edit</a>{% endif %}
+                </div>
+              </div>
+              <div class="grid-row">
+                  <p class="mid-grey-text font-xsmall">Add search words to describe specialist knowledge of skills your business offers.</p>
+                  {% if company.has_expertise %}
+                      <dl>
+                        {% if company.expertise_industries %}
+                            <dt>Industry</dt>
+                            <dd>{{ company.expertise_industries }}</dd>
+                        {% endif %}
+                        {% if company.expertise_regions %}
+                            <dt>Regional</dt>
+                            <dd>{{ company.expertise_regions }}</dd>
+                        {% endif %}
+                        {% if company.expertise_countries %}
+                            <dt>International</dt>
+                            <dd>{{ company.expertise_countries }}</dd>
+                        {% endif %}
+                        {% if company.expertise_languages %}
+                            <dt>Languages</dt>
+                            <dd>{{ company.expertise_languages }}</dd>
+                        {% endif %}
+                    {% else %}
+                      <a href="{% url 'find-a-buyer-expertise-routing' %}" class="link">Add expertise</a>
+                    {% endif %}
+              </div>
+            </div>
+
 
             <div class="message-box action-required border-medium border-black background-white">
               <div class="grid-row">

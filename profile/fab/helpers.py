@@ -1,14 +1,19 @@
 from datetime import datetime
-
 import http
 
 from directory_api_client.client import api_client
 from directory_constants.constants import choices
 from directory_validators.helpers import tokenize_keywords
 
+from profile.fab import forms
 
-SECTOR_CHOICES = {key: value for key, value in choices.INDUSTRIES}
-EMPLOYEE_CHOICES = {key: value for key, value in choices.EMPLOYEES}
+
+SECTOR_CHOICES = dict(choices.INDUSTRIES)
+EMPLOYEE_CHOICES = dict(choices.EMPLOYEES)
+INDUSTRY_CHOICES = dict(choices.INDUSTRIES)
+COUNTRY_CHOICES = dict(choices.COUNTRY_CHOICES)
+REGION_CHOICES = dict(forms.REGION_CHOICES)
+LANGUAGES_CHOICES = dict(forms.LANGUAGES_CHOICES)
 
 
 def get_company_profile(sso_sesison_id):
@@ -59,9 +64,10 @@ class ProfileParser:
 
     @property
     def sectors_label(self):
-        if self.data.get('sectors'):
-            return [SECTOR_CHOICES.get(item) for item in self.data['sectors']]
-        return []
+        return values_to_labels(
+            values=self.data.get('sectors') or [],
+            choices=SECTOR_CHOICES
+        )
 
     @property
     def employees_label(self):
@@ -69,8 +75,46 @@ class ProfileParser:
             return EMPLOYEE_CHOICES.get(self.data['employees'])
 
     @property
+    def expertise_industries_label(self):
+        return values_to_labels(
+            values=self.data.get('expertise_industries') or [],
+            choices=INDUSTRY_CHOICES
+        )
+
+    @property
+    def expertise_regions_label(self):
+        return values_to_labels(
+            values=self.data.get('expertise_regions') or [],
+            choices=REGION_CHOICES
+        )
+
+    @property
+    def expertise_countries_label(self):
+        return values_to_labels(
+            values=self.data.get('expertise_countries') or [],
+            choices=COUNTRY_CHOICES
+        )
+
+    @property
+    def expertise_languages_label(self):
+        return values_to_labels(
+            values=self.data.get('expertise_languages') or [],
+            choices=LANGUAGES_CHOICES
+        )
+
+    @property
     def is_sole_trader(self):
         return self.data['company_type'] != 'COMPANIES_HOUSE'
+
+    @property
+    def has_expertise(self):
+        fields = [
+            'expertise_industries',
+            'expertise_regions',
+            'expertise_countries',
+            'expertise_languages',
+        ]
+        return any(self.data.get(field) for field in fields)
 
     def serialize_for_template(self):
         if not self.data:
@@ -82,6 +126,11 @@ class ProfileParser:
             'sectors': self.sectors_label,
             'keywords': self.keywords,
             'employees': self.employees_label,
+            'expertise_industries': self.expertise_industries_label,
+            'expertise_regions': self.expertise_regions_label,
+            'expertise_countries': self.expertise_countries_label,
+            'expertise_languages': self.expertise_languages_label,
+            'has_expertise': self.has_expertise,
         }
 
     def serialize_for_form(self):
@@ -92,3 +141,7 @@ class ProfileParser:
             'date_of_creation': self.date_of_creation,
             'address': self.address,
         }
+
+
+def values_to_labels(values, choices):
+    return ', '.join([choices.get(item) for item in values if item in choices])
