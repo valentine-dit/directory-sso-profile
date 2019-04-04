@@ -472,8 +472,6 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
 
 
 class LogoForm(forms.Form):
-    def get_initial(self):
-        return {}
     logo = ImageField(
         help_text=(
             'For best results this should be a transparent PNG file of 600 x '
