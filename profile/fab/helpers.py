@@ -64,43 +64,43 @@ class ProfileParser:
 
     @property
     def sectors_label(self):
-        values = self.data.get('sectors')
-        if values:
-            return values_to_labels(values=values, choices=SECTOR_CHOICES)
-        return []
+        return values_to_labels(
+            values=self.data.get('sectors') or [],
+            choices=SECTOR_CHOICES
+        )
 
     @property
     def employees_label(self):
         if self.data.get('employees'):
             return EMPLOYEE_CHOICES.get(self.data['employees'])
-        return []
 
     @property
     def expertise_industries_label(self):
-        values = self.data.get('expertise_industries')
-        if values:
-            return values_to_labels(values=values, choices=INDUSTRY_CHOICES)
-        return []
+        return values_to_labels(
+            values=self.data.get('expertise_industries') or [],
+            choices=INDUSTRY_CHOICES
+        )
 
     @property
     def expertise_regions_label(self):
-        values = self.data.get('expertise_regions')
-        if values:
-            return values_to_labels(values=values, choices=REGION_CHOICES)
-        return []
+        return values_to_labels(
+            values=self.data.get('expertise_regions') or [],
+            choices=REGION_CHOICES
+        )
 
     @property
     def expertise_countries_label(self):
-        values = self.data.get('expertise_countries')
-        if values:
-            return values_to_labels(values=values, choices=COUNTRY_CHOICES)
-        return []
+        return values_to_labels(
+            values=self.data.get('expertise_countries') or [],
+            choices=COUNTRY_CHOICES
+        )
 
     @property
     def expertise_languages_label(self):
-        values = self.data.get('expertise_languages')
-        if values:
-            return values_to_labels(values=values, choices=LANGUAGES_CHOICES)
+        return values_to_labels(
+            values=self.data.get('expertise_languages') or [],
+            choices=LANGUAGES_CHOICES
+        )
 
     @property
     def is_sole_trader(self):

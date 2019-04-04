@@ -27,8 +27,16 @@
     </div>
     {% endif %}
 
-    {% if success_message %}
-        <div class="sso-profile-success-message">{{ success_message }}</div>
+    {% if messages %}
+        <div>
+        {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                <div class="success-message-box border-teal teal-text">
+                    <h2 class="heading-large margin-30">{{ message }}</h2>
+                </div>
+            {% endif %}
+        {% endfor %}
+        </div>
     {% endif %}
 
     {% if not company.email_address or not company.description or not company.is_verified or not company.is_published %}

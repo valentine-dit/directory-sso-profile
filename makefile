@@ -84,7 +84,8 @@ DEBUG_TEST_SET_ENV_VARS := \
 	export EXPORTING_OPPORTUNITIES_SEARCH_URL=https://opportunities.export.great.gov.uk/opportunities; \
 	export GET_ADDRESS_API_KEY=debug; \
 	export DIRECTORY_FORMS_API_API_KEY=debug; \
-	export DIRECTORY_FORMS_API_SENDER_ID=debug
+	export DIRECTORY_FORMS_API_SENDER_ID=debug; \
+	export URL_PREFIX_DOMAIN=http://testserver
 
 debug_webserver:
 	$(DEBUG_SET_ENV_VARS) && $(DJANGO_WEBSERVER)

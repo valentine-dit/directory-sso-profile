@@ -1,6 +1,0 @@
-FINANCIAL = 'financial'
-MANAGEMENT_CONSULTING = 'management-consulting'
-HUMAN_RESOURCES = 'human-resources-and-recruitment'
-LEGAL = 'legal'
-PUBLICITY = 'publicity'
-FURTHER_SERVICES = 'further-services'
