@@ -453,7 +453,7 @@ def test_companies_house_enrolment_expose_company(
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'sectors': ['AEROSPACE'],
-        'website_address': ''
+        'website': ''
     }
 
 
@@ -1071,7 +1071,7 @@ def test_sole_trader_enrolment_expose_company(
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'sectors': ['AEROSPACE'],
-        'website_address': ''
+        'website': ''
     }
 
 

@@ -6,7 +6,7 @@ raven==5.19.0
 requests==2.21.0
 whitenoise==3.1
 sigauth==4.0.1
-directory-validators==5.0.1
+directory-validators==5.1.0
 directory-healthcheck==1.0.1
 directory-components==8.4.1
 urllib3>=1.23.0<2.0.0
