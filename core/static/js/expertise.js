@@ -68,9 +68,7 @@ dit.components.expertise = (function() {
     }
 
     function buildNothingSelectedElement() {
-      var element = document.createElement('a');
-      element.href = '#' + autocompleteInputElement.id;
-      element.class = 'link';
+      var element = document.createElement('span');
       element.innerHTML = noResultsLabel;
       return element;
     }
