@@ -17,8 +17,11 @@
                         {% block form %}
                             {% render_form form %}
                         {% endblock %}
-                        <button class="button">Save and continue</button>
+                        {% block form_button %}
+                            <button class="button">Save and continue</button>
+                        {% endblock %}
                         <div>
+                            <br>
                             <br>
                             <a class="link" href="{% url 'find-a-buyer' %}">Back</a>
                         </div>

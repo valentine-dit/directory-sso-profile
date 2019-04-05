@@ -74,9 +74,9 @@ def test_profile_parser_keywords_joined():
 
 
 @pytest.mark.parametrize('value,expected', (
-    (None, []),
-    ('', []),
-    (['AEROSPACE'], ['Aerospace']),
+    (None, ''),
+    ('', ''),
+    (['AEROSPACE'], 'Aerospace'),
 ))
 def test_profile_parser_sectors(value, expected):
     parser = helpers.ProfileParser({'sectors': value})
@@ -103,3 +103,88 @@ def test_profile_parser_is_sole_trader(value, expected):
     parser = helpers.ProfileParser({'company_type': value})
 
     assert parser.is_sole_trader is expected
+
+
+@pytest.mark.parametrize('value,expected', (
+    ({'expertise_industries': 'thing'}, True),
+    ({'expertise_regions': 'thing'}, True),
+    ({'expertise_countries': 'thing'}, True),
+    ({'expertise_languages': 'thing'}, True),
+    ({'expertise_industries': ''}, False),
+    ({'expertise_regions': ''}, False),
+    ({'expertise_countries': ''}, False),
+    ({'expertise_languages': ''}, False),
+    ({}, False),
+))
+def test_profile_parser_has_expertise(value, expected):
+    parser = helpers.ProfileParser(value)
+
+    assert parser.has_expertise is expected
+
+
+@pytest.mark.parametrize('value,expected', (
+    ({'expertise_industries': ['MARINE']}, 'Marine'),
+    ({'expertise_industries': ['MARINE', 'POWER']}, 'Marine, Power'),
+    ({'expertise_industries': ['MARINE', '']}, 'Marine'),
+    ({'expertise_industries': ['MARINE', None]}, 'Marine'),
+    ({'expertise_industries': ['MARINE', 'bad-value']}, 'Marine'),
+    ({'expertise_industries': []}, ''),
+    ({'expertise_industries': ''}, ''),
+    ({'expertise_industries': None}, ''),
+    ({}, ''),
+))
+def test_profile_parser_expertise_industries_label(value, expected):
+    parser = helpers.ProfileParser(value)
+
+    assert parser.expertise_industries_label == expected
+
+
+@pytest.mark.parametrize('value,expected', (
+    ({'expertise_regions': ['LONDON']}, 'London'),
+    ({'expertise_regions': ['LONDON', 'WALES']}, 'London, Wales'),
+    ({'expertise_regions': ['LONDON', '']}, 'London'),
+    ({'expertise_regions': ['LONDON', None]}, 'London'),
+    ({'expertise_regions': ['LONDON', 'bad-value']}, 'London'),
+    ({'expertise_regions': []}, ''),
+    ({'expertise_regions': ''}, ''),
+    ({'expertise_regions': None}, ''),
+    ({}, ''),
+))
+def test_profile_parser_expertise_regions_label(value, expected):
+    parser = helpers.ProfileParser(value)
+
+    assert parser.expertise_regions_label == expected
+
+
+@pytest.mark.parametrize('value,expected', (
+    ({'expertise_countries': ['AL']}, 'Albania'),
+    ({'expertise_countries': ['AL', 'AO']}, 'Albania, Angola'),
+    ({'expertise_countries': ['AL', '']}, 'Albania'),
+    ({'expertise_countries': ['AL', None]}, 'Albania'),
+    ({'expertise_countries': ['AL', 'bad-value']}, 'Albania'),
+    ({'expertise_countries': []}, ''),
+    ({'expertise_countries': ''}, ''),
+    ({'expertise_countries': None}, ''),
+    ({}, ''),
+))
+def test_profile_parser_expertise_countries_label(value, expected):
+    parser = helpers.ProfileParser(value)
+
+    assert parser.expertise_countries_label == expected
+
+
+@pytest.mark.parametrize('value,expected', (
+    ({'expertise_languages': ['aa']}, 'Afar'),
+    ({'expertise_languages': ['aa', 'ak']}, 'Afar, Akan'),
+    ({'expertise_languages': ['aa', '']}, 'Afar'),
+    ({'expertise_languages': ['aa', None]}, 'Afar'),
+    ({'expertise_languages': ['aa', 'bad-value']}, 'Afar'),
+    ({'expertise_languages': []}, ''),
+    ({'expertise_languages': ''}, ''),
+    ({'expertise_languages': None}, ''),
+    ({}, ''),
+))
+def test_profile_parser_expertise_languages_label(value, expected):
+    parser = helpers.ProfileParser(value)
+
+    assert parser.expertise_languages_label == expected

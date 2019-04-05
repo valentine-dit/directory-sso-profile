@@ -187,8 +187,40 @@ urlpatterns = [
         name='find-a-buyer-case-study'
     ),
     url(
+        r'^find-a-buyer/add-expertise/$',
+        profile.fab.views.ExpertiseRoutingFormView.as_view(),
+        name='find-a-buyer-expertise-routing'
+    ),
+    url(
+        r'^find-a-buyer/add-expertise/regions/$',
+        profile.fab.views.RegionalExpertiseFormView.as_view(),
+        name='find-a-buyer-expertise-regional'
+    ),
+    url(
+        r'^find-a-buyer/add-expertise/countries/$',
+        profile.fab.views.CountryExpertiseFormView.as_view(),
+        name='find-a-buyer-expertise-countries'
+    ),
+    url(
+        r'^find-a-buyer/add-expertise/industries/$',
+        profile.fab.views.IndustryExpertiseFormView.as_view(),
+        name='find-a-buyer-expertise-industries'
+    ),
+    url(
+        r'^find-a-buyer/add-expertise/languages/$',
+        profile.fab.views.LanguageExpertiseFormView.as_view(),
+        name='find-a-buyer-expertise-languages'
+    ),
+    url(
         r'^find-a-buyer/admin/$',
         profile.fab.views.AdminToolsView.as_view(),
         name='find-a-buyer-admin-tools'
     ),
+]
+
+urlpatterns = [
+    url(
+        r'^profile/',
+        include(urlpatterns)
+    )
 ]
