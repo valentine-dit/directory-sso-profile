@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from profile.fab import helpers
+from profile.fab import constants, helpers
 
 
 @pytest.mark.parametrize('value,expected', (
@@ -188,3 +188,32 @@ def test_profile_parser_expertise_languages_label(value, expected):
     parser = helpers.ProfileParser(value)
 
     assert parser.expertise_languages_label == expected
+
+
+@pytest.mark.parametrize('value,expected', (
+    ({'expertise_products_services': {}}, {}),
+    ({'expertise_products_services': ''}, {}),
+    ({'expertise_products_services': None}, {}),
+    ({}, {}),
+    (
+        {
+            'expertise_products_services': {
+                constants.PUBLICITY: [
+                    'Public Relations',
+                    'Branding',
+                ],
+                constants.FURTHER_SERVICES: [
+                    'Business relocation',
+                ]
+            }
+        },
+        {
+            'Publicity': 'Public Relations, Branding',
+            'Further services': 'Business relocation',
+        },
+    ),
+))
+def test_profile_parser_expertise_products_services_label(value, expected):
+    parser = helpers.ProfileParser(value)
+
+    assert parser.expertise_products_services_label == expected

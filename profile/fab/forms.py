@@ -8,7 +8,7 @@ from django.forms import ImageField, Textarea
 from django.utils.safestring import mark_safe
 
 from enrolment.fields import DateField
-from profile.fab import validators
+from profile.fab import constants, validators
 
 
 INDUSTRY_CHOICES = [('', 'Select Industry')] + list(choices.INDUSTRIES)
@@ -487,26 +487,6 @@ class LogoForm(forms.Form):
     )
 
 
-class ProductsServicesForm(forms.Form):
-    keywords = fields.CharField(
-        label=(
-            'Enter up to 10 keywords that describe your company '
-            '(separated by commas):'
-        ),
-        help_text=(
-            'These keywords will be used to help potential overseas buyers '
-            'find your company.'
-        ),
-        widget=Textarea,
-        max_length=1000,
-        validators=[
-            directory_validators.company.keywords_word_limit,
-            directory_validators.company.keywords_special_characters,
-            directory_validators.company.no_html,
-        ]
-    )
-
-
 class PublishForm(forms.Form):
 
     LABEL_UNPUBLISH_FAS = 'Untick to remove your profile from this service'
@@ -657,3 +637,96 @@ class LanguageExpertiseForm(forms.Form):
         choices=LANGUAGES_CHOICES,
         required=False,
     )
+
+
+class ExpertiseProductsServicesRoutingForm(forms.Form):
+    CHOICES = (
+        (constants.FINANCIAL, 'Financial'),
+        (constants.MANAGEMENT_CONSULTING, 'Management consulting'),
+        (constants.HUMAN_RESOURCES, 'Human resources and recruitment'),
+        (constants.LEGAL, 'Legal'),
+        (constants.PUBLICITY, 'Publicity'),
+        (constants.FURTHER_SERVICES, 'Further services'),
+        (constants.OTHER, 'Other'),
+    )
+
+    choice = fields.ChoiceField(
+        label='Choose the products and services industry',
+        choices=CHOICES,
+    )
+
+
+class ExpertiseProductsServicesForm(forms.Form):
+
+    CHOICES_MAP = {
+        constants.FINANCIAL: (
+            'Opening bank accounts',
+            'Accounting and Tax (including registration for VAT and PAYE)',
+            'Insurance',
+            'Raising Capital',
+            'Regulatory support',
+            'Mergers and Acquisitions',
+        ),
+        constants.MANAGEMENT_CONSULTING: (
+            'Business development',
+            'Product safety regulation and compliance',
+            'Commercial/pricing strategy',
+            'Workforce development',
+            'Strategy & long-term planning',
+            'Risk consultation',
+        ),
+        constants.HUMAN_RESOURCES: (
+            'Staff management & progression',
+            (
+                'Onboarding, including new starter support and contracts '
+                'of employment'
+            ),
+            'Payroll',
+            'Salary benchmarking and employee benefits ',
+            'Succession planning',
+            'Employment & talent research',
+            'Sourcing and Hiring',
+        ),
+        constants.LEGAL: (
+            'Company incorporation',
+            'Employment',
+            'Immigration',
+            'Land use planning',
+            'Intellectual property',
+            'Data Protection and Information Assurance',
+        ),
+        constants.PUBLICITY: (
+            'Public Relations',
+            'Branding',
+            'Social Media',
+            'Public Affairs',
+            'Advertising',
+            'Marketing',
+        ),
+        constants.FURTHER_SERVICES: (
+            'Business relocation',
+            'Planning consultants',
+            'Facilities (water, wifi, electricity)',
+            'Translation services',
+            'Staff and family relocation including schooling for children',
+        ),
+        constants.OTHER: [],
+    }
+
+    expertise_products_services = fields.CharField(
+        label='Choose the products and services',
+        validators=[
+            directory_validators.company.keywords_word_limit,
+            directory_validators.company.no_html,
+        ],
+        widget=Textarea,
+        max_length=1000
+    )
+
+    def __init__(self, category, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        widget = self.fields['expertise_products_services'].widget
+        widget.attrs['data-choices'] = '|'.join(self.CHOICES_MAP[category])
+
+    def clean_expertise_products_services(self):
+        return self.cleaned_data['expertise_products_services'].split('|')

@@ -158,11 +158,6 @@ urlpatterns = [
         name='find-a-buyer-logo'
     ),
     url(
-        r'^find-a-buyer/products-and-services/$',
-        profile.fab.views.ProductsServicesFormView.as_view(),
-        name='find-a-buyer-products-and-services'
-    ),
-    url(
         r'^find-a-buyer/publish/$',
         profile.fab.views.PublishFormView.as_view(),
         name='find-a-buyer-publish'
@@ -210,6 +205,28 @@ urlpatterns = [
         r'^find-a-buyer/add-expertise/languages/$',
         profile.fab.views.LanguageExpertiseFormView.as_view(),
         name='find-a-buyer-expertise-languages'
+    ),
+    url(
+        r'^find-a-buyer/products-and-services/$',
+        RedirectView.as_view(
+            url=reverse_lazy(
+                'find-a-buyer-expertise-products-services-routing'
+            ),
+        ),
+        name='find-a-buyer-products-and-services'
+    ),
+    url(
+        r'^find-a-buyer/add-expertise/products-and-services/$',
+        profile.fab.views.ProductsServicesRoutingFormView.as_view(),
+        name='find-a-buyer-expertise-products-services-routing'
+    ),
+    url(
+        (
+            r'^find-a-buyer/add-expertise/products-and-services/'
+            r'(?P<category>.+)/$'
+        ),
+        profile.fab.views.ProductsServicesFormView.as_view(),
+        name='find-a-buyer-expertise-products-services'
     ),
     url(
         r'^find-a-buyer/admin/$',

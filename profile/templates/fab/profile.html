@@ -227,19 +227,26 @@
               {% endif %}
             </div>
 
-            <div class="{% if not company.keywords %}primary-action-required{% endif %} message-box border-medium border-black background-white">
+            <div id="profile-products-services-container" class="{% if not company.expertise_products_services %}primary-action-required{% endif %} message-box border-medium border-black background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Products and services</h3>
                 <div class="column-one-half right-column">
-                    {% if company.keywords %}<a href="{% url 'find-a-buyer-products-and-services' %}" class="link pencil-link">Edit</a>{% endif %}
+                    {% if company.expertise_products_services %}
+                        <a href="{% url 'find-a-buyer-expertise-products-services-routing' %}" class="link pencil-link">Edit</a>
+                    {% endif %}
                 </div>
               </div>
 
               <p class="mid-grey-text font-xsmall">Add search words to describe the core things your business offers.</p>
-              {% if company.keywords %}
-                <span>{{ company.keywords }}</span>
+              {% if company.expertise_products_services %}
+                <dl>
+                  {% for key, values in company.expertise_products_services.items %}
+                    <dt>{{ key }}</dt>
+                    <dd>{{ values }}</dd>
+                  {% endfor %}
+                </dl>
               {% else %}
-                <a href="{% url 'find-a-buyer-products-and-services' %}" class="link">Add products and services</a>
+                <a href="{% url 'find-a-buyer-expertise-products-services-routing' %}" class="link">Add products and services</a>
               {% endif %}
             </div>
 

@@ -116,6 +116,16 @@ class ProfileParser:
         ]
         return any(self.data.get(field) for field in fields)
 
+    @property
+    def expertise_products_services_label(self):
+        value = self.data.get('expertise_products_services')
+        if not value:
+            return {}
+        return {
+            unslugify(key): ', '.join(value)
+            for key, value in value.items()
+        }
+
     def serialize_for_template(self):
         if not self.data:
             return {}
@@ -131,6 +141,9 @@ class ProfileParser:
             'expertise_countries': self.expertise_countries_label,
             'expertise_languages': self.expertise_languages_label,
             'has_expertise': self.has_expertise,
+            'expertise_products_services': (
+                self.expertise_products_services_label
+            ),
         }
 
     def serialize_for_form(self):
@@ -145,3 +158,7 @@ class ProfileParser:
 
 def values_to_labels(values, choices):
     return ', '.join([choices.get(item) for item in values if item in choices])
+
+
+def unslugify(slug):
+    return (slug.replace('-', ' ')).capitalize()
