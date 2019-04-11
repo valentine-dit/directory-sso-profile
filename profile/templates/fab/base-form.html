@@ -23,7 +23,9 @@
                         <div>
                             <br>
                             <br>
-                            <a class="link" href="{% url 'find-a-buyer' %}">Back</a>
+                            {% block back_link %}
+                                <a class="link" href="{% url 'find-a-buyer' %}">Back</a>
+                            {% endblock %}
                         </div>
                      </form>
                 {% endblock %}

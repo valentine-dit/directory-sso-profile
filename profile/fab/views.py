@@ -176,12 +176,6 @@ class LogoFormView(BaseFormView):
     success_message = 'Logo updated'
 
 
-class ProductsServicesFormView(BaseFormView):
-    form_class = forms.ProductsServicesForm
-    template_name = 'fab/products-services-form.html'
-    success_message = 'Products and services updated'
-
-
 class ExpertiseRoutingFormView(
     ExpertiseFeatureFlagMixin,
     state_requirements.UserStateRequirementHandlerMixin,
@@ -368,3 +362,58 @@ class AdminToolsView(
             company=self.company.serialize_for_template(),
             **kwargs,
         )
+
+
+class ProductsServicesRoutingFormView(
+    ExpertiseFeatureFlagMixin,
+    state_requirements.UserStateRequirementHandlerMixin,
+    CompanyProfileMixin, FormView
+):
+    required_user_states = [
+        state_requirements.IsLoggedIn,
+        state_requirements.HasCompany,
+    ]
+
+    form_class = forms.ExpertiseProductsServicesRoutingForm
+    template_name = 'fab/products-services-routing-form.html'
+
+    def form_valid(self, form):
+        url = reverse(
+            'find-a-buyer-expertise-products-services',
+            kwargs={'category': form.cleaned_data['choice']}
+        )
+        return redirect(url)
+
+
+class ProductsServicesFormView(
+    ExpertiseFeatureFlagMixin, BaseFormView
+):
+    form_class = forms.ExpertiseProductsServicesForm
+    template_name = 'fab/products-services-form.html'
+    success_message = 'Products and services updated'
+
+    field_name = 'expertise_products_services'
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            category=self.kwargs['category'].replace('-', ' '),
+            **kwargs
+        )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['category'] = self.kwargs['category']
+        return kwargs
+
+    def get_initial(self):
+        initial = super().get_initial()
+        value = initial[self.field_name].get(self.kwargs['category'], [])
+        return {self.field_name: '|'.join(value)}
+
+    def serialize_form(self, form):
+        return {
+            self.field_name: {
+                **self.company.data[self.field_name],
+                self.kwargs['category']: form.cleaned_data[self.field_name],
+            }
+        }
