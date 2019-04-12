@@ -1,4 +1,4 @@
-from directory_constants.constants import choices
+from directory_constants import choices
 from directory_components import fields, forms
 import directory_validators.company
 import directory_validators.enrolment

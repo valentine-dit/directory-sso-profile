@@ -11,7 +11,7 @@ from directory_api_client.client import api_client
 from directory_ch_client.client import ch_search_api_client
 from directory_sso_api_client.client import sso_api_client
 from directory_forms_api_client import actions
-from directory_constants.constants import urls
+from directory_constants import urls
 
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
 SESSION_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'

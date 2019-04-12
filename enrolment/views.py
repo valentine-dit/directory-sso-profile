@@ -12,7 +12,7 @@ from django.template.response import TemplateResponse
 
 import core.mixins
 from enrolment import constants, forms, helpers
-from directory_constants.constants import urls
+from directory_constants import urls
 
 
 SESSION_KEY_ENROL_KEY = 'ENROL_KEY'

@@ -1,6 +1,6 @@
 from captcha.fields import ReCaptchaField
 from directory_components import forms, fields, widgets
-from directory_constants.constants import choices, urls
+from directory_constants import choices, urls
 from requests.exceptions import HTTPError
 from directory_validators.company import (
     no_company_with_insufficient_companies_house_data as compant_type_validator
