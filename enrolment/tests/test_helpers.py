@@ -1,6 +1,6 @@
 from unittest import mock
 
-from directory_constants.constants import urls
+from directory_constants import urls
 import pytest
 from requests.cookies import RequestsCookieJar
 from requests.exceptions import HTTPError

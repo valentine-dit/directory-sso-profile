@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from core.tests.helpers import create_response, submit_step_factory
 
 from enrolment import constants, forms, helpers, views
-from directory_constants.constants import urls as constants_url
+from directory_constants import urls as constants_url
 from django.contrib.sessions.backends import signed_cookies
 
 
