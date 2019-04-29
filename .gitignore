@@ -103,5 +103,4 @@ Temporary Items
 # JS
 node_modules/
 
-# Docker
 .env

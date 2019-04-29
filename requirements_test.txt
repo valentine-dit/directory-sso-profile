@@ -18,7 +18,7 @@ directory-api-client==12.2.0
 directory-ch-client==1.0.0
 directory-client-core==4.4.0
 directory-components==10.0.0
-directory-constants==16.0.0
+directory-constants==16.2.0
 directory-forms-api-client==3.3.0
 directory-healthcheck==1.0.1
 directory-sso-api-client==4.1.1
@@ -62,6 +62,6 @@ s3transfer==0.1.13
 sigauth==4.0.1
 six==1.11.0
 termcolor==1.1.0          # via pytest-sugar
-urllib3==1.24.1
+urllib3==1.24.2
 w3lib==1.19.0
 whitenoise==3.1

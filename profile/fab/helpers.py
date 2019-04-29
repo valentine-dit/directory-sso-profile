@@ -5,15 +5,13 @@ from directory_api_client.client import api_client
 from directory_constants import choices
 from directory_validators.helpers import tokenize_keywords
 
-from profile.fab import forms
-
 
 SECTOR_CHOICES = dict(choices.INDUSTRIES)
 EMPLOYEE_CHOICES = dict(choices.EMPLOYEES)
 INDUSTRY_CHOICES = dict(choices.INDUSTRIES)
 COUNTRY_CHOICES = dict(choices.COUNTRY_CHOICES)
-REGION_CHOICES = dict(forms.REGION_CHOICES)
-LANGUAGES_CHOICES = dict(forms.LANGUAGES_CHOICES)
+REGION_CHOICES = dict(choices.EXPERTISE_REGION_CHOICES)
+LANGUAGES_CHOICES = dict(choices.EXPERTISE_LANGUAGES)
 
 
 def get_company_profile(sso_sesison_id):
