@@ -17,7 +17,7 @@ dit.components.productsServicesTypeahead = (function() {
       selectElement: multiselectElement,
       defaultValue: '',
       confirmOnBlur: false,
-      showAllValues: false,
+      showAllValues: true,
       id: autocompleteId,
       onConfirm: handleAdd,
       source: function(query, populateResults) {

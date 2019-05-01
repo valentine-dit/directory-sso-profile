@@ -32,7 +32,7 @@
     <script type="text/javascript" src="{% static 'js/products-services.js' %}"></script>
     <script type="text/javascript">
       var keywordsElement = document.getElementById('id_expertise_products_services');
-      var choices = keywordsElement.getAttribute('data-choices')
+      var choices = keywordsElement.getAttribute('data-choices');
       dit.components.productsServicesTypeahead({
         multiselectElement: keywordsElement,
         selectedValuesElement: document.getElementById('selected-values'),
