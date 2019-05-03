@@ -31,7 +31,7 @@ class CompanyProfileMixin:
     @cached_property
     def company(self):
         data = helpers.get_company_profile(self.request.sso_user.session_id)
-        return helpers.ProfileParser(data)
+        return helpers.CompanyParser(data)
 
 
 class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
@@ -213,24 +213,28 @@ class RegionalExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.RegionalExpertiseForm
     template_name = 'fab/expertise-regions-form.html'
     success_message = 'Regional expertise updated'
+    success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
 class CountryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.CountryExpertiseForm
     template_name = 'fab/expertise-countries-form.html'
     success_message = 'International expertise updated'
+    success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
 class IndustryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.IndustryExpertiseForm
     template_name = 'fab/expertise-industry-form.html'
     success_message = 'Industry expertise updated'
+    success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
 class LanguageExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.LanguageExpertiseForm
     template_name = 'fab/expertise-language-form.html'
     success_message = 'Language expertise updated'
+    success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
 class BusinessDetailsFormView(BaseFormView):
@@ -384,6 +388,12 @@ class ProductsServicesRoutingFormView(
         )
         return redirect(url)
 
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            company=self.company.serialize_for_template(),
+            **kwargs,
+        )
+
 
 class ProductsServicesFormView(
     ExpertiseFeatureFlagMixin, BaseFormView
@@ -391,7 +401,9 @@ class ProductsServicesFormView(
     form_class = forms.ExpertiseProductsServicesForm
     template_name = 'fab/products-services-form.html'
     success_message = 'Products and services updated'
-
+    success_url = reverse_lazy(
+        'find-a-buyer-expertise-products-services-routing'
+    )
     field_name = 'expertise_products_services'
 
     def get_context_data(self, **kwargs):

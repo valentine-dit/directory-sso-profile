@@ -14,11 +14,7 @@
       <h2 class="heading-large">Products and services</h2>
       <div id="selected-values"></div>
     </div>
-    {% if category == 'further services' %}
-        <h1 class="heading-large">Add {{ category }}</h1>
-    {% else %}
-        <h1 class="heading-large">Add {{ category }} services</h1>
-    {% endif %}
+    <h1 class="heading-large">Add {{ category }} services</h1>
     {{ block.super }}
 {% endblock %}
 

@@ -1,4 +1,4 @@
-from directory_constants import choices
+from directory_constants import choices, expertise
 from directory_components import fields, forms
 import directory_validators.company
 import directory_validators.enrolment
@@ -471,7 +471,7 @@ class ExpertiseProductsServicesRoutingForm(forms.Form):
         (constants.HUMAN_RESOURCES, 'Human resources and recruitment'),
         (constants.LEGAL, 'Legal'),
         (constants.PUBLICITY, 'Publicity'),
-        (constants.FURTHER_SERVICES, 'Further services'),
+        (constants.BUSINESS_SUPPORT, 'Further services'),
         (constants.OTHER, 'Other'),
     )
 
@@ -484,57 +484,12 @@ class ExpertiseProductsServicesRoutingForm(forms.Form):
 class ExpertiseProductsServicesForm(forms.Form):
 
     CHOICES_MAP = {
-        constants.FINANCIAL: (
-            'Opening bank accounts',
-            'Accounting and Tax (including registration for VAT and PAYE)',
-            'Insurance',
-            'Raising Capital',
-            'Regulatory support',
-            'Mergers and Acquisitions',
-        ),
-        constants.MANAGEMENT_CONSULTING: (
-            'Business development',
-            'Product safety regulation and compliance',
-            'Commercial/pricing strategy',
-            'Workforce development',
-            'Strategy & long-term planning',
-            'Risk consultation',
-        ),
-        constants.HUMAN_RESOURCES: (
-            'Staff management & progression',
-            (
-                'Onboarding, including new starter support and contracts '
-                'of employment'
-            ),
-            'Payroll',
-            'Salary benchmarking and employee benefits ',
-            'Succession planning',
-            'Employment & talent research',
-            'Sourcing and Hiring',
-        ),
-        constants.LEGAL: (
-            'Company incorporation',
-            'Employment',
-            'Immigration',
-            'Land use planning',
-            'Intellectual property',
-            'Data Protection and Information Assurance',
-        ),
-        constants.PUBLICITY: (
-            'Public Relations',
-            'Branding',
-            'Social Media',
-            'Public Affairs',
-            'Advertising',
-            'Marketing',
-        ),
-        constants.FURTHER_SERVICES: (
-            'Business relocation',
-            'Planning consultants',
-            'Facilities (water, wifi, electricity)',
-            'Translation services',
-            'Staff and family relocation including schooling for children',
-        ),
+        constants.FINANCIAL: expertise.FINANCIAL,
+        constants.MANAGEMENT_CONSULTING: expertise.MANAGEMENT_CONSULTING,
+        constants.HUMAN_RESOURCES: expertise.HUMAN_RESOURCES,
+        constants.LEGAL: expertise.LEGAL,
+        constants.PUBLICITY: expertise.PUBLICITY,
+        constants.BUSINESS_SUPPORT: expertise.BUSINESS_SUPPORT,
         constants.OTHER: [],
     }
 
