@@ -9,6 +9,7 @@ dit.components.productsServicesTypeahead = (function() {
     var selectedValuesElement = options.selectedValuesElement;
     var noResultsLabel = options.noResultsLabel;
     var autocompleteId = multiselectElement.id + '_autocomplete';
+    var showAllValues = options.showAllValues || false;//true;
     var containerElement = document.createElement('span');
     multiselectElement.parentNode.insertBefore(containerElement, multiselectElement);
 
@@ -17,7 +18,7 @@ dit.components.productsServicesTypeahead = (function() {
       selectElement: multiselectElement,
       defaultValue: '',
       confirmOnBlur: false,
-      showAllValues: true,
+      showAllValues: showAllValues,
       id: autocompleteId,
       onConfirm: handleAdd,
       source: function(query, populateResults) {

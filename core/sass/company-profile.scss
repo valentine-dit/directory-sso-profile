@@ -303,6 +303,7 @@
     margin-bottom: 15px;
   }
   button {
+    text-align: left;
     background-color: $stone;
     border-radius: 5px;
     margin-bottom: 15px;
@@ -358,7 +359,7 @@
     border: 2px solid #000000;
   }
   .autocomplete__option {
-    height: 55px;
+    padding-bottom: 15px;
     padding-top: 15px;
     padding-left: 15px;
   }
