@@ -325,15 +325,29 @@ def test_edit_page_initial_data(
     )
 
 
-@pytest.mark.parametrize('url,data', zip(edit_urls, edit_data))
+success_urls = (
+    reverse('find-a-buyer'),
+    reverse('find-a-buyer'),
+    reverse('find-a-buyer'),
+    reverse('find-a-buyer'),
+    reverse('find-a-buyer-expertise-routing'),
+    reverse('find-a-buyer-expertise-routing'),
+    reverse('find-a-buyer-expertise-routing'),
+    reverse('find-a-buyer-expertise-routing'),
+)
+
+
+@pytest.mark.parametrize(
+    'url,data,success_url', zip(edit_urls, edit_data, success_urls)
+)
 def test_edit_page_submmit_success(
     returned_client, mock_update_company, sso_user, url, data,
-    sso_user_middleware
+    sso_user_middleware, success_url
 ):
     response = returned_client.post(url, data)
 
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer')
+    assert response.url == success_url
     assert mock_update_company.call_count == 1
     assert mock_update_company.call_args == mock.call(
         sso_session_id=sso_user.session_id,
@@ -626,6 +640,21 @@ def test_expertise_routing_form(client, settings, sso_user_middleware):
     assert response.context_data['company']
 
 
+def test_expertise_products_services_routing_form_context(
+    client, settings, mock_session_user, default_company_profile
+):
+    mock_session_user.login()
+
+    company = helpers.CompanyParser(default_company_profile)
+
+    url = reverse('find-a-buyer-expertise-products-services-routing')
+
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['company'] == company.serialize_for_template()
+
+
 @pytest.mark.parametrize('choice', (
     item for item, _ in forms.ExpertiseProductsServicesRoutingForm.CHOICES
 ))
@@ -729,8 +758,8 @@ def test_products_services_exposes_category(
 
     url = reverse(
         'find-a-buyer-expertise-products-services',
-        kwargs={'category': constants.FURTHER_SERVICES}
+        kwargs={'category': constants.BUSINESS_SUPPORT}
     )
     response = client.get(url)
 
-    assert response.context_data['category'] == 'further services'
+    assert response.context_data['category'] == 'business support'
