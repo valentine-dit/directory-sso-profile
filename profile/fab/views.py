@@ -31,7 +31,7 @@ class CompanyProfileMixin:
     @cached_property
     def company(self):
         data = helpers.get_company_profile(self.request.sso_user.session_id)
-        return helpers.ProfileParser(data)
+        return helpers.CompanyParser(data)
 
 
 class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
@@ -383,6 +383,12 @@ class ProductsServicesRoutingFormView(
             kwargs={'category': form.cleaned_data['choice']}
         )
         return redirect(url)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            company=self.company.serialize_for_template(),
+            **kwargs,
+        )
 
 
 class ProductsServicesFormView(

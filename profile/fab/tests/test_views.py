@@ -317,7 +317,7 @@ edit_data = (
 def test_edit_page_initial_data(
     returned_client, url, default_company_profile, sso_user_middleware
 ):
-    company = helpers.ProfileParser(default_company_profile)
+    company = helpers.CompanyParser(default_company_profile)
 
     response = returned_client.get(url)
     assert response.context_data['form'].initial == (
@@ -391,7 +391,7 @@ def test_edit_page_submmit_publish_success(
 def test_edit_page_submmit_publish_context(
     returned_client, sso_user_middleware, default_company_profile
 ):
-    company = helpers.ProfileParser(default_company_profile)
+    company = helpers.CompanyParser(default_company_profile)
 
     url = reverse('find-a-buyer-publish')
     response = returned_client.get(url)
@@ -516,7 +516,7 @@ def test_admin_tools(
 ):
     mock_session_user.login()
 
-    company = helpers.ProfileParser(default_company_profile)
+    company = helpers.CompanyParser(default_company_profile)
 
     url = reverse('find-a-buyer-admin-tools')
 
