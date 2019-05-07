@@ -214,8 +214,13 @@
   clear: both;
 }
 
-#online-profiles {
+.ellipsis {
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#online-profiles {
   h3 {
     margin-top: 0;
   }
@@ -229,9 +234,6 @@
       }
       span {
         vertical-align: middle;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
       }
     }
   }
@@ -380,5 +382,23 @@
     font-size: 36px;
     top: 0;
     line-height: 2.5em;
+  }
+}
+
+#content {
+  #view-profile-js {
+    width: 110px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    option {
+      color: initial;
+    }
+    option[disabled] {
+      display: none;
+    }
+  }
+  #view-profile-no-js {
+    display: inline;
   }
 }
