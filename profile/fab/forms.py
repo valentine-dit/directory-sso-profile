@@ -428,7 +428,7 @@ class ExpertiseRoutingForm(forms.Form):
     )
 
     choice = fields.ChoiceField(
-        label='Choose the specialist skills or knowledge',
+        label='Choose your area of expertise',
         choices=CHOICES,
     )
 
