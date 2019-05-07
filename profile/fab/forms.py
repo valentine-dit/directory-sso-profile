@@ -435,7 +435,7 @@ class ExpertiseRoutingForm(forms.Form):
 
 class RegionalExpertiseForm(forms.Form):
     expertise_regions = fields.MultipleChoiceField(
-        label='Select the regions you have experience in',
+        label='Select the regions you have expertise in',
         choices=choices.EXPERTISE_REGION_CHOICES,
         required=False,
     )
@@ -443,7 +443,7 @@ class RegionalExpertiseForm(forms.Form):
 
 class CountryExpertiseForm(forms.Form):
     expertise_countries = fields.MultipleChoiceField(
-        label='Select the countries you have experience in',
+        label='Select the countries you have expertise in',
         choices=choices.COUNTRY_CHOICES,
         required=False,
     )
@@ -451,7 +451,7 @@ class CountryExpertiseForm(forms.Form):
 
 class IndustryExpertiseForm(forms.Form):
     expertise_industries = fields.MultipleChoiceField(
-        label='Select the industries you have experience in',
+        label='Select the industries you have expertise in',
         choices=choices.INDUSTRIES,
         required=False,
     )
@@ -459,7 +459,7 @@ class IndustryExpertiseForm(forms.Form):
 
 class LanguageExpertiseForm(forms.Form):
     expertise_languages = fields.MultipleChoiceField(
-        label='Select the languages you have experience in',
+        label='Select the languages you have expertise in',
         choices=choices.EXPERTISE_LANGUAGES,
         required=False,
     )
