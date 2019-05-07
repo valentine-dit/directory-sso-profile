@@ -117,7 +117,7 @@ class CaseStudyBasicInfoForm(forms.Form):
         widget=Textarea,
     )
     sector = fields.ChoiceField(
-        label='Industry most relevant to your showcase',
+        label='Industry most relevant to your case study or project',
         choices=INDUSTRY_CHOICES
     )
     website = fields.URLField(
