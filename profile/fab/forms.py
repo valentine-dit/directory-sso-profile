@@ -12,8 +12,8 @@ from enrolment.fields import DateField
 from profile.fab import constants, validators
 
 
-INDUSTRY_CHOICES = [('', 'Select Industry')] + list(choices.INDUSTRIES)
-EMPLOYEES_CHOICES = [('', 'Select Employees')] + list(choices.EMPLOYEES)
+INDUSTRY_CHOICES = [('', 'Select an industry')] + list(choices.INDUSTRIES)
+EMPLOYEES_CHOICES = [('', 'Select employees')] + list(choices.EMPLOYEES)
 
 
 class SocialLinksForm(forms.Form):
@@ -121,18 +121,18 @@ class CaseStudyBasicInfoForm(forms.Form):
         choices=INDUSTRY_CHOICES
     )
     website = fields.URLField(
-        label='The web address for your case study (optional)',
+        label='The web address for your case study or project (optional)',
         help_text='Enter a full URL including http:// or https://',
         max_length=255,
         required=False,
     )
     keywords = fields.CharField(
         label=(
-            'Enter up to 10 keywords that describe your case study. '
+            'Enter up to 10 keywords that describe your case study or project. '
             'Keywords should be separated by commas.'
         ),
         help_text=(
-            'These keywords will be used to help potential overseas buyers '
+            'These keywords will help potential overseas buyers '
             'find your case study.'
         ),
         max_length=1000,
