@@ -87,7 +87,7 @@ class WebsiteForm(forms.Form):
 
 class CaseStudyBasicInfoForm(forms.Form):
     title = fields.CharField(
-        label='Showcase title',
+        label='Title of your case study or project',
         max_length=60,
         validators=[directory_validators.company.no_html],
     )
@@ -107,9 +107,7 @@ class CaseStudyBasicInfoForm(forms.Form):
     description = fields.CharField(
         label='Describe your case study or project',
         help_text=(
-            'Describe the project or case study in 1,000 characters or fewer. '
-            'Use this space to demonstrate the value of your '
-            'company to an international business audience.'
+            'Describe your project or case study in greater detail. You have up to 1,000 characters to use.'
         ),
         max_length=1000,
         validators=[
