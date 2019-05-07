@@ -1,3 +1,4 @@
+
 from directory_constants import choices, expertise
 from directory_components import fields, forms
 import directory_validators.company
@@ -476,7 +477,7 @@ class ExpertiseProductsServicesRoutingForm(forms.Form):
     )
 
     choice = fields.ChoiceField(
-        label='Choose the products and services industry',
+        label='Choose the industry you’re in',
         choices=CHOICES,
     )
 
