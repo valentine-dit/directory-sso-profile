@@ -42,7 +42,7 @@ class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
         'owner-transferred': (
             'We’ve sent a confirmation email to the new profile owner.'
         ),
-        'user-added': 'We’ve emailed the user you want added to your profile.',
+        'user-added': 'We’ve emailed the person you want to add to this account.',
         'user-removed': 'User successfully removed from your profile.',
     }
 
