@@ -495,7 +495,7 @@ class ExpertiseProductsServicesForm(forms.Form):
     }
 
     expertise_products_services = fields.CharField(
-        label='Choose the products and services',
+        label='Choose your products or services',
         validators=[
             directory_validators.company.keywords_word_limit,
             directory_validators.company.no_html,
