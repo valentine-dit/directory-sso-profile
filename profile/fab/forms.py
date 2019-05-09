@@ -107,7 +107,8 @@ class CaseStudyBasicInfoForm(forms.Form):
     description = fields.CharField(
         label='Describe your case study or project',
         help_text=(
-            'Describe your project or case study in greater detail. You have up to 1,000 characters to use.'
+            'Describe your project or case study in greater detail. '
+            'You have up to 1,000 characters to use.'
         ),
         max_length=1000,
         validators=[
@@ -128,8 +129,9 @@ class CaseStudyBasicInfoForm(forms.Form):
     )
     keywords = fields.CharField(
         label=(
-            'Enter up to 10 keywords that describe your case study or project. '
-            'Keywords should be separated by commas.'
+            'Enter up to 10 keywords that describe your case '
+            'study or project. Keywords should be separated by '
+            'commas.'
         ),
         help_text=(
             'These keywords will help potential overseas buyers '
