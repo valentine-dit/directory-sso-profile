@@ -398,13 +398,22 @@ class ProductsServicesRoutingFormView(
 class ProductsServicesFormView(
     ExpertiseFeatureFlagMixin, BaseFormView
 ):
-    form_class = forms.ExpertiseProductsServicesForm
-    template_name = 'fab/products-services-form.html'
     success_message = 'Products and services updated'
     success_url = reverse_lazy(
         'find-a-buyer-expertise-products-services-routing'
     )
     field_name = 'expertise_products_services'
+
+    def dispatch(self, *args, **kwargs):
+        form = forms.ExpertiseProductsServicesRoutingForm(
+            data={'choice': self.kwargs['category']}
+        )
+        if not form.is_valid():
+            return redirect(self.success_url)
+        return super().dispatch(*args, **kwargs)
+
+    form_class = forms.ExpertiseProductsServicesForm
+    template_name = 'fab/products-services-form.html'
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
@@ -427,5 +436,30 @@ class ProductsServicesFormView(
             self.field_name: {
                 **self.company.data[self.field_name],
                 self.kwargs['category']: form.cleaned_data[self.field_name],
+            }
+        }
+
+
+class ProductsServicesOtherFormView(
+    ExpertiseFeatureFlagMixin, BaseFormView
+):
+    success_message = 'Products and services updated'
+    success_url = reverse_lazy(
+        'find-a-buyer-expertise-products-services-routing'
+    )
+    field_name = 'expertise_products_services'
+    form_class = forms.ExpertiseProductsServicesOtherForm
+    template_name = 'fab/products-services-other-form.html'
+
+    def get_initial(self):
+        initial = super().get_initial()
+        value = initial[self.field_name].get('other', [])
+        return {self.field_name: ', '.join(value)}
+
+    def serialize_form(self, form):
+        return {
+            self.field_name: {
+                **self.company.data[self.field_name],
+                'other': form.cleaned_data[self.field_name],
             }
         }

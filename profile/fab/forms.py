@@ -1,5 +1,6 @@
 from directory_constants import choices, expertise
 from directory_components import fields, forms
+from directory_components.helpers import tokenize_keywords
 import directory_validators.company
 import directory_validators.enrolment
 
@@ -470,8 +471,8 @@ class ExpertiseProductsServicesRoutingForm(forms.Form):
         (constants.MANAGEMENT_CONSULTING, 'Management consulting'),
         (constants.HUMAN_RESOURCES, 'Human resources and recruitment'),
         (constants.LEGAL, 'Legal'),
-        (constants.PUBLICITY, 'Publicity'),
-        (constants.BUSINESS_SUPPORT, 'Further services'),
+        (constants.PUBLICITY, 'Publicity and communications'),
+        (constants.BUSINESS_SUPPORT, 'Business support'),
         (constants.OTHER, 'Other'),
     )
 
@@ -490,7 +491,6 @@ class ExpertiseProductsServicesForm(forms.Form):
         constants.LEGAL: expertise.LEGAL,
         constants.PUBLICITY: expertise.PUBLICITY,
         constants.BUSINESS_SUPPORT: expertise.BUSINESS_SUPPORT,
-        constants.OTHER: [],
     }
 
     expertise_products_services = fields.CharField(
@@ -510,3 +510,24 @@ class ExpertiseProductsServicesForm(forms.Form):
 
     def clean_expertise_products_services(self):
         return self.cleaned_data['expertise_products_services'].split('|')
+
+
+class ExpertiseProductsServicesOtherForm(forms.Form):
+
+    expertise_products_services = fields.CharField(
+        label=(
+            'Enter up to 10 keywords that describe your company '
+            '(separated by commas)'
+        ),
+        validators=[
+            directory_validators.company.keywords_word_limit,
+            directory_validators.company.no_html,
+        ],
+        widget=Textarea,
+        max_length=1000
+    )
+
+    def clean_expertise_products_services(self):
+        return tokenize_keywords(
+            self.cleaned_data['expertise_products_services']
+        )
