@@ -17,9 +17,28 @@
             </div>
             <div class="column-one-half right-column">
                 <a class="background-light-blue font-xsmall pill" href="{% url 'find-a-buyer-admin-tools' %}">Admin view</a>
-                {% if company.is_published_find_a_supplier %}
+                {% if company.is_published %}
                     <span class="divider"></span>
-                    <a href="{{ services_urls.fas }}suppliers/{{ company.number }}/">View profile</a>
+                    <span class="js-disabled-only" id="view-profile-no-js">
+                        {% if company.is_published_find_a_supplier %}
+                            <a href="{{ services_urls.fas }}suppliers/{{ company.number }}/" title="View Find a Supplier profile">View FAS profile</a>
+                            {% if company.is_published_investment_support_directory%}
+                                <span class="divider"></span>
+                            {% endif %}
+                        {% endif %}
+                        {% if company.is_published_investment_support_directory %}
+                            <a href="{{ services_urls.fas }}suppliers/{{ company.number }}/" title="View Investment Support Directory profile">View ISD profile</a>
+                        {% endif %}
+                    </span>
+                    <select class="link js-enabled-only" id="view-profile-js">
+                        <option value="" disabled selected>View profile</option>
+                        {% if company.is_published_find_a_supplier %}
+                            <option value="find-a-supplier">Find A Supplier</option>
+                        {% endif %}
+                        {% if company.is_published_investment_support_directory %}
+                            <option value="investment-support-directory">Investment Support Directory</option>
+                        {% endif %}
+                    </select>
                 {% endif %}
             </div>
         </div>
@@ -109,7 +128,7 @@
                 <dl>
                     {% if company.website %}
                         <dt>Website</dt>
-                        <dd>
+                        <dd class="ellipsis">
                             <a class="link" href="{{ company.website }}">{{ company.website }}</a>
                         </dd>
                     {% endif %}
@@ -152,7 +171,7 @@
                             {% if company.facebook_url %}
                                 <a class="link" href="{{ company.facebook_url }}">
                                     <img alt="with Facebook" height="36px" src="{% static 'directory_components/icons/facebook.svg' %}" width="36px" />
-                                    <span>{{ company.facebook_url }}</span>
+                                    <span class="ellipsis">{{ company.facebook_url }}</span>
                                 </a>
                             {% else %}
                                 <a class="link" href="{% url 'find-a-buyer-social' %}">
@@ -165,7 +184,7 @@
                             {% if company.twitter_url %}
                                 <a class="link" href="{{ company.twitter_url }}">
                                     <img alt="with Twitter" height="36px" src="{% static 'directory_components/icons/twitter.svg' %}" width="36px" />
-                                    <span>{{ company.twitter_url }}</span>
+                                    <span class="ellipsis">{{ company.twitter_url }}</span>
                                 </a>
                             {% else %}
                                 <a class="link" href="{% url 'find-a-buyer-social' %}">
@@ -178,7 +197,7 @@
                             {% if company.linkedin_url %}
                                 <a class="link" href="{{ company.linkedin_url }}">
                                     <img alt="with LinkedIn" height="36px" src="{% static 'directory_components/icons/linkedin.svg' %}" width="36px" />                            
-                                    <span>{{ company.linkedin_url }}</span>
+                                    <span class="ellipsis">{{ company.linkedin_url }}</span>
                                 </a>
                             {% else %}
                                 <a class="link" href="{% url 'find-a-buyer-social' %}">

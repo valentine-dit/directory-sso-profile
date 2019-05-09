@@ -34,6 +34,7 @@
         selectedValuesElement: document.getElementById('selected-values'),
         noResultsLabel: 'No products and services selected.',
         choices: choices ? choices.split('|') : [],
+        showAllValues: {% if category == 'other' %}false{% else %}true{% endif %}
       });
     </script>
 {% endblock %}
