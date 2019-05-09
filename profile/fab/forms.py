@@ -55,7 +55,7 @@ class EmailAddressForm(forms.Form):
 
 class DescriptionForm(forms.Form):
     summary = fields.CharField(
-        label='Add a short introduction to your business for overseas buyers'',
+        label='Add a short introduction to your business for overseas buyers',
         help_text='This will appear on your profile homepage.',
         max_length=250,
         widget=Textarea(attrs={'rows': 5}),
