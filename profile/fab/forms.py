@@ -55,8 +55,8 @@ class EmailAddressForm(forms.Form):
 
 class DescriptionForm(forms.Form):
     summary = fields.CharField(
-        label='Brief summary to make your company stand out to buyers:',
-        help_text='Maximum 250 characters.',
+        label='Add a short introduction to your business for overseas buyers'',
+        help_text='This will appear on your profile homepage.',
         max_length=250,
         widget=Textarea(attrs={'rows': 5}),
         validators=[
@@ -65,7 +65,7 @@ class DescriptionForm(forms.Form):
         ],
     )
     description = fields.CharField(
-        label='Describe your business to overseas buyers:',
+        label='Add more detailed information about your business.',
         help_text='Maximum 2,000 characters.',
         max_length=2000,
         widget=Textarea(attrs={'rows': 5}),
