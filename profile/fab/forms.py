@@ -472,7 +472,7 @@ class ExpertiseProductsServicesRoutingForm(forms.Form):
         (constants.HUMAN_RESOURCES, 'Human resources and recruitment'),
         (constants.LEGAL, 'Legal'),
         (constants.PUBLICITY, 'Publicity'),
-        (constants.BUSINESS_SUPPORT, 'Further services'),
+        (constants.BUSINESS_SUPPORT, 'Business support'),
         (constants.OTHER, 'Other'),
     )
 
