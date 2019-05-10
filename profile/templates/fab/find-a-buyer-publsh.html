@@ -24,7 +24,7 @@
         {% with company.is_published_investment_support_directory as is_published %}
             <div class="publish-box border-medium {{ is_published|yesno:'border-teal,border-stone-60' }}">
                 <h2 class="heading-small">{{ is_published|yesno:"Already published on great.gov.uk UK Investment Support Directory,Publish on great.gov.uk UK Investment Support Directory" }}</h2>
-                <p>This business profile is ready to be published on UK Investment Support Directory on great.gov.uk. We'll email you when it goes live.</p>
+                <p>This business profile is ready to be published in the UK Investment Support Directory on great.gov.uk. We'll email you when it goes live.</p>
                 {% include 'directory_components/form_widgets/form_field.html' with field=form.is_published_investment_support_directory %}
             </div>
         {% endwith %}
