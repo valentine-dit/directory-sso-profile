@@ -705,6 +705,79 @@ def test_products_services_form_prepopulate(
     }
 
 
+def test_products_services_other_form(
+    mock_retrieve_company, mock_session_user, default_company_profile, client
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200,
+        {
+            **default_company_profile,
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment',
+                ],
+                constants.OTHER: [
+                    'Foo',
+                    'Bar',
+                ]
+            }
+        }
+    )
+
+    url = reverse('find-a-buyer-expertise-products-services-other')
+    response = client.get(url)
+
+    assert response.context_data['form'].initial == {
+        'expertise_products_services': 'Foo, Bar'
+    }
+
+
+def test_products_services_other_form_update(
+    client, mock_retrieve_company, mock_update_company, sso_user,
+    mock_session_user, default_company_profile
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200,
+        {
+            **default_company_profile,
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment',
+                ],
+                constants.OTHER: [
+                    'Foo',
+                    'Bar',
+                ]
+            }
+        }
+    )
+
+    url = reverse('find-a-buyer-expertise-products-services-other')
+
+    client.post(
+        url,
+        {'expertise_products_services': 'Baz,Zad'}
+    )
+
+    assert mock_update_company.call_count == 1
+    assert mock_update_company.call_args == mock.call(
+        data={
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment',
+                ],
+                constants.OTHER: ['Baz', 'Zad']
+            }
+        },
+        sso_session_id='123'
+    )
+
+
 def test_products_services_form_update(
     client, mock_retrieve_company, mock_update_company, sso_user,
     mock_session_user, default_company_profile

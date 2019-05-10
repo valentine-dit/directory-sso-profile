@@ -221,6 +221,11 @@ urlpatterns = [
         name='find-a-buyer-expertise-products-services-routing'
     ),
     url(
+        r'^find-a-buyer/add-expertise/products-and-services/other/$',
+        profile.fab.views.ProductsServicesOtherFormView.as_view(),
+        name='find-a-buyer-expertise-products-services-other'
+    ),
+    url(
         (
             r'^find-a-buyer/add-expertise/products-and-services/'
             r'(?P<category>.+)/$'

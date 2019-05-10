@@ -14,31 +14,21 @@
         <div class="grid-row" >
             <div class="column-one-half">
                 <a href="{% url 'find-a-buyer-admin-tools' %}">Admin tools</a>
+                <span class="divider"></span>
+                <a class="background-light-blue font-xsmall pill" href="{% url 'find-a-buyer-admin-tools' %}">Admin view</a>
             </div>
             <div class="column-one-half right-column">
-                <a class="background-light-blue font-xsmall pill" href="{% url 'find-a-buyer-admin-tools' %}">Admin view</a>
                 {% if company.is_published %}
-                    <span class="divider"></span>
-                    <span class="js-disabled-only" id="view-profile-no-js">
-                        {% if company.is_published_find_a_supplier %}
-                            <a href="{{ services_urls.fas }}suppliers/{{ company.number }}/" title="View Find a Supplier profile">View FAS profile</a>
-                            {% if company.is_published_investment_support_directory%}
-                                <span class="divider"></span>
-                            {% endif %}
-                        {% endif %}
-                        {% if company.is_published_investment_support_directory %}
-                            <a href="{{ services_urls.fas }}suppliers/{{ company.number }}/" title="View Investment Support Directory profile">View ISD profile</a>
-                        {% endif %}
-                    </span>
-                    <select class="link js-enabled-only" id="view-profile-js">
-                        <option value="" disabled selected>View profile</option>
-                        {% if company.is_published_find_a_supplier %}
-                            <option value="find-a-supplier">Find A Supplier</option>
-                        {% endif %}
-                        {% if company.is_published_investment_support_directory %}
-                            <option value="investment-support-directory">Investment Support Directory</option>
-                        {% endif %}
-                    </select>
+                    {% if company.is_published_find_a_supplier %}
+                        <div>
+                            <a href="{{ services_urls.fas }}suppliers/{{ company.number }}/">View Find a Supplier profile</a>
+                        </div>
+                    {% endif %}
+                    {% if company.is_published_investment_support_directory %}
+                        <div> 
+                            <a href="{{ services_urls.fas }}investment-support-directory/{{ company.number }}/">View UK Investment Support Directory profile</a>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
