@@ -500,7 +500,8 @@ class ExpertiseProductsServicesForm(forms.Form):
             directory_validators.company.no_html,
         ],
         widget=Textarea,
-        max_length=1000
+        max_length=1000,
+        required=False,
     )
 
     def __init__(self, category, *args, **kwargs):
@@ -524,6 +525,7 @@ class ExpertiseProductsServicesOtherForm(forms.Form):
             directory_validators.company.no_html,
         ],
         widget=Textarea,
+        required=False,
         max_length=1000
     )
 
