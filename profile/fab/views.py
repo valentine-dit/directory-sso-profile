@@ -123,7 +123,8 @@ class BaseFormView(
             )
             raise
         else:
-            messages.success(self.request, self.success_message)
+            if self.success_message:
+                messages.success(self.request, self.success_message)
             return redirect(self.success_url)
 
     def serialize_form(self, form):
@@ -212,28 +213,28 @@ class ExpertiseRoutingFormView(
 class RegionalExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.RegionalExpertiseForm
     template_name = 'fab/expertise-regions-form.html'
-    success_message = 'Regional expertise updated'
+    success_message = None
     success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
 class CountryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.CountryExpertiseForm
     template_name = 'fab/expertise-countries-form.html'
-    success_message = 'International expertise updated'
+    success_message = None
     success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
 class IndustryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.IndustryExpertiseForm
     template_name = 'fab/expertise-industry-form.html'
-    success_message = 'Industry expertise updated'
+    success_message = None
     success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
 class LanguageExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.LanguageExpertiseForm
     template_name = 'fab/expertise-language-form.html'
-    success_message = 'Language expertise updated'
+    success_message = None
     success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
@@ -398,7 +399,7 @@ class ProductsServicesRoutingFormView(
 class ProductsServicesFormView(
     ExpertiseFeatureFlagMixin, BaseFormView
 ):
-    success_message = 'Products and services updated'
+    success_message = None
     success_url = reverse_lazy(
         'find-a-buyer-expertise-products-services-routing'
     )
@@ -443,7 +444,7 @@ class ProductsServicesFormView(
 class ProductsServicesOtherFormView(
     ExpertiseFeatureFlagMixin, BaseFormView
 ):
-    success_message = 'Products and services updated'
+    success_message = None
     success_url = reverse_lazy(
         'find-a-buyer-expertise-products-services-routing'
     )
