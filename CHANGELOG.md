@@ -5,6 +5,7 @@
 ### Implemented enhancements
 - Move form choices to [Constants][directory-constants].
 - [TT-1426](https://uktrade.atlassian.net/browse/TT-1426) Show links to public ISD and FAS profiles
+- [TT-1423](https://uktrade.atlassian.net/browse/TT-1423) Improve content on ISD "other" products and services form
 
 ### Fixed bugs:
 - Upgraded urllib3 to fix [vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2019-11324)
