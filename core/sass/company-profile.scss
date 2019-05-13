@@ -214,8 +214,13 @@
   clear: both;
 }
 
-#online-profiles {
+.ellipsis {
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#online-profiles {
   h3 {
     margin-top: 0;
   }
@@ -229,9 +234,6 @@
       }
       span {
         vertical-align: middle;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
       }
     }
   }
@@ -303,21 +305,16 @@
     margin-bottom: 15px;
   }
   button {
+    text-align: left;
     background-color: $stone;
     border-radius: 5px;
     margin-bottom: 15px;
-    padding: 5px 15px;
+    padding: 5px 10px;
     margin-right: 15px;
     display: inline-block;
     font-size: 19px;
     border: 0;
     cursor: pointer;
-    &:after {
-      content: '❌';
-      color: $mid-blue;
-      margin-left: 15px;
-      font-weight: bold;
-    }
     &:focus {
       box-shadow: 0 0 0 2pt $focus-yellow;
     }
@@ -342,7 +339,8 @@
   }
 }
 
-#profile-expertise-container {
+#profile-expertise-container,
+#profile-products-services-container {
   dt {
     font-weight: bold;
   }
@@ -363,7 +361,7 @@
     border: 2px solid #000000;
   }
   .autocomplete__option {
-    height: 55px;
+    padding-bottom: 15px;
     padding-top: 15px;
     padding-left: 15px;
   }
@@ -384,5 +382,23 @@
     font-size: 36px;
     top: 0;
     line-height: 2.5em;
+  }
+}
+
+#content {
+  #view-profile-js {
+    width: 110px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    option {
+      color: initial;
+    }
+    option[disabled] {
+      display: none;
+    }
+  }
+  #view-profile-no-js {
+    display: inline;
   }
 }

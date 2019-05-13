@@ -15,8 +15,6 @@ ratings:
     - "**.py"
 exclude_paths:
 - "**/tests/"
-- "Dockerfile"
-- "docker/"
 - "README.md"
 - "LICENCE"
 - "*.yml"

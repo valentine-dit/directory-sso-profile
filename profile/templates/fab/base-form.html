@@ -6,6 +6,20 @@
 {% block head_css %}
     {{ block.super }}
     <link href="{% static 'css/company-profile.css' %}" media="all" rel="stylesheet" />
+    <style type="text/css">
+        {% comment 'paths to background images set in css files do not get tranformed during post-processing, so the images 404 in dev, stage and prod' %}{% endcomment %}
+        #selected-values-container button::after {
+          content: "";
+          margin-left: 15px;
+          background-image: url('{% static 'images/cross.png' %}');
+          height: 15px;
+          width: 15px;
+          display: inline-block;
+          background-size: 15px;
+          background-repeat: no-repeat;
+          vertical-align: middle;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -23,7 +37,9 @@
                         <div>
                             <br>
                             <br>
-                            <a class="link" href="{% url 'find-a-buyer' %}">Back</a>
+                            {% block back_link %}
+                                <a class="link" href="{% url 'find-a-buyer' %}">Back</a>
+                            {% endblock %}
                         </div>
                      </form>
                 {% endblock %}

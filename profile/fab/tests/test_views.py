@@ -11,7 +11,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
 from core.tests.helpers import create_response, submit_step_factory
-from profile.fab import forms, helpers, views
+from profile.fab import constants, forms, helpers, views
 
 
 def create_test_image(extension):
@@ -26,7 +26,11 @@ def create_test_image(extension):
 
 @pytest.fixture
 def default_company_profile():
-    return {'name': 'Cool Company', 'is_publishable': True}
+    return {
+        'name': 'Cool Company',
+        'is_publishable': True,
+        'expertise_products_services': {},
+    }
 
 
 @pytest.fixture
@@ -218,11 +222,15 @@ def test_supplier_company_retrieve_not_found(
 
 
 def test_supplier_company_retrieve_found(
-    mock_retrieve_company, sso_user_middleware, returned_client, settings
+    mock_retrieve_company, sso_user_middleware, returned_client, settings,
+    default_company_profile
 ):
+
     settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = False
 
-    mock_retrieve_company.return_value = create_response(200, {'a': 'b'})
+    mock_retrieve_company.return_value = create_response(
+        200, default_company_profile
+    )
     expected_template_name = views.FindABuyerView.template_name_fab_user
 
     response = returned_client.get(reverse('find-a-buyer'))
@@ -231,11 +239,14 @@ def test_supplier_company_retrieve_found(
 
 
 def test_supplier_company_retrieve_found_business_profile_on(
-    mock_retrieve_company, sso_user_middleware, returned_client, settings
+    mock_retrieve_company, sso_user_middleware, returned_client, settings,
+    default_company_profile
 ):
     settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = True
 
-    mock_retrieve_company.return_value = create_response(200, {'a': 'b'})
+    mock_retrieve_company.return_value = create_response(
+        200, default_company_profile
+    )
 
     response = returned_client.get(reverse('find-a-buyer'))
 
@@ -279,7 +290,6 @@ edit_urls = (
     reverse('find-a-buyer-description'),
     reverse('find-a-buyer-email'),
     reverse('find-a-buyer-social'),
-    reverse('find-a-buyer-products-and-services'),
     reverse('find-a-buyer-website'),
     reverse('find-a-buyer-expertise-regional'),
     reverse('find-a-buyer-expertise-countries'),
@@ -295,7 +305,6 @@ edit_data = (
         'twitter_url': 'https://www.twitter.com/thing/',
         'linkedin_url': 'https://www.linkedin.com/thing/',
     },
-    {'keywords': 'foo, bar, baz'},
     {'website': 'https://www.mycompany.com/'},
     {'expertise_regions': ['WEST_MIDLANDS']},
     {'expertise_countries': ['AL']},
@@ -308,7 +317,7 @@ edit_data = (
 def test_edit_page_initial_data(
     returned_client, url, default_company_profile, sso_user_middleware
 ):
-    company = helpers.ProfileParser(default_company_profile)
+    company = helpers.CompanyParser(default_company_profile)
 
     response = returned_client.get(url)
     assert response.context_data['form'].initial == (
@@ -316,15 +325,29 @@ def test_edit_page_initial_data(
     )
 
 
-@pytest.mark.parametrize('url,data', zip(edit_urls, edit_data))
+success_urls = (
+    reverse('find-a-buyer'),
+    reverse('find-a-buyer'),
+    reverse('find-a-buyer'),
+    reverse('find-a-buyer'),
+    reverse('find-a-buyer-expertise-routing'),
+    reverse('find-a-buyer-expertise-routing'),
+    reverse('find-a-buyer-expertise-routing'),
+    reverse('find-a-buyer-expertise-routing'),
+)
+
+
+@pytest.mark.parametrize(
+    'url,data,success_url', zip(edit_urls, edit_data, success_urls)
+)
 def test_edit_page_submmit_success(
     returned_client, mock_update_company, sso_user, url, data,
-    sso_user_middleware
+    sso_user_middleware, success_url
 ):
     response = returned_client.post(url, data)
 
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer')
+    assert response.url == success_url
     assert mock_update_company.call_count == 1
     assert mock_update_company.call_args == mock.call(
         sso_session_id=sso_user.session_id,
@@ -382,7 +405,7 @@ def test_edit_page_submmit_publish_success(
 def test_edit_page_submmit_publish_context(
     returned_client, sso_user_middleware, default_company_profile
 ):
-    company = helpers.ProfileParser(default_company_profile)
+    company = helpers.CompanyParser(default_company_profile)
 
     url = reverse('find-a-buyer-publish')
     response = returned_client.get(url)
@@ -507,7 +530,7 @@ def test_admin_tools(
 ):
     mock_session_user.login()
 
-    company = helpers.ProfileParser(default_company_profile)
+    company = helpers.CompanyParser(default_company_profile)
 
     url = reverse('find-a-buyer-admin-tools')
 
@@ -615,3 +638,201 @@ def test_expertise_routing_form(client, settings, sso_user_middleware):
 
     assert response.status_code == 200
     assert response.context_data['company']
+
+
+def test_expertise_products_services_routing_form_context(
+    client, settings, mock_session_user, default_company_profile
+):
+    mock_session_user.login()
+
+    company = helpers.CompanyParser(default_company_profile)
+
+    url = reverse('find-a-buyer-expertise-products-services-routing')
+
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['company'] == company.serialize_for_template()
+
+
+@pytest.mark.parametrize('choice', (
+    item for item, _ in forms.ExpertiseProductsServicesRoutingForm.CHOICES
+))
+def test_expertise_products_services_routing_form(
+    choice, client, settings, mock_session_user
+):
+    mock_session_user.login()
+
+    url = reverse('find-a-buyer-expertise-products-services-routing')
+
+    response = client.post(url, {'choice': choice})
+
+    assert response.url == reverse(
+        'find-a-buyer-expertise-products-services',
+        kwargs={'category': choice}
+    )
+
+
+def test_products_services_form_prepopulate(
+    mock_retrieve_company, mock_session_user, default_company_profile, client
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200,
+        {
+            **default_company_profile,
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment',
+                ],
+                constants.PUBLICITY: [
+                    'Public Relations',
+                    'Branding',
+                ]
+            }
+        }
+    )
+
+    url = reverse(
+        'find-a-buyer-expertise-products-services',
+        kwargs={'category': constants.PUBLICITY}
+    )
+    response = client.get(url)
+
+    assert response.context_data['form'].initial == {
+        'expertise_products_services': 'Public Relations|Branding'
+    }
+
+
+def test_products_services_other_form(
+    mock_retrieve_company, mock_session_user, default_company_profile, client
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200,
+        {
+            **default_company_profile,
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment',
+                ],
+                constants.OTHER: [
+                    'Foo',
+                    'Bar',
+                ]
+            }
+        }
+    )
+
+    url = reverse('find-a-buyer-expertise-products-services-other')
+    response = client.get(url)
+
+    assert response.context_data['form'].initial == {
+        'expertise_products_services': 'Foo, Bar'
+    }
+
+
+def test_products_services_other_form_update(
+    client, mock_retrieve_company, mock_update_company, sso_user,
+    mock_session_user, default_company_profile
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200,
+        {
+            **default_company_profile,
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment',
+                ],
+                constants.OTHER: [
+                    'Foo',
+                    'Bar',
+                ]
+            }
+        }
+    )
+
+    url = reverse('find-a-buyer-expertise-products-services-other')
+
+    client.post(
+        url,
+        {'expertise_products_services': 'Baz,Zad'}
+    )
+
+    assert mock_update_company.call_count == 1
+    assert mock_update_company.call_args == mock.call(
+        data={
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment',
+                ],
+                constants.OTHER: ['Baz', 'Zad']
+            }
+        },
+        sso_session_id='123'
+    )
+
+
+def test_products_services_form_update(
+    client, mock_retrieve_company, mock_update_company, sso_user,
+    mock_session_user, default_company_profile
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200,
+        {
+            **default_company_profile,
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment',
+                ],
+                constants.PUBLICITY: [
+                    'Public Relations',
+                    'Branding',
+                ]
+            }
+        }
+    )
+
+    url = reverse(
+        'find-a-buyer-expertise-products-services',
+        kwargs={'category': constants.PUBLICITY}
+    )
+    client.post(
+        url,
+        {'expertise_products_services': ['Social Media']}
+    )
+
+    assert mock_update_company.call_count == 1
+    assert mock_update_company.call_args == mock.call(
+        data={
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment'
+                ],
+                constants.PUBLICITY: ['Social Media']
+            }
+        },
+        sso_session_id='123'
+    )
+
+
+def test_products_services_exposes_category(
+    client, mock_session_user
+):
+    mock_session_user.login()
+
+    url = reverse(
+        'find-a-buyer-expertise-products-services',
+        kwargs={'category': constants.BUSINESS_SUPPORT}
+    )
+    response = client.get(url)
+
+    assert response.context_data['category'] == 'business support'
