@@ -250,8 +250,10 @@
               {% if company.expertise_products_services %}
                 <dl>
                   {% for key, values in company.expertise_products_services.items %}
-                    <dt>{{ key }}</dt>
-                    <dd>{{ values }}</dd>
+                    {% if values %}
+                      <dt>{{ key }}</dt>
+                      <dd>{{ values }}</dd>
+                    {% endif %}
                   {% endfor %}
                 </dl>
               {% else %}
