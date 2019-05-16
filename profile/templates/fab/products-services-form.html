@@ -9,7 +9,32 @@
 {% endblock %}
 
 {% block form_contents %}
-	{% include 'fab/breadcrumbs.html' with label='Products and services' %}
-    <h1 class="heading-large">Products and services</h1>
+    {% include 'fab/breadcrumbs.html' with label='Products and services' %}
+    <div id="selected-values-container" class="js-enabled-only">
+      <h2 class="heading-large">Products and services</h2>
+      <div id="selected-values"></div>
+    </div>
+    <h1 class="heading-large">Add {{ category }} services</h1>
     {{ block.super }}
+{% endblock %}
+
+{% block back_link %}
+    <a class="link" href="{% url 'find-a-buyer-expertise-products-services-routing' %}">Back</a>
+{% endblock %}
+
+{% block body_js %}
+  <link href="{% static 'directory_components/js/vendor/accessible-autocomplete.min.css' %}" media="all" rel="stylesheet" />
+  <script type="text/javascript" src="{% static 'directory_components/js/vendor/accessible-autocomplete.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/products-services.js' %}"></script>
+  <script type="text/javascript">
+    var keywordsElement = document.getElementById('id_expertise_products_services');
+    var choices = keywordsElement.getAttribute('data-choices');
+    dit.components.productsServicesTypeahead({
+      multiselectElement: keywordsElement,
+      selectedValuesElement: document.getElementById('selected-values'),
+      noResultsLabel: 'No products and services selected.',
+      choices: choices ? choices.split('|') : [],
+      showAllValues: true
+    });
+  </script>
 {% endblock %}

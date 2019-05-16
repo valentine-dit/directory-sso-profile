@@ -1,5 +1,7 @@
-from directory_constants.constants import choices
+
+from directory_constants import choices, expertise
 from directory_components import fields, forms
+from directory_components.helpers import tokenize_keywords
 import directory_validators.company
 import directory_validators.enrolment
 
@@ -8,186 +10,11 @@ from django.forms import ImageField, Textarea
 from django.utils.safestring import mark_safe
 
 from enrolment.fields import DateField
-from profile.fab import validators
+from profile.fab import constants, validators
 
 
-INDUSTRY_CHOICES = [('', 'Select Industry')] + list(choices.INDUSTRIES)
-EMPLOYEES_CHOICES = [('', 'Select Employees')] + list(choices.EMPLOYEES)
-REGION_CHOICES = [
-    ('NORTH_EAST', 'North East'),
-    ('NORTH_WEST', 'North West'),
-    ('YORKSHIRE_AND_HUMBER', 'Yorkshire and the Humber'),
-    ('EAST_MIDLANDS', 'East Midlands'),
-    ('WEST_MIDLANDS', 'West Midlands'),
-    ('EASTERN', 'Eastern'),
-    ('LONDON', 'London'),
-    ('SOUTH_EAST', 'South East'),
-    ('SOUTH_WEST', 'South West'),
-    ('SCOTLAND', 'Scotland'),
-    ('WALES', 'Wales'),
-]
-LANGUAGES_CHOICES = [
-    ('ab', 'Abkhazian'),
-    ('aa', 'Afar'),
-    ('af', 'Afrikaans'),
-    ('ak', 'Akan'),
-    ('sq', 'Albanian'),
-    ('am', 'Amharic'),
-    ('ar', 'Arabic'),
-    ('an', 'Aragonese'),
-    ('hy', 'Armenian'),
-    ('as', 'Assamese'),
-    ('av', 'Avaric'),
-    ('ay', 'Aymara'),
-    ('az', 'Azerbaijani'),
-    ('bm', 'Bambara'),
-    ('ba', 'Bashkir'),
-    ('eu', 'Basque'),
-    ('be', 'Belarusian'),
-    ('bn', 'Bengali'),
-    ('bi', 'Bislama'),
-    ('bs', 'Bosnian'),
-    ('br', 'Breton'),
-    ('bg', 'Bulgarian'),
-    ('my', 'Burmese'),
-    ('yue', 'Cantonese'),
-    ('ca', 'Catalan'),
-    ('km', 'Central Khmer'),
-    ('ce', 'Chechen'),
-    ('zh', 'Chinese (written, simplified)'),
-    ('kw', 'Cornish'),
-    ('co', 'Corsican'),
-    ('cr', 'Cree'),
-    ('hr', 'Croatian'),
-    ('cs', 'Czech'),
-    ('da', 'Danish'),
-    ('dv', 'Divehi; Dhivehi; Maldivian'),
-    ('nl', 'Dutch; Flemish'),
-    ('dz', 'Dzongkha'),
-    ('en', 'English'),
-    ('et', 'Estonian'),
-    ('ee', 'Ewe'),
-    ('fo', 'Faroese'),
-    ('fj', 'Fijian'),
-    ('fi', 'Finnish'),
-    ('fr', 'French'),
-    ('ff', 'Fulah'),
-    ('gd', 'Gaelic'),
-    ('gl', 'Galician'),
-    ('lg', 'Ganda'),
-    ('ka', 'Georgian'),
-    ('de', 'German'),
-    ('el ', 'Greek'),
-    ('gn', 'Guarani'),
-    ('gu', 'Gujarati'),
-    ('ht', 'Haitian; Haitian Creole'),
-    ('ha', 'Hausa'),
-    ('he', 'Hebrew'),
-    ('hz', 'Herero'),
-    ('hi', 'Hindi'),
-    ('ho', 'Hiri Motu'),
-    ('hu', 'Hungarian'),
-    ('is', 'Icelandic'),
-    ('ig', 'Igbo'),
-    ('id', 'Indonesian'),
-    ('ik', 'Inupiaq'),
-    ('ga', 'Irish'),
-    ('it', 'Italian'),
-    ('ja', 'Japanese'),
-    ('jv', 'Javanese'),
-    ('kn', 'Kannada'),
-    ('kr', 'Kanuri'),
-    ('ks', 'Kashmiri'),
-    ('kk', 'Kazakh'),
-    ('ki', 'Kikuyu; Gikuyu'),
-    ('rw', 'Kinyarwanda'),
-    ('ky', 'Kirghiz; Kyrgyz'),
-    ('kv', 'Komi'),
-    ('kg', 'Kongo'),
-    ('ko', 'Korean'),
-    ('kj', 'Kuanyama; Kwanyama'),
-    ('ku', 'Kurdish'),
-    ('lo', 'Lao'),
-    ('lv', 'Latvian'),
-    ('li', 'Limburgan; Limburger; Limburgish'),
-    ('ln', 'Lingala'),
-    ('lt', 'Lithuanian'),
-    ('lu', 'Luba-Katanga'),
-    ('lb', 'Luxembourgish; Letzeburgesch'),
-    ('mk', 'Macedonian'),
-    ('mg', 'Malagasy'),
-    ('ms', 'Malay'),
-    ('ml', 'Malayalam'),
-    ('mt', 'Maltese'),
-    ('gv', 'Manx'),
-    ('cmn', 'Mandarin'),
-    ('mi', 'Maori'),
-    ('mr', 'Marathi'),
-    ('mh', 'Marshallese'),
-    ('mn', 'Mongolian'),
-    ('na', 'Nauru'),
-    ('ng', 'Ndonga'),
-    ('ne', 'Nepali'),
-    ('se', 'Northern Sami'),
-    ('no', 'Norwegian'),
-    ('oj', 'Ojibwa'),
-    ('or', 'Oriya'),
-    ('om', 'Oromo'),
-    ('os', 'Ossetian; Ossetic'),
-    ('pa', 'Panjabi; Punjabi'),
-    ('fa', 'Persian'),
-    ('pl', 'Polish'),
-    ('pt', 'Portuguese'),
-    ('ps', 'Pushto; Pashto'),
-    ('qu', 'Quechua'),
-    ('ro', 'Romanian; Moldavian; Moldovan'),
-    ('rm', 'Romansh'),
-    ('rn', 'Rundi'),
-    ('ru', 'Russian'),
-    ('sm', 'Samoan'),
-    ('sg', 'Sango'),
-    ('sc', 'Sardinian'),
-    ('sr', 'Serbian'),
-    ('sn', 'Shona'),
-    ('ii', 'Sichuan Yi; Nuosu'),
-    ('sd', 'Sindhi'),
-    ('si', 'Sinhala; Sinhalese'),
-    ('sk', 'Slovak'),
-    ('sl', 'Slovenian'),
-    ('so', 'Somali'),
-    ('st', 'Sotho, Southern'),
-    ('es', 'Spanish'),
-    ('su', 'Sundanese'),
-    ('sw', 'Swahili'),
-    ('ss', 'Swati'),
-    ('sv', 'Swedish'),
-    ('ty', 'Tahitian'),
-    ('tg', 'Tajik'),
-    ('ta', 'Tamil'),
-    ('tt', 'Tatar'),
-    ('te', 'Telugu'),
-    ('th', 'Thai'),
-    ('bo', 'Tibetan'),
-    ('ti', 'Tigrinya'),
-    ('to', 'Tonga (Tonga Islands)'),
-    ('ts', 'Tsonga'),
-    ('tn', 'Tswana'),
-    ('tr', 'Turkish'),
-    ('tk', 'Turkmen'),
-    ('tw', 'Twi'),
-    ('ug', 'Uighur; Uyghur'),
-    ('uk', 'Ukrainian'),
-    ('ur', 'Urdu'),
-    ('uz', 'Uzbek'),
-    ('ve', 'Venda'),
-    ('vi', 'Vietnamese'),
-    ('wa', 'Walloon'),
-    ('cy', 'Welsh'),
-    ('yi', 'Yiddish'),
-    ('yo', 'Yoruba'),
-    ('za', 'Zhuang; Chuang'),
-    ('zu', 'Zulu'),
-]
+INDUSTRY_CHOICES = [('', 'Select an industry')] + list(choices.INDUSTRIES)
+EMPLOYEES_CHOICES = [('', 'Select employees')] + list(choices.EMPLOYEES)
 
 
 class SocialLinksForm(forms.Form):
@@ -261,7 +88,7 @@ class WebsiteForm(forms.Form):
 
 class CaseStudyBasicInfoForm(forms.Form):
     title = fields.CharField(
-        label='Showcase title',
+        label='Title of your case study or project',
         max_length=60,
         validators=[directory_validators.company.no_html],
     )
@@ -281,9 +108,8 @@ class CaseStudyBasicInfoForm(forms.Form):
     description = fields.CharField(
         label='Describe your case study or project',
         help_text=(
-            'Describe the project or case study in 1,000 characters or fewer. '
-            'Use this space to demonstrate the value of your '
-            'company to an international business audience.'
+            'Describe your project or case study in greater detail. '
+            'You have up to 1,000 characters to use.'
         ),
         max_length=1000,
         validators=[
@@ -293,22 +119,23 @@ class CaseStudyBasicInfoForm(forms.Form):
         widget=Textarea,
     )
     sector = fields.ChoiceField(
-        label='Industry most relevant to your showcase',
+        label='Industry most relevant to your case study or project',
         choices=INDUSTRY_CHOICES
     )
     website = fields.URLField(
-        label='The web address for your case study (optional)',
+        label='The web address for your case study or project (optional)',
         help_text='Enter a full URL including http:// or https://',
         max_length=255,
         required=False,
     )
     keywords = fields.CharField(
         label=(
-            'Enter up to 10 keywords that describe your case study. '
-            'Keywords should be separated by commas.'
+            'Enter up to 10 keywords that describe your case '
+            'study or project. Keywords should be separated by '
+            'commas.'
         ),
         help_text=(
-            'These keywords will be used to help potential overseas buyers '
+            'These keywords will help potential overseas buyers '
             'find your case study.'
         ),
         max_length=1000,
@@ -487,26 +314,6 @@ class LogoForm(forms.Form):
     )
 
 
-class ProductsServicesForm(forms.Form):
-    keywords = fields.CharField(
-        label=(
-            'Enter up to 10 keywords that describe your company '
-            '(separated by commas):'
-        ),
-        help_text=(
-            'These keywords will be used to help potential overseas buyers '
-            'find your company.'
-        ),
-        widget=Textarea,
-        max_length=1000,
-        validators=[
-            directory_validators.company.keywords_word_limit,
-            directory_validators.company.keywords_special_characters,
-            directory_validators.company.no_html,
-        ]
-    )
-
-
 class PublishForm(forms.Form):
 
     LABEL_UNPUBLISH_FAS = 'Untick to remove your profile from this service'
@@ -622,22 +429,22 @@ class ExpertiseRoutingForm(forms.Form):
     )
 
     choice = fields.ChoiceField(
-        label='Choose the specialist skills or knowledge',
+        label='Choose your area of expertise',
         choices=CHOICES,
     )
 
 
 class RegionalExpertiseForm(forms.Form):
     expertise_regions = fields.MultipleChoiceField(
-        label='Select the regions you have experience in',
-        choices=REGION_CHOICES,
+        label='Select the regions you have expertise in',
+        choices=choices.EXPERTISE_REGION_CHOICES,
         required=False,
     )
 
 
 class CountryExpertiseForm(forms.Form):
     expertise_countries = fields.MultipleChoiceField(
-        label='Select the countries you have experience in',
+        label='Select the countries you have expertise in',
         choices=choices.COUNTRY_CHOICES,
         required=False,
     )
@@ -645,7 +452,7 @@ class CountryExpertiseForm(forms.Form):
 
 class IndustryExpertiseForm(forms.Form):
     expertise_industries = fields.MultipleChoiceField(
-        label='Select the industries you have experience in',
+        label='Select the industries you have expertise in',
         choices=choices.INDUSTRIES,
         required=False,
     )
@@ -653,7 +460,75 @@ class IndustryExpertiseForm(forms.Form):
 
 class LanguageExpertiseForm(forms.Form):
     expertise_languages = fields.MultipleChoiceField(
-        label='Select the languages you have experience in',
-        choices=LANGUAGES_CHOICES,
+        label='Select the languages you have expertise in',
+        choices=choices.EXPERTISE_LANGUAGES,
         required=False,
     )
+
+
+class ExpertiseProductsServicesRoutingForm(forms.Form):
+    CHOICES = (
+        (constants.FINANCIAL, 'Financial'),
+        (constants.MANAGEMENT_CONSULTING, 'Management consulting'),
+        (constants.HUMAN_RESOURCES, 'Human resources and recruitment'),
+        (constants.LEGAL, 'Legal'),
+        (constants.PUBLICITY, 'Publicity and communications'),
+        (constants.BUSINESS_SUPPORT, 'Business support'),
+        (constants.OTHER, 'Other'),
+    )
+
+    choice = fields.ChoiceField(
+        label='Choose the industry you’re in',
+        choices=CHOICES,
+    )
+
+
+class ExpertiseProductsServicesForm(forms.Form):
+
+    CHOICES_MAP = {
+        constants.FINANCIAL: expertise.FINANCIAL,
+        constants.MANAGEMENT_CONSULTING: expertise.MANAGEMENT_CONSULTING,
+        constants.HUMAN_RESOURCES: expertise.HUMAN_RESOURCES,
+        constants.LEGAL: expertise.LEGAL,
+        constants.PUBLICITY: expertise.PUBLICITY,
+        constants.BUSINESS_SUPPORT: expertise.BUSINESS_SUPPORT,
+    }
+
+    expertise_products_services = fields.CharField(
+        label='Choose your products or services',
+        validators=[
+            directory_validators.company.keywords_word_limit,
+            directory_validators.company.no_html,
+        ],
+        widget=Textarea,
+        max_length=1000,
+        required=False,
+    )
+
+    def __init__(self, category, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        widget = self.fields['expertise_products_services'].widget
+        widget.attrs['data-choices'] = '|'.join(self.CHOICES_MAP[category])
+
+    def clean_expertise_products_services(self):
+        return self.cleaned_data['expertise_products_services'].split('|')
+
+
+class ExpertiseProductsServicesOtherForm(forms.Form):
+
+    expertise_products_services = fields.CharField(
+        label='Enter keywords that describe your products or services',
+        help_text='Keywords should be separated by commas',
+        validators=[
+            directory_validators.company.keywords_word_limit,
+            directory_validators.company.no_html,
+        ],
+        widget=Textarea,
+        required=False,
+        max_length=1000
+    )
+
+    def clean_expertise_products_services(self):
+        return tokenize_keywords(
+            self.cleaned_data['expertise_products_services']
+        )

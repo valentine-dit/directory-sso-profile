@@ -31,7 +31,7 @@ class CompanyProfileMixin:
     @cached_property
     def company(self):
         data = helpers.get_company_profile(self.request.sso_user.session_id)
-        return helpers.ProfileParser(data)
+        return helpers.CompanyParser(data)
 
 
 class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
@@ -42,7 +42,9 @@ class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
         'owner-transferred': (
             'We’ve sent a confirmation email to the new profile owner.'
         ),
-        'user-added': 'We’ve emailed the user you want added to your profile.',
+        'user-added': (
+            'We’ve emailed the person you want to add to this account.'
+        ),
         'user-removed': 'User successfully removed from your profile.',
     }
 
@@ -123,7 +125,8 @@ class BaseFormView(
             )
             raise
         else:
-            messages.success(self.request, self.success_message)
+            if self.success_message:
+                messages.success(self.request, self.success_message)
             return redirect(self.success_url)
 
     def serialize_form(self, form):
@@ -176,12 +179,6 @@ class LogoFormView(BaseFormView):
     success_message = 'Logo updated'
 
 
-class ProductsServicesFormView(BaseFormView):
-    form_class = forms.ProductsServicesForm
-    template_name = 'fab/products-services-form.html'
-    success_message = 'Products and services updated'
-
-
 class ExpertiseRoutingFormView(
     ExpertiseFeatureFlagMixin,
     state_requirements.UserStateRequirementHandlerMixin,
@@ -218,25 +215,29 @@ class ExpertiseRoutingFormView(
 class RegionalExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.RegionalExpertiseForm
     template_name = 'fab/expertise-regions-form.html'
-    success_message = 'Regional expertise updated'
+    success_message = None
+    success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
 class CountryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.CountryExpertiseForm
     template_name = 'fab/expertise-countries-form.html'
-    success_message = 'International expertise updated'
+    success_message = None
+    success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
 class IndustryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.IndustryExpertiseForm
     template_name = 'fab/expertise-industry-form.html'
-    success_message = 'Industry expertise updated'
+    success_message = None
+    success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
 class LanguageExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
     form_class = forms.LanguageExpertiseForm
     template_name = 'fab/expertise-language-form.html'
-    success_message = 'Language expertise updated'
+    success_message = None
+    success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
 class BusinessDetailsFormView(BaseFormView):
@@ -368,3 +369,100 @@ class AdminToolsView(
             company=self.company.serialize_for_template(),
             **kwargs,
         )
+
+
+class ProductsServicesRoutingFormView(
+    ExpertiseFeatureFlagMixin,
+    state_requirements.UserStateRequirementHandlerMixin,
+    CompanyProfileMixin, FormView
+):
+    required_user_states = [
+        state_requirements.IsLoggedIn,
+        state_requirements.HasCompany,
+    ]
+
+    form_class = forms.ExpertiseProductsServicesRoutingForm
+    template_name = 'fab/products-services-routing-form.html'
+
+    def form_valid(self, form):
+        url = reverse(
+            'find-a-buyer-expertise-products-services',
+            kwargs={'category': form.cleaned_data['choice']}
+        )
+        return redirect(url)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            company=self.company.serialize_for_template(),
+            **kwargs,
+        )
+
+
+class ProductsServicesFormView(
+    ExpertiseFeatureFlagMixin, BaseFormView
+):
+    success_message = None
+    success_url = reverse_lazy(
+        'find-a-buyer-expertise-products-services-routing'
+    )
+    field_name = 'expertise_products_services'
+
+    def dispatch(self, *args, **kwargs):
+        form = forms.ExpertiseProductsServicesRoutingForm(
+            data={'choice': self.kwargs['category']}
+        )
+        if not form.is_valid():
+            return redirect(self.success_url)
+        return super().dispatch(*args, **kwargs)
+
+    form_class = forms.ExpertiseProductsServicesForm
+    template_name = 'fab/products-services-form.html'
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            category=self.kwargs['category'].replace('-', ' '),
+            **kwargs
+        )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['category'] = self.kwargs['category']
+        return kwargs
+
+    def get_initial(self):
+        initial = super().get_initial()
+        value = initial[self.field_name].get(self.kwargs['category'], [])
+        return {self.field_name: '|'.join(value)}
+
+    def serialize_form(self, form):
+        return {
+            self.field_name: {
+                **self.company.data[self.field_name],
+                self.kwargs['category']: form.cleaned_data[self.field_name],
+            }
+        }
+
+
+class ProductsServicesOtherFormView(
+    ExpertiseFeatureFlagMixin, BaseFormView
+):
+    success_message = None
+    success_url = reverse_lazy(
+        'find-a-buyer-expertise-products-services-routing'
+    )
+    field_name = 'expertise_products_services'
+    form_class = forms.ExpertiseProductsServicesOtherForm
+    template_name = 'fab/products-services-other-form.html'
+
+    def get_initial(self):
+        initial = super().get_initial()
+        value = initial[self.field_name].get('other', [])
+        return {self.field_name: ', '.join(value)}
+
+    def serialize_form(self, form):
+        return {
+            self.field_name: {
+                **self.company.data[self.field_name],
+                'other': form.cleaned_data[self.field_name],
+            }
+        }
