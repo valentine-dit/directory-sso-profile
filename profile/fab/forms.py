@@ -517,10 +517,8 @@ class ExpertiseProductsServicesForm(forms.Form):
 class ExpertiseProductsServicesOtherForm(forms.Form):
 
     expertise_products_services = fields.CharField(
-        label=(
-            'Enter up to 10 keywords that describe your company '
-            '(separated by commas)'
-        ),
+        label='Enter keywords that describe your products or services',
+        help_text='Keywords should be separated by commas',
         validators=[
             directory_validators.company.keywords_word_limit,
             directory_validators.company.no_html,
