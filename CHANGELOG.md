@@ -1,5 +1,12 @@
 # Changelog
 
+## Pre-release
+
+### Implemented enhancements
+- TT-1468 Rename "Back" to "Back to profile" in the products and services edit screen
+
+### Fixed bugs:
+
 ## [2019.05.16](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.05.16)
 
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.04.08...2019.05.16)
