@@ -53,3 +53,10 @@ class CompanyParser(directory_components.helpers.CompanyParser):
 
 def unslugify(slug):
     return (slug.replace('-', ' ')).capitalize()
+
+
+def has_collaborators(sso_session_id):
+    response = api_client.company.retrieve_collaborators(
+        sso_session_id=sso_session_id
+    )
+    return  bool(response.json())
