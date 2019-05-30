@@ -41,7 +41,7 @@
         {% for message in messages %}
             {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
                 <div class="success-message-box border-teal teal-text">
-                    <h2 class="heading-large margin-30">{{ message }}</h2>
+                    <h2 class="heading-large margin-30-m">{{ message }}</h2>
                 </div>
             {% endif %}
         {% endfor %}
@@ -200,7 +200,7 @@
                 </section>
             </div>
         </div>
-        <div class="column-two-thirds">
+        <div class="column-two-thirds" id="details-column">
             <h2 class="heading-large" id="company-name">
                 {{ company.name }}
                 <a href="{% url 'find-a-buyer-business-details' %}" class="link pencil-link">Edit</a>

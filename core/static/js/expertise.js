@@ -44,6 +44,7 @@ dit.components.expertise = (function() {
     }
 
     function handleAdd(value) {
+      debugger
       setOption(value, true);
       // hack to clear the input box. delay 150ms to allow the react component
       // to render iwth the new value first.
