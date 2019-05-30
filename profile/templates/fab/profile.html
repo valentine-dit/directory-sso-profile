@@ -160,12 +160,12 @@
                             
                             {% if company.facebook_url %}
                                 <a class="link" href="{{ company.facebook_url }}">
-                                    <img alt="with Facebook" height="36px" src="{% static 'directory_components/icons/facebook.svg' %}" width="36px" />
-                                    <span class="ellipsis">{{ company.facebook_url }}</span>
+                                    <img alt="with Facebook" height="36px" src="{% static 'images/facebook.png' %}" width="36px" />
+                                    <span class="ellipsis">Visit Company's Facebook</span>
                                 </a>
                             {% else %}
                                 <a class="link" href="{% url 'find-a-buyer-social' %}">
-                                    <img alt="with Facebook" height="36px" src="{% static 'directory_components/icons/facebook.svg' %}" width="36px" />
+                                    <img alt="with Facebook" height="36px" src="{% static 'images/facebook.png' %}" width="36px" />
                                     <span>Add Facebook</span>
                                 </a>
                             {% endif %}
@@ -173,12 +173,12 @@
                         <li>
                             {% if company.twitter_url %}
                                 <a class="link" href="{{ company.twitter_url }}">
-                                    <img alt="with Twitter" height="36px" src="{% static 'directory_components/icons/twitter.svg' %}" width="36px" />
-                                    <span class="ellipsis">{{ company.twitter_url }}</span>
+                                    <img alt="with Twitter" height="36px" src="{% static 'images/twitter.png' %}" width="36px" />
+                                    <span class="ellipsis">Visit Company's Twitter </span>
                                 </a>
                             {% else %}
                                 <a class="link" href="{% url 'find-a-buyer-social' %}">
-                                    <img alt="with Twitter" height="36px" src="{% static 'directory_components/icons/twitter.svg' %}" width="36px" />
+                                    <img alt="with Twitter" height="36px" src="{% static 'images/twitter.png' %}" width="36px" />
                                     <span>Add Twitter</span>
                                 </a>
                             {% endif %}
@@ -186,12 +186,12 @@
                         <li>
                             {% if company.linkedin_url %}
                                 <a class="link" href="{{ company.linkedin_url }}">
-                                    <img alt="with LinkedIn" height="36px" src="{% static 'directory_components/icons/linkedin.svg' %}" width="36px" />                            
-                                    <span class="ellipsis">{{ company.linkedin_url }}</span>
+                                    <img alt="with LinkedIn" height="36px" src="{% static 'images/linkedin.png' %}" width="36px" />
+                                    <span class="ellipsis">Visit Company's LinkedIn</span>
                                 </a>
                             {% else %}
                                 <a class="link" href="{% url 'find-a-buyer-social' %}">
-                                    <img alt="with LinkedIn" height="36px" src="{% static 'directory_components/icons/linkedin.svg' %}" width="36px" />
+                                    <img alt="with LinkedIn" height="36px" src="{% static 'images/linkedin.png' %}" width="36px" />
                                     <span>Add Linkedin</span>
                                 </a>
                             {% endif %}
@@ -205,7 +205,7 @@
                 {{ company.name }}
                 <a href="{% url 'find-a-buyer-business-details' %}" class="link pencil-link">Edit</a>
             </h2>
-            <div class="{% if not company.email_address %}primary-action-required{% endif %} message-box border-medium border-black background-white">
+            <div class="{% if not company.email_address %}primary-action-required{% endif %} message-box border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Profile email</h3>
                 <div class="column-one-half right-column">
@@ -220,7 +220,7 @@
               {% endif %}
             </div>
 
-            <div class="{% if not company.description %}primary-action-required{% endif %} message-box border-medium border-black background-white">
+            <div class="{% if not company.description %}primary-action-required{% endif %} message-box border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Company description</h3>
                 <div class="column-one-half right-column">
@@ -236,7 +236,7 @@
               {% endif %}
             </div>
 
-            <div id="profile-products-services-container" class="{% if not company.expertise_products_services %}primary-action-required{% endif %} message-box border-medium border-black background-white">
+            <div id="profile-products-services-container" class="{% if not company.expertise_products_services %}primary-action-required{% endif %} message-box border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Products and services</h3>
                 <div class="column-one-half right-column">
@@ -296,7 +296,7 @@
               </div>
             </div>
 
-            <div class="message-box action-required border-medium border-black background-white">
+            <div class="message-box action-required border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Business showcase</h3>
               </div>

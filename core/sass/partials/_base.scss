@@ -16,6 +16,10 @@ body {
   }
 }
 
+#main-content {
+  padding-top: 30px;
+}
+
 nav ul {
   list-style: none;
 }
@@ -36,6 +40,10 @@ nav ul {
   .container {
       margin: 0 30px;
   }
+
+  #main-content {
+	  padding-top: 45px;
+  }
 }
 
 @media (min-width: 1020px) {
@@ -43,3 +51,4 @@ nav ul {
       margin: 0 auto;
   }
 }
+

@@ -71,8 +71,10 @@
 }
 
 #logo-container {
+  max-height: 300px;
+  max-width: 300px;
   background-color: white;
-  border: 1px solid #999;
+  border: 15px solid #FFFFFF;
   position: relative;
   img {
     width: 100%;
@@ -82,8 +84,8 @@
   #add-image {
     display: table-cell;
     vertical-align: middle;
-    height: 250px;
-    width: 250px;
+    height: 300px;
+    width: 300px;
   }
   #edit-image {
     position: absolute;
