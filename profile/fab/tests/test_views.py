@@ -560,6 +560,20 @@ def test_admin_tools(
     assert response.context_data['company'] == company.serialize_for_template()
 
 
+def test_admin_tools_no_collaborators(
+    settings, client, mock_session_user, mock_retrieve_collaborators
+):
+    mock_session_user.login()
+
+    mock_retrieve_collaborators.return_value = create_response(200, {})
+
+    url = reverse('find-a-buyer-admin-tools')
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['has_collaborators'] is False
+
+
 def test_business_details_sole_trader(
     settings, mock_session_user, mock_retrieve_company, client
 ):
