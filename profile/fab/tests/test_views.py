@@ -104,6 +104,16 @@ def mock_retrieve_supplier():
     patch.stop()
 
 
+@pytest.fixture(autouse=True)
+def mock_retrieve_collaborators():
+    patch = mock.patch.object(
+        api_client.company, 'retrieve_collaborators',
+        return_value=create_response(200, {'ssoID': '12345'})
+    )
+    yield patch.start()
+    patch.stop()
+
+
 @pytest.fixture
 def submit_case_study_create_step(client):
     return submit_step_factory(
@@ -546,7 +556,22 @@ def test_admin_tools(
     assert response.context_data['FAB_TRANSFER_ACCOUNT_URL'] == (
         settings.FAB_TRANSFER_ACCOUNT_URL
     )
+    assert response.context_data['has_collaborators'] is True
     assert response.context_data['company'] == company.serialize_for_template()
+
+
+def test_admin_tools_no_collaborators(
+    settings, client, mock_session_user, mock_retrieve_collaborators
+):
+    mock_session_user.login()
+
+    mock_retrieve_collaborators.return_value = create_response(200, {})
+
+    url = reverse('find-a-buyer-admin-tools')
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['has_collaborators'] is False
 
 
 def test_business_details_sole_trader(

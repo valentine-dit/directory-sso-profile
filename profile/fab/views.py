@@ -367,6 +367,9 @@ class AdminToolsView(
             FAB_REMOVE_USER_URL=settings.FAB_REMOVE_USER_URL,
             FAB_TRANSFER_ACCOUNT_URL=settings.FAB_TRANSFER_ACCOUNT_URL,
             company=self.company.serialize_for_template(),
+            has_collaborators=helpers.has_collaborators(
+                self.request.sso_user.session_id
+            ),
             **kwargs,
         )
 
