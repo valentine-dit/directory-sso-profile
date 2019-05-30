@@ -192,68 +192,19 @@ def test_find_a_buyer_exposes_context(
     assert context['FAB_REGISTER_URL'] == settings.FAB_REGISTER_URL
 
 
-def test_find_a_buyer_unauthenticated(
-    sso_user_middleware_unauthenticated, returned_client, settings
-):
-    settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON'] = False
-
-    response = returned_client.get(reverse('find-a-buyer'))
-
-    assert response.status_code == http.client.FOUND
-
-    assert response.url == (
-        'http://sso.trade.great:8004/accounts/login/'
-        '?next=http%3A//testserver/profile/find-a-buyer/'
-    )
-
-
 def test_find_a_buyer_unauthenticated_enrolment(
     sso_user_middleware_unauthenticated, returned_client, settings
 ):
-    settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON'] = True
-
     response = returned_client.get(reverse('find-a-buyer'))
 
     assert response.status_code == http.client.FOUND
     assert response.url == reverse('enrolment-start')
 
 
-def test_supplier_company_retrieve_not_found(
-    mock_retrieve_company, sso_user_middleware, returned_client, settings
-):
-    settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = False
-
-    mock_retrieve_company.return_value = create_response(404)
-    expected_template_name = views.FindABuyerView.template_name_not_fab_user
-
-    response = returned_client.get(reverse('find-a-buyer'))
-
-    assert response.template_name == [expected_template_name]
-
-
-def test_supplier_company_retrieve_found(
-    mock_retrieve_company, sso_user_middleware, returned_client, settings,
-    default_company_profile
-):
-
-    settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = False
-
-    mock_retrieve_company.return_value = create_response(
-        200, default_company_profile
-    )
-    expected_template_name = views.FindABuyerView.template_name_fab_user
-
-    response = returned_client.get(reverse('find-a-buyer'))
-
-    assert response.template_name == [expected_template_name]
-
-
 def test_supplier_company_retrieve_found_business_profile_on(
     mock_retrieve_company, sso_user_middleware, returned_client, settings,
     default_company_profile
 ):
-    settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = True
-
     mock_retrieve_company.return_value = create_response(
         200, default_company_profile
     )
@@ -608,20 +559,6 @@ def test_business_details_companies_house(
     assert isinstance(
         response.context_data['form'], forms.CompaniesHouseBusinessDetailsForm
     )
-
-
-@pytest.mark.parametrize('url', (
-    reverse('find-a-buyer-expertise-routing'),
-    reverse('find-a-buyer-expertise-regional'),
-    reverse('find-a-buyer-expertise-countries'),
-    reverse('find-a-buyer-expertise-languages'),
-))
-def test_add_expertise_feature_fag_off(settings, url, client):
-    settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON'] = False
-
-    response = client.get(url)
-
-    assert response.status_code == 404
 
 
 @pytest.mark.parametrize('choice,expected_url', (

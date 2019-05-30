@@ -296,20 +296,7 @@ def steps_data(captcha_stub):
 
 
 @pytest.mark.parametrize('url', urls)
-def test_404_feature_off(url, client, settings):
-
-    settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON'] = False
-
-    response = client.get(url)
-
-    assert response.status_code == 404
-
-
-@pytest.mark.parametrize('url', urls)
-def test_200_feature_on(url, client, settings):
-
-    settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON'] = True
-
+def test_200_feature_on(url, client):
     response = client.get(url)
 
     assert response.status_code == 200

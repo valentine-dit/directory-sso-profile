@@ -20,13 +20,6 @@ BASIC = 'details'
 MEDIA = 'images'
 
 
-class ExpertiseFeatureFlagMixin:
-    def dispatch(self, request, *args, **kwargs):
-        if not settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON']:
-            raise Http404()
-        return super().dispatch(request, *args, **kwargs)
-
-
 class CompanyProfileMixin:
     @cached_property
     def company(self):
@@ -35,7 +28,7 @@ class CompanyProfileMixin:
 
 
 class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
-    template_name_fab_user = 'fab/is-fab-user.html'
+    template_name_fab_user = 'fab/profile.html'
     template_name_not_fab_user = 'fab/is-not-fab-user.html'
 
     SUCCESS_MESSAGES = {
@@ -50,10 +43,7 @@ class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         if request.sso_user is None:
-            if settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON']:
-                return redirect('enrolment-start')
-            else:
-                return self.handle_no_permission()
+            return redirect('enrolment-start')
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, *args, **kwargs):
@@ -64,10 +54,7 @@ class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
 
     def get_template_names(self, *args, **kwargs):
         if self.company:
-            if settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON']:
-                template_name = 'fab/profile.html'
-            else:
-                template_name = self.template_name_fab_user
+            template_name = self.template_name_fab_user
         else:
             template_name = self.template_name_not_fab_user
         return [template_name]
@@ -180,7 +167,6 @@ class LogoFormView(BaseFormView):
 
 
 class ExpertiseRoutingFormView(
-    ExpertiseFeatureFlagMixin,
     state_requirements.UserStateRequirementHandlerMixin,
     CompanyProfileMixin, FormView
 ):
@@ -212,28 +198,28 @@ class ExpertiseRoutingFormView(
         )
 
 
-class RegionalExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
+class RegionalExpertiseFormView(BaseFormView):
     form_class = forms.RegionalExpertiseForm
     template_name = 'fab/expertise-regions-form.html'
     success_message = None
     success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
-class CountryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
+class CountryExpertiseFormView(BaseFormView):
     form_class = forms.CountryExpertiseForm
     template_name = 'fab/expertise-countries-form.html'
     success_message = None
     success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
-class IndustryExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
+class IndustryExpertiseFormView(BaseFormView):
     form_class = forms.IndustryExpertiseForm
     template_name = 'fab/expertise-industry-form.html'
     success_message = None
     success_url = reverse_lazy('find-a-buyer-expertise-routing')
 
 
-class LanguageExpertiseFormView(ExpertiseFeatureFlagMixin, BaseFormView):
+class LanguageExpertiseFormView(BaseFormView):
     form_class = forms.LanguageExpertiseForm
     template_name = 'fab/expertise-language-form.html'
     success_message = None
@@ -375,7 +361,6 @@ class AdminToolsView(
 
 
 class ProductsServicesRoutingFormView(
-    ExpertiseFeatureFlagMixin,
     state_requirements.UserStateRequirementHandlerMixin,
     CompanyProfileMixin, FormView
 ):
@@ -401,9 +386,7 @@ class ProductsServicesRoutingFormView(
         )
 
 
-class ProductsServicesFormView(
-    ExpertiseFeatureFlagMixin, BaseFormView
-):
+class ProductsServicesFormView(BaseFormView):
     success_message = None
     success_url = reverse_lazy(
         'find-a-buyer-expertise-products-services-routing'
@@ -446,9 +429,7 @@ class ProductsServicesFormView(
         }
 
 
-class ProductsServicesOtherFormView(
-    ExpertiseFeatureFlagMixin, BaseFormView
-):
+class ProductsServicesOtherFormView(BaseFormView):
     success_message = None
     success_url = reverse_lazy(
         'find-a-buyer-expertise-products-services-routing'
