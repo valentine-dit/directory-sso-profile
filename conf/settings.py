@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'directory_components',
     'profile',
     'enrolment',
+    'health_check.cache',
     'directory_healthcheck',
 ]
 
@@ -103,20 +104,15 @@ VCAP_SERVICES = env.json('VCAP_SERVICES', {})
 if 'redis' in VCAP_SERVICES:
     REDIS_URL = VCAP_SERVICES['redis'][0]['credentials']['uri']
 else:
-    REDIS_URL = env.str('REDIS_URL', '')
+    REDIS_URL = env.str('REDIS_URL')
 
-if REDIS_URL:
-    cache = {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
-        'OPTIONS': {
-            'CLIENT_CLASS': "django_redis.client.DefaultClient",
-        }
+cache = {
+    'BACKEND': 'django_redis.cache.RedisCache',
+    'LOCATION': REDIS_URL,
+    'OPTIONS': {
+        'CLIENT_CLASS': "django_redis.client.DefaultClient",
     }
-else:
-    cache = {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    }
+}
 
 CACHES = {
     'default': cache,
@@ -343,29 +339,21 @@ URL_PREFIX_DOMAIN = env.str('URL_PREFIX_DOMAIN', '')
 
 # feature flags
 FEATURE_FLAGS = {
-    'BUSINESS_PROFILE_ON': env.bool(
-        'FEATURE_BUSINESS_PROFILE_ENABLED', False
-    ),
     'ENROLMENT_SELECT_BUSINESS_ON': env.bool(
         'FEATURE_ENROLMENT_SELECT_BUSINESS_ENABLED', True
     ),
-    'NEW_HEADER_FOOTER_ON': env.bool(
-        'FEATURE_NEW_HEADER_FOOTER_ENABLED', False
-    ),
-    'HEADER_SEARCH_ON': env.bool('FEATURE_HEADER_SEARCH_ENABLED', False),
-    'EXPERTISE_FIELDS_ON': env.bool('FEATURE_EXPERTISE_FIELDS_ENABLED', False),
+    'COUNTRY_SELECTOR_ON': False,
     # used by directory-components
     'MAINTENANCE_MODE_ON': env.bool('FEATURE_MAINTENANCE_MODE_ENABLED', False),
-    # used by directory-components
-    'NEW_ACCOUNT_JOURNEY_ON': env.bool(
-        'FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED', False
-    ),
 }
 
 # Healthcheck
 DIRECTORY_HEALTHCHECK_TOKEN = env.str('HEALTH_CHECK_TOKEN')
 DIRECTORY_HEALTHCHECK_BACKENDS = [
     directory_healthcheck.backends.SingleSignOnBackend,
+    directory_healthcheck.backends.APIBackend,
+    # health_check.cache.CacheBackend is also registered in
+    # INSTALLED_APPS's health_check.cache
 ]
 
 

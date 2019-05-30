@@ -4,8 +4,16 @@
 
 ### Implemented enhancements
 - TT-1468 Rename "Back" to "Back to profile" in the products and services edit screen
+- no ticket - Removed the following obsolete feature flags:
+    + FEATURE_BUSINESS_PROFILE_ENABLED
+    + FEATURE_NEW_HEADER_FOOTER_ENABLED
+    + FEATURE_HEADER_SEARCH_ENABLED
+    + FEATURE_EXPERTISE_FIELDS_ENABLED
+    + FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED
+- no ticket - Fall over if redis is not available
 
 ### Fixed bugs:
+- Upgrade django rest framework to fix security vulnerability
 
 ## [2019.05.16](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.05.16)
 
