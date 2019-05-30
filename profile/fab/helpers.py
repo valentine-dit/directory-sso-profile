@@ -59,4 +59,4 @@ def has_collaborators(sso_session_id):
     response = api_client.company.retrieve_collaborators(
         sso_session_id=sso_session_id
     )
-    return  bool(response.json())
+    return bool(response.json())
