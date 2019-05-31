@@ -71,8 +71,6 @@
 }
 
 #logo-container {
-  max-height: 250px;
-  max-width: 250px;
   background-color: white;
   border: 1px solid #999;
   position: relative;
@@ -90,6 +88,7 @@
   #edit-image {
     position: absolute;
     right: 0;
+    top: 0;
     color: white;
     background: $active-blue;
     padding: 10px;
@@ -368,6 +367,9 @@
 }
 
 .success-message-box {
+  display:flex;
+  align-items: center;
+  justify-content: center;
   margin-top: 45px;
   position: relative;
   border-width: 3px;
@@ -380,8 +382,6 @@
     left: -50px;
     font-weight: bold;
     font-size: 36px;
-    top: 0;
-    line-height: 2.5em;
   }
 }
 
@@ -400,5 +400,43 @@
   }
   #view-profile-no-js {
     display: inline;
+  }
+}
+
+
+@media (min-width: 641px) {
+  #logo-container {
+    max-height: 250px;
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 641px) {
+  .success-message-box {
+    h2 {
+      margin-left: 15px;
+    }
+  }
+  #data-column {
+    & > div {
+      width: 100%;
+    }
+  }
+  #user-mode-container {
+    .divider {
+      display: none;
+    }
+    .pill {
+      float: right;
+    }
+    .right-column {
+      text-align: left;
+      margin-top: 30px;
+    }
+  }
+
+  .pencil-link {
+    position: relative;
+    top: -2em;
   }
 }
