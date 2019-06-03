@@ -11,6 +11,7 @@
     + FEATURE_EXPERTISE_FIELDS_ENABLED
     + FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED
 - no ticket - Fall over if redis is not available
+- TT-1501 update isd-url view profile url 
 
 ### Fixed bugs:
 - Upgrade django rest framework to fix security vulnerability
