@@ -3,6 +3,7 @@
 ## Pre-release
 
 ### Implemented enhancements
+- [TT-1392] Fixed UI Bugs on ISD profile page
 - TT-1468 Rename "Back" to "Back to profile" in the products and services edit screen
 - no ticket - Removed the following obsolete feature flags:
     + FEATURE_BUSINESS_PROFILE_ENABLED
