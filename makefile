@@ -69,6 +69,7 @@ DEBUG_SET_ENV_VARS := \
 	export DIRECTORY_CH_SEARCH_CLIENT_BASE_URL=http://127.0.0.1:8012; \
 	export DIRECTORY_FORMS_API_BASE_URL=http://forms.trade.great:8011; \
 	export DIRECTORY_API_CLIENT_BASE_URL=http://api.trade.great:8000; \
+	export DIRECTORY_CONSTANTS_URL_INVESTMENT_SUPPORT_DIRECTORY=http://supplier.trade.great:8005/investment-support-directory/\
 	export DIRECTORY_API_CLIENT_API_KEY=debug; \
 	export STORAGE_CLASS_NAME=local-storage; \
 	export LOCAL_STORAGE_DOMAIN=http://0.0.0.0:8000; \
