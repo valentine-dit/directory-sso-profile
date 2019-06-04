@@ -4,7 +4,6 @@ from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
 
 from django.conf import settings
-from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView
@@ -46,13 +45,6 @@ URL_SOLE_TRADER_ENROLMENT = reverse_lazy(
 URL_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
     'enrolment-companies-house', kwargs={'step': USER_ACCOUNT}
 )
-
-
-class NotFoundOnDisabledFeature:
-    def dispatch(self, *args, **kwargs):
-        if not settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON']:
-            raise Http404()
-        return super().dispatch(*args, **kwargs)
 
 
 class RedirectLoggedInMixin:
@@ -294,8 +286,7 @@ class ServicesRefererDetectorMixin:
 
 
 class BusinessTypeRoutingView(
-    NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin,
-    StepsListMixin, FormView
+    RedirectAlreadyEnrolledMixin, StepsListMixin, FormView
 ):
     form_class = forms.BusinessType
     template_name = 'enrolment/business-type.html'
@@ -332,8 +323,8 @@ class BusinessTypeRoutingView(
 
 
 class EnrolmentStartView(
-    NotFoundOnDisabledFeature, RedirectAlreadyEnrolledMixin,
-    StepsListMixin, ServicesRefererDetectorMixin, TemplateView
+    RedirectAlreadyEnrolledMixin, StepsListMixin, ServicesRefererDetectorMixin,
+    TemplateView
 ):
     template_name = 'enrolment/start.html'
 
@@ -360,7 +351,6 @@ class EnrolmentStartView(
 
 
 class BaseEnrolmentWizardView(
-    NotFoundOnDisabledFeature,
     RedirectAlreadyEnrolledMixin,
     RestartOnStepSkipped,
     UserAccountEnrolmentHandlerMixin,
@@ -638,7 +628,6 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
 
 
 class ResendVerificationCodeView(
-    NotFoundOnDisabledFeature,
     RedirectLoggedInMixin,
     RestartOnStepSkipped,
     ProgressIndicatorMixin,
