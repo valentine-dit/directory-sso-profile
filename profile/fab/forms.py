@@ -455,6 +455,7 @@ class IndustryExpertiseForm(forms.Form):
         label='Select the industries you have expertise in',
         choices=choices.INDUSTRIES,
         required=False,
+        help_text='Choose the industries you work with'
     )
 
 
