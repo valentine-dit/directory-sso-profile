@@ -452,7 +452,7 @@ class CountryExpertiseForm(forms.Form):
 
 class IndustryExpertiseForm(forms.Form):
     expertise_industries = fields.MultipleChoiceField(
-        label='Select the industries you have expertise in',
+        label='Choose the industries you work with',
         choices=choices.INDUSTRIES,
         required=False,
     )
