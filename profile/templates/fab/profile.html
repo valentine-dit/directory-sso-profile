@@ -261,7 +261,7 @@
               {% endif %}
             </div>
 
-            <div id="profile-expertise-container" class="message-box action-required border-medium border-stone background-white">
+            <div id="profile-expertise-container" class="message-box border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">
                     Expertise
@@ -296,19 +296,23 @@
               </div>
             </div>
 
-            <div class="message-box action-required border-medium border-stone background-white">
+            <div class="message-box border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Business showcase</h3>
               </div>
               <div class="grid-row">
                   <p class="mid-grey-text font-xsmall">Add images and success case studies to promote your products and services.</p>
+              </div>
+              <div class="grid-row">
                   <ul id="case-studies">
                       {% for case_study in company.supplier_case_studies %}
                           <li id="case-study-{{ case_study.pk }}">
                             <img src="{{ case_study.image_one }}" width="60" />
                             <span>{{ case_study.title }}</span>
-                            <a id="edit-image-{{ case_study.pk }}" href="{% url 'find-a-buyer-case-study-edit' id=case_study.pk step='basic' %}" class="link pencil-link">Edit</a>
-                        </li>
+                            <div class="right-column">
+                                <a id="edit-image-{{ case_study.pk }}" href="{% url 'find-a-buyer-case-study-edit' id=case_study.pk step='basic' %}" class="link pencil-link">Edit</a>
+                            </div>
+                      </li>
                       {% endfor %}
                   </ul>
               </div>
