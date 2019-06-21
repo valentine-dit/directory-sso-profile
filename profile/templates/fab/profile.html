@@ -109,7 +109,7 @@
 
             <div>
                 <div class="grid-row" id="about-company-container">
-                    <h3 class="column-two-thirds heading-medium">This company</h3>
+                    <h3 class="column-two-thirds heading-medium">Business details</h3>
                     <div class="column-one-third right-column">
                         <a href="{% url 'find-a-buyer-business-details' %}" class="link pencil-link">Edit</a>
                     </div>
@@ -222,7 +222,7 @@
 
             <div class="{% if not company.description %}primary-action-required{% endif %} message-box border-medium border-stone background-white">
               <div class="grid-row">
-                <h3 class="box-heading heading-medium black-text column-one-half">Company description</h3>
+                <h3 class="box-heading heading-medium black-text column-one-half">Business description</h3>
                 <div class="column-one-half right-column">
                     {% if company.description %}<a href="{% url 'find-a-buyer-description' %}" class="link pencil-link">Edit</a>{% endif %}
                 </div>
@@ -245,8 +245,7 @@
                     {% endif %}
                 </div>
               </div>
-
-              <p class="mid-grey-text font-xsmall">Tell overseas buyers what you can offer.</p>
+              <p class="mid-grey-text font-xsmall">Add search words to describe specialist knowledge or skills your business offers.</p>
               {% if company.expertise_products_services %}
                 <dl>
                   {% for key, values in company.expertise_products_services.items %}
