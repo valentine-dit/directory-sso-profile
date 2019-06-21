@@ -3,6 +3,14 @@
 ## Pre-release
 
 ### Implemented enhancements
+
+### Fixed bugs:
+
+## [2019.06.15](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.06.05)
+
+[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.05.16...2019.06.05)
+
+### Implemented enhancements
 - [TT-1392] Fixed UI Bugs on ISD profile page
 - TT-1468 Rename "Back" to "Back to profile" in the products and services edit screen
 - no ticket - Removed the following obsolete feature flags:
