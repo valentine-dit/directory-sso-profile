@@ -63,20 +63,18 @@ DEBUG_SET_ENV_VARS := \
 	export DIRECTORY_CONSTANTS_URL_FIND_A_SUPPLIER=http://supplier.trade.great:8005/; \
 	export DIRECTORY_CONSTANTS_URL_INVEST=http://invest.trade.great:8012/; \
 	export DIRECTORY_CONSTANTS_URL_SINGLE_SIGN_ON=http://sso.trade.great:8004/; \
-	export FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED=true; \
 	export RECAPTCHA_PUBLIC_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI; \
 	export RECAPTCHA_PRIVATE_KEY=6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe; \
 	export DIRECTORY_CH_SEARCH_CLIENT_API_KEY=debug; \
 	export DIRECTORY_CH_SEARCH_CLIENT_BASE_URL=http://127.0.0.1:8012; \
 	export DIRECTORY_FORMS_API_BASE_URL=http://forms.trade.great:8011; \
 	export DIRECTORY_API_CLIENT_BASE_URL=http://api.trade.great:8000; \
+	export DIRECTORY_CONSTANTS_URL_INVESTMENT_SUPPORT_DIRECTORY=http://supplier.trade.great:8005/investment-support-directory/\
 	export DIRECTORY_API_CLIENT_API_KEY=debug; \
-	export FEATURE_BUSINESS_PROFILE_ENABLED=true; \
-	export FEATURE_NEW_HEADER_FOOTER_ENABLED=true; \
-	export FEATURE_HEADER_SEARCH_ENABLED=false; \
-	export FEATURE_EXPERTISE_FIELDS_ENABLED=true; \
 	export STORAGE_CLASS_NAME=local-storage; \
-	export LOCAL_STORAGE_DOMAIN=http://0.0.0.0:8000
+	export LOCAL_STORAGE_DOMAIN=http://0.0.0.0:8000; \
+	export REDIS_URL=redis://localhost:6379
+
 
 DEBUG_TEST_SET_ENV_VARS := \
 	export EXPORTING_OPPORTUNITIES_API_BASE_URL=https://staging-new-design-eig.herokuapp.com/; \

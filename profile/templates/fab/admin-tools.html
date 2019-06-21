@@ -19,8 +19,10 @@
         <hr class="background-light-grey">
         <p class="active-blue-text font-xsmall">Editors</p>
         <p><a class="link" href="{{ FAB_ADD_USER_URL }}">Add an editor</a></p>
-        <p><a class="link" href="{{ FAB_TRANSFER_ACCOUNT_URL }}">Make administrator</a></p>
-        <p><a class="link great-red-text" href="{{ FAB_REMOVE_USER_URL }}">Remove editor</a></p>
+        <p><a class="link" href="{{ FAB_TRANSFER_ACCOUNT_URL }}">Transfer your business profile</a></p>
+	{% if has_collaborators %}
+            <p><a class="link great-red-text" href="{{ FAB_REMOVE_USER_URL }}">Remove editor</a></p>
+	{% endif %}
     </div>
 
     {% if company.is_publishable %}

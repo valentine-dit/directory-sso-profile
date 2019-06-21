@@ -104,6 +104,16 @@ def mock_retrieve_supplier():
     patch.stop()
 
 
+@pytest.fixture(autouse=True)
+def mock_retrieve_collaborators():
+    patch = mock.patch.object(
+        api_client.company, 'retrieve_collaborators',
+        return_value=create_response(200, {'ssoID': '12345'})
+    )
+    yield patch.start()
+    patch.stop()
+
+
 @pytest.fixture
 def submit_case_study_create_step(client):
     return submit_step_factory(
@@ -182,68 +192,19 @@ def test_find_a_buyer_exposes_context(
     assert context['FAB_REGISTER_URL'] == settings.FAB_REGISTER_URL
 
 
-def test_find_a_buyer_unauthenticated(
-    sso_user_middleware_unauthenticated, returned_client, settings
-):
-    settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON'] = False
-
-    response = returned_client.get(reverse('find-a-buyer'))
-
-    assert response.status_code == http.client.FOUND
-
-    assert response.url == (
-        'http://sso.trade.great:8004/accounts/login/'
-        '?next=http%3A//testserver/profile/find-a-buyer/'
-    )
-
-
 def test_find_a_buyer_unauthenticated_enrolment(
     sso_user_middleware_unauthenticated, returned_client, settings
 ):
-    settings.FEATURE_FLAGS['NEW_ACCOUNT_JOURNEY_ON'] = True
-
     response = returned_client.get(reverse('find-a-buyer'))
 
     assert response.status_code == http.client.FOUND
     assert response.url == reverse('enrolment-start')
 
 
-def test_supplier_company_retrieve_not_found(
-    mock_retrieve_company, sso_user_middleware, returned_client, settings
-):
-    settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = False
-
-    mock_retrieve_company.return_value = create_response(404)
-    expected_template_name = views.FindABuyerView.template_name_not_fab_user
-
-    response = returned_client.get(reverse('find-a-buyer'))
-
-    assert response.template_name == [expected_template_name]
-
-
-def test_supplier_company_retrieve_found(
-    mock_retrieve_company, sso_user_middleware, returned_client, settings,
-    default_company_profile
-):
-
-    settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = False
-
-    mock_retrieve_company.return_value = create_response(
-        200, default_company_profile
-    )
-    expected_template_name = views.FindABuyerView.template_name_fab_user
-
-    response = returned_client.get(reverse('find-a-buyer'))
-
-    assert response.template_name == [expected_template_name]
-
-
 def test_supplier_company_retrieve_found_business_profile_on(
     mock_retrieve_company, sso_user_middleware, returned_client, settings,
     default_company_profile
 ):
-    settings.FEATURE_FLAGS['BUSINESS_PROFILE_ON'] = True
-
     mock_retrieve_company.return_value = create_response(
         200, default_company_profile
     )
@@ -546,7 +507,22 @@ def test_admin_tools(
     assert response.context_data['FAB_TRANSFER_ACCOUNT_URL'] == (
         settings.FAB_TRANSFER_ACCOUNT_URL
     )
+    assert response.context_data['has_collaborators'] is True
     assert response.context_data['company'] == company.serialize_for_template()
+
+
+def test_admin_tools_no_collaborators(
+    settings, client, mock_session_user, mock_retrieve_collaborators
+):
+    mock_session_user.login()
+
+    mock_retrieve_collaborators.return_value = create_response(200, {})
+
+    url = reverse('find-a-buyer-admin-tools')
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['has_collaborators'] is False
 
 
 def test_business_details_sole_trader(
@@ -583,20 +559,6 @@ def test_business_details_companies_house(
     assert isinstance(
         response.context_data['form'], forms.CompaniesHouseBusinessDetailsForm
     )
-
-
-@pytest.mark.parametrize('url', (
-    reverse('find-a-buyer-expertise-routing'),
-    reverse('find-a-buyer-expertise-regional'),
-    reverse('find-a-buyer-expertise-countries'),
-    reverse('find-a-buyer-expertise-languages'),
-))
-def test_add_expertise_feature_fag_off(settings, url, client):
-    settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON'] = False
-
-    response = client.get(url)
-
-    assert response.status_code == 404
 
 
 @pytest.mark.parametrize('choice,expected_url', (
@@ -703,6 +665,79 @@ def test_products_services_form_prepopulate(
     assert response.context_data['form'].initial == {
         'expertise_products_services': 'Public Relations|Branding'
     }
+
+
+def test_products_services_other_form(
+    mock_retrieve_company, mock_session_user, default_company_profile, client
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200,
+        {
+            **default_company_profile,
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment',
+                ],
+                constants.OTHER: [
+                    'Foo',
+                    'Bar',
+                ]
+            }
+        }
+    )
+
+    url = reverse('find-a-buyer-expertise-products-services-other')
+    response = client.get(url)
+
+    assert response.context_data['form'].initial == {
+        'expertise_products_services': 'Foo, Bar'
+    }
+
+
+def test_products_services_other_form_update(
+    client, mock_retrieve_company, mock_update_company, sso_user,
+    mock_session_user, default_company_profile
+):
+    mock_session_user.login()
+    mock_retrieve_company.return_value = create_response(
+        200,
+        {
+            **default_company_profile,
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment',
+                ],
+                constants.OTHER: [
+                    'Foo',
+                    'Bar',
+                ]
+            }
+        }
+    )
+
+    url = reverse('find-a-buyer-expertise-products-services-other')
+
+    client.post(
+        url,
+        {'expertise_products_services': 'Baz,Zad'}
+    )
+
+    assert mock_update_company.call_count == 1
+    assert mock_update_company.call_args == mock.call(
+        data={
+            'expertise_products_services': {
+                constants.LEGAL: [
+                    'Company incorporation',
+                    'Employment',
+                ],
+                constants.OTHER: ['Baz', 'Zad']
+            }
+        },
+        sso_session_id='123'
+    )
 
 
 def test_products_services_form_update(

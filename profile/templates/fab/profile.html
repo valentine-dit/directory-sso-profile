@@ -14,31 +14,21 @@
         <div class="grid-row" >
             <div class="column-one-half">
                 <a href="{% url 'find-a-buyer-admin-tools' %}">Admin tools</a>
+                <span class="divider"></span>
+                <span class="background-denim-blue font-xsmall pill">Admin view</span>
             </div>
             <div class="column-one-half right-column">
-                <a class="background-light-blue font-xsmall pill" href="{% url 'find-a-buyer-admin-tools' %}">Admin view</a>
                 {% if company.is_published %}
-                    <span class="divider"></span>
-                    <span class="js-disabled-only" id="view-profile-no-js">
-                        {% if company.is_published_find_a_supplier %}
-                            <a href="{{ services_urls.fas }}suppliers/{{ company.number }}/" title="View Find a Supplier profile">View FAS profile</a>
-                            {% if company.is_published_investment_support_directory%}
-                                <span class="divider"></span>
-                            {% endif %}
-                        {% endif %}
-                        {% if company.is_published_investment_support_directory %}
-                            <a href="{{ services_urls.fas }}suppliers/{{ company.number }}/" title="View Investment Support Directory profile">View ISD profile</a>
-                        {% endif %}
-                    </span>
-                    <select class="link js-enabled-only" id="view-profile-js">
-                        <option value="" disabled selected>View profile</option>
-                        {% if company.is_published_find_a_supplier %}
-                            <option value="find-a-supplier">Find A Supplier</option>
-                        {% endif %}
-                        {% if company.is_published_investment_support_directory %}
-                            <option value="investment-support-directory">Investment Support Directory</option>
-                        {% endif %}
-                    </select>
+                    {% if company.is_published_find_a_supplier %}
+                        <div>
+                            <a href="{{ services_urls.fas }}suppliers/{{ company.number }}/">View Find a Supplier profile</a>
+                        </div>
+                    {% endif %}
+                    {% if company.is_published_investment_support_directory %}
+                        <div> 
+                            <a href="{{ services_urls.isd }}{{ company.number }}/">View UK Investment Support Directory profile</a>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -51,7 +41,7 @@
         {% for message in messages %}
             {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
                 <div class="success-message-box border-teal teal-text">
-                    <h2 class="heading-large margin-30">{{ message }}</h2>
+                    <h2 class="heading-large margin-30-m">{{ message }}</h2>
                 </div>
             {% endif %}
         {% endfor %}
@@ -170,12 +160,12 @@
                             
                             {% if company.facebook_url %}
                                 <a class="link" href="{{ company.facebook_url }}">
-                                    <img alt="with Facebook" height="36px" src="{% static 'directory_components/icons/facebook.svg' %}" width="36px" />
-                                    <span class="ellipsis">{{ company.facebook_url }}</span>
+                                    <img alt="with Facebook" height="36px" src="{% static 'images/facebook.png' %}" width="36px" />
+                                    <span class="ellipsis">Visit Company's Facebook</span>
                                 </a>
                             {% else %}
                                 <a class="link" href="{% url 'find-a-buyer-social' %}">
-                                    <img alt="with Facebook" height="36px" src="{% static 'directory_components/icons/facebook.svg' %}" width="36px" />
+                                    <img alt="with Facebook" height="36px" src="{% static 'images/facebook.png' %}" width="36px" />
                                     <span>Add Facebook</span>
                                 </a>
                             {% endif %}
@@ -183,12 +173,12 @@
                         <li>
                             {% if company.twitter_url %}
                                 <a class="link" href="{{ company.twitter_url }}">
-                                    <img alt="with Twitter" height="36px" src="{% static 'directory_components/icons/twitter.svg' %}" width="36px" />
-                                    <span class="ellipsis">{{ company.twitter_url }}</span>
+                                    <img alt="with Twitter" height="36px" src="{% static 'images/twitter.png' %}" width="36px" />
+                                    <span class="ellipsis">Visit Company's Twitter </span>
                                 </a>
                             {% else %}
                                 <a class="link" href="{% url 'find-a-buyer-social' %}">
-                                    <img alt="with Twitter" height="36px" src="{% static 'directory_components/icons/twitter.svg' %}" width="36px" />
+                                    <img alt="with Twitter" height="36px" src="{% static 'images/twitter.png' %}" width="36px" />
                                     <span>Add Twitter</span>
                                 </a>
                             {% endif %}
@@ -196,12 +186,12 @@
                         <li>
                             {% if company.linkedin_url %}
                                 <a class="link" href="{{ company.linkedin_url }}">
-                                    <img alt="with LinkedIn" height="36px" src="{% static 'directory_components/icons/linkedin.svg' %}" width="36px" />                            
-                                    <span class="ellipsis">{{ company.linkedin_url }}</span>
+                                    <img alt="with LinkedIn" height="36px" src="{% static 'images/linkedin.png' %}" width="36px" />
+                                    <span class="ellipsis">Visit Company's LinkedIn</span>
                                 </a>
                             {% else %}
                                 <a class="link" href="{% url 'find-a-buyer-social' %}">
-                                    <img alt="with LinkedIn" height="36px" src="{% static 'directory_components/icons/linkedin.svg' %}" width="36px" />
+                                    <img alt="with LinkedIn" height="36px" src="{% static 'images/linkedin.png' %}" width="36px" />
                                     <span>Add Linkedin</span>
                                 </a>
                             {% endif %}
@@ -210,19 +200,19 @@
                 </section>
             </div>
         </div>
-        <div class="column-two-thirds">
+        <div class="column-two-thirds" id="details-column">
             <h2 class="heading-large" id="company-name">
                 {{ company.name }}
                 <a href="{% url 'find-a-buyer-business-details' %}" class="link pencil-link">Edit</a>
             </h2>
-            <div class="{% if not company.email_address %}primary-action-required{% endif %} message-box border-medium border-black background-white">
+            <div class="{% if not company.email_address %}primary-action-required{% endif %} message-box border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Profile email</h3>
                 <div class="column-one-half right-column">
                     {% if company.email_address %}<a href="{% url 'find-a-buyer-email' %}" class="link pencil-link">Edit</a>{% endif %}
                 </div>
               </div>
-              <p class="mid-grey-text font-xsmall">This will be the email address international buyers will contact you from the business profile.</p>
+              <p class="mid-grey-text font-xsmall">This is the email address overseas buyers will use to contact you.</p>
               {% if company.email_address %}
                 <span>{{ company.email_address }}</span>
               {% else %}
@@ -230,7 +220,7 @@
               {% endif %}
             </div>
 
-            <div class="{% if not company.description %}primary-action-required{% endif %} message-box border-medium border-black background-white">
+            <div class="{% if not company.description %}primary-action-required{% endif %} message-box border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Business description</h3>
                 <div class="column-one-half right-column">
@@ -246,7 +236,7 @@
               {% endif %}
             </div>
 
-            <div id="profile-products-services-container" class="{% if not company.expertise_products_services %}primary-action-required{% endif %} message-box border-medium border-black background-white">
+            <div id="profile-products-services-container" class="{% if not company.expertise_products_services %}primary-action-required{% endif %} message-box border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Products and services</h3>
                 <div class="column-one-half right-column">
@@ -255,13 +245,14 @@
                     {% endif %}
                 </div>
               </div>
-
               <p class="mid-grey-text font-xsmall">Add search words to describe specialist knowledge or skills your business offers.</p>
               {% if company.expertise_products_services %}
                 <dl>
                   {% for key, values in company.expertise_products_services.items %}
-                    <dt>{{ key }}</dt>
-                    <dd>{{ values }}</dd>
+                    {% if values %}
+                      <dt>{{ key }}</dt>
+                      <dd>{{ values }}</dd>
+                    {% endif %}
                   {% endfor %}
                 </dl>
               {% else %}
@@ -269,56 +260,58 @@
               {% endif %}
             </div>
 
-            {% if features.EXPERTISE_FIELDS_ON %}
-                <div id="profile-expertise-container" class="message-box action-required border-medium border-black background-white">
-                  <div class="grid-row">
-                    <h3 class="box-heading heading-medium black-text column-one-half">
-                        Expertise
-                    </h3>
-                    <div class="column-one-half right-column">
-                        {% if company.has_expertise %}<a href="{% url 'find-a-buyer-expertise-routing' %}" class="link pencil-link">Edit</a>{% endif %}
-                    </div>
-                  </div>
-                  <div class="grid-row">
-                      <p class="mid-grey-text font-xsmall">Add search words to describe specialist knowledge of skills your business offers.</p>
-                      {% if company.has_expertise %}
-                          <dl>
-                            {% if company.expertise_industries %}
-                                <dt>Industry</dt>
-                                <dd>{{ company.expertise_industries }}</dd>
-                            {% endif %}
-                            {% if company.expertise_regions %}
-                                <dt>Regional</dt>
-                                <dd>{{ company.expertise_regions }}</dd>
-                            {% endif %}
-                            {% if company.expertise_countries %}
-                                <dt>International</dt>
-                                <dd>{{ company.expertise_countries }}</dd>
-                            {% endif %}
-                            {% if company.expertise_languages %}
-                                <dt>Languages</dt>
-                                <dd>{{ company.expertise_languages }}</dd>
-                            {% endif %}
-                        {% else %}
-                          <a href="{% url 'find-a-buyer-expertise-routing' %}" class="link">Add expertise</a>
-                        {% endif %}
-                  </div>
+            <div id="profile-expertise-container" class="message-box border-medium border-stone background-white">
+              <div class="grid-row">
+                <h3 class="box-heading heading-medium black-text column-one-half">
+                    Expertise
+                </h3>
+                <div class="column-one-half right-column">
+                    {% if company.has_expertise %}<a href="{% url 'find-a-buyer-expertise-routing' %}" class="link pencil-link">Edit</a>{% endif %}
                 </div>
-            {% endif %}
+              </div>
+              <div class="grid-row">
+                  <p class="mid-grey-text font-xsmall">Tell overseas buyers about your specialist knowledge or skills.</p>
+                  {% if company.has_expertise %}
+                      <dl>
+                        {% if company.expertise_industries %}
+                            <dt>Industry</dt>
+                            <dd>{{ company.expertise_industries }}</dd>
+                        {% endif %}
+                        {% if company.expertise_regions %}
+                            <dt>Regional</dt>
+                            <dd>{{ company.expertise_regions }}</dd>
+                        {% endif %}
+                        {% if company.expertise_countries %}
+                            <dt>International</dt>
+                            <dd>{{ company.expertise_countries }}</dd>
+                        {% endif %}
+                        {% if company.expertise_languages %}
+                            <dt>Languages</dt>
+                            <dd>{{ company.expertise_languages }}</dd>
+                        {% endif %}
+                    {% else %}
+                      <a href="{% url 'find-a-buyer-expertise-routing' %}" class="link">Add expertise</a>
+                    {% endif %}
+              </div>
+            </div>
 
-            <div class="message-box action-required border-medium border-black background-white">
+            <div class="message-box border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Business showcase</h3>
               </div>
               <div class="grid-row">
                   <p class="mid-grey-text font-xsmall">Add images and success case studies to promote your products and services.</p>
+              </div>
+              <div class="grid-row">
                   <ul id="case-studies">
                       {% for case_study in company.supplier_case_studies %}
                           <li id="case-study-{{ case_study.pk }}">
                             <img src="{{ case_study.image_one }}" width="60" />
                             <span>{{ case_study.title }}</span>
-                            <a id="edit-image-{{ case_study.pk }}" href="{% url 'find-a-buyer-case-study-edit' id=case_study.pk step='basic' %}" class="link pencil-link">Edit</a>
-                        </li>
+                            <div class="right-column">
+                                <a id="edit-image-{{ case_study.pk }}" href="{% url 'find-a-buyer-case-study-edit' id=case_study.pk step='basic' %}" class="link pencil-link">Edit</a>
+                            </div>
+                      </li>
                       {% endfor %}
                   </ul>
               </div>

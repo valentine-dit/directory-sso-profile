@@ -3,11 +3,42 @@
 ## Pre-release
 
 ### Implemented enhancements
+
+### Fixed bugs:
+
+## [2019.06.15](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.06.05)
+
+[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.05.16...2019.06.05)
+
+### Implemented enhancements
+- [TT-1392] Fixed UI Bugs on ISD profile page
+- TT-1468 Rename "Back" to "Back to profile" in the products and services edit screen
+- no ticket - Removed the following obsolete feature flags:
+    + FEATURE_BUSINESS_PROFILE_ENABLED
+    + FEATURE_NEW_HEADER_FOOTER_ENABLED
+    + FEATURE_HEADER_SEARCH_ENABLED
+    + FEATURE_EXPERTISE_FIELDS_ENABLED
+    + FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED
+- no ticket - Fall over if redis is not available
+- TT-1501 update isd-url view profile url 
+- TT-1321-industry-rewording
+
+### Fixed bugs:
+- Upgrade django rest framework to fix security vulnerability
+
+## [2019.05.16](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.05.16)
+
+[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.04.08...2019.05.16)
+
+### Implemented enhancements
 - Move form choices to [Constants][directory-constants].
+- TT-1426 - Show links to public ISD and FAS profiles
+- TT-1423 - Improve content on ISD "other" products and services form
 
 ### Fixed bugs:
 - Upgraded urllib3 to fix [vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2019-11324)
 - Removed old references to Docker.
-- [[TT-1271]](https://uktrade.atlassian.net/browse/TT-1271) Show dropdown arrow on industry expertise input
-
+- TT-1271 - Show dropdown arrow on industry expertise input
+- TT-1415 - Allow products and services to be cleared
 [directory-constants]: https://github.com/uktrade/directory-constants
+- TT-1417 - Populate "Other" products and services with keywords

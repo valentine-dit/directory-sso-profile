@@ -1,5 +1,7 @@
+
 from directory_constants import choices, expertise
 from directory_components import fields, forms
+from directory_components.helpers import tokenize_keywords
 import directory_validators.company
 import directory_validators.enrolment
 
@@ -11,8 +13,8 @@ from enrolment.fields import DateField
 from profile.fab import constants, validators
 
 
-INDUSTRY_CHOICES = [('', 'Select Industry')] + list(choices.INDUSTRIES)
-EMPLOYEES_CHOICES = [('', 'Select Employees')] + list(choices.EMPLOYEES)
+INDUSTRY_CHOICES = [('', 'Select an industry')] + list(choices.INDUSTRIES)
+EMPLOYEES_CHOICES = [('', 'Select employees')] + list(choices.EMPLOYEES)
 
 
 class SocialLinksForm(forms.Form):
@@ -86,7 +88,7 @@ class WebsiteForm(forms.Form):
 
 class CaseStudyBasicInfoForm(forms.Form):
     title = fields.CharField(
-        label='Showcase title',
+        label='Title of your case study or project',
         max_length=60,
         validators=[directory_validators.company.no_html],
     )
@@ -106,9 +108,8 @@ class CaseStudyBasicInfoForm(forms.Form):
     description = fields.CharField(
         label='Describe your case study or project',
         help_text=(
-            'Describe the project or case study in 1,000 characters or fewer. '
-            'Use this space to demonstrate the value of your '
-            'company to an international business audience.'
+            'Describe your project or case study in greater detail. '
+            'You have up to 1,000 characters to use.'
         ),
         max_length=1000,
         validators=[
@@ -118,22 +119,23 @@ class CaseStudyBasicInfoForm(forms.Form):
         widget=Textarea,
     )
     sector = fields.ChoiceField(
-        label='Industry most relevant to your showcase',
+        label='Industry most relevant to your case study or project',
         choices=INDUSTRY_CHOICES
     )
     website = fields.URLField(
-        label='The web address for your case study (optional)',
+        label='The web address for your case study or project (optional)',
         help_text='Enter a full URL including http:// or https://',
         max_length=255,
         required=False,
     )
     keywords = fields.CharField(
         label=(
-            'Enter up to 10 keywords that describe your case study. '
-            'Keywords should be separated by commas.'
+            'Enter up to 10 keywords that describe your case '
+            'study or project. Keywords should be separated by '
+            'commas.'
         ),
         help_text=(
-            'These keywords will be used to help potential overseas buyers '
+            'These keywords will help potential overseas buyers '
             'find your case study.'
         ),
         max_length=1000,
@@ -427,14 +429,14 @@ class ExpertiseRoutingForm(forms.Form):
     )
 
     choice = fields.ChoiceField(
-        label='Choose the specialist skills or knowledge',
+        label='Choose your area of expertise',
         choices=CHOICES,
     )
 
 
 class RegionalExpertiseForm(forms.Form):
     expertise_regions = fields.MultipleChoiceField(
-        label='Select the regions you have experience in',
+        label='Select the regions you have expertise in',
         choices=choices.EXPERTISE_REGION_CHOICES,
         required=False,
     )
@@ -442,7 +444,7 @@ class RegionalExpertiseForm(forms.Form):
 
 class CountryExpertiseForm(forms.Form):
     expertise_countries = fields.MultipleChoiceField(
-        label='Select the countries you have experience in',
+        label='Select the countries you have expertise in',
         choices=choices.COUNTRY_CHOICES,
         required=False,
     )
@@ -450,7 +452,7 @@ class CountryExpertiseForm(forms.Form):
 
 class IndustryExpertiseForm(forms.Form):
     expertise_industries = fields.MultipleChoiceField(
-        label='Select the industries you have experience in',
+        label='Choose the industries you work with',
         choices=choices.INDUSTRIES,
         required=False,
     )
@@ -458,7 +460,7 @@ class IndustryExpertiseForm(forms.Form):
 
 class LanguageExpertiseForm(forms.Form):
     expertise_languages = fields.MultipleChoiceField(
-        label='Select the languages you have experience in',
+        label='Select the languages you have expertise in',
         choices=choices.EXPERTISE_LANGUAGES,
         required=False,
     )
@@ -470,13 +472,13 @@ class ExpertiseProductsServicesRoutingForm(forms.Form):
         (constants.MANAGEMENT_CONSULTING, 'Management consulting'),
         (constants.HUMAN_RESOURCES, 'Human resources and recruitment'),
         (constants.LEGAL, 'Legal'),
-        (constants.PUBLICITY, 'Publicity'),
-        (constants.BUSINESS_SUPPORT, 'Further services'),
+        (constants.PUBLICITY, 'Publicity and communications'),
+        (constants.BUSINESS_SUPPORT, 'Business support'),
         (constants.OTHER, 'Other'),
     )
 
     choice = fields.ChoiceField(
-        label='Choose the products and services industry',
+        label='Choose the industry you’re in',
         choices=CHOICES,
     )
 
@@ -490,17 +492,17 @@ class ExpertiseProductsServicesForm(forms.Form):
         constants.LEGAL: expertise.LEGAL,
         constants.PUBLICITY: expertise.PUBLICITY,
         constants.BUSINESS_SUPPORT: expertise.BUSINESS_SUPPORT,
-        constants.OTHER: [],
     }
 
     expertise_products_services = fields.CharField(
-        label='Choose the products and services',
+        label='Choose your products or services',
         validators=[
             directory_validators.company.keywords_word_limit,
             directory_validators.company.no_html,
         ],
         widget=Textarea,
-        max_length=1000
+        max_length=1000,
+        required=False,
     )
 
     def __init__(self, category, *args, **kwargs):
@@ -510,3 +512,23 @@ class ExpertiseProductsServicesForm(forms.Form):
 
     def clean_expertise_products_services(self):
         return self.cleaned_data['expertise_products_services'].split('|')
+
+
+class ExpertiseProductsServicesOtherForm(forms.Form):
+
+    expertise_products_services = fields.CharField(
+        label='Enter keywords that describe your products or services',
+        help_text='Keywords should be separated by commas',
+        validators=[
+            directory_validators.company.keywords_word_limit,
+            directory_validators.company.no_html,
+        ],
+        widget=Textarea,
+        required=False,
+        max_length=1000
+    )
+
+    def clean_expertise_products_services(self):
+        return tokenize_keywords(
+            self.cleaned_data['expertise_products_services']
+        )
