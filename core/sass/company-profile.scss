@@ -243,13 +243,14 @@
 }
 
 #company-name {
+  display: flex;
+  align-items: center;
   a {
-    font-size: 19px;
-    font-weight: normal;
-    vertical-align: bottom;
     line-height: 40px;
+    margin-left: 15px;
   }
 }
+
 
 #about-company-container {
   margin-top: 2em;
@@ -407,7 +408,33 @@
   }
 }
 
+@media (min-width: 641px) {
+  #company-name-mobile {
+    display: none;
+  }
+}
+
 @media (max-width: 641px) {
+  #logo-container {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #user-mode-container hr,
+  #data-column hr {
+    margin-left: -20px;
+    margin-right: -20px;
+  }
+  #company-name-mobile {
+    display: flex;
+    align-items: center;
+    a {
+      top: 0;
+      width: 60px;
+    }
+  }
+  #company-name {
+    display: none;
+  }
   .success-message-box {
     h2 {
       margin-left: 15px;

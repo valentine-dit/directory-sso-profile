@@ -3,6 +3,9 @@
 ## Pre-release
 
 ### Implemented enhancements
+- TT-1577 - Move company title under logo on mobile
+
+### Implemented enhancements
 
 ### Fixed bugs:
 
