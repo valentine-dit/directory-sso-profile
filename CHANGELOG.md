@@ -5,6 +5,9 @@
 ### Implemented enhancements
 - TT-1577 - Move company title under logo on mobile
 
+### Fixed bugs:
+- no ticket - Upgrade Django to fix security vulnerability  
+
 ### Implemented enhancements
 
 ### Fixed bugs:
