@@ -105,6 +105,12 @@
                     <img alt="{{ company.name }}" src="{{ company.logo }}" />
                     <a id="edit-image" href="{% url 'find-a-buyer-logo' %}" class="link pencil-link">Edit</a>
                 {% endif %}
+
+            </div>
+
+            <div  id="company-name-mobile">
+                <h3 class="heading-medium">{{ company.name }}</h3>
+                <a href="{% url 'find-a-buyer-business-details' %}" class="link pencil-link">Edit</a>
             </div>
 
             <div>
@@ -201,10 +207,10 @@
             </div>
         </div>
         <div class="column-two-thirds" id="details-column">
-            <h2 class="heading-large" id="company-name">
-                {{ company.name }}
+            <div id="company-name">
+                <h2 class="heading-large">{{ company.name }}</h2>
                 <a href="{% url 'find-a-buyer-business-details' %}" class="link pencil-link">Edit</a>
-            </h2>
+            </div>
             <div class="{% if not company.email_address %}primary-action-required{% endif %} message-box border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Profile email</h3>
