@@ -180,6 +180,8 @@
   li {
     display: table;
     margin-bottom: 10px;
+    width: 100%;
+
     span {
       display: table-cell;
       vertical-align: middle;
@@ -405,14 +407,6 @@
   }
 }
 
-
-@media (min-width: 641px) {
-  #logo-container {
-    max-height: 250px;
-    max-width: 250px;
-  }
-}
-
 @media (max-width: 641px) {
   .success-message-box {
     h2 {
@@ -441,4 +435,8 @@
     position: relative;
     top: -2em;
   }
+}
+
+.background-denim-blue {
+  background-color: $denim;
 }
