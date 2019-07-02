@@ -1,9 +1,14 @@
 {% extends 'fab/base-form.html' %}
 
 {% load static from staticfiles %}
+{% load breadcrumbs from directory_components %}
 
 {% block form_contents %}
-    {% include 'fab/breadcrumbs.html' with label='Add regional expertise' %}
+    {% breadcrumbs 'Add regional expertise' %}
+        <a href="{% url 'about' %}">Home</a>
+        <a href="{% url 'find-a-buyer' %}">Business profile</a>
+    {% endbreadcrumbs %}
+
     <div id="selected-values-container" class="js-enabled-only">
       <h2 class="heading-small">Regional expertise selected</h2>
       <div id="selected-values"></div>

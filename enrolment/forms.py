@@ -62,11 +62,12 @@ class BusinessType(forms.Form):
 class UserAccount(forms.Form):
     PASSWORD_HELP_TEXT = (
         '<p>Your password must:</p>'
-        '<ul class="list list-bullet">'
+        '<ul class="list list-bullet margin-l-30-m">'
         '<li>be at least 10 characters</li>'
-        '<li>contain at least 1 letter</li>'
-        '<li>contain at least 1 number</li>'
-        '<li>not contain the word "password"</li>'
+        '<li>have at least 1 letter</li>'
+        '<li>have at least 1 number</li>'
+        '<li>not contain the words which are easy to guess such as "password"'
+        '</li>'
         '</ul>'
     )
     MESSAGE_NOT_MATCH = "Passwords don't match"
@@ -76,6 +77,7 @@ class UserAccount(forms.Form):
         label='Your email address'
     )
     password = fields.CharField(
+        label='Set a password',
         help_text=mark_safe(PASSWORD_HELP_TEXT),
         widget=PasswordInput
     )
@@ -83,7 +85,6 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
-
     captcha = ReCaptchaField(
         label='',
         label_suffix='',
@@ -187,7 +188,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
     )
     date_of_creation = DateField(
         label='Incorporated on',
-        input_formats=['%m %B %Y'],
+        input_formats=['%d %B %Y'],
         disabled=True,
         required=False,
     )
@@ -231,11 +232,11 @@ class CompaniesHouseBusinessDetails(forms.Form):
         del self.fields['website']
 
     def set_form_initial(self, company_profile):
-        company = helpers.CompanyProfileFormatter(company_profile)
+        company = helpers.CompanyParser(company_profile)
         self.initial['company_name'] = company.name
         self.initial['company_number'] = company.number
-        self.initial['sic'] = company.sic_code
-        self.initial['date_of_creation'] = company.date_created
+        self.initial['sic'] = company.nature_of_business
+        self.initial['date_of_creation'] = company.date_of_creation
         self.initial['address'] = company.address
         self.initial['postal_code'] = company.postcode
 

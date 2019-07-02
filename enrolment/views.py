@@ -438,6 +438,7 @@ class CompaniesHouseEnrolmentView(
                     company_number=previous_data['company_number'],
                     session=self.request.session,
                 )
+
         elif step == COMPANY_SEARCH:
             form_kwargs['session'] = self.request.session
         return form_kwargs
