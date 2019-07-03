@@ -6,6 +6,7 @@
 - TT-1577 - Move company title under logo on mobile.
 - TT-1575 - Update registration journey for Companies House listed company.
 - No ticket - Replace custom breadcrumbs with shared component
+- TT-1574 - Update registration journey for non Companies House listed company.
 
 ### Fixed bugs:
 - no ticket - Upgrade Django to fix security vulnerability  

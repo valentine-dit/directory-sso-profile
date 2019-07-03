@@ -1032,14 +1032,7 @@ def test_sole_trader_enrolment_expose_company(
     mock_session_user.login()
 
     response = submit_sole_trader_step({
-        'company_name': 'Test company',
-        'postal_code': 'EEA 3AD',
-        'address': '555 fake street, London',
-    })
-
-    assert response.status_code == 302
-
-    response = submit_sole_trader_step({
+        'company_type': 'SOLE_TRADER',
         'company_name': 'Test company',
         'postal_code': 'EEA 3AD',
         'address': '555 fake street, London',
@@ -1050,6 +1043,7 @@ def test_sole_trader_enrolment_expose_company(
     response = client.get(response.url)
 
     assert response.context_data['company'] == {
+        'company_type': 'SOLE_TRADER',
         'company_name': 'Test company',
         'postal_code': 'EEA 3AD',
         'address': '555 fake street\nLondon\nEEA 3AD',
@@ -1083,17 +1077,7 @@ def test_sole_trader_enrolment_submit_end_to_end_logged_in(
 
     response = submit_sole_trader_step(
         {
-            'company_name': 'Test company',
-            'postal_code': 'EEA 3AD',
-            'address': '555 fake street, London',
-        },
-        step_name=resolve(response.url).kwargs['step'],
-    )
-
-    assert response.status_code == 302
-
-    response = submit_sole_trader_step(
-        {
+            'company_type': 'SOLE_TRADER',
             'company_name': 'Test company',
             'postal_code': 'EEA 3AD',
             'address': '555 fake street, London',
@@ -1118,16 +1102,16 @@ def test_sole_trader_enrolment_submit_end_to_end_logged_in(
         'sso_id': '123',
         'company_email': 'test@a.com',
         'contact_email_address': 'test@a.com',
+        'company_type': 'SOLE_TRADER',
         'company_name': 'Test company',
+        'sectors': ['AEROSPACE'],
         'postal_code': 'EEA 3AD',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
-        'sectors': ['AEROSPACE'],
         'given_name': 'Foo',
         'family_name': 'Example',
         'job_title': 'Exampler',
         'phone_number': '1232342',
-        'company_type': 'SOLE_TRADER',
     })
 
 

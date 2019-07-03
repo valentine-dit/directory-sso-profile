@@ -3,7 +3,7 @@ from directory_components import forms, fields, widgets
 from directory_constants import choices, urls
 from requests.exceptions import HTTPError
 from directory_validators.company import (
-    no_company_with_insufficient_companies_house_data as compant_type_validator
+    no_company_with_insufficient_companies_house_data as company_type_validator
 )
 from directory_validators.enrolment import (
     company_number as company_number_validator
@@ -15,6 +15,7 @@ from django.http.request import QueryDict
 
 from enrolment import constants, helpers
 from enrolment.fields import DateField
+from enrolment.widgets import PostcodeInput
 
 
 INDUSTRY_CHOICES = (
@@ -154,7 +155,7 @@ class CompaniesHouseSearch(forms.Form):
         cleaned_data = super().clean()
         if 'company_number' in cleaned_data:
             try:
-                compant_type_validator(cleaned_data['company_number'])
+                company_type_validator(cleaned_data['company_number'])
             except ValidationError as error:
                 raise ValidationError({
                     'company_name': error
@@ -286,40 +287,24 @@ class SoleTraderSearch(forms.Form):
 
     MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
 
+    company_type = fields.ChoiceField(
+        label='Your business sub type',
+        choices=[
+            (value, label) for value, label in choices.COMPANY_TYPES
+            if value != 'COMPANIES_HOUSE'
+        ]
+    )
     company_name = fields.CharField(
         label='Business name'
     )
     postal_code = fields.CharField(
         label='Business postcode',
+        widget=PostcodeInput,
     )
     address = fields.CharField(
         help_text='Type your business address',
         widget=Textarea(attrs={'rows': 4}),
-    )
-
-    def clean_address(self):
-        value = self.cleaned_data['address'].strip().replace(', ', '\n')
-        postal_code = self.cleaned_data['postal_code']
-        if value.count('\n') == 0:
-            raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
-        if postal_code not in value:
-            value = f'{value}\n{postal_code}'
-        return value
-
-
-class SoleTraderBusinessDetails(forms.Form):
-    company_name = fields.CharField(
-        label='Business name'
-    )
-    postal_code = fields.CharField(
-        label='Business postcode',
         required=False,
-        disabled=True
-    )
-    address = fields.CharField(
-        disabled=True,
-        required=False,
-        widget=Textarea(attrs={'rows': 3}),
     )
     sectors = fields.ChoiceField(
         label='What industry is your business in?',
@@ -331,31 +316,21 @@ class SoleTraderBusinessDetails(forms.Form):
         required=False,
     )
 
-    def __init__(self, initial, *args, **kwargs):
-        super().__init__(initial=initial, *args, **kwargs)
-        # force the form to use the initial value rather than the value
-        # the user submitted in previous sessions
-        # on GET the data structure is a MultiValueDict. on POST the data
-        # structure is a QueryDict
-        if self.data and not isinstance(self.data, QueryDict):
-            self.initial_to_data('company_name')
-            self.initial_to_data('postal_code')
-            self.initial_to_data('address')
-
-    def initial_to_data(self, field_name):
-        self.data.setlist(
-            self.add_prefix(field_name),
-            [self.initial[field_name]]
-        )
-
-    def clean_address(self):
-        address_parts = self.cleaned_data['address'].split('\n')
-        self.cleaned_data['address_line_1'] = address_parts[0].strip()
-        self.cleaned_data['address_line_2'] = address_parts[1].strip()
-        return self.cleaned_data['address']
-
     def clean_sectors(self):
         return [self.cleaned_data['sectors']]
+
+    def clean_address(self):
+        value = self.cleaned_data['address'].strip().replace(', ', '\n')
+        parts = value.split('\n')
+
+        postal_code = self.cleaned_data['postal_code']
+        if value.count('\n') == 0:
+            raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
+        if postal_code not in value:
+            value = f'{value}\n{postal_code}'
+        self.cleaned_data['address_line_1'] = parts[0].strip()
+        self.cleaned_data['address_line_2'] = parts[1].strip()
+        return value
 
 
 class ResendVerificationCode(forms.Form):

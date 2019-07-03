@@ -6,13 +6,13 @@
 {% block content %}
     <section class="container">
         {% block breadcrumbs %}{% endblock %}
-        <div class="grid-row">
-            <div class="column-one-half">
+        <div class="grid-row margin-top-60">
+            <div class="column-two-thirds">
                 
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {% block above_form %}
-                        <h1 class="heading-large margin-top-0">{% block step_title %}{% endblock %}</h1>
+                        <h1 class="heading-xlarge margin-top-0">{% block step_title %}{% endblock %}</h1>
                     {% endblock %}
                     {{ wizard.management_form }}
                     {% if wizard.form.forms %}
@@ -32,10 +32,10 @@
                     {% block below_submit_button %}{% endblock %}
                 </form>
             </div>
-            <div class="column-one-third padding-top-30" id="progress-column">
+            <div class="column-one-third padding-top-30 overline-flag-red" id="progress-column">
                 {% if step_labels %}
                     <span>Part of:</span>
-                    <a class="link heading-medium" href="{% url 'enrolment-start' %}">Create a great.gov.uk account</a>
+                    <a class="link heading-medium margin-0" href="{% url 'enrolment-start' %}">Create a great.gov.uk account</a>
                     {% include 'enrolment/progress.html' %}
                 {% endif %}
             </div>
