@@ -8,7 +8,7 @@
 - No ticket - Replace custom breadcrumbs with shared component
 
 ### Fixed bugs:
-- no ticket - Upgrade Django to fix security vulnerability  
+- No ticket - Upgrade vulnerable django version to django 1.11.22
 
 ### Implemented enhancements
 
