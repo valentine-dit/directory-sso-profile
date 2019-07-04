@@ -433,13 +433,13 @@ def test_companies_house_enrolment_expose_company(
     assert response.context_data['company'] == {
         'company_name': 'Example corp',
         'company_number': '12345678',
-        'sic': '1234',
-        'date_of_creation': '2001-01-01',
+        'date_of_creation': '2001-01-20',
         'postal_code': 'EDG 4DF',
         'address': '555 fake street, London',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'sectors': ['AEROSPACE'],
+        'sic': '',
         'website': ''
     }
 
@@ -491,8 +491,7 @@ def test_companies_house_enrolment_submit_end_to_end(
         'contact_email_address': 'test@a.com',
         'company_name': 'Example corp',
         'company_number': '12345678',
-        'sic': '1234',
-        'date_of_creation': '2001-01-01',
+        'date_of_creation': '2001-01-20',
         'postal_code': 'EDG 4DF',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
@@ -551,10 +550,10 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
         'sso_id': '123',
         'company_email': 'test@a.com',
         'contact_email_address': 'test@a.com',
+        'company_type': 'COMPANIES_HOUSE',
         'company_name': 'Example corp',
         'company_number': '12345678',
-        'sic': '1234',
-        'date_of_creation': '2001-01-01',
+        'date_of_creation': '2001-01-20',
         'postal_code': 'EDG 4DF',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
@@ -562,8 +561,7 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
         'given_name': 'Foo',
         'family_name': 'Example',
         'job_title': 'Exampler',
-        'phone_number': '1232342',
-        'company_type': 'COMPANIES_HOUSE',
+        'phone_number': '1232342'
     })
 
 

@@ -1,10 +1,13 @@
 {% extends 'fab/base-form.html' %}
 
 {% load static from staticfiles %}
+{% load breadcrumbs from directory_components %}
 
 {% block form_contents %}
-    {% include 'fab/breadcrumbs.html' with label='Add products and services' %}
-
+    {% breadcrumbs 'Add products and services' %}
+        <a href="{% url 'about' %}">Home</a>
+        <a href="{% url 'find-a-buyer' %}">Business profile</a>
+    {% endbreadcrumbs %}
     <div id="selected-expertise-container">
         {% for key, values in company.expertise_products_services.items %}
             {% if values %}
@@ -16,7 +19,7 @@
             {% endif %}
         {% endfor %}
     </div>
-    <h1 class="heading-large">Add products and services</h1>
+    <h1 class="heading-large margin-top-0">Add products and services</h1>
     <div id="business-details-form">
         {{ block.super }}
     </div>

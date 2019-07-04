@@ -1,6 +1,7 @@
 {% extends 'core/wizard.html' %}
 
 {% load static from staticfiles %}
+{% load breadcrumbs from directory_components %}
 
 {% block head_css %}
     {{ block.super }}
@@ -8,5 +9,7 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    {% include 'enrolment/breadcrumbs.html' %}
+    {% breadcrumbs 'Create a great.gov.uk account' %}
+        <a href="{{ services_urls.exred }}">Home</a>
+    {% endbreadcrumbs %}
 {% endblock %}

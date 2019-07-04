@@ -6,37 +6,38 @@
 {% block content %}
     <section class="container">
         {% block breadcrumbs %}{% endblock %}
-        <div class="column-one-half">
-            
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {% block above_form %}
-                    <h1 class="heading-large">{% block step_title %}{% endblock %}</h1>
-                {% endblock %}
-                {{ wizard.management_form }}
-                {% if wizard.form.forms %}
-                    {{ wizard.form.management_form }}
-                    {% for form in wizard.form.forms %}
-                         {% render_form form %}
-                    {% endfor %}
-                {% else %}
-                    {% render_form form %}
+        <div class="grid-row">
+            <div class="column-one-half">
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% block above_form %}
+                        <h1 class="heading-large margin-top-0">{% block step_title %}{% endblock %}</h1>
+                    {% endblock %}
+                    {{ wizard.management_form }}
+                    {% if wizard.form.forms %}
+                        {{ wizard.form.management_form }}
+                        {% for form in wizard.form.forms %}
+                             {% render_form form %}
+                        {% endfor %}
+                    {% else %}
+                        {% render_form form %}
+                    {% endif %}
+                    {% block below_form %}{% endblock %}
+                    {% if wizard.steps.step1 != wizard.steps.count %}
+                        <button type="submit" class="button">{% block button_submit_label %}Save and continue{% endblock %}</button>
+                    {% else %}
+                        <button class="button next" type="submit">{% block button_next_label %}Save and continue{% endblock %}</button>
+                    {% endif %}
+                    {% block below_submit_button %}{% endblock %}
+                </form>
+            </div>
+            <div class="column-one-third padding-top-30" id="progress-column">
+                {% if step_labels %}
+                    <span>Part of:</span>
+                    <a class="link heading-medium" href="{% url 'enrolment-start' %}">Create a great.gov.uk account</a>
+                    {% include 'enrolment/progress.html' %}
                 {% endif %}
-                {% block below_form %}{% endblock %}
-                {% if wizard.steps.step1 != wizard.steps.count %}
-                    <button type="submit" class="button">Save and continue</button>
-                {% else %}
-                    <button class="button next" type="submit">Save and continue</button>
-                {% endif %}
-                {% block below_submit_button %}{% endblock %}
-            </form>
-        </div>
-        <div class="column-one-third" id="progress-column">
-            {% if step_labels %}
-                <span>Part of:</span>
-                <a class="link heading-medium" href="{% url 'enrolment-start' %}">Create a great.gov.uk account</a>
-                {% include 'enrolment/progress.html' %}
-            {% endif %}
-        </div>
+            </div>
     </section>
 {% endblock %}

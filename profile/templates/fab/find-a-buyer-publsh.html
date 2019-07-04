@@ -1,6 +1,6 @@
 {% extends 'fab/base-form.html' %}
 
-{% load render_form from directory_components %}
+{% load breadcrumbs render_form from directory_components %}
 {% load static from staticfiles %}
 
 {% block head_css %}
@@ -9,8 +9,12 @@
 {% endblock %}
 
 {% block form_contents %}
-    {% include 'fab/breadcrumbs.html' with label='Publish your profile' %}
-    <h1 class="heading-large">Publishing your profile on great.gov.uk</h1>
+    {% breadcrumbs 'Publish your profile' %}
+        <a href="{% url 'about' %}">Home</a>
+        <a href="{% url 'find-a-buyer' %}">Business profile</a>
+    {% endbreadcrumbs %}
+
+    <h1 class="heading-large margin-top-0">Publishing your profile on great.gov.uk</h1>
     {% if company.is_uk_isd_company %}
         <p>You can publish your profile on 2 great.gov.uk platforms – great.gov.uk/trade and great.gov.uk UK Investment Support Directory.</p>
         <p>You can publish on either or both of these.</p>

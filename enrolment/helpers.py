@@ -1,22 +1,22 @@
 import collections
 from http import cookies
-from datetime import datetime
 import re
+
+from directory_api_client.client import api_client
+from directory_ch_client.client import ch_search_api_client
+from directory_constants import choices
+from directory_sso_api_client.client import sso_api_client
+from directory_forms_api_client import actions
+from directory_constants import urls
+import directory_components
 
 from django.utils import formats
 from django.utils.dateparse import parse_datetime
 from django.conf import settings
 
-from directory_api_client.client import api_client
-from directory_ch_client.client import ch_search_api_client
-from directory_sso_api_client.client import sso_api_client
-from directory_forms_api_client import actions
-from directory_constants import urls
-
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
 SESSION_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'
 SESSION_KEY_IS_ENROLLED = 'IS_ENROLLED'
-
 
 StepsListConf = collections.namedtuple(
     'StepsListConf', ['form_labels_user', 'form_labels_anon']
@@ -176,9 +176,9 @@ def request_collaboration(company_number, email, name, form_url):
     response.raise_for_status()
 
 
-class CompanyProfileFormatter:
-    def __init__(self, unfomatted_companies_house_data):
-        self.data = unfomatted_companies_house_data
+class CompanyParser(directory_components.helpers.CompanyParser):
+
+    SIC_CODES = dict(choices.SIC_CODES)
 
     @property
     def number(self):
@@ -189,15 +189,11 @@ class CompanyProfileFormatter:
         return self.data['company_name']
 
     @property
-    def sic_code(self):
-        return ', '.join(self.data.get('sic_codes', []))
-
-    @property
-    def date_created(self):
-        date = self.data.get('date_of_creation')
-        if date:
-            date_format = COMPANIES_HOUSE_DATE_FORMAT
-            return datetime.strptime(date, date_format).strftime('%m %B %Y')
+    def nature_of_business(self):
+        return directory_components.helpers.values_to_labels(
+            values=self.data.get('sic_codes', []),
+            choices=self.SIC_CODES
+        )
 
     @property
     def address(self):

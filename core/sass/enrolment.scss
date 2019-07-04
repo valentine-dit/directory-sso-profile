@@ -9,7 +9,6 @@
 
 body.js-enabled {
   #id_search-company_number-container,
-  #id_business-details-company_number-container,
   #id_search-address-container{
     display: none;
   }
@@ -27,6 +26,7 @@ textarea.form-control {
 
 #id_business-details-company_number-container,
 #id_business-details-sic-container,
+#id_business-details-company_number-container,
 #id_business-details-date_of_creation-container,
 #id_business-details-address-container {
   padding-bottom: 10px;
@@ -52,21 +52,16 @@ textarea.form-control {
 }
 
 #content {
-  .container {
-    overflow: hidden;
-  }
   form {
-    margin-top: 50px;
     input, select {
       width: 80%;
+    }
+    #id_verification-code {
+      width: 7ch;
     }
     button {
       margin-top: 40px;
     }
-  }
-
-  .breadcrumbs {
-    padding-top: 0;
   }
 
   #id_user-account-captcha-container {
@@ -133,19 +128,10 @@ textarea.form-control {
   }
 }
 
-#content {
-  nav.breadcrumbs {
-    padding-bottom: 0;
-    padding-left: 15px;
-  }
-}
-
 #progress-column {
   float: right;
   border-top: 5px solid $flag-red;
-  padding-top: 30px;
   padding-left: 0;
-  margin-top: 2.5em;
   a {
     margin: 0;
   }
@@ -153,37 +139,18 @@ textarea.form-control {
 
 #start-now-button {
   display: block;
-  margin-top: 15px;
-  width: 145px;
+  width: 200px;
+  text-align: center;
+  border-radius: 0;
   &:active {
     background-color: $mid-blue;
   }
 }
 
-#start-page-progress-indicator {
-  font-size: 1.5em;
-}
-
-#success-message-container {
-  margin-top: 80px;
-  .message-box {
-    position: relative;
-    border-left-width: 100px;
-    &:before {
-      content: '✓';
-      color: white;
-      position: absolute;
-      left: -70px;
-      font-weight: bold;
-      font-size: 50px;
-      top: 0;
-      line-height: 2.5em;
+@media (min-width: 769px) {
+  #id_user-account-password-container {
+    ul {
+      margin-left: 30px;
     }
-  }
-}
-
-#next-container {
-  h2 {
-    margin: 0;
   }
 }

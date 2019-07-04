@@ -1,6 +1,6 @@
 {% extends 'core/wizard.html' %}
 
-{% load render_form from directory_components %}
+{% load breadcrumbs render_form from directory_components %}
 {% load static from staticfiles %}
 
 {% block head_css %}
@@ -9,8 +9,11 @@
 {% endblock %}
 
 {% block form_contents %}
-	{% include 'fab/breadcrumbs.html' with label='Business showcase' %}
-    <h1 class="heading-large">Image and testimonials</h1>
+    {% breadcrumbs 'Business showcase' %}
+        <a href="{% url 'about' %}">Home</a>
+        <a href="{% url 'find-a-buyer' %}">Business profile</a>
+    {% endbreadcrumbs %}
+    <h1 class="heading-large margin-top-0">Image and testimonials</h1>
     {{ block.super }}
 {% endblock %}
 

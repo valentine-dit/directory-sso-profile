@@ -1,6 +1,6 @@
 {% extends 'fab/base-form.html' %}
 
-{% load render_form from directory_components %}
+{% load breadcrumbs render_form from directory_components %}
 {% load static from staticfiles %}
 
 {% block head_css %}
@@ -9,12 +9,15 @@
 {% endblock %}
 
 {% block form_contents %}
-    {% include 'fab/breadcrumbs.html' with label='Products and services' %}
+    {% breadcrumbs 'Products and services' %}
+        <a href="{% url 'about' %}">Home</a>
+        <a href="{% url 'find-a-buyer' %}">Business profile</a>
+    {% endbreadcrumbs %}
     <div id="selected-values-container" class="js-enabled-only">
       <h2 class="heading-large">Products and services</h2>
       <div id="selected-values"></div>
     </div>
-    <h1 class="heading-large">Add {{ category }} services</h1>
+    <h1 class="heading-large margin-top-0">Add {{ category }} services</h1>
     {{ block.super }}
 {% endblock %}
 
