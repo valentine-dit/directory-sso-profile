@@ -6,7 +6,7 @@
 - TT-1577 - Move company title under logo on mobile
 
 ### Fixed bugs:
-- no ticket - Upgrade Django to fix security vulnerability  
+- No ticket - Upgrade vulnerable django version to django 1.11.22
 
 ### Implemented enhancements
 
