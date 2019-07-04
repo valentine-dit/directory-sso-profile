@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load static from staticfiles %}
+{% load breadcrumbs from directory_components %}
 
 {% block head_css %}
     {{ block.super }}
@@ -9,8 +10,11 @@
 
 {% block content %}
     <div class="container" id="associated-accounts-container">
-        {% include 'fab/breadcrumbs.html' with label='Admin tools' %}
-        <h1 class="heading-large">Admin tools</h1>
+        {% breadcrumbs 'Admin tools' %}
+            <a href="{% url 'about' %}">Home</a>
+            <a href="{% url 'find-a-buyer' %}">Business profile</a>
+        {% endbreadcrumbs %}
+        <h1 class="heading-large margin-top-0">Admin tools</h1>
         <h2 class="heading-medium">Associated accounts</h2>
         <p>Accounts linked to your business profile:</p>
         

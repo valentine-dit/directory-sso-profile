@@ -3,6 +3,14 @@
 ## Pre-release
 
 ### Implemented enhancements
+- TT-1577 - Move company title under logo on mobile.
+- TT-1575 - Update registration journey for Companies House listed company.
+- No ticket - Replace custom breadcrumbs with shared component
+
+### Fixed bugs:
+- No ticket - Upgrade vulnerable django version to django 1.11.22
+
+### Implemented enhancements
 
 ### Fixed bugs:
 

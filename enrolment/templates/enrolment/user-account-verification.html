@@ -4,7 +4,7 @@
 
 {% block above_form %}
     <div id="user-account-verification-header-container">
-        <h1 class="heading-large">Enter your confirmation code</h1>
+        <h1 class="heading-large margin-top-0">Enter your confirmation code</h1>
         <p>We've emailed you a 5 digit confirmation code</p>
     </div>
 {% endblock %}
@@ -12,3 +12,5 @@
 {% block below_form %}
 	<p><a class="link" href="{{ verification_missing_url }}">Resend my code</a></p>
 {% endblock %}
+
+{% block button_next_label %}Submit{% endblock %}
