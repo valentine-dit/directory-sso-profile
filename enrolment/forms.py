@@ -132,6 +132,13 @@ class UserAccountVerification(forms.Form):
         error_messages={'required': MESSAGE_INVALID_CODE}
     )
 
+    def __init__(self, *args, **kwargs):
+        super(UserAccountVerification, self).__init__(*args, **kwargs)
+        if self.initial.get('email') is None:
+            self.fields['email'] = fields.EmailField(
+                label='Your email address'
+            )
+
 
 class CompaniesHouseSearch(forms.Form):
     MESSAGE_COMPANY_NOT_FOUND = (

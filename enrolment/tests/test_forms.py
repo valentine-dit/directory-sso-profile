@@ -6,6 +6,8 @@ from requests.exceptions import HTTPError
 
 from enrolment import forms, helpers
 
+from directory_components import fields
+
 
 @pytest.fixture(autouse=True)
 def mock_clean():
@@ -96,6 +98,20 @@ def test_create_user(mock_create_user):
 
     assert form.is_valid() is True
     assert form.cleaned_data["user_details"] == data
+
+
+def test_verification_code_empty_email():
+
+    form = forms.UserAccountVerification()
+    assert type(form.fields['email']) is fields.EmailField
+
+
+def test_verification_code_with_email():
+
+    form = forms.UserAccountVerification(
+        data={'email': 'test@test.com'}
+    )
+    assert type(form.fields['email']) is fields.CharField
 
 
 @mock.patch.object(helpers, 'get_company_profile', return_value={

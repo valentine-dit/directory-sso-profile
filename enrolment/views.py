@@ -146,7 +146,10 @@ class ProgressIndicatorMixin:
 class RestartOnStepSkipped:
     def render(self, *args, **kwargs):
         prev = self.steps.prev
-        if prev and not self.get_cleaned_data_for_step(prev):
+        current = self.steps.current
+        if prev and not self.get_cleaned_data_for_step(prev) and not (
+                current == VERIFICATION
+        ):
             return redirect(reverse('enrolment-business-type'))
         return super().render(*args, **kwargs)
 
@@ -438,7 +441,6 @@ class CompaniesHouseEnrolmentView(
                     company_number=previous_data['company_number'],
                     session=self.request.session,
                 )
-
         elif step == COMPANY_SEARCH:
             form_kwargs['session'] = self.request.session
         return form_kwargs
