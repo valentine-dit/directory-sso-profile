@@ -125,7 +125,7 @@ class UserAccountVerification(forms.Form):
 
     email = fields.CharField(label='', widget=HiddenInput, disabled=True)
     code = fields.CharField(
-        label='',
+        label='Confirmation Code',
         min_length=5,
         max_length=5,
         error_messages={'required': MESSAGE_INVALID_CODE}
