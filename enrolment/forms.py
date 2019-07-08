@@ -132,7 +132,7 @@ class UserAccountVerification(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        super(UserAccountVerification, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if self.initial.get('email') is None:
             self.fields['email'] = fields.EmailField(
                 label='Your email address'
