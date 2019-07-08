@@ -109,7 +109,7 @@ def test_verification_code_empty_email():
 def test_verification_code_with_email():
 
     form = forms.UserAccountVerification(
-        data={'email': 'test@test.com'}
+        initial={'email': 'test@test.com'}
     )
     assert type(form.fields['email']) is fields.CharField
 
