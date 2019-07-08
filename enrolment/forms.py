@@ -288,7 +288,7 @@ class SoleTraderSearch(forms.Form):
     MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
 
     company_type = fields.ChoiceField(
-        label='Your business sub type',
+        label='Business category',
         choices=[
             (value, label) for value, label in choices.COMPANY_TYPES
             if value != 'COMPANIES_HOUSE'
