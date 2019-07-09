@@ -13,6 +13,7 @@ from core.tests.helpers import create_response, submit_step_factory
 from enrolment import constants, forms, helpers, views
 from directory_constants import urls as constants_url
 from django.contrib.sessions.backends import signed_cookies
+from directory_components import fields
 
 
 urls = (
@@ -753,6 +754,32 @@ def test_user_verification_passes_cookies(
 
 
 @pytest.mark.parametrize('company_type', company_types)
+@freeze_time('2012-01-14 12:00:02')
+def test_user_verification_manual_passes_cookies(
+    company_type, submit_step_builder, client, steps_data
+):
+    url = reverse(
+        'enrolment-companies-house', kwargs={'step': views.VERIFICATION}
+    )
+
+    response = client.post(url,
+                           data={'email': 'test@test.com', 'code': '12345'})
+    # I get management error , I want to submit  email/code to the form
+    # And confirm user can loggin
+
+    assert response.status_code == 302
+
+    assert str(response.cookies['debug_sso_session_cookie']) == (
+        'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
+        'Path=/; Secure'
+    )
+    assert str(response.cookies['sso_display_logged_in']) == (
+        'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
+    )
+
+@pytest.mark.parametrize('company_type', company_types)
 def test_confirm_user_verify_code_incorrect_code(
     client, company_type, submit_step_builder, mock_session_user,
     mock_confirm_verification_code, steps_data
@@ -766,6 +793,33 @@ def test_confirm_user_verify_code_incorrect_code(
     assert response.status_code == 302
 
     response = submit_step(steps_data[views.VERIFICATION])
+
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+    assert response.context_data['form'].errors['code'] == ['Invalid code']
+
+
+@pytest.mark.parametrize('company_type', company_types)
+def test_confirm_user_verify_code_incorrect_code_manual_email(
+    client, company_type, submit_step_builder,
+    mock_session_user, mock_confirm_verification_code,
+):
+
+    mock_session_user.return_value = create_response(404)
+    mock_confirm_verification_code.return_value = create_response(400)
+
+    url = reverse(
+        'enrolment-companies-house', kwargs={'step': views.VERIFICATION}
+    )
+
+    response = client.get(url)
+    assert isinstance(
+        response.context_data['form'].fields['email'], fields.EmailField
+    )
+
+    response = client.post(url, data={'email': 'test@test.com', 'code': '12345'})
+    # I get management error , I want to submit invalid email/code to the form
 
     assert response.status_code == 302
 
@@ -914,6 +968,8 @@ def test_confirm_user_resend_verification_code_complete(
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
     )
+
+
 
 
 @freeze_time('2012-01-14 12:00:02')
