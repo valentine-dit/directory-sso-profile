@@ -146,10 +146,7 @@ class ProgressIndicatorMixin:
 class RestartOnStepSkipped:
     def render(self, *args, **kwargs):
         prev = self.steps.prev
-        current = self.steps.current
-        if prev and not self.get_cleaned_data_for_step(prev) and not (
-                current == VERIFICATION
-        ):
+        if prev and not self.get_cleaned_data_for_step(prev):
             return redirect(reverse('enrolment-business-type'))
         return super().render(*args, **kwargs)
 
@@ -157,11 +154,32 @@ class RestartOnStepSkipped:
 class UserAccountEnrolmentHandlerMixin:
 
     def user_account_condition(self):
+        is_logged_in = bool(self.request.sso_user)
+        # user has gone straight to verification code entry step, skipping the
+        # step where they enter their email. This can happen if:
+        # - user submitted the first step then closed the browser and followed
+        # the email from another browser session
+        # - user submitted the first step then followed the email from another
+        # device
+        skipped_first_step = (
+            self.kwargs['step'] == VERIFICATION
+            and not self.storage.data['step_data']
+        )
+        failed_verification = (
+            self.kwargs['step'] == VERIFICATION and
+            self.storage.extra_data.get('failed_verification', False)
+        )
+        return (
+            (not is_logged_in) and
+            not (skipped_first_step or failed_verification)
+        )
+
+    def verification_condition(self):
         return self.request.sso_user is None
 
     condition_dict = {
         USER_ACCOUNT: user_account_condition,
-        VERIFICATION: user_account_condition,
+        VERIFICATION: verification_condition,
     }
 
     def get_form_initial(self, step):
@@ -193,6 +211,7 @@ class UserAccountEnrolmentHandlerMixin:
         return response
 
     def validate_code(self, form, response):
+        self.storage.extra_data['failed_verification'] = False
         try:
             upstream_response = helpers.confirm_verification_code(
                 email=form.cleaned_data['email'],
@@ -200,6 +219,7 @@ class UserAccountEnrolmentHandlerMixin:
             )
         except HTTPError as error:
             if error.response.status_code == 400:
+                self.storage.extra_data['failed_verification'] = True
                 self.storage.set_step_data(
                     VERIFICATION,
                     {form.add_prefix('code'): [None]}
