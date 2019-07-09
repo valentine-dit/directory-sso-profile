@@ -1,0 +1,14 @@
+{% url 'enrolment-business-type' as default_link_url %}
+
+<div class="message-box padding-15 padding-30-m border-medium background-stone-30 border-stone grey-text margin-right-15" id="business-type-information-box">
+    <h2 class="box-heading heading-medium heading-small grey-text margin-bottom-0">Your business type</h2>
+    <p id="business-type" class="box-description marargin-top-0">
+        {% if is_in_companies_house %}
+            A business registered with Companies House
+        {% else %}
+            UK business not registered in Companies House
+        {% endif %}
+        <br>
+        <a href="{{ link_url|default:default_link_url }}" class="link" id="change-business-type">{{ link_text|default:'Change' }}</a>
+    </p>
+</div>
