@@ -111,7 +111,7 @@ def test_verification_code_with_email():
     form = forms.UserAccountVerification(
         initial={'email': 'test@test.com'}
     )
-    assert type(form.fields['email']) is fields.CharField
+    assert isinstance(form.fields['email'], fields.EmailField)
 
 
 @mock.patch.object(helpers, 'get_company_profile', return_value={
