@@ -13,7 +13,6 @@ from core.tests.helpers import create_response, submit_step_factory
 from enrolment import constants, forms, helpers, views
 from directory_constants import urls as constants_url
 from django.contrib.sessions.backends import signed_cookies
-from directory_components import fields
 
 
 urls = (
@@ -960,8 +959,6 @@ def test_confirm_user_resend_verification_code_complete(
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
     )
-
-
 
 
 @freeze_time('2012-01-14 12:00:02')
