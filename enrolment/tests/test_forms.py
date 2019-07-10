@@ -180,8 +180,10 @@ def test_companies_house_search_company_active(client):
 def test_sole_trader_search_address_postcode_appended(address, expected):
     form = forms.SoleTraderSearch(data={
         'company_name': 'thing',
+        'company_type': 'SOLE_TRADER',
         'address': address,
         'postal_code': 'EEE EEE',
+        'sectors': 'AEROSPACE',
     })
     assert form.is_valid()
 
@@ -193,6 +195,7 @@ def test_sole_trader_search_address_too_short(address):
     form = forms.SoleTraderSearch(data={
         'address': address,
         'postal_code': 'EEE EEE',
+        'sectors': 'AEROSPACE',
     })
     assert form.is_valid() is False
 

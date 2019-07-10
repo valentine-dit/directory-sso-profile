@@ -248,6 +248,7 @@ class CreateCompanyProfileMixin:
             'address_line_2',
             'company_name',
             'company_number',
+            'company_type',
             'date_of_creation',
             'family_name',
             'given_name',
@@ -467,8 +468,8 @@ class CompaniesHouseEnrolmentView(
 
     def serialize_form_list(self, form_list):
         return {
+            **super().serialize_form_list(form_list),
             'company_type': 'COMPANIES_HOUSE',
-            **super().serialize_form_list(form_list)
         }
 
     def done(self, form_list, form_dict, **kwargs):
@@ -514,14 +515,12 @@ class SoleTraderEnrolmentView(
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
             COMPANY_SEARCH: 2,
-            BUSINESS_INFO: 3,
-            PERSONAL_INFO: 4,
+            PERSONAL_INFO: 3,
         },
         step_counter_anon={
             USER_ACCOUNT: 2,
             VERIFICATION: 3,
             COMPANY_SEARCH: 4,
-            BUSINESS_INFO: 4,
             PERSONAL_INFO: 5,
         },
         first_step=USER_ACCOUNT,
@@ -531,28 +530,22 @@ class SoleTraderEnrolmentView(
         (USER_ACCOUNT, forms.UserAccount),
         (VERIFICATION, forms.UserAccountVerification),
         (COMPANY_SEARCH, forms.SoleTraderSearch),
-        (BUSINESS_INFO, forms.SoleTraderBusinessDetails),
         (PERSONAL_INFO, forms.PersonalDetails),
     )
 
     templates = {
         USER_ACCOUNT: 'enrolment/user-account.html',
         VERIFICATION: 'enrolment/user-account-verification.html',
-        COMPANY_SEARCH: 'enrolment/sole-trader-search.html',
-        BUSINESS_INFO: 'enrolment/sole-trader-business-details.html',
+        COMPANY_SEARCH: 'enrolment/sole-trader-business-details.html',
         PERSONAL_INFO: 'enrolment/sole-trader-personal-details.html',
         FINISHED: 'enrolment/success-sole-trader.html',
     }
 
-    def get_form_initial(self, step):
-        form_initial = super().get_form_initial(step)
-        if step == BUSINESS_INFO:
-            data = self.get_cleaned_data_for_step(COMPANY_SEARCH)
-            if data:
-                form_initial['address'] = data['address'].replace(', ', '\n')
-                form_initial['postal_code'] = data['postal_code']
-                form_initial['company_name'] = data['company_name']
-        return form_initial
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.steps.current == PERSONAL_INFO:
+            context['company'] = self.get_cleaned_data_for_step(COMPANY_SEARCH)
+        return context
 
     def done(self, form_list, form_dict, **kwargs):
         self.create_user_profile(form_dict[PERSONAL_INFO])
@@ -563,12 +556,6 @@ class SoleTraderEnrolmentView(
             self.templates[FINISHED],
             context=self.get_referrer_context()
         )
-
-    def serialize_form_list(self, form_list):
-        return {
-            'company_type': 'SOLE_TRADER',
-            **super().serialize_form_list(form_list)
-        }
 
 
 class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
