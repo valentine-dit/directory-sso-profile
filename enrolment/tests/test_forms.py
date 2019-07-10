@@ -103,7 +103,7 @@ def test_create_user(mock_create_user):
 def test_verification_code_empty_email():
 
     form = forms.UserAccountVerification()
-    assert type(form.fields['email']) is fields.EmailField
+    assert isinstance(form.fields['email'], fields.EmailField)
 
 
 def test_verification_code_with_email():
@@ -111,7 +111,7 @@ def test_verification_code_with_email():
     form = forms.UserAccountVerification(
         initial={'email': 'test@test.com'}
     )
-    assert isinstance(form.fields['email'], fields.EmailField)
+    assert isinstance(form.fields['email'], fields.CharField)
 
 
 @mock.patch.object(helpers, 'get_company_profile', return_value={
