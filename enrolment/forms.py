@@ -122,7 +122,7 @@ class UserAccount(forms.Form):
 class UserAccountVerification(forms.Form):
 
     MESSAGE_INVALID_CODE = 'Invalid code'
-
+    # email field can be overridden in __init__ to allow user to enter email
     email = fields.CharField(label='', widget=HiddenInput, disabled=True)
     code = fields.CharField(
         label='Confirmation Code',
