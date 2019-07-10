@@ -124,14 +124,21 @@ class UserAccount(forms.Form):
 class UserAccountVerification(forms.Form):
 
     MESSAGE_INVALID_CODE = 'Invalid code'
-
+    # email field can be overridden in __init__ to allow user to enter email
     email = fields.CharField(label='', widget=HiddenInput, disabled=True)
     code = fields.CharField(
-        label='',
+        label='Confirmation Code',
         min_length=5,
         max_length=5,
         error_messages={'required': MESSAGE_INVALID_CODE}
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.initial.get('email') is None:
+            self.fields['email'] = fields.EmailField(
+                label='Your email address'
+            )
 
 
 class CompaniesHouseSearch(forms.Form):

@@ -6,6 +6,7 @@
 - TT-1577 - Move company title under logo on mobile.
 - TT-1575 - Update registration journey for Companies House listed company.
 - No ticket - Replace custom breadcrumbs with shared component
+- TT-1607 - Verification Code allow email
 - TT-1574 - Update registration journey for non Companies House listed company.
 - TT-998 - Support multiple non companies house company types
 - TT-1574 - Update registration journey for nont Companies House listed company

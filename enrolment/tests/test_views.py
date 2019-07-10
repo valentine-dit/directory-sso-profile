@@ -753,6 +753,30 @@ def test_user_verification_passes_cookies(
 
 
 @pytest.mark.parametrize('company_type', company_types)
+@freeze_time('2012-01-14 12:00:02')
+def test_user_verification_manual_passes_cookies(
+    company_type, submit_step_builder, client
+):
+    submit_step = submit_step_builder(company_type)
+
+    response = submit_step(
+        data={'email': 'test@test.com', 'code': '12345'},
+        step_name=views.VERIFICATION,
+    )
+    assert response.status_code == 302
+
+    assert str(response.cookies['debug_sso_session_cookie']) == (
+        'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
+        'Path=/; Secure'
+    )
+    assert str(response.cookies['sso_display_logged_in']) == (
+        'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
+    )
+
+
+@pytest.mark.parametrize('company_type', company_types)
 def test_confirm_user_verify_code_incorrect_code(
     client, company_type, submit_step_builder, mock_session_user,
     mock_confirm_verification_code, steps_data
@@ -770,6 +794,27 @@ def test_confirm_user_verify_code_incorrect_code(
     assert response.status_code == 302
 
     response = client.get(response.url)
+    assert response.context_data['form'].errors['code'] == ['Invalid code']
+
+
+@pytest.mark.parametrize('company_type', company_types)
+def test_confirm_user_verify_code_incorrect_code_manual_email(
+    client, company_type, submit_step_builder,
+    mock_session_user, mock_confirm_verification_code, steps_data
+):
+    mock_confirm_verification_code.return_value = create_response(400)
+    submit_step = submit_step_builder(company_type)
+
+    response = submit_step(
+        data={'email': 'test@test.com', 'code': '12345'},
+        step_name=views.VERIFICATION,
+    )
+
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.context_data['form'].is_valid() is False
     assert response.context_data['form'].errors['code'] == ['Invalid code']
 
 

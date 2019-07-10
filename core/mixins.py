@@ -17,7 +17,8 @@ class PreventCaptchaRevalidationMixin:
         for step_name, form_class in self.get_form_list().items():
             if 'captcha' in form_class.base_fields:
                 return self.get_step_index(step_name)
-        raise NotImplementedError
+        # this can happen if the step with a captcha is optional
+        return -1
 
     def get_form(self, step=None, *args, **kwargs):
         form = super().get_form(step=step, *args, **kwargs)
