@@ -435,9 +435,10 @@ def test_companies_house_enrolment_expose_company(
         'company_number': '12345678',
         'date_of_creation': '2001-01-20',
         'postal_code': 'EDG 4DF',
-        'address': '555 fake street, London',
+        'address': '555 fake street, London, EDG 4DF',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
+        'address_line_3': 'EDG 4DF',
         'sectors': ['AEROSPACE'],
         'sic': '',
         'website': ''

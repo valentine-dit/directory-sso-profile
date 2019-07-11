@@ -14,14 +14,14 @@ chardet==3.0.4
 codecov==2.0.15
 contextlib2==0.5.5
 coverage==4.5.1           # via codecov, pytest-cov
-directory-api-client==12.2.0
-directory-ch-client==1.0.0
-directory-client-core==4.4.0
-directory-components==20.0.0
+directory-api-client==15.0.0
+directory-ch-client==2.0.1
+directory-client-core==5.1.1
+directory-components==26.0.0
 directory-constants==18.2.0
-directory-forms-api-client==3.3.0
+directory-forms-api-client==4.1.1
 directory-healthcheck==1.0.1
-directory-sso-api-client==4.1.1
+directory-sso-api-client==5.0.1
 directory-validators==5.1.0
 django-environ==0.4.5
 django-formtools==2.0

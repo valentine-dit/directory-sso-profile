@@ -3,6 +3,7 @@
 ## Pre-release
 
 ### Implemented enhancements
+- TT-1564 - Update registration journey SSO user with Companies House company
 - TT-1577 - Move company title under logo on mobile.
 - TT-1575 - Update registration journey for Companies House listed company.
 - No ticket - Replace custom breadcrumbs with shared component
