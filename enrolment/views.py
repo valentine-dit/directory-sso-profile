@@ -1,9 +1,11 @@
 import abc
 
+from directory_constants import company_types, urls
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
 
 from django.conf import settings
+from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView
@@ -11,7 +13,6 @@ from django.template.response import TemplateResponse
 
 import core.mixins
 from enrolment import constants, forms, helpers
-from directory_constants import urls
 
 
 SESSION_KEY_ENROL_KEY = 'ENROL_KEY'
@@ -290,25 +291,6 @@ class CreateUserProfileMixin:
         )
 
 
-class ServicesRefererDetectorMixin:
-    def get_referrer_context(self):
-        context = {}
-        referrer_url = self.request.session.get(SESSION_KEY_REFERRER)
-        if referrer_url and referrer_url.startswith(urls.SERVICES_FAB):
-            context = {'fab_referrer': True}
-        self.request.session.pop(SESSION_KEY_REFERRER, None)
-        return context
-
-    def dispatch(self, request, *args, **kwargs):
-        referrer_entry_points = [urls.SERVICES_FAB]
-        referrer_url = request.META.get('HTTP_REFERER')
-        if referrer_url:
-            for url in referrer_entry_points:
-                if referrer_url.startswith(url):
-                    self.request.session[SESSION_KEY_REFERRER] = referrer_url
-        return super().dispatch(request, *args, **kwargs)
-
-
 class BusinessTypeRoutingView(
     RedirectAlreadyEnrolledMixin, StepsListMixin, FormView
 ):
@@ -347,8 +329,7 @@ class BusinessTypeRoutingView(
 
 
 class EnrolmentStartView(
-    RedirectAlreadyEnrolledMixin, StepsListMixin, ServicesRefererDetectorMixin,
-    TemplateView
+    RedirectAlreadyEnrolledMixin, StepsListMixin, TemplateView
 ):
     template_name = 'enrolment/start.html'
 
@@ -381,7 +362,6 @@ class BaseEnrolmentWizardView(
     core.mixins.PreventCaptchaRevalidationMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
-    ServicesRefererDetectorMixin,
     NamedUrlSessionWizardView
 ):
 
@@ -446,7 +426,6 @@ class CompaniesHouseEnrolmentView(
         COMPANY_SEARCH: 'enrolment/companies-house-search.html',
         BUSINESS_INFO: 'enrolment/companies-house-business-details.html',
         PERSONAL_INFO: 'enrolment/companies-house-personal-details.html',
-        FINISHED: 'enrolment/success-companies-house.html',
     }
 
     def get_form_kwargs(self, step=None):
@@ -488,11 +467,8 @@ class CompaniesHouseEnrolmentView(
             )
         else:
             self.create_company_profile(data)
-        return TemplateResponse(
-            self.request,
-            self.templates[FINISHED],
-            context=self.get_referrer_context()
-        )
+        messages.success(self.request, 'Business profile created')
+        return redirect('find-a-buyer')
 
 
 class SoleTraderEnrolmentView(
@@ -538,8 +514,13 @@ class SoleTraderEnrolmentView(
         VERIFICATION: 'enrolment/user-account-verification.html',
         COMPANY_SEARCH: 'enrolment/sole-trader-business-details.html',
         PERSONAL_INFO: 'enrolment/sole-trader-personal-details.html',
-        FINISHED: 'enrolment/success-sole-trader.html',
     }
+
+    def get_form_initial(self, step):
+        form_initial = super().get_form_initial(step=step)
+        if step == COMPANY_SEARCH:
+            form_initial.setdefault('company_type', company_types.SOLE_TRADER)
+        return form_initial
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -551,11 +532,8 @@ class SoleTraderEnrolmentView(
         self.create_user_profile(form_dict[PERSONAL_INFO])
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
-        return TemplateResponse(
-            self.request,
-            self.templates[FINISHED],
-            context=self.get_referrer_context()
-        )
+        messages.success(self.request, 'Business profile created')
+        return redirect('find-a-buyer')
 
 
 class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
@@ -587,7 +565,6 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
         USER_ACCOUNT: 'enrolment/user-account.html',
         VERIFICATION: 'enrolment/user-account-verification.html',
         PERSONAL_INFO: 'enrolment/preverified-personal-details.html',
-        FINISHED: 'enrolment/success-pre-verified.html',
         FAILURE: 'enrolment/failure-pre-verified.html',
     }
 
@@ -618,10 +595,10 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
         try:
             self.claim_company(self.serialize_form_list(form_list))
         except HTTPError:
-            template_name = self.templates[FAILURE]
+            return TemplateResponse(self.request, self.templates[FAILURE])
         else:
-            template_name = self.templates[FINISHED]
-        return TemplateResponse(self.request, template_name)
+            messages.success(self.request, 'Business profile created')
+            return redirect('find-a-buyer')
 
     def claim_company(self, data):
         helpers.claim_company(

@@ -26,6 +26,7 @@ TERMS_LABEL = mark_safe(
     'conditions</a> of the great.gov.uk service.'
 )
 
+
 class BusinessType(forms.Form):
     CHOICES = (
         (
