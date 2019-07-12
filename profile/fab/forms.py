@@ -1,6 +1,6 @@
 
 from directory_constants import choices, expertise
-from directory_components import fields, forms
+from directory_components import forms
 from directory_components.helpers import tokenize_keywords
 import directory_validators.company
 import directory_validators.enrolment
@@ -9,7 +9,6 @@ from django.conf import settings
 from django.forms import ImageField, Textarea
 from django.utils.safestring import mark_safe
 
-from enrolment.fields import DateField
 from profile.fab import constants, validators
 
 
@@ -20,7 +19,7 @@ EMPLOYEES_CHOICES = [('', 'Select employees')] + list(choices.EMPLOYEES)
 class SocialLinksForm(forms.Form):
     HELP_URLS = 'Use a full web address (URL) including http:// or https://'
 
-    facebook_url = fields.URLField(
+    facebook_url = forms.URLField(
         label='URL for your Facebook company page (optional):',
         help_text=HELP_URLS,
         max_length=255,
@@ -29,7 +28,7 @@ class SocialLinksForm(forms.Form):
             directory_validators.company.case_study_social_link_facebook
         ],
     )
-    twitter_url = fields.URLField(
+    twitter_url = forms.URLField(
         label='URL for your Twitter company profile (optional):',
         help_text=HELP_URLS,
         max_length=255,
@@ -38,7 +37,7 @@ class SocialLinksForm(forms.Form):
             directory_validators.company.case_study_social_link_twitter
         ],
     )
-    linkedin_url = fields.URLField(
+    linkedin_url = forms.URLField(
         label='URL for your LinkedIn company profile (optional):',
         help_text=HELP_URLS,
         max_length=255,
@@ -50,13 +49,13 @@ class SocialLinksForm(forms.Form):
 
 
 class EmailAddressForm(forms.Form):
-    email_address = fields.EmailField(
+    email_address = forms.EmailField(
         label='Email address'
     )
 
 
 class DescriptionForm(forms.Form):
-    summary = fields.CharField(
+    summary = forms.CharField(
         label='Add a short introduction to your business for overseas buyers',
         help_text='This will appear on your profile homepage.',
         max_length=250,
@@ -66,7 +65,7 @@ class DescriptionForm(forms.Form):
             directory_validators.company.no_html,
         ],
     )
-    description = fields.CharField(
+    description = forms.CharField(
         label='Add more detailed information about your business.',
         help_text='Maximum 2,000 characters.',
         max_length=2000,
@@ -79,7 +78,7 @@ class DescriptionForm(forms.Form):
 
 
 class WebsiteForm(forms.Form):
-    website = fields.URLField(
+    website = forms.URLField(
         label='Business URL',
         help_text='Enter a full URL including http:// or https://',
         max_length=255,
@@ -87,12 +86,12 @@ class WebsiteForm(forms.Form):
 
 
 class CaseStudyBasicInfoForm(forms.Form):
-    title = fields.CharField(
+    title = forms.CharField(
         label='Title of your case study or project',
         max_length=60,
         validators=[directory_validators.company.no_html],
     )
-    short_summary = fields.CharField(
+    short_summary = forms.CharField(
         label='Summary of your case study or project',
         help_text=(
             'Summarise your case study in 200 characters or fewer. This will'
@@ -105,7 +104,7 @@ class CaseStudyBasicInfoForm(forms.Form):
         ],
         widget=Textarea,
     )
-    description = fields.CharField(
+    description = forms.CharField(
         label='Describe your case study or project',
         help_text=(
             'Describe your project or case study in greater detail. '
@@ -118,17 +117,17 @@ class CaseStudyBasicInfoForm(forms.Form):
         ],
         widget=Textarea,
     )
-    sector = fields.ChoiceField(
+    sector = forms.ChoiceField(
         label='Industry most relevant to your case study or project',
         choices=INDUSTRY_CHOICES
     )
-    website = fields.URLField(
+    website = forms.URLField(
         label='The web address for your case study or project (optional)',
         help_text='Enter a full URL including http:// or https://',
         max_length=255,
         required=False,
     )
-    keywords = fields.CharField(
+    keywords = forms.CharField(
         label=(
             'Enter up to 10 keywords that describe your case '
             'study or project. Keywords should be separated by '
@@ -218,7 +217,7 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
             directory_validators.company.image_format,
         ],
     )
-    image_one_caption = fields.CharField(
+    image_one_caption = forms.CharField(
         label=(
             'Add a caption that tells visitors what the main image represents'
         ),
@@ -234,7 +233,7 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
             directory_validators.company.image_format,
         ]
     )
-    image_two_caption = fields.CharField(
+    image_two_caption = forms.CharField(
         label=(
             'Add a caption that tells visitors what this second image '
             'represents'
@@ -252,7 +251,7 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
             directory_validators.company.image_format,
         ]
     )
-    image_three_caption = fields.CharField(
+    image_three_caption = forms.CharField(
         label=(
             'Add a caption that tells visitors what this third image '
             'represents'
@@ -263,7 +262,7 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
         required=False,
         validators=[directory_validators.company.no_html],
     )
-    testimonial = fields.CharField(
+    testimonial = forms.CharField(
         label='Testimonial or block quote (optional)',
         help_text=(
             'Add testimonial from a satisfied client or use this space'
@@ -274,7 +273,7 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
         widget=Textarea,
         validators=[directory_validators.company.no_html],
     )
-    testimonial_name = fields.CharField(
+    testimonial_name = forms.CharField(
         label='Full name of the source of the testimonial (optional)',
         help_text=(
             'Add the source to make the quote more credible and to '
@@ -284,13 +283,13 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
         required=False,
         validators=[directory_validators.company.no_html],
     )
-    testimonial_job_title = fields.CharField(
+    testimonial_job_title = forms.CharField(
         label='Job title of the source (optional)',
         max_length=255,
         required=False,
         validators=[directory_validators.company.no_html],
     )
-    testimonial_company = fields.CharField(
+    testimonial_company = forms.CharField(
         label="Company name of the source (optional)",
         max_length=255,
         required=False,
@@ -330,43 +329,43 @@ class PublishForm(forms.Form):
             field = self.fields['is_published_find_a_supplier']
             field.widget.label = self.LABEL_UNPUBLISH_FAS
 
-    is_published_investment_support_directory = fields.BooleanField(
+    is_published_investment_support_directory = forms.BooleanField(
         label=LABEL_ISD,
         required=False
     )
-    is_published_find_a_supplier = fields.BooleanField(
+    is_published_find_a_supplier = forms.BooleanField(
         label=LABEL_FAS,
         required=False
     )
 
 
 class CompaniesHouseBusinessDetailsForm(forms.Form):
-    name = fields.CharField(
+    name = forms.CharField(
         label='Trading name'
     )
-    number = fields.CharField(
+    number = forms.CharField(
         disabled=True,
     )
-    date_of_creation = DateField(
+    date_of_creation = forms.DateField(
         label='Incorporated on',
         input_formats=['%d %B %Y'],
         disabled=True,
         required=False,
     )
-    address = fields.CharField(
+    address = forms.CharField(
         disabled=True,
         required=False,
     )
-    website = fields.URLField(
+    website = forms.URLField(
         label='Business URL (optional)',
         help_text='The website address must start with http:// or https://',
         required=False,
     )
-    employees = fields.ChoiceField(
+    employees = forms.ChoiceField(
         choices=EMPLOYEES_CHOICES,
         label='How many employees are in your business?',
     )
-    sectors = fields.ChoiceField(
+    sectors = forms.ChoiceField(
         label='What industry is your business in?',
         choices=INDUSTRY_CHOICES,
     )
@@ -381,32 +380,32 @@ class CompaniesHouseBusinessDetailsForm(forms.Form):
 
 
 class SoleTraderBusinessDetailsForm(forms.Form):
-    name = fields.CharField(
+    name = forms.CharField(
         label='Trading name'
     )
-    address_line_1 = fields.CharField(
+    address_line_1 = forms.CharField(
         required=False,
     )
-    address_line_2 = fields.CharField(
+    address_line_2 = forms.CharField(
         required=False,
     )
-    locality = fields.CharField(
+    locality = forms.CharField(
         required=False,
     )
-    postal_code = fields.CharField(
+    postal_code = forms.CharField(
         required=False,
     )
 
-    website_address = fields.URLField(
+    website_address = forms.URLField(
         label='Business URL (optional)',
         help_text='The website address must start with http:// or https://',
         required=False,
     )
-    employees = fields.ChoiceField(
+    employees = forms.ChoiceField(
         choices=EMPLOYEES_CHOICES,
         label='How many employees are in your business?',
     )
-    sectors = fields.ChoiceField(
+    sectors = forms.ChoiceField(
         label='What industry is your business in?',
         choices=INDUSTRY_CHOICES,
     )
@@ -428,14 +427,14 @@ class ExpertiseRoutingForm(forms.Form):
         (LANGUAGE, 'Language expertise'),
     )
 
-    choice = fields.ChoiceField(
+    choice = forms.ChoiceField(
         label='Choose your area of expertise',
         choices=CHOICES,
     )
 
 
 class RegionalExpertiseForm(forms.Form):
-    expertise_regions = fields.MultipleChoiceField(
+    expertise_regions = forms.MultipleChoiceField(
         label='Select the regions you have expertise in',
         choices=choices.EXPERTISE_REGION_CHOICES,
         required=False,
@@ -443,7 +442,7 @@ class RegionalExpertiseForm(forms.Form):
 
 
 class CountryExpertiseForm(forms.Form):
-    expertise_countries = fields.MultipleChoiceField(
+    expertise_countries = forms.MultipleChoiceField(
         label='Select the countries you have expertise in',
         choices=choices.COUNTRY_CHOICES,
         required=False,
@@ -451,7 +450,7 @@ class CountryExpertiseForm(forms.Form):
 
 
 class IndustryExpertiseForm(forms.Form):
-    expertise_industries = fields.MultipleChoiceField(
+    expertise_industries = forms.MultipleChoiceField(
         label='Choose the industries you work with',
         choices=choices.INDUSTRIES,
         required=False,
@@ -459,7 +458,7 @@ class IndustryExpertiseForm(forms.Form):
 
 
 class LanguageExpertiseForm(forms.Form):
-    expertise_languages = fields.MultipleChoiceField(
+    expertise_languages = forms.MultipleChoiceField(
         label='Select the languages you have expertise in',
         choices=choices.EXPERTISE_LANGUAGES,
         required=False,
@@ -477,7 +476,7 @@ class ExpertiseProductsServicesRoutingForm(forms.Form):
         (constants.OTHER, 'Other'),
     )
 
-    choice = fields.ChoiceField(
+    choice = forms.ChoiceField(
         label='Choose the industry you’re in',
         choices=CHOICES,
     )
@@ -494,7 +493,7 @@ class ExpertiseProductsServicesForm(forms.Form):
         constants.BUSINESS_SUPPORT: expertise.BUSINESS_SUPPORT,
     }
 
-    expertise_products_services = fields.CharField(
+    expertise_products_services = forms.CharField(
         label='Choose your products or services',
         validators=[
             directory_validators.company.keywords_word_limit,
@@ -516,7 +515,7 @@ class ExpertiseProductsServicesForm(forms.Form):
 
 class ExpertiseProductsServicesOtherForm(forms.Form):
 
-    expertise_products_services = fields.CharField(
+    expertise_products_services = forms.CharField(
         label='Enter keywords that describe your products or services',
         help_text='Keywords should be separated by commas',
         validators=[

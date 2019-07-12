@@ -197,13 +197,9 @@ class CompanyParser(directory_components.helpers.CompanyParser):
 
     @property
     def address(self):
-        address = []
-        if self.data.get('registered_office_address'):
-            for field in ['address_line_1', 'address_line_2', 'locality']:
-                value = self.data['registered_office_address'].get(field)
-                if value:
-                    address.append(value)
-        return ', '.join(address)
+        address = self.data.get('registered_office_address', {})
+        names = ['address_line_1', 'address_line_2', 'locality', 'postal_code']
+        return ', '.join([address[name] for name in names if name in address])
 
     @property
     def postcode(self):

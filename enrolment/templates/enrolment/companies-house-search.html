@@ -11,6 +11,11 @@
     </div>
 {% endblock %}
 
+{% block below_form %}
+  <p><a class="link" href="{{ services_urls.great_domestic }}contact/triage/great-account/company-not-found/" id="cannot-find-company-name">I cannot find my business name</a></p>
+{% endblock %}
+
+
 {% block body_js %}
     {{ block.super }}
     <script src="{% static 'directory_components/js/dit.components.company-lookup.js' %}"></script>

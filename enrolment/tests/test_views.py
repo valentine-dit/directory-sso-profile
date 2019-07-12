@@ -435,9 +435,10 @@ def test_companies_house_enrolment_expose_company(
         'company_number': '12345678',
         'date_of_creation': '2001-01-20',
         'postal_code': 'EDG 4DF',
-        'address': '555 fake street, London',
+        'address': '555 fake street, London, EDG 4DF',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
+        'address_line_3': 'EDG 4DF',
         'sectors': ['AEROSPACE'],
         'sic': '',
         'website': ''
@@ -1433,33 +1434,3 @@ def test_wizard_progress_indicator_mixin(
     response = view(request, step=views.USER_ACCOUNT)
 
     assert response.context_data['step_number'] == expected
-
-
-def test_session_referral_mixin_allowed_entry(rf, client):
-
-    class TestView(views.ServicesRefererDetectorMixin, TemplateView):
-        template_name = 'enrolment/start.html'
-
-    request = rf.get('/')
-    request.session = client.session
-    request.META['HTTP_REFERER'] = constants_url.SERVICES_FAB
-    view = TestView.as_view()
-    view(request)
-
-    assert request.session[
-        views.SESSION_KEY_REFERRER
-    ] == constants_url.SERVICES_FAB
-
-
-def test_session_referral_mixin_not_allowed_entry(rf, client):
-
-    class TestView(views.ServicesRefererDetectorMixin, TemplateView):
-        template_name = 'enrolment/start.html'
-
-    request = rf.get('/')
-    request.session = client.session
-    request.META['HTTP_REFERER'] = constants_url.CONTACT_US
-    view = TestView.as_view()
-    view(request)
-
-    assert request.session.get(views.SESSION_KEY_REFERRER) is None

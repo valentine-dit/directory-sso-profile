@@ -1,5 +1,5 @@
 from captcha.fields import ReCaptchaField
-from directory_components import forms, fields, widgets
+from directory_components import forms
 from directory_constants import choices, urls
 from requests.exceptions import HTTPError
 from directory_validators.company import (
@@ -14,7 +14,6 @@ from django.utils.safestring import mark_safe
 from django.http.request import QueryDict
 
 from enrolment import constants, helpers
-from enrolment.fields import DateField
 from enrolment.widgets import PostcodeInput
 
 
@@ -53,9 +52,9 @@ class BusinessType(forms.Form):
             )
         ),
     )
-    choice = fields.ChoiceField(
+    choice = forms.ChoiceField(
         label='',
-        widget=widgets.RadioSelect(),
+        widget=forms.RadioSelect(),
         choices=CHOICES,
     )
 
@@ -74,15 +73,15 @@ class UserAccount(forms.Form):
     MESSAGE_NOT_MATCH = "Passwords don't match"
     MESSAGE_PASSWORD_INVALID = 'Invalid Password'
 
-    email = fields.EmailField(
+    email = forms.EmailField(
         label='Your email address'
     )
-    password = fields.CharField(
+    password = forms.CharField(
         label='Set a password',
         help_text=mark_safe(PASSWORD_HELP_TEXT),
         widget=PasswordInput
     )
-    password_confirmed = fields.CharField(
+    password_confirmed = forms.CharField(
         label='Confirm password',
         widget=PasswordInput,
     )
@@ -91,7 +90,7 @@ class UserAccount(forms.Form):
         label_suffix='',
     )
 
-    terms_agreed = fields.BooleanField(
+    terms_agreed = forms.BooleanField(
         label=mark_safe(
             'Tick this box to accept the '
             f'<a href="{urls.TERMS_AND_CONDITIONS}" target="_blank">terms and '
@@ -125,8 +124,8 @@ class UserAccountVerification(forms.Form):
 
     MESSAGE_INVALID_CODE = 'Invalid code'
     # email field can be overridden in __init__ to allow user to enter email
-    email = fields.CharField(label='', widget=HiddenInput, disabled=True)
-    code = fields.CharField(
+    email = forms.CharField(label='', widget=HiddenInput, disabled=True)
+    code = forms.CharField(
         label='Confirmation Code',
         min_length=5,
         max_length=5,
@@ -136,7 +135,7 @@ class UserAccountVerification(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.initial.get('email') is None:
-            self.fields['email'] = fields.EmailField(
+            self.fields['email'] = forms.EmailField(
                 label='Your email address'
             )
 
@@ -147,10 +146,10 @@ class CompaniesHouseSearch(forms.Form):
         "<p>Check that you've entered the right name.</p>"
     )
     MESSAGE_COMPANY_NOT_ACTIVE = 'Company not active.'
-    company_name = fields.CharField(
+    company_name = forms.CharField(
         label='Registered company name',
     )
-    company_number = fields.CharField(
+    company_number = forms.CharField(
         validators=[company_number_validator],
     )
 
@@ -182,37 +181,42 @@ class CompaniesHouseSearch(forms.Form):
 
 
 class CompaniesHouseBusinessDetails(forms.Form):
-    company_name = fields.CharField(
-        label='Registered company name'
+    company_name = forms.CharField(
+        label='Registered company name',
     )
-    company_number = fields.CharField(
+    company_number = forms.CharField(
         disabled=True,
         required=False,
+        container_css_classes='border-active-blue read-only-input-container'
     )
-    sic = fields.CharField(
+    sic = forms.CharField(
         label='Nature of business',
         disabled=True,
         required=False,
+        container_css_classes='border-active-blue read-only-input-container'
     )
-    date_of_creation = DateField(
+    date_of_creation = forms.DateField(
         label='Incorporated on',
         input_formats=['%d %B %Y'],
         disabled=True,
         required=False,
+        container_css_classes='border-active-blue read-only-input-container'
     )
-    postal_code = fields.CharField(
-        label='Business postcode',
-        required=False,
-    )
-    address = fields.CharField(
+    postal_code = forms.CharField(
         disabled=True,
         required=False,
+        container_css_classes='hidden-input-container',
     )
-    sectors = fields.ChoiceField(
+    address = forms.CharField(
+        disabled=True,
+        required=False,
+        container_css_classes='border-active-blue read-only-input-container'
+        )
+    sectors = forms.ChoiceField(
         label='What industry is your company in?',
         choices=INDUSTRY_CHOICES,
     )
-    website = fields.URLField(
+    website = forms.URLField(
         label='What\'s your business web address (optional)',
         help_text='The website address must start with http:// or https://',
         required=False,
@@ -270,18 +274,18 @@ class CompaniesHouseBusinessDetails(forms.Form):
 
 class PersonalDetails(forms.Form):
 
-    given_name = fields.CharField(
+    given_name = forms.CharField(
         label='First name',
     )
-    family_name = fields.CharField(
+    family_name = forms.CharField(
         label='Last name',
     )
-    job_title = fields.CharField()
-    phone_number = fields.CharField(
+    job_title = forms.CharField()
+    phone_number = forms.CharField(
         label='Phone number (optional)',
         required=False
     )
-    confirmed_is_company_representative = fields.BooleanField(
+    confirmed_is_company_representative = forms.BooleanField(
         label=(
             'I confirm that I have the right to act for this business. I '
             'understand that great.gov.uk might write to this business to '
@@ -294,30 +298,30 @@ class SoleTraderSearch(forms.Form):
 
     MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
 
-    company_type = fields.ChoiceField(
+    company_type = forms.ChoiceField(
         label='Business category',
         choices=[
             (value, label) for value, label in choices.COMPANY_TYPES
             if value != 'COMPANIES_HOUSE'
         ]
     )
-    company_name = fields.CharField(
+    company_name = forms.CharField(
         label='Business name'
     )
-    postal_code = fields.CharField(
+    postal_code = forms.CharField(
         label='Business postcode',
         widget=PostcodeInput,
     )
-    address = fields.CharField(
+    address = forms.CharField(
         help_text='Type your business address',
         widget=Textarea(attrs={'rows': 4}),
         required=False,
     )
-    sectors = fields.ChoiceField(
+    sectors = forms.ChoiceField(
         label='What industry is your business in?',
         choices=INDUSTRY_CHOICES,
     )
-    website = fields.URLField(
+    website = forms.URLField(
         label='What\'s your business web address (optional)',
         help_text='The website address must start with http:// or https://',
         required=False,
@@ -341,6 +345,6 @@ class SoleTraderSearch(forms.Form):
 
 
 class ResendVerificationCode(forms.Form):
-    email = fields.EmailField(
+    email = forms.EmailField(
         label='Your email address'
     )
