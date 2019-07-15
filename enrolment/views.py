@@ -25,6 +25,9 @@ SESSION_KEY_REFERRER = 'REFERRER_URL'
 PROGRESS_STEP_LABEL_USER_ACCOUNT = (
     'Enter your business email address and set a password'
 )
+PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT = (
+    'Enter your email address and set a password'
+)
 PROGRESS_STEP_LABEL_VERIFICATION = 'Enter your confirmation code'
 PROGRESS_STEP_LABEL_PERSONAL_INFO = 'Enter your details'
 PROGRESS_STEP_LABEL_BUSINESS_TYPE = 'Select your business type'
@@ -44,6 +47,9 @@ URL_SOLE_TRADER_ENROLMENT = reverse_lazy(
 )
 URL_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
     'enrolment-companies-house', kwargs={'step': USER_ACCOUNT}
+)
+URL_INDIVIDUAL_ENROLMENT = reverse_lazy(
+    'enrolment-individual', kwargs={'step': USER_ACCOUNT}
 )
 
 
@@ -279,7 +285,7 @@ class CreateUserProfileMixin:
         return {
             'first_name': form.cleaned_data['given_name'],
             'last_name': form.cleaned_data['family_name'],
-            'job_title': form.cleaned_data['job_title'],
+            'job_title': form.cleaned_data.get('job_title', ''),
             'mobile_phone_number': form.cleaned_data.get('phone_number'),
         }
 
@@ -340,6 +346,8 @@ class BusinessTypeRoutingView(
             url = URL_COMPANIES_HOUSE_ENROLMENT
         elif choice == constants.SOLE_TRADER:
             url = URL_SOLE_TRADER_ENROLMENT
+        elif choice == constants.NOT_COMPANY:
+            url = URL_INDIVIDUAL_ENROLMENT
         else:
             raise NotImplementedError()
         self.request.session[SESSION_KEY_COMPANY_CHOICE] = choice
@@ -551,6 +559,57 @@ class SoleTraderEnrolmentView(
         self.create_user_profile(form_dict[PERSONAL_INFO])
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
+        return TemplateResponse(
+            self.request,
+            self.templates[FINISHED],
+            context=self.get_referrer_context()
+        )
+
+
+class IndividualUserEnrolmentView(
+    CreateUserProfileMixin, CreateCompanyProfileMixin, BaseEnrolmentWizardView
+):
+    steps_list_conf = helpers.StepsListConf(
+        form_labels_user=[
+            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            PROGRESS_STEP_LABEL_PERSONAL_INFO
+        ],
+        form_labels_anon=[
+            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT,
+            PROGRESS_STEP_LABEL_VERIFICATION,
+            PROGRESS_STEP_LABEL_PERSONAL_INFO
+        ],
+    )
+
+    progress_conf = helpers.ProgressIndicatorConf(
+        step_counter_user={
+            PERSONAL_INFO: 3
+        },
+        step_counter_anon={
+            USER_ACCOUNT: 2,
+            VERIFICATION: 3,
+            PERSONAL_INFO: 4
+        },
+        first_step=USER_ACCOUNT
+    )
+
+    form_list = [
+        (USER_ACCOUNT, forms.UserAccount),
+        (VERIFICATION, forms.UserAccountVerification),
+        (PERSONAL_INFO, forms.IndividualPersonalDetails),
+    ]
+
+    templates = {
+        USER_ACCOUNT: 'enrolment/individual-user-account.html',
+        VERIFICATION: 'enrolment/user-account-verification.html',
+        PERSONAL_INFO: 'enrolment/individual-personal-details.html',
+        FINISHED: 'enrolment/success-individual.html'
+    }
+
+    def done(self, form_list, form_dict, **kwargs):
+        self.create_user_profile(form_dict[PERSONAL_INFO])
+        data = self.serialize_form_list(form_list)
         return TemplateResponse(
             self.request,
             self.templates[FINISHED],

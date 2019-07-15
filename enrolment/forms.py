@@ -294,6 +294,19 @@ class PersonalDetails(forms.Form):
     )
 
 
+class IndividualPersonalDetails(forms.Form):
+    given_name = forms.CharField(
+        label='First name',
+    )
+    family_name = forms.CharField(
+        label='Last name',
+    )
+    phone_number = forms.CharField(
+        label='Phone number (optional)',
+        required=False
+    )
+
+
 class SoleTraderSearch(forms.Form):
 
     MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'

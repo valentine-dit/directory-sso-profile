@@ -20,8 +20,9 @@ urls = (
     reverse('enrolment-start'),
     reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}),
     reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}),
+    reverse('enrolment-individual', kwargs={'step': views.USER_ACCOUNT}),
 )
-company_types = (constants.COMPANIES_HOUSE_COMPANY, constants.SOLE_TRADER)
+company_types = (constants.COMPANIES_HOUSE_COMPANY, constants.SOLE_TRADER, constants.NOT_COMPANY)
 
 
 @pytest.fixture
@@ -45,6 +46,16 @@ def submit_sole_trader_step(client):
 
 
 @pytest.fixture
+def submit_individual_step(client):
+    return submit_step_factory(
+        client,
+        url_name='enrolment-individual',
+        view_name='individual_enrolment_view',
+        view_class=views.IndividualUserEnrolmentView,
+    )
+
+
+@pytest.fixture
 def submit_pre_verified_step(client):
     return submit_step_factory(
         client=client,
@@ -55,12 +66,15 @@ def submit_pre_verified_step(client):
 
 
 @pytest.fixture
-def submit_step_builder(submit_companies_house_step, submit_sole_trader_step):
+def submit_step_builder(submit_companies_house_step, submit_sole_trader_step,
+                        submit_individual_step ):
     def inner(choice):
         if choice == constants.COMPANIES_HOUSE_COMPANY:
             return submit_companies_house_step
         elif choice == constants.SOLE_TRADER:
             return submit_sole_trader_step
+        elif choice == constants.NOT_COMPANY:
+            return submit_individual_step
     return inner
 
 
@@ -1032,6 +1046,43 @@ def test_confirm_user_resend_verification_code_choice_sole_trader(
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
     )
+
+
+@freeze_time('2012-01-14 12:00:02')
+def test_confirm_user_resend_verification_code_choice_individual(
+        session_client_company_factory,
+        submit_resend_verification_house_step,
+        steps_data,
+):
+    session_client_company_factory(constants.NOT_COMPANY)
+
+    response = submit_resend_verification_house_step(
+        steps_data[views.RESEND_VERIFICATION]
+    )
+
+    assert response.status_code == 302
+
+    response = submit_resend_verification_house_step(
+        steps_data[views.VERIFICATION],
+        step_name=resolve(response.url).kwargs['step'],
+    )
+
+    assert response.status_code == 302
+
+    assert response.url == reverse(
+        'enrolment-individual', kwargs={'step': views.USER_ACCOUNT}
+    )
+
+    assert str(response.cookies['debug_sso_session_cookie']) == (
+        'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
+        'Path=/; Secure'
+    )
+    assert str(response.cookies['sso_display_logged_in']) == (
+        'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
+    )
+
 
 
 def test_confirm_user_resend_verification_logged_in(client, mock_session_user):

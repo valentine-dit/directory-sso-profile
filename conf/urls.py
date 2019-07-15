@@ -103,6 +103,14 @@ urlpatterns = [
         name='enrolment-sole-trader'
     ),
     url(
+        r'^enrol/business-type/individual/(?P<step>.+)/$',
+        enrolment.views.IndividualUserEnrolmentView.as_view(
+            url_name='enrolment-individual',
+            done_step_name='finished'
+        ),
+        name='enrolment-individual'
+    ),
+    url(
         r'^enrol/pre-verified/(?P<step>.+)/$',
         enrolment.views.PreVerifiedEnrolmentView.as_view(
             url_name='enrolment-pre-verified',
