@@ -5,8 +5,9 @@ clean:
 test_requirements:
 	pip install -r requirements_test.txt
 
-FLAKE8 := flake8 . --exclude=.venv
-PYTEST := pytest . --cov=. --cov-config=.coveragerc --cov-report=html --cov-report=term --capture=no -vv -s $(pytest_args)
+FLAKE8 := flake8 . --exclude=.venv,node_modules
+PYTEST := pytest . --ignore=node_modules -W ignore::DeprecationWarning --cov=. --cov-config=.coveragerc \
+    --cov-report=html --cov-report=term --capture=no -vv -s $(pytest_args)
 COLLECT_STATIC := python manage.py collectstatic --noinput
 CODECOV := \
 	if [ "$$CODECOV_REPO_TOKEN" != "" ]; then \
@@ -22,6 +23,9 @@ DJANGO_WEBSERVER := \
 
 django_webserver:
 	$(DJANGO_WEBSERVER)
+
+debug_test_last_failed:
+	make debug_test pytest_args='--last-failed'
 
 DEBUG_SET_ENV_VARS := \
 	export PORT=8006; \

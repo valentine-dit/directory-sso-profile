@@ -567,7 +567,7 @@ class SoleTraderEnrolmentView(
 
 
 class IndividualUserEnrolmentView(
-    CreateUserProfileMixin, CreateCompanyProfileMixin, BaseEnrolmentWizardView
+    CreateUserProfileMixin, BaseEnrolmentWizardView
 ):
     steps_list_conf = helpers.StepsListConf(
         form_labels_user=[
@@ -584,12 +584,12 @@ class IndividualUserEnrolmentView(
 
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
-            PERSONAL_INFO: 3
+            PERSONAL_INFO: 1
         },
         step_counter_anon={
-            USER_ACCOUNT: 2,
-            VERIFICATION: 3,
-            PERSONAL_INFO: 4
+            USER_ACCOUNT: 1,
+            VERIFICATION: 2,
+            PERSONAL_INFO: 3
         },
         first_step=USER_ACCOUNT
     )
@@ -607,9 +607,18 @@ class IndividualUserEnrolmentView(
         FINISHED: 'enrolment/success-individual.html'
     }
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        if self.steps.current == VERIFICATION:
+            context['verification_missing_url'] = urls.build_great_url(
+                'contact/triage/great-account/verification-missing/'
+            )
+        return context
+
     def done(self, form_list, form_dict, **kwargs):
+        print(form_list)
+        print(form_dict)
         self.create_user_profile(form_dict[PERSONAL_INFO])
-        data = self.serialize_form_list(form_list)
         return TemplateResponse(
             self.request,
             self.templates[FINISHED],
@@ -740,6 +749,8 @@ class ResendVerificationCodeView(
             url = URL_COMPANIES_HOUSE_ENROLMENT
         elif choice == constants.SOLE_TRADER:
             url = URL_SOLE_TRADER_ENROLMENT
+        elif choice == constants.NOT_COMPANY:
+            url = URL_INDIVIDUAL_ENROLMENT
         else:
             url = reverse('enrolment-business-type')
         response = self.validate_code(

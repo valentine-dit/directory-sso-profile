@@ -22,7 +22,7 @@ urls = (
     reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}),
     reverse('enrolment-individual', kwargs={'step': views.USER_ACCOUNT}),
 )
-company_types = (constants.COMPANIES_HOUSE_COMPANY, constants.SOLE_TRADER, constants.NOT_COMPANY)
+company_types = (constants.COMPANIES_HOUSE_COMPANY, constants.SOLE_TRADER)
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ def submit_pre_verified_step(client):
 
 @pytest.fixture
 def submit_step_builder(submit_companies_house_step, submit_sole_trader_step,
-                        submit_individual_step ):
+                        submit_individual_step):
     def inner(choice):
         if choice == constants.COMPANIES_HOUSE_COMPANY:
             return submit_companies_house_step
@@ -383,6 +383,19 @@ def test_companies_house_enrolment(
 
     response = submit_companies_house_step(steps_data[views.PERSONAL_INFO])
     assert response.status_code == 302
+
+
+def test_individual_enrolment(
+    client, submit_individual_step, mock_session_user, steps_data
+):
+    print(steps_data)
+
+    response = submit_individual_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_individual_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
 
 
 def test_companies_house_enrolment_change_company_name(
@@ -750,6 +763,8 @@ def test_user_verification_passes_cookies(
 ):
     submit_step = submit_step_builder(company_type)
 
+    print(steps_data[views.USER_ACCOUNT])
+
     response = submit_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
 
@@ -1082,7 +1097,6 @@ def test_confirm_user_resend_verification_code_choice_individual(
         'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
         'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
     )
-
 
 
 def test_confirm_user_resend_verification_logged_in(client, mock_session_user):
