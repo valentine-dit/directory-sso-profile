@@ -298,6 +298,7 @@ def steps_data(captcha_stub):
             'job_title': 'Exampler',
             'phone_number': '1232342',
             'confirmed_is_company_representative': True,
+            'terms_agreed': True,
         },
         views.VERIFICATION: {
             'code': '12345',
@@ -509,9 +510,8 @@ def test_companies_house_enrolment_submit_end_to_end(
 
     response = client.get(response.url)
 
-    assert response.status_code == 200
-    assert response.context_data['fab_referrer'] is True
-    assert response.template_name == 'enrolment/success-companies-house.html'
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
         'sso_id': '123',
@@ -571,8 +571,8 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
 
     response = client.get(response.url)
 
-    assert response.status_code == 200
-    assert response.template_name == 'enrolment/success-companies-house.html'
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
         'sso_id': '123',
@@ -656,8 +656,8 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
 
     response = client.get(response.url)
 
-    assert response.status_code == 200
-    assert response.template_name == 'enrolment/success-companies-house.html'
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
     assert mock_enrolment_send.call_count == 0
 
     assert mock_request_collaboration.call_count == 1
@@ -1206,8 +1206,8 @@ def test_sole_trader_enrolment_submit_end_to_end_logged_in(
 
     response = client.get(response.url)
 
-    assert response.status_code == 200
-    assert response.template_name == 'enrolment/success-sole-trader.html'
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
         'sso_id': '123',
@@ -1337,8 +1337,8 @@ def test_claim_preverified_success(
 
     response = client.get(response.url)
 
-    assert response.status_code == 200
-    assert response.template_name == 'enrolment/success-pre-verified.html'
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
     assert mock_claim_company.call_count == 1
     assert mock_claim_company.call_args == mock.call(
         data={'name': 'Foo Example'},
@@ -1499,33 +1499,3 @@ def test_wizard_progress_indicator_mixin(
     response = view(request, step=views.USER_ACCOUNT)
 
     assert response.context_data['step_number'] == expected
-
-
-def test_session_referral_mixin_allowed_entry(rf, client):
-
-    class TestView(views.ServicesRefererDetectorMixin, TemplateView):
-        template_name = 'enrolment/start.html'
-
-    request = rf.get('/')
-    request.session = client.session
-    request.META['HTTP_REFERER'] = constants_url.SERVICES_FAB
-    view = TestView.as_view()
-    view(request)
-
-    assert request.session[
-        views.SESSION_KEY_REFERRER
-    ] == constants_url.SERVICES_FAB
-
-
-def test_session_referral_mixin_not_allowed_entry(rf, client):
-
-    class TestView(views.ServicesRefererDetectorMixin, TemplateView):
-        template_name = 'enrolment/start.html'
-
-    request = rf.get('/')
-    request.session = client.session
-    request.META['HTTP_REFERER'] = constants_url.CONTACT_US
-    view = TestView.as_view()
-    view(request)
-
-    assert request.session.get(views.SESSION_KEY_REFERRER) is None
