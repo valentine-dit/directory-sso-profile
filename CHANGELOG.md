@@ -2,19 +2,8 @@
 
 ## Pre-release
 
-### Implemented enhancements
-<<<<<<< HEAD
-=======
-- TT-1577 - Move company title under logo on mobile.
-- TT-1575 - Update registration journey for Companies House listed company.
-- No ticket - Replace custom breadcrumbs with shared component
-- TT-1607 - Verification Code allow email
-
-### Fixed bugs:
-- No ticket - Upgrade vulnerable django version to django 1.11.22
-
-### Implemented enhancements
->>>>>>> 761d31f... added tests
+### Hot Fit:
+TT-1607 - Standalone Verification 
 
 ### Fixed bugs:
 
