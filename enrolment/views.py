@@ -282,7 +282,7 @@ class CreateUserProfileMixin:
         return {
             'first_name': form.cleaned_data['given_name'],
             'last_name': form.cleaned_data['family_name'],
-            'job_title': form.cleaned_data.get('job_title', ''),
+            'job_title': form.cleaned_data.get('job_title'),
             'mobile_phone_number': form.cleaned_data.get('phone_number'),
         }
 
@@ -568,11 +568,11 @@ class IndividualUserEnrolmentView(
         first_step=USER_ACCOUNT
     )
 
-    form_list = [
+    form_list = (
         (USER_ACCOUNT, forms.UserAccount),
         (VERIFICATION, forms.UserAccountVerification),
         (PERSONAL_INFO, forms.IndividualPersonalDetails),
-    ]
+    )
 
     templates = {
         USER_ACCOUNT: 'enrolment/individual-user-account.html',

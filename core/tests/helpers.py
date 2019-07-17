@@ -16,6 +16,7 @@ def submit_step_factory(client, url_name, view_name, view_class):
 
     def submit_step(data, step_name=None):
         step_name = step_name or next(step_names)
+        print(data, step_name)
         return client.post(
             reverse(url_name, kwargs={'step': step_name}),
             {

@@ -394,9 +394,19 @@ def test_individual_enrolment(
     response = submit_individual_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
 
+    print(response.json())
+
     response = submit_individual_step(steps_data[views.VERIFICATION])
     assert response.status_code == 302
 
+    print(response.json())
+
+    mock_session_user.login()
+
+    response = submit_individual_step(steps_data[views.PERSONAL_INFO])
+    assert response.status_code == 302
+
+    print(response.json())
 
 
 def test_companies_house_enrolment_change_company_name(

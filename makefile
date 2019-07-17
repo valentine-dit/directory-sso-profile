@@ -100,6 +100,12 @@ debug_pytest:
 	$(COLLECT_STATIC) && \
 	$(PYTEST)
 
+debug_pytest_one:
+	$(DEBUG_SET_ENV_VARS) && \
+	$(DEBUG_TEST_SET_ENV_VARS) && \
+	$(COLLECT_STATIC) && \
+	$(PYTEST) $(name)
+
 debug_test:
 	$(DEBUG_SET_ENV_VARS) && \
 	$(DEBUG_TEST_SET_ENV_VARS) && \

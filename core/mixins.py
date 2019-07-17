@@ -23,7 +23,6 @@ class PreventCaptchaRevalidationMixin:
     def get_form(self, step=None, *args, **kwargs):
         form = super().get_form(step=step, *args, **kwargs)
         fields = form.fields
-        print(fields)
         if 'captcha' in fields and self.steps.index > self.captcha_step_index:
             del fields['captcha']
         return form
