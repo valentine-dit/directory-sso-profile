@@ -32,7 +32,7 @@ class ExportingIsGreatClient:
         return requests.get(url, params=params, auth=self.auth)
 
     def get_opportunities(self, sso_id):
-        params = {'sso_user_id': sso_id}
+        params = {'user_id': sso_id}
         return self.get(self.endpoints['opportunities'], params)
 
 

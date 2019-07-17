@@ -4,10 +4,9 @@ from django.conf import settings
 from django.views.generic import TemplateView
 
 from profile.exops import helpers
-from sso.utils import SSOLoginRequiredMixin
 
 
-class ExportOpportunitiesBaseView(SSOLoginRequiredMixin, TemplateView):
+class ExportOpportunitiesBaseView(TemplateView):
     template_name_not_exops_user = 'exops/is-not-exops-user.html'
     template_name_error = 'exops/opportunities-retrieve-error.html'
 
@@ -15,11 +14,8 @@ class ExportOpportunitiesBaseView(SSOLoginRequiredMixin, TemplateView):
     opportunities_retrieve_error = False
 
     def dispatch(self, request, *args, **kwargs):
-        if request.sso_user is None:
-            return self.handle_no_permission()
-        sso_id = request.sso_user.id
         try:
-            self.opportunities = helpers.get_opportunities(sso_id)
+            self.opportunities = helpers.get_opportunities(request.user.id)
         except HTTPError:
             self.opportunities_retrieve_error = True
         return super().dispatch(request, *args, **kwargs)

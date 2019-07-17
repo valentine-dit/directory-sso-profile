@@ -7,88 +7,43 @@ import pytest
 import requests
 
 from django.contrib.sessions.backends import signed_cookies
+from django.contrib.auth import get_user_model
 
 from core.tests.helpers import create_response
-from sso.utils import SSOUser
 from profile.eig_apps.constants import HAS_VISITED_ABOUT_PAGE_SESSION_KEY
 
 
 @pytest.fixture
-def sso_user():
+def user():
+    SSOUser = get_user_model()
     return SSOUser(
         id=1,
         email='jim@example.com',
-        session_id='213'
+        session_id='123',
+        has_user_profile=False,
     )
 
 
 @pytest.fixture
-def request_logged_in(rf, sso_user):
+def request_logged_in(rf, user):
     request = rf.get('/')
-    request.sso_user = sso_user
+    request.user = user
     return request
 
 
 @pytest.fixture
 def api_response_200():
-    response = requests.Response()
-    response.status_code = http.client.OK.value
-    response.json = lambda: deepcopy({})
-    return response
+    return create_response()
 
 
 @pytest.fixture
 def api_response_403():
-    response = requests.Response()
-    response.status_code = http.client.FORBIDDEN.value
-    return response
+    return create_response(status_code=403)
 
 
 @pytest.fixture
 def api_response_500():
-    response = requests.Response()
-    response.status_code = http.client.INTERNAL_SERVER_ERROR.value
-    return response
-
-
-@pytest.fixture()
-def sso_user_middleware(sso_user):
-    def process_request(self, request):
-        request.sso_user = sso_user
-
-    stub = mock.patch(
-        'sso.middleware.SSOUserMiddleware.process_request',
-        process_request
-    )
-    stub.start()
-    yield
-    stub.stop()
-
-
-@pytest.fixture
-def sso_user_middleware_unauthenticated():
-    def process_request(self, request):
-        request.sso_user = None
-
-    stub = mock.patch(
-        'sso.middleware.SSOUserMiddleware.process_request',
-        process_request
-    )
-    stub.start()
-    yield
-    stub.stop()
-
-
-@pytest.fixture
-def returned_client(client, settings):
-    """Client that has visited the about page already"""
-
-    session = signed_cookies.SessionStore()
-    session.save()
-    session[HAS_VISITED_ABOUT_PAGE_SESSION_KEY] = 'true'
-    session.save()
-    client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
-    return client
+    return create_response(status_code=500)
 
 
 @pytest.fixture(autouse=True)
@@ -116,7 +71,13 @@ def mock_session_user(client, settings):
 
     def login():
         started.return_value = create_response(
-            200, {'id': '123', 'email': 'test@a.com'}
+            200,
+            {
+                'id': '123',
+                'email': 'test@a.com',
+                'hashed_uuid': 'abc',
+                'has_user_profile': False,
+            }
         )
     started = patch.start()
     started.login = login

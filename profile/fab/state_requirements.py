@@ -4,8 +4,6 @@ from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 
-from sso.utils import build_url_with_next
-
 
 class UserStateRule(abc.ABC):
 
@@ -46,19 +44,6 @@ class UserStateRequirementHandlerMixin:
             if not rule.is_user_in_required_state():
                 return rule.handle_invalid_state()
         return super().dispatch(*args, **kwargs)
-
-
-class IsLoggedIn(RedirectUserStateRule):
-
-    @property
-    def redirect_url(self):
-        return build_url_with_next(
-            redirect_url=settings.SSO_PROXY_LOGIN_URL,
-            next_url=self.context['request'].build_absolute_uri(),
-        )
-
-    def is_user_in_required_state(self):
-        return self.context['request'].sso_user is not None
 
 
 class HasCompany(RedirectUserStateRule):

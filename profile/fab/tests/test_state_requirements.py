@@ -69,28 +69,6 @@ def test_redirect_rule_handler_mixin_redirect_not_required(rf):
     assert response.status_code == 200
 
 
-def test_is_logged_in_rule_anon_user(rf):
-    request = rf.get('/')
-    request.sso_user = None
-
-    view = create_view_for_rule(state_requirements.IsLoggedIn)
-    response = view(request)
-
-    assert response.status_code == 302
-    assert response.url == (
-        'http://sso.trade.great:8004/accounts/login/?next=http%3A//testserver/'
-    )
-
-
-def test_is_logged_in_rule_authed_user(rf):
-    request = rf.get('/')
-    request.sso_user = Mock()
-    view = create_view_for_rule(state_requirements.IsLoggedIn)
-    response = view(request)
-
-    assert response.status_code == 200
-
-
 def test_company_required_rule_has_company(rf):
     view = create_view_for_rule(
         state_requirements.HasCompany, CompanyTestView

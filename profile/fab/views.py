@@ -6,14 +6,14 @@ from requests.exceptions import RequestException
 from django.conf import settings
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.files.storage import DefaultStorage
 from django.shortcuts import redirect, Http404
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView, FormView
 
+import core.mixins
 from profile.fab import forms, helpers
-from sso.utils import SSOLoginRequiredMixin
-
 from profile.fab import state_requirements
 
 BASIC = 'details'
@@ -23,11 +23,12 @@ MEDIA = 'images'
 class CompanyProfileMixin:
     @cached_property
     def company(self):
-        data = helpers.get_company_profile(self.request.sso_user.session_id)
-        return helpers.CompanyParser(data)
+        if self.request.user.is_authenticated:
+            data = helpers.get_company_profile(self.request.user.session_id)
+            return helpers.CompanyParser(data)
 
 
-class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
+class FindABuyerView(CompanyProfileMixin, TemplateView):
     template_name_fab_user = 'fab/profile.html'
     template_name_not_fab_user = 'fab/is-not-fab-user.html'
 
@@ -40,11 +41,6 @@ class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
         ),
         'user-removed': 'User successfully removed from your profile.',
     }
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.sso_user is None:
-            return redirect('enrolment-start')
-        return super().dispatch(request, *args, **kwargs)
 
     def get(self, *args, **kwargs):
         for key, message in self.SUCCESS_MESSAGES.items():
@@ -63,7 +59,7 @@ class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
         if not self.company:
             return False
         response = api_client.supplier.retrieve_profile(
-            sso_session_id=self.request.sso_user.session_id,
+            sso_session_id=self.request.user.session_id,
         )
         response.raise_for_status()
         parsed = response.json()
@@ -73,7 +69,9 @@ class FindABuyerView(SSOLoginRequiredMixin, CompanyProfileMixin, TemplateView):
         return {
             'fab_tab_classes': 'active',
             'is_profile_owner': self.is_company_profile_owner(),
-            'company': self.company.serialize_for_template(),
+            'company': (
+                self.company.serialize_for_template() if self.company else None
+            ),
             'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
             'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
             'FAB_ADD_CASE_STUDY_URL': settings.FAB_ADD_CASE_STUDY_URL,
@@ -88,10 +86,7 @@ class BaseFormView(
     state_requirements.UserStateRequirementHandlerMixin, CompanyProfileMixin,
     FormView
 ):
-    required_user_states = [
-        state_requirements.IsLoggedIn,
-        state_requirements.HasCompany,
-    ]
+    required_user_states = [state_requirements.HasCompany]
 
     success_url = reverse_lazy('find-a-buyer')
 
@@ -101,13 +96,13 @@ class BaseFormView(
     def form_valid(self, form):
         try:
             response = api_client.company.update_profile(
-                sso_session_id=self.request.sso_user.session_id,
+                sso_session_id=self.request.user.session_id,
                 data=self.serialize_form(form)
             )
             response.raise_for_status()
         except RequestException:
             self.send_update_error_to_sentry(
-                sso_user=self.request.sso_user,
+                user=self.request.user,
                 api_response=response
             )
             raise
@@ -120,12 +115,12 @@ class BaseFormView(
         return form.cleaned_data
 
     @staticmethod
-    def send_update_error_to_sentry(sso_user, api_response):
+    def send_update_error_to_sentry(user, api_response):
         # This is needed to not include POST data (e.g. binary image), which
         # was causing sentry to fail at sending
         sentry_client.context.clear()
         sentry_client.user_context(
-            {'sso_id': sso_user.id, 'sso_user_email': sso_user.email}
+            {'hashed_uuid': user.hashed_uuid, 'user_email': user.email}
         )
         sentry_client.captureMessage(
             message='Updating company profile failed',
@@ -170,10 +165,7 @@ class ExpertiseRoutingFormView(
     state_requirements.UserStateRequirementHandlerMixin,
     CompanyProfileMixin, FormView
 ):
-    required_user_states = [
-        state_requirements.IsLoggedIn,
-        state_requirements.HasCompany,
-    ]
+    required_user_states = [state_requirements.HasCompany]
 
     form_class = forms.ExpertiseRoutingForm
     template_name = 'fab/expertise-routing-form.html'
@@ -264,10 +256,7 @@ class BaseCaseStudyWizardView(
     CompanyProfileMixin,
     NamedUrlSessionWizardView
 ):
-    required_user_states = [
-        state_requirements.IsLoggedIn,
-        state_requirements.HasCompany,
-    ]
+    required_user_states = [state_requirements.HasCompany]
 
     done_step_name = 'finished'
 
@@ -281,6 +270,8 @@ class BaseCaseStudyWizardView(
         BASIC: 'fab/case-study-basic-form.html',
         MEDIA: 'fab/case-study-media-form.html',
     }
+    def get_form_kwargs(self, *args, **kwargs):
+        return super().get_form_kwargs(*args, **kwargs)
 
     def get_template_names(self):
         return [self.templates[self.steps.current]]
@@ -303,7 +294,7 @@ class CaseStudyWizardEditView(BaseCaseStudyWizardView):
 
     def get_form_initial(self, step):
         response = api_client.company.retrieve_private_case_study(
-            sso_session_id=self.request.sso_user.session_id,
+            sso_session_id=self.request.user.session_id,
             case_study_id=self.kwargs['id'],
         )
         if response.status_code == 404:
@@ -315,7 +306,7 @@ class CaseStudyWizardEditView(BaseCaseStudyWizardView):
         response = api_client.company.update_case_study(
             data=self.serialize_form_list(form_list),
             case_study_id=self.kwargs['id'],
-            sso_session_id=self.request.sso_user.session_id,
+            sso_session_id=self.request.user.session_id,
         )
         response.raise_for_status()
         return redirect('find-a-buyer')
@@ -329,7 +320,7 @@ class CaseStudyWizardEditView(BaseCaseStudyWizardView):
 class CaseStudyWizardCreateView(BaseCaseStudyWizardView):
     def done(self, form_list, *args, **kwags):
         response = api_client.company.create_case_study(
-            sso_session_id=self.request.sso_user.session_id,
+            sso_session_id=self.request.user.session_id,
             data=self.serialize_form_list(form_list),
         )
         response.raise_for_status()
@@ -340,10 +331,7 @@ class AdminToolsView(
     CompanyProfileMixin, state_requirements.UserStateRequirementHandlerMixin,
     TemplateView
 ):
-    required_user_states = [
-        state_requirements.IsLoggedIn,
-        state_requirements.HasCompany,
-    ]
+    required_user_states = [state_requirements.HasCompany]
 
     template_name = 'fab/admin-tools.html'
 
@@ -354,7 +342,7 @@ class AdminToolsView(
             FAB_TRANSFER_ACCOUNT_URL=settings.FAB_TRANSFER_ACCOUNT_URL,
             company=self.company.serialize_for_template(),
             has_collaborators=helpers.has_collaborators(
-                self.request.sso_user.session_id
+                self.request.user.session_id
             ),
             **kwargs,
         )
@@ -364,10 +352,7 @@ class ProductsServicesRoutingFormView(
     state_requirements.UserStateRequirementHandlerMixin,
     CompanyProfileMixin, FormView
 ):
-    required_user_states = [
-        state_requirements.IsLoggedIn,
-        state_requirements.HasCompany,
-    ]
+    required_user_states = [state_requirements.HasCompany]
 
     form_class = forms.ExpertiseProductsServicesRoutingForm
     template_name = 'fab/products-services-routing-form.html'
@@ -450,3 +435,21 @@ class ProductsServicesOtherFormView(BaseFormView):
                 'other': form.cleaned_data[self.field_name],
             }
         }
+
+
+class PersonalDetailsFormView(
+    # state_requirements.UserStateRequirementHandlerMixin,
+    core.mixins.CreateUserProfileMixin,
+    CompanyProfileMixin,
+    SuccessMessageMixin,
+    FormView
+):
+    template_name = 'fab/personal-details-form.html'
+    form_class = core.forms.PersonalDetails
+    required_user_states = [state_requirements.HasCompany]
+    success_url = reverse_lazy('find-a-buyer')
+    success_message = 'Details updated'
+
+    def form_valid(self, form):
+        self.create_user_profile(form)
+        return super().form_valid(form)

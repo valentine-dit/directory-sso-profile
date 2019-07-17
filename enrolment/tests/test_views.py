@@ -5,6 +5,7 @@ from freezegun import freeze_time
 import pytest
 from requests.exceptions import HTTPError
 
+from django.contrib.auth.models import AnonymousUser
 from django.urls import resolve, reverse
 from django.views.generic import TemplateView
 
@@ -1345,7 +1346,7 @@ def test_claim_preverified_failure(
     ),
 ))
 def test_steps_list_mixin(
-    is_anon, is_feature_enabled, expected, rf, settings
+    is_anon, is_feature_enabled, expected, rf, settings, user
 ):
     settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = is_feature_enabled
 
@@ -1365,7 +1366,7 @@ def test_steps_list_mixin(
         )
 
     request = rf.get('/')
-    request.sso_user = None if is_anon else mock.Mock()
+    request.user = AnonymousUser() if is_anon else user
     view = TestView.as_view()
 
     response = view(request)
@@ -1389,7 +1390,7 @@ def test_steps_list_mixin_no_business_type(rf, settings):
         )
 
     request = rf.get('/')
-    request.sso_user = None
+    request.user = AnonymousUser()
     view = TestView.as_view()
 
     response = view(request)
@@ -1406,7 +1407,7 @@ def test_steps_list_mixin_no_business_type(rf, settings):
     (False, False, 1),
 ))
 def test_wizard_progress_indicator_mixin(
-    is_anon, is_feature_enabled, expected, rf, settings, client
+    is_anon, is_feature_enabled, expected, rf, settings, client, user
 ):
     settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = is_feature_enabled
 
@@ -1427,7 +1428,7 @@ def test_wizard_progress_indicator_mixin(
 
     request = rf.get('/')
     request.session = client.session
-    request.sso_user = None if is_anon else mock.Mock()
+    request.user = AnonymousUser() if is_anon else user
     view = TestView.as_view(
         url_name='enrolment-companies-house'
     )

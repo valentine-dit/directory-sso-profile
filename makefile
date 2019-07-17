@@ -30,7 +30,7 @@ DEBUG_SET_ENV_VARS := \
 	export SSO_SIGNATURE_SECRET=api_signature_debug; \
 	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great:8003/; \
 	export SSO_PROXY_API_OAUTH2_BASE_URL=http://sso.trade.great:8004/oauth2/; \
-	export SSO_PROXY_LOGIN_URL=http://sso.trade.great:8004/accounts/login/?next=http://profile.trade.great:8006; \
+	export SSO_PROXY_LOGIN_URL=http://sso.trade.great:8004/accounts/login/; \
 	export SSO_PROXY_LOGOUT_URL=http://sso.trade.great:8004/accounts/logout/?next=http://profile.trade.great:8006; \
 	export SSO_PROXY_PASSWORD_RESET_URL=http://sso.trade.great:8004/accounts/password/reset/; \
 	export SSO_PROXY_SIGNUP_URL=http://sso.trade.great:8004/accounts/signup/?next=http://profile.trade.great:8006; \
