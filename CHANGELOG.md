@@ -2,7 +2,8 @@
 
 ## Pre-release
 
-### Implemented enhancements
+### Hot Fit:
+TT-1607 - Standalone Verification 
 
 ### Fixed bugs:
 

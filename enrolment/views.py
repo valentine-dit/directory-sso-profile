@@ -154,11 +154,27 @@ class RestartOnStepSkipped:
 class UserAccountEnrolmentHandlerMixin:
 
     def user_account_condition(self):
+        # user has gone straight to verification code entry step, skipping the
+        # step where they enter their email. This can happen if:
+        # - user submitted the first step then closed the browser and followed
+        # the email from another browser session
+        # - user submitted the first step then followed the email from another
+        # device
+        skipped_first_step = (
+            self.kwargs['step'] == VERIFICATION and
+            USER_ACCOUNT not in self.storage.data['step_data']
+        )
+        if skipped_first_step:
+            return False
+
+        return self.request.sso_user is None
+
+    def verification_condition(self):
         return self.request.sso_user is None
 
     condition_dict = {
         USER_ACCOUNT: user_account_condition,
-        VERIFICATION: user_account_condition,
+        VERIFICATION: verification_condition,
     }
 
     def get_form_initial(self, step):
@@ -196,10 +212,13 @@ class UserAccountEnrolmentHandlerMixin:
                 verification_code=form.cleaned_data['code'],
             )
         except HTTPError as error:
-            if error.response.status_code == 400:
+            if error.response.status_code in [400, 404]:
                 self.storage.set_step_data(
                     VERIFICATION,
-                    {form.add_prefix('code'): [None]}
+                    {
+                        form.add_prefix('email'): [form.cleaned_data['email']],
+                        form.add_prefix('code'): [None]
+                    }
                 )
                 return self.render_revalidation_failure(
                     failed_step=VERIFICATION,
