@@ -1,6 +1,6 @@
 from captcha.fields import ReCaptchaField
 from directory_components import forms
-from directory_constants import choices, urls
+from directory_constants import choices
 from requests.exceptions import HTTPError
 from directory_validators.company import (
     no_company_with_insufficient_companies_house_data as company_type_validator
@@ -20,7 +20,6 @@ import core.forms
 INDUSTRY_CHOICES = (
     (('', 'Please select'),) + choices.INDUSTRIES + (('OTHER', 'Other'),)
 )
-
 
 
 class BusinessType(forms.Form):

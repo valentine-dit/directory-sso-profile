@@ -1,7 +1,6 @@
 from django.core.urlresolvers import reverse
 
 from profile.eig_apps import views
-from profile.eig_apps import constants
 
 
 SIGN_OUT_LABEL = '>Sign out<'

@@ -1,16 +1,11 @@
-from copy import deepcopy
 import os
-import http
 from unittest import mock
 
 import pytest
-import requests
 
-from django.contrib.sessions.backends import signed_cookies
 from django.contrib.auth import get_user_model
 
 from core.tests.helpers import create_response
-from profile.eig_apps.constants import HAS_VISITED_ABOUT_PAGE_SESSION_KEY
 
 
 @pytest.fixture
@@ -18,6 +13,7 @@ def user():
     SSOUser = get_user_model()
     return SSOUser(
         id=1,
+        pk=1,
         email='jim@example.com',
         session_id='123',
         has_user_profile=False,
@@ -62,24 +58,43 @@ def captcha_stub():
 
 
 @pytest.fixture(autouse=True)
-def mock_session_user(client, settings):
-    client.cookies[settings.SSO_SESSION_COOKIE] = '123'
+def auth_backend():
     patch = mock.patch(
-        'directory_sso_api_client.client.sso_api_client.user.get_session_user',
+        'directory_sso_api_client.sso_api_client.user.get_session_user',
         return_value=create_response(404)
     )
+    yield patch.start()
+    patch.stop()
 
-    def login():
-        started.return_value = create_response(
+
+@pytest.fixture
+def client(client, auth_backend, settings):
+    def force_login(user):
+        client.cookies[settings.SSO_SESSION_COOKIE] = '123'
+        auth_backend.return_value = create_response(
             200,
             {
-                'id': '123',
-                'email': 'test@a.com',
-                'hashed_uuid': 'abc',
-                'has_user_profile': False,
+                'id': user.id,
+                'email': user.email,
+                'hashed_uuid': user.hashed_uuid,
+                'has_user_profile': user.has_user_profile,
             }
         )
-    started = patch.start()
-    started.login = login
-    yield started
+    client.force_login = force_login
+    return client
+
+
+@pytest.fixture(autouse=True)
+def mock_create_user_profile():
+    response = create_response(200, {
+        'first_name': 'First Name',
+        'last_name': 'Last Name',
+        'job_title': 'Director',
+        'mobile_phone_number': '08888888888',
+    })
+    patch = mock.patch(
+        'directory_sso_api_client.sso_api_client.user.create_user_profile',
+        return_value=response
+    )
+    yield patch.start()
     patch.stop()

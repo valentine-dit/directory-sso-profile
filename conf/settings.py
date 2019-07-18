@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'raven.contrib.django.raven_compat',
     'django.contrib.sessions',
-    'django.contrib.contenttypes',  # required by DRF and auth, not using any DB
+    'django.contrib.contenttypes',  # required by DRF and auth, not using DB
     'django.contrib.messages',
     'directory_sso_api_client',
     'captcha',
@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'health_check.cache',
     'directory_healthcheck',
 ]
+
 
 MIDDLEWARE_CLASSES = [
     'directory_components.middleware.MaintenanceModeMiddleware',
@@ -446,4 +447,4 @@ VALIDATOR_ALLOWED_IMAGE_FORMATS = ('PNG', 'JPG', 'JPEG')
 
 AUTH_USER_MODEL = 'sso.SSOUser'
 
-AUTHENTICATION_BACKENDS = ['sso.backends.SSOUserBackend']        
+AUTHENTICATION_BACKENDS = ['sso.backends.SSOUserBackend']

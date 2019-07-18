@@ -157,7 +157,6 @@ class RestartOnStepSkipped:
 class UserAccountEnrolmentHandlerMixin:
 
     def user_account_condition(self):
-        is_logged_in = self.request.user.is_authenticated
         # user has gone straight to verification code entry step, skipping the
         # step where they enter their email. This can happen if:
         # - user submitted the first step then closed the browser and followed
@@ -171,7 +170,7 @@ class UserAccountEnrolmentHandlerMixin:
         if skipped_first_step:
             return False
 
-        return self.request.sso_user is None
+        return self.request.user.is_anonymous
 
     def verification_condition(self):
         return self.request.user.is_anonymous

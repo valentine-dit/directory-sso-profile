@@ -30,7 +30,6 @@ class PreventCaptchaRevalidationMixin:
         return form
 
 
-
 class CreateUserProfileMixin:
 
     def serialize_user_profile(self, form):

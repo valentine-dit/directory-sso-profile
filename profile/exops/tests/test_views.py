@@ -7,9 +7,9 @@ from profile.exops import views
 
 
 def test_export_opportunities_applications_exposes_context(
-    client, mock_session_user, settings
+    client, settings, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     settings.EXPORTING_OPPORTUNITIES_SEARCH_URL = 'http://find'
     url = reverse('export-opportunities-applications')
 
@@ -21,9 +21,9 @@ def test_export_opportunities_applications_exposes_context(
 
 
 def test_export_opportunities_email_alerts_exposes_context(
-    client, settings, mock_session_user
+    client, settings, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
 
     settings.EXPORTING_OPPORTUNITIES_SEARCH_URL = 'http://find'
     url = reverse('export-opportunities-email-alerts')
@@ -51,10 +51,9 @@ def test_opportunities_email_alerts_unauthenticated(client):
 
 @patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
 def test_opportunities_applications_retrieve_not_found(
-    mock_retrieve_opportunities, api_response_403, mock_session_user,
-    client
+    mock_retrieve_opportunities, api_response_403, client, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_opportunities.return_value = api_response_403
     url = reverse('export-opportunities-applications')
 
@@ -67,10 +66,9 @@ def test_opportunities_applications_retrieve_not_found(
 
 @patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
 def test_opportunities_applications_retrieve_found(
-    mock_retrieve_opportunities, api_response_200, mock_session_user,
-    client
+    mock_retrieve_opportunities, api_response_200, client, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_opportunities.return_value = api_response_200
 
     url = reverse('export-opportunities-applications')
@@ -83,10 +81,9 @@ def test_opportunities_applications_retrieve_found(
 
 @patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
 def test_opportunities_applications_retrieve_error(
-    mock_retrieve_opportunities, api_response_500, mock_session_user,
-    client
+    mock_retrieve_opportunities, api_response_500, client, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_opportunities.return_value = api_response_500
     url = reverse('export-opportunities-applications')
 
@@ -99,10 +96,9 @@ def test_opportunities_applications_retrieve_error(
 
 @patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
 def test_opportunities_email_alerts_retrieve_not_found(
-    mock_retrieve_opportunities, api_response_403, mock_session_user,
-    client
+    mock_retrieve_opportunities, api_response_403, client, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_opportunities.return_value = api_response_403
 
     url = reverse('export-opportunities-email-alerts')
@@ -115,9 +111,9 @@ def test_opportunities_email_alerts_retrieve_not_found(
 
 @patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
 def test_opportunities_email_alerts_retrieve_found(
-    mock_retrieve_opportunities, api_response_200, client, mock_session_user
+    mock_retrieve_opportunities, api_response_200, client, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_opportunities.return_value = api_response_200
     url = reverse('export-opportunities-email-alerts')
 
@@ -130,9 +126,9 @@ def test_opportunities_email_alerts_retrieve_found(
 
 @patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
 def test_opportunities_email_alerts_retrieve_error(
-    mock_retrieve_opportunities, api_response_500, mock_session_user, client
+    mock_retrieve_opportunities, api_response_500, client, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_opportunities.return_value = api_response_500
     url = reverse('export-opportunities-email-alerts')
 

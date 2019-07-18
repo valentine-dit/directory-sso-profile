@@ -9,26 +9,16 @@ from django.urls import reverse, reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.files.storage import DefaultStorage
 from django.shortcuts import redirect, Http404
-from django.utils.functional import cached_property
 from django.views.generic import TemplateView, FormView
 
 import core.mixins
 from profile.fab import forms, helpers
-from profile.fab import state_requirements
 
 BASIC = 'details'
 MEDIA = 'images'
 
 
-class CompanyProfileMixin:
-    @cached_property
-    def company(self):
-        if self.request.user.is_authenticated:
-            data = helpers.get_company_profile(self.request.user.session_id)
-            return helpers.CompanyParser(data)
-
-
-class FindABuyerView(CompanyProfileMixin, TemplateView):
+class FindABuyerView(TemplateView):
     template_name_fab_user = 'fab/profile.html'
     template_name_not_fab_user = 'fab/is-not-fab-user.html'
 
@@ -49,14 +39,14 @@ class FindABuyerView(CompanyProfileMixin, TemplateView):
         return super().get(*args, **kwargs)
 
     def get_template_names(self, *args, **kwargs):
-        if self.company:
+        if self.request.user.company:
             template_name = self.template_name_fab_user
         else:
             template_name = self.template_name_not_fab_user
         return [template_name]
 
     def is_company_profile_owner(self):
-        if not self.company:
+        if not self.request.user.company:
             return False
         response = api_client.supplier.retrieve_profile(
             sso_session_id=self.request.user.session_id,
@@ -66,12 +56,15 @@ class FindABuyerView(CompanyProfileMixin, TemplateView):
         return parsed['is_company_owner']
 
     def get_context_data(self):
+        if self.request.user.is_authenticated and self.request.user.company:
+            company = self.request.user.company.serialize_for_template()
+        else:
+            company = None
+
         return {
             'fab_tab_classes': 'active',
             'is_profile_owner': self.is_company_profile_owner(),
-            'company': (
-                self.company.serialize_for_template() if self.company else None
-            ),
+            'company': company,
             'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
             'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
             'FAB_ADD_CASE_STUDY_URL': settings.FAB_ADD_CASE_STUDY_URL,
@@ -82,16 +75,12 @@ class FindABuyerView(CompanyProfileMixin, TemplateView):
         }
 
 
-class BaseFormView(
-    state_requirements.UserStateRequirementHandlerMixin, CompanyProfileMixin,
-    FormView
-):
-    required_user_states = [state_requirements.HasCompany]
+class BaseFormView(FormView):
 
     success_url = reverse_lazy('find-a-buyer')
 
     def get_initial(self):
-        return self.company.serialize_for_form()
+        return self.request.user.company.serialize_for_form()
 
     def form_valid(self, form):
         try:
@@ -161,11 +150,7 @@ class LogoFormView(BaseFormView):
     success_message = 'Logo updated'
 
 
-class ExpertiseRoutingFormView(
-    state_requirements.UserStateRequirementHandlerMixin,
-    CompanyProfileMixin, FormView
-):
-    required_user_states = [state_requirements.HasCompany]
+class ExpertiseRoutingFormView(FormView):
 
     form_class = forms.ExpertiseRoutingForm
     template_name = 'fab/expertise-routing-form.html'
@@ -185,7 +170,7 @@ class ExpertiseRoutingFormView(
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            company=self.company.serialize_for_template(),
+            company=self.request.user.company.serialize_for_template(),
             **kwargs,
         )
 
@@ -222,7 +207,7 @@ class BusinessDetailsFormView(BaseFormView):
     template_name = 'fab/business-details-form.html'
 
     def get_form_class(self):
-        if self.company.is_sole_trader:
+        if self.request.user.company.is_sole_trader:
             return forms.SoleTraderBusinessDetailsForm
         return forms.CompaniesHouseBusinessDetailsForm
 
@@ -236,27 +221,24 @@ class PublishFormView(BaseFormView):
     success_message = 'Published status successfully changed'
 
     def dispatch(self, request, *args, **kwargs):
-        if not self.company.is_publishable:
+        if not self.request.user.company.is_publishable:
             return redirect('find-a-buyer')
         return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        return {**kwargs, 'company': self.company.serialize_for_form()}
+        return {
+            **super().get_form_kwargs(),
+            'company': self.request.user.company.serialize_for_form()
+        }
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             **kwargs,
-            company=self.company.serialize_for_template()
+            company=self.request.user.company.serialize_for_template()
         )
 
 
-class BaseCaseStudyWizardView(
-    state_requirements.UserStateRequirementHandlerMixin,
-    CompanyProfileMixin,
-    NamedUrlSessionWizardView
-):
-    required_user_states = [state_requirements.HasCompany]
+class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
 
     done_step_name = 'finished'
 
@@ -325,11 +307,7 @@ class CaseStudyWizardCreateView(BaseCaseStudyWizardView):
         return redirect('find-a-buyer')
 
 
-class AdminToolsView(
-    CompanyProfileMixin, state_requirements.UserStateRequirementHandlerMixin,
-    TemplateView
-):
-    required_user_states = [state_requirements.HasCompany]
+class AdminToolsView(TemplateView):
 
     template_name = 'fab/admin-tools.html'
 
@@ -338,7 +316,7 @@ class AdminToolsView(
             FAB_ADD_USER_URL=settings.FAB_ADD_USER_URL,
             FAB_REMOVE_USER_URL=settings.FAB_REMOVE_USER_URL,
             FAB_TRANSFER_ACCOUNT_URL=settings.FAB_TRANSFER_ACCOUNT_URL,
-            company=self.company.serialize_for_template(),
+            company=self.request.user.company.serialize_for_template(),
             has_collaborators=helpers.has_collaborators(
                 self.request.user.session_id
             ),
@@ -346,11 +324,7 @@ class AdminToolsView(
         )
 
 
-class ProductsServicesRoutingFormView(
-    state_requirements.UserStateRequirementHandlerMixin,
-    CompanyProfileMixin, FormView
-):
-    required_user_states = [state_requirements.HasCompany]
+class ProductsServicesRoutingFormView(FormView):
 
     form_class = forms.ExpertiseProductsServicesRoutingForm
     template_name = 'fab/products-services-routing-form.html'
@@ -364,7 +338,7 @@ class ProductsServicesRoutingFormView(
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            company=self.company.serialize_for_template(),
+            company=self.request.user.company.serialize_for_template(),
             **kwargs,
         )
 
@@ -406,7 +380,7 @@ class ProductsServicesFormView(BaseFormView):
     def serialize_form(self, form):
         return {
             self.field_name: {
-                **self.company.data[self.field_name],
+                **self.request.user.company.data[self.field_name],
                 self.kwargs['category']: form.cleaned_data[self.field_name],
             }
         }
@@ -429,22 +403,17 @@ class ProductsServicesOtherFormView(BaseFormView):
     def serialize_form(self, form):
         return {
             self.field_name: {
-                **self.company.data[self.field_name],
+                **self.request.user.company.data[self.field_name],
                 'other': form.cleaned_data[self.field_name],
             }
         }
 
 
 class PersonalDetailsFormView(
-    state_requirements.UserStateRequirementHandlerMixin,
-    core.mixins.CreateUserProfileMixin,
-    CompanyProfileMixin,
-    SuccessMessageMixin,
-    FormView
+    core.mixins.CreateUserProfileMixin, SuccessMessageMixin, FormView
 ):
     template_name = 'fab/personal-details-form.html'
     form_class = core.forms.PersonalDetails
-    required_user_states = [state_requirements.HasCompany]
     success_url = reverse_lazy('find-a-buyer')
     success_message = 'Details updated'
 

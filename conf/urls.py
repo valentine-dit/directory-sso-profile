@@ -1,5 +1,6 @@
 import directory_healthcheck.views
 
+from django.contrib.auth.decorators import user_passes_test
 from django.conf.urls import include, url
 from django.urls import reverse_lazy
 from django.views.generic import RedirectView
@@ -11,6 +12,15 @@ import profile.eig_apps.views
 import profile.exops.views
 import profile.fab.views
 import profile.soo.views
+
+
+def company_required(function):
+    inner = user_passes_test(
+        lambda user: bool(user.company),
+        reverse_lazy('find-a-buyer'),
+    )
+    if function:
+        return login_required(inner(function))
 
 
 healthcheck_urls = [
@@ -142,27 +152,27 @@ urlpatterns = [
     ),
     url(
         r'^find-a-buyer/social-links/$',
-        login_required(profile.fab.views.SocialLinksFormView.as_view()),
+        company_required(profile.fab.views.SocialLinksFormView.as_view()),
         name='find-a-buyer-social'
     ),
     url(
         r'^find-a-buyer/email/$',
-        login_required(profile.fab.views.EmailAddressFormView.as_view()),
+        company_required(profile.fab.views.EmailAddressFormView.as_view()),
         name='find-a-buyer-email'
     ),
     url(
         r'^find-a-buyer/description/$',
-        login_required(profile.fab.views.DescriptionFormView.as_view()),
+        company_required(profile.fab.views.DescriptionFormView.as_view()),
         name='find-a-buyer-description'
     ),
     url(
         r'^find-a-buyer/website/$',
-        login_required(profile.fab.views.WebsiteFormView.as_view()),
+        company_required(profile.fab.views.WebsiteFormView.as_view()),
         name='find-a-buyer-website'
     ),
     url(
         r'^find-a-buyer/logo/$',
-        login_required(profile.fab.views.LogoFormView.as_view()),
+        company_required(profile.fab.views.LogoFormView.as_view()),
         name='find-a-buyer-logo'
     ),
 
@@ -173,24 +183,26 @@ urlpatterns = [
     ),
     url(
         r'^find-a-buyer/publish/$',
-        login_required(profile.fab.views.PublishFormView.as_view()),
+        company_required(profile.fab.views.PublishFormView.as_view()),
         name='find-a-buyer-publish'
     ),
     url(
         r'^find-a-buyer/business-details/$',
-        login_required(profile.fab.views.BusinessDetailsFormView.as_view()),
+        company_required(profile.fab.views.BusinessDetailsFormView.as_view()),
         name='find-a-buyer-business-details'
     ),
     url(
         r'^find-a-buyer/case-study/(?P<id>[0-9]+)/(?P<step>.+)/$',
-        profile.fab.views.CaseStudyWizardEditView.as_view(
-            url_name='find-a-buyer-case-study-edit'
+        company_required(
+            profile.fab.views.CaseStudyWizardEditView.as_view(
+                url_name='find-a-buyer-case-study-edit'
+            )
         ),
         name='find-a-buyer-case-study-edit'
     ),
     url(
         r'^find-a-buyer/case-study/(?P<step>.+)/$',
-        login_required(
+        company_required(
             profile.fab.views.CaseStudyWizardCreateView.as_view(
                 url_name='find-a-buyer-case-study'
             )
@@ -199,27 +211,33 @@ urlpatterns = [
     ),
     url(
         r'^find-a-buyer/add-expertise/$',
-        login_required(profile.fab.views.ExpertiseRoutingFormView.as_view()),
+        company_required(profile.fab.views.ExpertiseRoutingFormView.as_view()),
         name='find-a-buyer-expertise-routing'
     ),
     url(
         r'^find-a-buyer/add-expertise/regions/$',
-        login_required(profile.fab.views.RegionalExpertiseFormView.as_view()),
+        company_required(
+            profile.fab.views.RegionalExpertiseFormView.as_view()
+        ),
         name='find-a-buyer-expertise-regional'
     ),
     url(
         r'^find-a-buyer/add-expertise/countries/$',
-        login_required(profile.fab.views.CountryExpertiseFormView.as_view()),
+        company_required(profile.fab.views.CountryExpertiseFormView.as_view()),
         name='find-a-buyer-expertise-countries'
     ),
     url(
         r'^find-a-buyer/add-expertise/industries/$',
-        login_required(profile.fab.views.IndustryExpertiseFormView.as_view()),
+        company_required(
+            profile.fab.views.IndustryExpertiseFormView.as_view()
+        ),
         name='find-a-buyer-expertise-industries'
     ),
     url(
         r'^find-a-buyer/add-expertise/languages/$',
-        login_required(profile.fab.views.LanguageExpertiseFormView.as_view()),
+        company_required(
+            profile.fab.views.LanguageExpertiseFormView.as_view()
+        ),
         name='find-a-buyer-expertise-languages'
     ),
     url(
@@ -233,14 +251,14 @@ urlpatterns = [
     ),
     url(
         r'^find-a-buyer/add-expertise/products-and-services/$',
-        login_required(
+        company_required(
             profile.fab.views.ProductsServicesRoutingFormView.as_view()
         ),
         name='find-a-buyer-expertise-products-services-routing'
     ),
     url(
         r'^find-a-buyer/add-expertise/products-and-services/other/$',
-        login_required(
+        company_required(
             profile.fab.views.ProductsServicesOtherFormView.as_view()
         ),
         name='find-a-buyer-expertise-products-services-other'
@@ -250,12 +268,12 @@ urlpatterns = [
             r'^find-a-buyer/add-expertise/products-and-services/'
             r'(?P<category>.+)/$'
         ),
-        login_required(profile.fab.views.ProductsServicesFormView.as_view()),
+        company_required(profile.fab.views.ProductsServicesFormView.as_view()),
         name='find-a-buyer-expertise-products-services'
     ),
     url(
         r'^find-a-buyer/admin/$',
-        login_required(profile.fab.views.AdminToolsView.as_view()),
+        company_required(profile.fab.views.AdminToolsView.as_view()),
         name='find-a-buyer-admin-tools'
     ),
 ]
