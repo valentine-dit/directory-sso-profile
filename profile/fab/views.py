@@ -270,8 +270,6 @@ class BaseCaseStudyWizardView(
         BASIC: 'fab/case-study-basic-form.html',
         MEDIA: 'fab/case-study-media-form.html',
     }
-    def get_form_kwargs(self, *args, **kwargs):
-        return super().get_form_kwargs(*args, **kwargs)
 
     def get_template_names(self):
         return [self.templates[self.steps.current]]
@@ -438,7 +436,7 @@ class ProductsServicesOtherFormView(BaseFormView):
 
 
 class PersonalDetailsFormView(
-    # state_requirements.UserStateRequirementHandlerMixin,
+    state_requirements.UserStateRequirementHandlerMixin,
     core.mixins.CreateUserProfileMixin,
     CompanyProfileMixin,
     SuccessMessageMixin,

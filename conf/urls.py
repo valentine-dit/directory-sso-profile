@@ -183,10 +183,8 @@ urlpatterns = [
     ),
     url(
         r'^find-a-buyer/case-study/(?P<id>[0-9]+)/(?P<step>.+)/$',
-        login_required(
-            profile.fab.views.CaseStudyWizardEditView.as_view(
-                url_name='find-a-buyer-case-study-edit'
-            )
+        profile.fab.views.CaseStudyWizardEditView.as_view(
+            url_name='find-a-buyer-case-study-edit'
         ),
         name='find-a-buyer-case-study-edit'
     ),
