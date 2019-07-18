@@ -31,7 +31,6 @@ def submit_companies_house_step(client):
     return submit_step_factory(
         client=client,
         url_name='enrolment-companies-house',
-        view_name='companies_house_enrolment_view',
         view_class=views.CompaniesHouseEnrolmentView,
     )
 
@@ -41,7 +40,6 @@ def submit_sole_trader_step(client):
     return submit_step_factory(
         client=client,
         url_name='enrolment-sole-trader',
-        view_name='sole_trader_enrolment_view',
         view_class=views.SoleTraderEnrolmentView,
     )
 
@@ -51,7 +49,6 @@ def submit_pre_verified_step(client):
     return submit_step_factory(
         client=client,
         url_name='enrolment-pre-verified',
-        view_name='pre_verified_enrolment_view',
         view_class=views.PreVerifiedEnrolmentView,
     )
 
@@ -71,7 +68,6 @@ def submit_resend_verification_house_step(client):
     return submit_step_factory(
         client=client,
         url_name='resend-verification',
-        view_name='resend_verification_code_view',
         view_class=views.ResendVerificationCodeView,
     )
 
