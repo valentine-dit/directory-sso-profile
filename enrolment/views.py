@@ -165,17 +165,13 @@ class UserAccountEnrolmentHandlerMixin:
         # - user submitted the first step then followed the email from another
         # device
         skipped_first_step = (
-            self.kwargs['step'] == VERIFICATION
-            and not self.storage.data['step_data']
-        )
-        failed_verification = (
             self.kwargs['step'] == VERIFICATION and
-            self.storage.extra_data.get('failed_verification', False)
+            USER_ACCOUNT not in self.storage.data['step_data']
         )
-        return (
-            (not is_logged_in) and
-            not (skipped_first_step or failed_verification)
-        )
+        if skipped_first_step:
+            return False
+
+        return self.request.sso_user is None
 
     def verification_condition(self):
         return self.request.user.is_anonymous
@@ -214,18 +210,19 @@ class UserAccountEnrolmentHandlerMixin:
         return response
 
     def validate_code(self, form, response):
-        self.storage.extra_data['failed_verification'] = False
         try:
             upstream_response = helpers.confirm_verification_code(
                 email=form.cleaned_data['email'],
                 verification_code=form.cleaned_data['code'],
             )
         except HTTPError as error:
-            if error.response.status_code == 400:
-                self.storage.extra_data['failed_verification'] = True
+            if error.response.status_code in [400, 404]:
                 self.storage.set_step_data(
                     VERIFICATION,
-                    {form.add_prefix('code'): [None]}
+                    {
+                        form.add_prefix('email'): [form.cleaned_data['email']],
+                        form.add_prefix('code'): [None]
+                    }
                 )
                 return self.render_revalidation_failure(
                     failed_step=VERIFICATION,
