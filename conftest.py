@@ -1,94 +1,45 @@
-from copy import deepcopy
 import os
-import http
 from unittest import mock
 
 import pytest
-import requests
 
-from django.contrib.sessions.backends import signed_cookies
+from django.contrib.auth import get_user_model
 
 from core.tests.helpers import create_response
-from sso.utils import SSOUser
-from profile.eig_apps.constants import HAS_VISITED_ABOUT_PAGE_SESSION_KEY
 
 
 @pytest.fixture
-def sso_user():
+def user():
+    SSOUser = get_user_model()
     return SSOUser(
         id=1,
+        pk=1,
         email='jim@example.com',
-        session_id='213'
+        session_id='123',
+        has_user_profile=False,
     )
 
 
 @pytest.fixture
-def request_logged_in(rf, sso_user):
+def request_logged_in(rf, user):
     request = rf.get('/')
-    request.sso_user = sso_user
+    request.user = user
     return request
 
 
 @pytest.fixture
 def api_response_200():
-    response = requests.Response()
-    response.status_code = http.client.OK.value
-    response.json = lambda: deepcopy({})
-    return response
+    return create_response()
 
 
 @pytest.fixture
 def api_response_403():
-    response = requests.Response()
-    response.status_code = http.client.FORBIDDEN.value
-    return response
+    return create_response(status_code=403)
 
 
 @pytest.fixture
 def api_response_500():
-    response = requests.Response()
-    response.status_code = http.client.INTERNAL_SERVER_ERROR.value
-    return response
-
-
-@pytest.fixture()
-def sso_user_middleware(sso_user):
-    def process_request(self, request):
-        request.sso_user = sso_user
-
-    stub = mock.patch(
-        'sso.middleware.SSOUserMiddleware.process_request',
-        process_request
-    )
-    stub.start()
-    yield
-    stub.stop()
-
-
-@pytest.fixture
-def sso_user_middleware_unauthenticated():
-    def process_request(self, request):
-        request.sso_user = None
-
-    stub = mock.patch(
-        'sso.middleware.SSOUserMiddleware.process_request',
-        process_request
-    )
-    stub.start()
-    yield
-    stub.stop()
-
-
-@pytest.fixture
-def returned_client(client, settings):
-    """Client that has visited the about page already"""
-
-    session = signed_cookies.SessionStore()
-    session.save()
-    session[HAS_VISITED_ABOUT_PAGE_SESSION_KEY] = 'true'
-    session.save()
-    client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
-    return client
+    return create_response(status_code=500)
 
 
 @pytest.fixture(autouse=True)
@@ -107,18 +58,43 @@ def captcha_stub():
 
 
 @pytest.fixture(autouse=True)
-def mock_session_user(client, settings):
-    client.cookies[settings.SSO_SESSION_COOKIE] = '123'
+def auth_backend():
     patch = mock.patch(
-        'directory_sso_api_client.client.sso_api_client.user.get_session_user',
+        'directory_sso_api_client.sso_api_client.user.get_session_user',
         return_value=create_response(404)
     )
+    yield patch.start()
+    patch.stop()
 
-    def login():
-        started.return_value = create_response(
-            200, {'id': '123', 'email': 'test@a.com'}
+
+@pytest.fixture
+def client(client, auth_backend, settings):
+    def force_login(user):
+        client.cookies[settings.SSO_SESSION_COOKIE] = '123'
+        auth_backend.return_value = create_response(
+            200,
+            {
+                'id': user.id,
+                'email': user.email,
+                'hashed_uuid': user.hashed_uuid,
+                'has_user_profile': user.has_user_profile,
+            }
         )
-    started = patch.start()
-    started.login = login
-    yield started
+    client.force_login = force_login
+    return client
+
+
+@pytest.fixture(autouse=True)
+def mock_create_user_profile():
+    response = create_response(200, {
+        'first_name': 'First Name',
+        'last_name': 'Last Name',
+        'job_title': 'Director',
+        'mobile_phone_number': '08888888888',
+    })
+    patch = mock.patch(
+        'directory_sso_api_client.sso_api_client.user.create_user_profile',
+        return_value=response
+    )
+    yield patch.start()
     patch.stop()

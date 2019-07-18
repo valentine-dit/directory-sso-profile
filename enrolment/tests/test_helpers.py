@@ -73,26 +73,6 @@ def test_create_user(mock_create_user):
     assert result == data
 
 
-@mock.patch.object(helpers.sso_api_client.user, 'create_user_profile')
-def test_create_user_profile(mock_create_user_profile):
-
-    data = {
-        'first_name': 'First Name',
-        'last_name': 'Last Name',
-        'job_title': 'Director',
-        'mobile_phone_number': '08888888888',
-    }
-    mock_create_user_profile.return_value = create_response(201, data)
-    helpers.create_user_profile(
-        sso_session_id=1,
-        data=data
-    )
-    assert mock_create_user_profile.call_count == 1
-    assert mock_create_user_profile.call_args == mock.call(
-        sso_session_id=1, data=data
-    )
-
-
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
 def test_create_user_duplicate(mock_create_user):
 
@@ -129,7 +109,7 @@ def test_send_verification_code_email(mock_submit):
             'expiry_date': '10 Feb 2019, 1:19 p.m.'
         },
         'meta': {
-            'action_name': 'gov-notify',
+            'action_name': 'gov-notify-email',
             'form_url': form_url,
             'sender': {},
             'spam_control': {},
@@ -184,7 +164,7 @@ def test_notify_already_registered(mock_submit):
             'contact_us_url': urls.FEEDBACK,
         },
         'meta': {
-            'action_name': 'gov-notify',
+            'action_name': 'gov-notify-email',
             'form_url': form_url,
             'sender': {},
             'spam_control': {},
@@ -220,7 +200,7 @@ def test_request_collaboration(mock_request_collaboration, mock_submit):
             'report_abuse_url': urls.FEEDBACK,
         },
         'meta': {
-            'action_name': 'gov-notify',
+            'action_name': 'gov-notify-email',
             'form_url': '/the/form/',
             'sender': {},
             'spam_control': {},

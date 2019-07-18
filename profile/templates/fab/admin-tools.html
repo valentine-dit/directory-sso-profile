@@ -19,7 +19,7 @@
         <p>Accounts linked to your business profile:</p>
         
         <p class="active-blue-text font-xsmall">Your account - administrator</p>
-        <p>{{ request.sso_user.email }}</p>
+        <p>{{ request.user.email }}</p>
         <hr class="background-light-grey">
         <p class="active-blue-text font-xsmall">Editors</p>
         <p><a class="link" href="{{ FAB_ADD_USER_URL }}">Add an editor</a></p>

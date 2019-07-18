@@ -1,5 +1,7 @@
 from django.utils.functional import cached_property
 
+from core import helpers
+
 
 class PreventCaptchaRevalidationMixin:
     """When get_all_cleaned_data() is called the forms are revalidated,
@@ -26,3 +28,20 @@ class PreventCaptchaRevalidationMixin:
         if 'captcha' in fields and self.steps.index > self.captcha_step_index:
             del fields['captcha']
         return form
+
+
+class CreateUserProfileMixin:
+
+    def serialize_user_profile(self, form):
+        return {
+            'first_name': form.cleaned_data['given_name'],
+            'last_name': form.cleaned_data['family_name'],
+            'job_title': form.cleaned_data['job_title'],
+            'mobile_phone_number': form.cleaned_data.get('phone_number'),
+        }
+
+    def create_user_profile(self, form):
+        helpers.create_user_profile(
+            sso_session_id=self.request.user.session_id,
+            data=self.serialize_user_profile(form),
+        )

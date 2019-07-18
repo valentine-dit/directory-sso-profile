@@ -1,6 +1,6 @@
 from captcha.fields import ReCaptchaField
 from directory_components import forms
-from directory_constants import choices, urls
+from directory_constants import choices
 from requests.exceptions import HTTPError
 from directory_validators.company import (
     no_company_with_insufficient_companies_house_data as company_type_validator
@@ -15,15 +15,10 @@ from django.http.request import QueryDict
 
 from enrolment import constants, helpers
 from enrolment.widgets import PostcodeInput
-
+import core.forms
 
 INDUSTRY_CHOICES = (
     (('', 'Please select'),) + choices.INDUSTRIES + (('OTHER', 'Other'),)
-)
-TERMS_LABEL = mark_safe(
-    'Tick this box to accept the '
-    f'<a href="{urls.TERMS_AND_CONDITIONS}" target="_blank">terms and '
-    'conditions</a> of the great.gov.uk service.'
 )
 
 
@@ -94,7 +89,7 @@ class UserAccount(forms.Form):
         label='',
         label_suffix='',
     )
-    terms_agreed = forms.BooleanField(label=TERMS_LABEL)
+    terms_agreed = forms.BooleanField(label=core.forms.TERMS_LABEL)
 
     def clean_password_confirmed(self):
         value = self.cleaned_data['password_confirmed']
@@ -268,29 +263,6 @@ class CompaniesHouseBusinessDetails(forms.Form):
 
     def clean_sectors(self):
         return [self.cleaned_data['sectors']]
-
-
-class PersonalDetails(forms.Form):
-
-    given_name = forms.CharField(
-        label='First name',
-    )
-    family_name = forms.CharField(
-        label='Last name',
-    )
-    job_title = forms.CharField()
-    phone_number = forms.CharField(
-        label='Phone number (optional)',
-        required=False
-    )
-    confirmed_is_company_representative = forms.BooleanField(
-        label=(
-            'I confirm that I have the right to act for this business. I '
-            'understand that great.gov.uk might write to this business to '
-            'confirm I can create an account.'
-        )
-    )
-    terms_agreed = forms.BooleanField(label=TERMS_LABEL)
 
 
 class SoleTraderSearch(forms.Form):
