@@ -206,22 +206,6 @@ def mock_create_user():
     patch.stop()
 
 
-# @pytest.fixture(autouse=True)
-# def mock_create_user_profile():
-#     response = create_response(200, {
-#         'first_name': 'First Name',
-#         'last_name': 'Last Name',
-#         'job_title': 'Director',
-#         'mobile_phone_number': '08888888888',
-#     })
-#     patch = mock.patch.object(
-#         helpers.sso_api_client.user, 'create_user_profile',
-#         return_value=response
-#     )
-#     yield patch.start()
-#     patch.stop()
-
-
 @pytest.fixture(autouse=True)
 def mock_user_has_company():
     patch = mock.patch.object(
