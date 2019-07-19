@@ -15,6 +15,7 @@ def create_response(status_code=200, json_body={}, content=None):
 def submit_step_factory(client, url_name, view_class):
     step_names = iter([name for name, form in view_class.form_list])
     view_name = normalize_name(view_class.__name__)
+
     def submit_step(data, step_name=None):
         step_name = step_name or next(step_names)
         return client.post(

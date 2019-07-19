@@ -320,6 +320,10 @@ def session_client_referrer_factory(client, settings):
         constants.SOLE_TRADER,
         views.URL_SOLE_TRADER_ENROLMENT
     ),
+    (
+        constants.OVERSEAS_COMPANY,
+        views.URL_OVERSEAS_BUSINESS_ENROLMNET
+    ),
 ))
 def test_enrolment_routing(client, choice, expected_url):
     url = reverse('enrolment-business-type')
@@ -1414,3 +1418,11 @@ def test_wizard_progress_indicator_mixin(
     response = view(request, step=views.USER_ACCOUNT)
 
     assert response.context_data['step_number'] == expected
+
+
+def test_overseas_business_enrolmnet(client):
+    url = reverse('enrolment-overseas-business')
+
+    response = client.get(url)
+
+    assert response.status_code == 200
