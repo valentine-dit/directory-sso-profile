@@ -48,7 +48,8 @@ def submit_sole_trader_step(client):
 @pytest.fixture
 def submit_individual_step(client):
 
-    # The WizardView converts view class name from camelcase to snake case to get the view name
+    # The WizardView converts view class name from camelcase to
+    # snake case to get the view name
     return submit_step_factory(
         client,
         url_name='enrolment-individual',
