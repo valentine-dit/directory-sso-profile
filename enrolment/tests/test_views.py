@@ -206,20 +206,20 @@ def mock_create_user():
     patch.stop()
 
 
-@pytest.fixture(autouse=True)
-def mock_create_user_profile():
-    response = create_response(200, {
-        'first_name': 'First Name',
-        'last_name': 'Last Name',
-        'job_title': 'Director',
-        'mobile_phone_number': '08888888888',
-    })
-    patch = mock.patch.object(
-        helpers.sso_api_client.user, 'create_user_profile',
-        return_value=response
-    )
-    yield patch.start()
-    patch.stop()
+# @pytest.fixture(autouse=True)
+# def mock_create_user_profile():
+#     response = create_response(200, {
+#         'first_name': 'First Name',
+#         'last_name': 'Last Name',
+#         'job_title': 'Director',
+#         'mobile_phone_number': '08888888888',
+#     })
+#     patch = mock.patch.object(
+#         helpers.sso_api_client.user, 'create_user_profile',
+#         return_value=response
+#     )
+#     yield patch.start()
+#     patch.stop()
 
 
 @pytest.fixture(autouse=True)
@@ -1488,7 +1488,8 @@ def test_wizard_progress_indicator_mixin(
     assert response.context_data['step_number'] == expected
 
 
-def test_individual_enrolment(
+
+def test_individual_enrolment_steps(
     client, submit_individual_step, steps_data, user
 ):
 

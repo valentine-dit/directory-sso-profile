@@ -265,29 +265,6 @@ class CompaniesHouseBusinessDetails(forms.Form):
         return [self.cleaned_data['sectors']]
 
 
-class PersonalDetails(forms.Form):
-
-    given_name = forms.CharField(
-        label='First name',
-    )
-    family_name = forms.CharField(
-        label='Last name',
-    )
-    job_title = forms.CharField()
-    phone_number = forms.CharField(
-        label='Phone number (optional)',
-        required=False
-    )
-    confirmed_is_company_representative = forms.BooleanField(
-        label=(
-            'I confirm that I have the right to act for this business. I '
-            'understand that great.gov.uk might write to this business to '
-            'confirm I can create an account.'
-        )
-    )
-    terms_agreed = forms.BooleanField(label=TERMS_LABEL)
-
-
 class IndividualPersonalDetails(forms.Form):
     given_name = forms.CharField(
         label='First name',
