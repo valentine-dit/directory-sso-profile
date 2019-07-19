@@ -3,12 +3,13 @@
 ## Pre-release
 
 ### Implemented enhancements
+=======
 - TT-990  - Update registration journey of individual user
+- TT-1566 - Handle overseas busienss enrolment
 - TT-1564 - Update registration journey SSO user with Companies House company
 - TT-1577 - Move company title under logo on mobile.
 - TT-1575 - Update registration journey for Companies House listed company.
 - No ticket - Replace custom breadcrumbs with shared component
-- TT-1607 - Verification Code allow email
 - TT-1574 - Update registration journey for non Companies House listed company.
 - TT-998 - Support multiple non companies house company types
 - TT-1574 - Update registration journey for nont Companies House listed company
@@ -16,9 +17,12 @@
 ### Fixed bugs:
 - No ticket - Upgrade vulnerable django version to django 1.11.22
 
+## [07-17-2019 ](https://github.com/uktrade/directory-ui-supplier/releases/tag/07-17-2019 )
+[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.05...07-17-2019)
+
 ### Implemented enhancements
 
-### Fixed bugs:
+- TT-1607 - Verification Code allow email
 
 ## [2019.06.15](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.06.05)
 

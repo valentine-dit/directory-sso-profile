@@ -64,14 +64,6 @@ def create_user(email, password):
     return response.json()
 
 
-def create_user_profile(sso_session_id, data):
-    response = sso_api_client.user.create_user_profile(
-        sso_session_id=sso_session_id, data=data
-    )
-    response.raise_for_status()
-    return response
-
-
 def user_has_company(sso_session_id):
     response = api_client.company.retrieve_private_profile(sso_session_id)
     if response.status_code == 404:
@@ -100,7 +92,7 @@ def create_company_profile(data):
 
 
 def send_verification_code_email(email, verification_code, form_url):
-    action = actions.GovNotifyAction(
+    action = actions.GovNotifyEmailAction(
         template_id=settings.CONFIRM_VERIFICATION_CODE_TEMPLATE_ID,
         email_address=email,
         form_url=form_url,
@@ -119,7 +111,7 @@ def send_verification_code_email(email, verification_code, form_url):
 
 
 def notify_already_registered(email, form_url):
-    action = actions.GovNotifyAction(
+    action = actions.GovNotifyEmailAction(
         email_address=email,
         template_id=settings.GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID,
         form_url=form_url,
@@ -162,7 +154,7 @@ def request_collaboration(company_number, email, name, form_url):
         collaborator_email=email,
     )
     response.raise_for_status()
-    action = actions.GovNotifyAction(
+    action = actions.GovNotifyEmailAction(
         email_address=response.json()['company_email'],
         template_id=settings.GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID,
         form_url=form_url,
