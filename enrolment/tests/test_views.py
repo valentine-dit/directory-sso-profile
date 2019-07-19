@@ -47,10 +47,12 @@ def submit_sole_trader_step(client):
 
 @pytest.fixture
 def submit_individual_step(client):
+
+    # The WizardView converts view class name from camelcase to snake case to get the view name
     return submit_step_factory(
         client,
         url_name='enrolment-individual',
-        view_name='individual_enrolment_view',
+        view_name='individual_user_enrolment_view',
         view_class=views.IndividualUserEnrolmentView,
     )
 
@@ -384,29 +386,6 @@ def test_companies_house_enrolment(
 
     response = submit_companies_house_step(steps_data[views.PERSONAL_INFO])
     assert response.status_code == 302
-
-
-def test_individual_enrolment(
-    client, submit_individual_step, mock_session_user, steps_data
-):
-    print(steps_data)
-
-    response = submit_individual_step(steps_data[views.USER_ACCOUNT])
-    assert response.status_code == 302
-
-    print(response.json())
-
-    response = submit_individual_step(steps_data[views.VERIFICATION])
-    assert response.status_code == 302
-
-    print(response.json())
-
-    mock_session_user.login()
-
-    response = submit_individual_step(steps_data[views.PERSONAL_INFO])
-    assert response.status_code == 302
-
-    print(response.json())
 
 
 def test_companies_house_enrolment_change_company_name(
@@ -772,8 +751,6 @@ def test_user_verification_passes_cookies(
     company_type, submit_step_builder, client, steps_data
 ):
     submit_step = submit_step_builder(company_type)
-
-    print(steps_data[views.USER_ACCOUNT])
 
     response = submit_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
@@ -1509,3 +1486,95 @@ def test_wizard_progress_indicator_mixin(
     response = view(request, step=views.USER_ACCOUNT)
 
     assert response.context_data['step_number'] == expected
+
+
+def test_individual_enrolment(
+    client, submit_individual_step, mock_session_user, steps_data
+):
+
+    response = submit_individual_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_individual_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    mock_session_user.login()
+
+    response = submit_individual_step(steps_data[views.PERSONAL_INFO])
+    assert response.status_code == 302
+
+
+def test_individual_enrolment_redirect_to_start(client):
+    url = reverse(
+        'enrolment-individual', kwargs={'step': views.PERSONAL_INFO}
+    )
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('enrolment-business-type')
+
+
+def test_individual_enrolment_submit_end_to_end(
+    client, submit_individual_step, mock_session_user,
+    mock_create_user_profile, steps_data, session_client_referrer_factory,
+):
+    session_client_referrer_factory(constants_url.SERVICES_FAB)
+    response = submit_individual_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_individual_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    mock_session_user.login()
+
+    response = submit_individual_step(steps_data[views.PERSONAL_INFO])
+    assert response.status_code == 302
+
+    client.get(response.url)
+
+    assert mock_create_user_profile.call_count == 1
+    assert mock_create_user_profile.call_args == mock.call(data={
+        'first_name': 'Foo',
+        'last_name': 'Example',
+        'job_title': None,
+        'mobile_phone_number': '1232342',
+        },
+        sso_session_id='foo-bar'
+    )
+
+
+def test_individual_enrolment_submit_end_to_end_logged_in(
+    client, submit_individual_step, mock_session_user,
+    mock_create_user_profile, steps_data
+):
+    mock_session_user.login()
+
+    url = reverse(
+        'enrolment-individual', kwargs={'step': views.USER_ACCOUNT}
+    )
+    response = client.get(url)
+    assert response.status_code == 302
+
+    step = resolve(response.url).kwargs['step']
+
+    assert step == views.PERSONAL_INFO
+
+    response = submit_individual_step(
+        steps_data[views.PERSONAL_INFO],
+        step_name=step
+    )
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+    assert response.status_code == 200
+
+    assert mock_create_user_profile.call_count == 1
+    assert mock_create_user_profile.call_args == mock.call(data={
+        'first_name': 'Foo',
+        'last_name': 'Example',
+        'job_title': None,
+        'mobile_phone_number': '1232342',
+    },
+        sso_session_id='123'
+    )

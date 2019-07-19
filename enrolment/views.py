@@ -558,12 +558,12 @@ class IndividualUserEnrolmentView(
 
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
-            PERSONAL_INFO: 1
+            PERSONAL_INFO: 3
         },
         step_counter_anon={
-            USER_ACCOUNT: 1,
-            VERIFICATION: 2,
-            PERSONAL_INFO: 3
+            USER_ACCOUNT: 2,
+            VERIFICATION: 3,
+            PERSONAL_INFO: 4
         },
         first_step=USER_ACCOUNT
     )
@@ -581,22 +581,11 @@ class IndividualUserEnrolmentView(
         FINISHED: 'enrolment/success-individual.html'
     }
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        if self.steps.current == VERIFICATION:
-            context['verification_missing_url'] = urls.build_great_url(
-                'contact/triage/great-account/verification-missing/'
-            )
-        return context
-
     def done(self, form_list, form_dict, **kwargs):
-        print(form_list)
-        print(form_dict)
         self.create_user_profile(form_dict[PERSONAL_INFO])
         return TemplateResponse(
             self.request,
-            self.templates[FINISHED],
-            context=self.get_referrer_context()
+            self.templates[FINISHED]
         )
 
 
