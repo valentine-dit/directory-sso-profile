@@ -13,9 +13,9 @@ from django.forms import HiddenInput, PasswordInput, Textarea, ValidationError
 from django.utils.safestring import mark_safe
 from django.http.request import QueryDict
 
+from core.forms import TERMS_LABEL
 from enrolment import constants, helpers
 from enrolment.widgets import PostcodeInput, RadioSelect
-import core.forms
 
 INDUSTRY_CHOICES = (
     (('', 'Please select'),) + choices.INDUSTRIES + (('OTHER', 'Other'),)
@@ -96,7 +96,7 @@ class UserAccount(forms.Form):
         label='',
         label_suffix='',
     )
-    terms_agreed = forms.BooleanField(label=core.forms.TERMS_LABEL)
+    terms_agreed = forms.BooleanField(label=TERMS_LABEL)
 
     def clean_password_confirmed(self):
         value = self.cleaned_data['password_confirmed']
@@ -270,6 +270,19 @@ class CompaniesHouseBusinessDetails(forms.Form):
 
     def clean_sectors(self):
         return [self.cleaned_data['sectors']]
+
+
+class IndividualPersonalDetails(forms.Form):
+    given_name = forms.CharField(
+        label='First name',
+    )
+    family_name = forms.CharField(
+        label='Last name',
+    )
+    phone_number = forms.CharField(
+        label='Phone number (optional)',
+        required=False
+    )
 
 
 class SoleTraderSearch(forms.Form):

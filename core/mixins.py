@@ -36,7 +36,7 @@ class CreateUserProfileMixin:
         return {
             'first_name': form.cleaned_data['given_name'],
             'last_name': form.cleaned_data['family_name'],
-            'job_title': form.cleaned_data['job_title'],
+            'job_title': form.cleaned_data.get('job_title'),
             'mobile_phone_number': form.cleaned_data.get('phone_number'),
         }
 

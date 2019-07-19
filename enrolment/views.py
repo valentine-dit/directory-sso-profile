@@ -28,6 +28,9 @@ SESSION_KEY_REFERRER = 'REFERRER_URL'
 PROGRESS_STEP_LABEL_USER_ACCOUNT = (
     'Enter your business email address and set a password'
 )
+PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT = (
+    'Enter your email address and set a password'
+)
 PROGRESS_STEP_LABEL_VERIFICATION = 'Enter your confirmation code'
 PROGRESS_STEP_LABEL_PERSONAL_INFO = 'Enter your details'
 PROGRESS_STEP_LABEL_BUSINESS_TYPE = 'Select your business type'
@@ -47,6 +50,9 @@ URL_SOLE_TRADER_ENROLMENT = reverse_lazy(
 )
 URL_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
     'enrolment-companies-house', kwargs={'step': USER_ACCOUNT}
+)
+URL_INDIVIDUAL_ENROLMENT = reverse_lazy(
+    'enrolment-individual', kwargs={'step': USER_ACCOUNT}
 )
 URL_OVERSEAS_BUSINESS_ENROLMNET = reverse_lazy(
     'enrolment-overseas-business'
@@ -306,6 +312,8 @@ class BusinessTypeRoutingView(
             url = URL_COMPANIES_HOUSE_ENROLMENT
         elif choice == constants.SOLE_TRADER:
             url = URL_SOLE_TRADER_ENROLMENT
+        elif choice == constants.NOT_COMPANY:
+            url = URL_INDIVIDUAL_ENROLMENT
         elif choice == constants.OVERSEAS_COMPANY:
             url = URL_OVERSEAS_BUSINESS_ENROLMNET
         else:
@@ -524,6 +532,55 @@ class SoleTraderEnrolmentView(
         return redirect('find-a-buyer')
 
 
+class IndividualUserEnrolmentView(
+    core.mixins.CreateUserProfileMixin, BaseEnrolmentWizardView
+):
+    steps_list_conf = helpers.StepsListConf(
+        form_labels_user=[
+            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            PROGRESS_STEP_LABEL_PERSONAL_INFO
+        ],
+        form_labels_anon=[
+            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT,
+            PROGRESS_STEP_LABEL_VERIFICATION,
+            PROGRESS_STEP_LABEL_PERSONAL_INFO
+        ],
+    )
+
+    progress_conf = helpers.ProgressIndicatorConf(
+        step_counter_user={
+            PERSONAL_INFO: 3
+        },
+        step_counter_anon={
+            USER_ACCOUNT: 2,
+            VERIFICATION: 3,
+            PERSONAL_INFO: 4
+        },
+        first_step=USER_ACCOUNT
+    )
+
+    form_list = (
+        (USER_ACCOUNT, forms.UserAccount),
+        (VERIFICATION, forms.UserAccountVerification),
+        (PERSONAL_INFO, forms.IndividualPersonalDetails),
+    )
+
+    templates = {
+        USER_ACCOUNT: 'enrolment/individual-user-account.html',
+        VERIFICATION: 'enrolment/user-account-verification.html',
+        PERSONAL_INFO: 'enrolment/individual-personal-details.html',
+        FINISHED: 'enrolment/success-individual.html'
+    }
+
+    def done(self, form_list, form_dict, **kwargs):
+        self.create_user_profile(form_dict[PERSONAL_INFO])
+        return TemplateResponse(
+            self.request,
+            self.templates[FINISHED]
+        )
+
+
 class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
     steps_list_conf = helpers.StepsListConf(
         form_labels_user=[PROGRESS_STEP_LABEL_PERSONAL_INFO],
@@ -646,6 +703,8 @@ class ResendVerificationCodeView(
             url = URL_COMPANIES_HOUSE_ENROLMENT
         elif choice == constants.SOLE_TRADER:
             url = URL_SOLE_TRADER_ENROLMENT
+        elif choice == constants.NOT_COMPANY:
+            url = URL_INDIVIDUAL_ENROLMENT
         else:
             url = reverse('enrolment-business-type')
         response = self.validate_code(

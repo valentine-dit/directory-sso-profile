@@ -22,6 +22,7 @@ urls = (
     reverse('enrolment-start'),
     reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}),
     reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}),
+    reverse('enrolment-individual', kwargs={'step': views.USER_ACCOUNT}),
 )
 company_types = (constants.COMPANIES_HOUSE_COMPANY, constants.SOLE_TRADER)
 
@@ -45,6 +46,16 @@ def submit_sole_trader_step(client):
 
 
 @pytest.fixture
+def submit_individual_step(client):
+
+    return submit_step_factory(
+        client,
+        url_name='enrolment-individual',
+        view_class=views.IndividualUserEnrolmentView,
+    )
+
+
+@pytest.fixture
 def submit_pre_verified_step(client):
     return submit_step_factory(
         client=client,
@@ -54,12 +65,15 @@ def submit_pre_verified_step(client):
 
 
 @pytest.fixture
-def submit_step_builder(submit_companies_house_step, submit_sole_trader_step):
+def submit_step_builder(submit_companies_house_step, submit_sole_trader_step,
+                        submit_individual_step):
     def inner(choice):
         if choice == constants.COMPANIES_HOUSE_COMPANY:
             return submit_companies_house_step
         elif choice == constants.SOLE_TRADER:
             return submit_sole_trader_step
+        elif choice == constants.NOT_COMPANY:
+            return submit_individual_step
     return inner
 
 
@@ -1016,6 +1030,42 @@ def test_confirm_user_resend_verification_code_choice_sole_trader(
     )
 
 
+@freeze_time('2012-01-14 12:00:02')
+def test_confirm_user_resend_verification_code_choice_individual(
+        session_client_company_factory,
+        submit_resend_verification_house_step,
+        steps_data,
+):
+    session_client_company_factory(constants.NOT_COMPANY)
+
+    response = submit_resend_verification_house_step(
+        steps_data[views.RESEND_VERIFICATION]
+    )
+
+    assert response.status_code == 302
+
+    response = submit_resend_verification_house_step(
+        steps_data[views.VERIFICATION],
+        step_name=resolve(response.url).kwargs['step'],
+    )
+
+    assert response.status_code == 302
+
+    assert response.url == reverse(
+        'enrolment-individual', kwargs={'step': views.USER_ACCOUNT}
+    )
+
+    assert str(response.cookies['debug_sso_session_cookie']) == (
+        'Set-Cookie: debug_sso_session_cookie=foo-bar; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; HttpOnly; Max-Age=1209600; '
+        'Path=/; Secure'
+    )
+    assert str(response.cookies['sso_display_logged_in']) == (
+        'Set-Cookie: sso_display_logged_in=true; Domain=.trade.great; '
+        'expires=Thu, 07-Mar-2019 10:17:38 GMT; Max-Age=1209600; Path=/'
+    )
+
+
 def test_confirm_user_resend_verification_logged_in(
     client, user
 ):
@@ -1418,6 +1468,98 @@ def test_wizard_progress_indicator_mixin(
     response = view(request, step=views.USER_ACCOUNT)
 
     assert response.context_data['step_number'] == expected
+
+
+def test_individual_enrolment_steps(
+    client, submit_individual_step, steps_data, user
+):
+
+    response = submit_individual_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_individual_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    client.force_login(user)
+
+    response = submit_individual_step(steps_data[views.PERSONAL_INFO])
+    assert response.status_code == 302
+
+
+def test_individual_enrolment_redirect_to_start(client):
+    url = reverse(
+        'enrolment-individual', kwargs={'step': views.PERSONAL_INFO}
+    )
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('enrolment-business-type')
+
+
+def test_individual_enrolment_submit_end_to_end(
+    client, submit_individual_step, user,
+    mock_create_user_profile, steps_data, session_client_referrer_factory,
+):
+    session_client_referrer_factory(constants_url.SERVICES_FAB)
+    response = submit_individual_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_individual_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    client.force_login(user)
+
+    response = submit_individual_step(steps_data[views.PERSONAL_INFO])
+    assert response.status_code == 302
+
+    client.get(response.url)
+
+    assert mock_create_user_profile.call_count == 1
+    assert mock_create_user_profile.call_args == mock.call(data={
+        'first_name': 'Foo',
+        'last_name': 'Example',
+        'job_title': None,
+        'mobile_phone_number': '1232342',
+        },
+        sso_session_id='123'
+    )
+
+
+def test_individual_enrolment_submit_end_to_end_logged_in(
+    client, submit_individual_step, user,
+    mock_create_user_profile, steps_data
+):
+    client.force_login(user)
+
+    url = reverse(
+        'enrolment-individual', kwargs={'step': views.USER_ACCOUNT}
+    )
+    response = client.get(url)
+    assert response.status_code == 302
+
+    step = resolve(response.url).kwargs['step']
+
+    assert step == views.PERSONAL_INFO
+
+    response = submit_individual_step(
+        steps_data[views.PERSONAL_INFO],
+        step_name=step
+    )
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+    assert response.status_code == 200
+
+    assert mock_create_user_profile.call_count == 1
+    assert mock_create_user_profile.call_args == mock.call(data={
+        'first_name': 'Foo',
+        'last_name': 'Example',
+        'job_title': None,
+        'mobile_phone_number': '1232342',
+    },
+        sso_session_id='123'
+    )
 
 
 def test_overseas_business_enrolmnet(client):
