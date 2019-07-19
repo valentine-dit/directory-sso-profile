@@ -1488,7 +1488,6 @@ def test_wizard_progress_indicator_mixin(
     assert response.context_data['step_number'] == expected
 
 
-
 def test_individual_enrolment_steps(
     client, submit_individual_step, steps_data, user
 ):
