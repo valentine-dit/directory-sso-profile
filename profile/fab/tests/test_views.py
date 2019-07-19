@@ -3,6 +3,7 @@ import http
 from unittest import mock
 
 from directory_api_client.client import api_client
+from formtools.wizard.views import normalize_name
 import pytest
 from PIL import Image, ImageDraw
 from requests.exceptions import HTTPError
@@ -119,7 +120,6 @@ def submit_case_study_create_step(client):
     return submit_step_factory(
         client=client,
         url_name='find-a-buyer-case-study',
-        view_name='case_study_wizard_create_view',
         view_class=views.CaseStudyWizardCreateView,
     )
 
@@ -127,8 +127,8 @@ def submit_case_study_create_step(client):
 @pytest.fixture
 def submit_case_study_edit_step(client):
     url_name = 'find-a-buyer-case-study-edit'
-    view_name = 'case_study_wizard_edit_view'
     view_class = views.CaseStudyWizardEditView
+    view_name = normalize_name(view_class.__name__)
     step_names = iter([name for name, form in view_class.form_list])
 
     def submit_step(data, step_name=None):

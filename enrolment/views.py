@@ -48,6 +48,9 @@ URL_SOLE_TRADER_ENROLMENT = reverse_lazy(
 URL_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
     'enrolment-companies-house', kwargs={'step': USER_ACCOUNT}
 )
+URL_OVERSEAS_BUSINESS_ENROLMNET = reverse_lazy(
+    'enrolment-overseas-business'
+)
 
 
 class RedirectLoggedInMixin:
@@ -303,6 +306,8 @@ class BusinessTypeRoutingView(
             url = URL_COMPANIES_HOUSE_ENROLMENT
         elif choice == constants.SOLE_TRADER:
             url = URL_SOLE_TRADER_ENROLMENT
+        elif choice == constants.OVERSEAS_COMPANY:
+            url = URL_OVERSEAS_BUSINESS_ENROLMNET
         else:
             raise NotImplementedError()
         self.request.session[SESSION_KEY_COMPANY_CHOICE] = choice
@@ -679,3 +684,7 @@ class ResendVerificationCodeView(
             if data:
                 form_initial['email'] = data['email']
         return form_initial
+
+
+class EnrolmentOverseasBusinessView(TemplateView):
+    template_name = 'enrolment/overseas-business.html'
