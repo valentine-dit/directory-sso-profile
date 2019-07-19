@@ -53,7 +53,6 @@ def submit_individual_step(client):
     return submit_step_factory(
         client,
         url_name='enrolment-individual',
-        view_name='individual_user_enrolment_view',
         view_class=views.IndividualUserEnrolmentView,
     )
 
@@ -201,6 +200,22 @@ def mock_create_user():
     })
     patch = mock.patch.object(
         helpers.sso_api_client.user, 'create_user',
+        return_value=response
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_create_user_profile():
+    response = create_response(200, {
+        'first_name': 'First Name',
+        'last_name': 'Last Name',
+        'job_title': 'Director',
+        'mobile_phone_number': '08888888888',
+    })
+    patch = mock.patch.object(
+        helpers.sso_api_client.user, 'create_user_profile',
         return_value=response
     )
     yield patch.start()
@@ -1474,7 +1489,7 @@ def test_wizard_progress_indicator_mixin(
 
 
 def test_individual_enrolment(
-    client, submit_individual_step, mock_session_user, steps_data
+    client, submit_individual_step, steps_data, user
 ):
 
     response = submit_individual_step(steps_data[views.USER_ACCOUNT])
@@ -1483,7 +1498,7 @@ def test_individual_enrolment(
     response = submit_individual_step(steps_data[views.VERIFICATION])
     assert response.status_code == 302
 
-    mock_session_user.login()
+    client.force_login(user)
 
     response = submit_individual_step(steps_data[views.PERSONAL_INFO])
     assert response.status_code == 302
@@ -1501,7 +1516,7 @@ def test_individual_enrolment_redirect_to_start(client):
 
 
 def test_individual_enrolment_submit_end_to_end(
-    client, submit_individual_step, mock_session_user,
+    client, submit_individual_step, user,
     mock_create_user_profile, steps_data, session_client_referrer_factory,
 ):
     session_client_referrer_factory(constants_url.SERVICES_FAB)
@@ -1511,7 +1526,7 @@ def test_individual_enrolment_submit_end_to_end(
     response = submit_individual_step(steps_data[views.VERIFICATION])
     assert response.status_code == 302
 
-    mock_session_user.login()
+    client.force_login(user)
 
     response = submit_individual_step(steps_data[views.PERSONAL_INFO])
     assert response.status_code == 302
@@ -1525,15 +1540,15 @@ def test_individual_enrolment_submit_end_to_end(
         'job_title': None,
         'mobile_phone_number': '1232342',
         },
-        sso_session_id='foo-bar'
+        sso_session_id='123'
     )
 
 
 def test_individual_enrolment_submit_end_to_end_logged_in(
-    client, submit_individual_step, mock_session_user,
+    client, submit_individual_step, user,
     mock_create_user_profile, steps_data
 ):
-    mock_session_user.login()
+    client.force_login(user)
 
     url = reverse(
         'enrolment-individual', kwargs={'step': views.USER_ACCOUNT}
