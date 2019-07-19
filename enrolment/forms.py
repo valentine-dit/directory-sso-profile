@@ -14,7 +14,7 @@ from django.utils.safestring import mark_safe
 from django.http.request import QueryDict
 
 from enrolment import constants, helpers
-from enrolment.widgets import PostcodeInput
+from enrolment.widgets import PostcodeInput, RadioSelect
 import core.forms
 
 INDUSTRY_CHOICES = (
@@ -54,7 +54,14 @@ class BusinessType(forms.Form):
     )
     choice = forms.ChoiceField(
         label='',
-        widget=forms.RadioSelect(),
+        widget=RadioSelect(
+            help_text={
+                constants.NOT_COMPANY: (
+                    'You can create an account as an individual, but you will '
+                    'not be able to create a business profile'
+                )
+            }
+        ),
         choices=CHOICES,
     )
 

@@ -139,6 +139,19 @@ body.js-enabled {
   }
 }
 
+.multiple-choice {
+  .radio-button-helptext {
+    display: none;
+    margin-left: -20px;
+    border-left-width: 5px;
+    border-style: solid;
+    margin-top: 10px;
+  }
+  input:checked + label + .radio-button-helptext {
+    display: inline-block!important;
+  }
+}
+
 .message-box.margin-bottom-5 {
   margin-bottom: 5px;
 }
