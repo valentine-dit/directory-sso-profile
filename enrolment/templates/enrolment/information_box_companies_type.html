@@ -3,8 +3,10 @@
 <div class="message-box padding-15 padding-30-m border-medium background-stone-30 border-stone grey-text margin-right-15 margin-bottom-5" id="business-type-information-box">
     <h2 class="box-heading heading-medium heading-small grey-text margin-bottom-0">Your business type</h2>
     <p id="business-type" class="box-description marargin-top-0">
-        {% if is_in_companies_house %}
+        {% if company and is_in_companies_house %}
             A business registered with Companies House
+        {% elif not company %}
+            I'm a UK taxpayer but do not represent a business
         {% else %}
             UK business not registered in Companies House
         {% endif %}
