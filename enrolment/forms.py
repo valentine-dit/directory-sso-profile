@@ -15,7 +15,7 @@ from django.http.request import QueryDict
 
 from enrolment import constants, helpers
 from enrolment.widgets import PostcodeInput
-import core.forms
+from core.forms import TERMS_LABEL
 
 INDUSTRY_CHOICES = (
     (('', 'Please select'),) + choices.INDUSTRIES + (('OTHER', 'Other'),)
@@ -89,7 +89,7 @@ class UserAccount(forms.Form):
         label='',
         label_suffix='',
     )
-    terms_agreed = forms.BooleanField(label=core.forms.TERMS_LABEL)
+    terms_agreed = forms.BooleanField(label=TERMS_LABEL)
 
     def clean_password_confirmed(self):
         value = self.cleaned_data['password_confirmed']

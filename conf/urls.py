@@ -124,8 +124,8 @@ urlpatterns = [
             done_step_name='finished'
         ),
         name='enrolment-individual'
-	),
-	url(
+    ),
+    url(
         r'^enrol/business-type/overseas-business/$',
         enrolment.views.EnrolmentOverseasBusinessView.as_view(),
         name='enrolment-overseas-business'
