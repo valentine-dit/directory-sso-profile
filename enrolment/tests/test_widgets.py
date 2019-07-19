@@ -31,7 +31,7 @@ def test_choice_field_help_text_widget():
     span_class = (
         'border-light-grey padding-left-30 padding-top-15 padding-bottom-15'
     )
-    expected = f"""
+    expected = """
     <p class=" form-group">
         <div class="form-group">
             <ul id="id_a">
@@ -40,7 +40,7 @@ def test_choice_field_help_text_widget():
                     <label id="id_a_0-label" for="id_a_0" class="form-label">
                         foo label
                     </label>
-                    <span class="radio-button-helptext {{span_class}}">
+                    <span class="radio-button-helptext {span_class}">
                         Helptext for foo
                     </span>
                 </li>
@@ -49,7 +49,7 @@ def test_choice_field_help_text_widget():
                     <label id="id_a_1-label" for="id_a_1" class="form-label">
                         bar label
                     </label>
-                    <span class="radio-button-helptext {{span_class}}">
+                    <span class="radio-button-helptext {span_class}">
                         Helptext for bar
                     </span>
                 </li>
@@ -62,6 +62,6 @@ def test_choice_field_help_text_widget():
             </ul>
         </div>
     </p>
-    """
+    """.format(span_class=span_class)
 
     assert_html_equal(expected_html=expected, actual_html=Form().as_p())
