@@ -3,7 +3,6 @@
 ## Pre-release
 
 ### Implemented enhancements
-=======
 - TT-990  - Update registration journey of individual user
 - TT-1566 - Handle overseas busienss enrolment
 - TT-1564 - Update registration journey SSO user with Companies House company
