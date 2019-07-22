@@ -12,6 +12,7 @@
 - TT-1574 - Update registration journey for non Companies House listed company.
 - TT-998 - Support multiple non companies house company types
 - TT-1574 - Update registration journey for nont Companies House listed company
+- TT-1671 - Add radio button help text to company types list
 
 ### Fixed bugs:
 - No ticket - Upgrade vulnerable django version to django 1.11.22
