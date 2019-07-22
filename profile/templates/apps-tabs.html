@@ -7,7 +7,11 @@
 
         {% if request.user.is_authenticated and not request.user.has_user_profile %}
             <div class="margin-top-30">
-                {% url 'find-a-buyer-personal-details' as url %}
+                {% if not request.user.company %}
+                    {% url 'enrolment-start' as url %}
+                {% else %}
+                    {% url 'find-a-buyer-personal-details' as url %}
+                {% endif %}
                 {% banner banner_content='Some profile details are missing. <a href="'|add:url|add:'">Please add them</a>.</p>' badge_content='Profile incomplete' %}
             </div>
         {% endif %}
