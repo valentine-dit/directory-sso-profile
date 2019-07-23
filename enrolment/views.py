@@ -313,7 +313,13 @@ class BusinessTypeRoutingView(
         elif choice == constants.SOLE_TRADER:
             url = URL_SOLE_TRADER_ENROLMENT
         elif choice == constants.NOT_COMPANY:
-            url = URL_INDIVIDUAL_ENROLMENT
+            # if the user already has an SSO account then they are trying to
+            # create a business account
+            if self.request.user.is_authenticated:
+                url = reverse('enrolment-individual-interstitial')
+            # otherwise the user is creating an account from scratch
+            else:
+                url = URL_INDIVIDUAL_ENROLMENT
         elif choice == constants.OVERSEAS_COMPANY:
             url = URL_OVERSEAS_BUSINESS_ENROLMNET
         else:
@@ -530,6 +536,18 @@ class SoleTraderEnrolmentView(
         self.create_company_profile(data)
         messages.success(self.request, 'Business profile created')
         return redirect('find-a-buyer')
+
+
+class IndividualUserEnrolmentInterstitial(TemplateView):
+    template_name = 'enrolment/individual-interstitial.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_anonymous:
+            url = reverse(
+                'enrolment-individual', kwargs={'step': PERSONAL_INFO}
+            )
+            return redirect(url)
+        return super().dispatch(request, *args, **kwargs)
 
 
 class IndividualUserEnrolmentView(
