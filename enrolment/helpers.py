@@ -23,7 +23,7 @@ StepsListConf = collections.namedtuple(
 )
 ProgressIndicatorConf = collections.namedtuple(
     'ProgressIndicatorConf',
-    ['step_counter_user', 'step_counter_anon', 'first_step']
+    ['step_counter_user', 'step_counter_anon']
 )
 
 

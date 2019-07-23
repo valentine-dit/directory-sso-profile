@@ -1448,16 +1448,12 @@ def test_steps_list_mixin_no_business_type(rf, settings):
     ]
 
 
-@pytest.mark.parametrize('is_anon,is_feature_enabled,expected', (
-    (True, True, 2),
-    (True, False, 1),
-    (False, True, 2),
-    (False, False, 1),
-))
+@pytest.mark.parametrize('is_anon', (True, False))
+@pytest.mark.parametrize('is_enabled,expected', ((True, 2), (False, 1)))
 def test_wizard_progress_indicator_mixin(
-    is_anon, is_feature_enabled, expected, rf, settings, client, user
+    is_anon, is_enabled, expected, rf, settings, client, user
 ):
-    settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = is_feature_enabled
+    settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = is_enabled
 
     class TestView(views.ProgressIndicatorMixin, NamedUrlSessionWizardView):
         def get_template_names(self):
@@ -1471,7 +1467,6 @@ def test_wizard_progress_indicator_mixin(
         progress_conf = helpers.ProgressIndicatorConf(
             step_counter_user={views.USER_ACCOUNT: 2},
             step_counter_anon={views.USER_ACCOUNT: 2},
-            first_step=views.USER_ACCOUNT,
         )
 
     request = rf.get('/')
