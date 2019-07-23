@@ -122,18 +122,17 @@ class ProgressIndicatorMixin:
         pass  # pragma: no cover
 
     def get(self, *args, **kwargs):
-        if self.steps.current == self.progress_conf.first_step:
-            self.request.session[SESSION_KEY_INGRESS_ANON] = (
-                bool(self.request.user.is_anonymous)
+        if (
+            SESSION_KEY_INGRESS_ANON not in self.storage.extra_data and
+            self.kwargs['step'] == self.steps.first
+        ):
+            self.storage.extra_data[SESSION_KEY_INGRESS_ANON] = bool(
+                self.request.user.is_anonymous
             )
         return super().get(*args, **kwargs)
 
-    def render_done(self, *args, **kwargs):
-        self.request.session.pop(SESSION_KEY_INGRESS_ANON, None)
-        return super().render_done(*args, **kwargs)
-
     def should_show_anon_progress_indicator(self):
-        if self.request.session.get(SESSION_KEY_INGRESS_ANON):
+        if self.storage.extra_data.get(SESSION_KEY_INGRESS_ANON):
             return True
         return self.request.user.is_anonymous
 
@@ -396,7 +395,6 @@ class CompaniesHouseEnrolmentView(
             BUSINESS_INFO: 4,
             PERSONAL_INFO: 5,
         },
-        first_step=USER_ACCOUNT,
     )
     steps_list_conf = helpers.StepsListConf(
         form_labels_user=[
@@ -501,7 +499,6 @@ class SoleTraderEnrolmentView(
             COMPANY_SEARCH: 4,
             PERSONAL_INFO: 5,
         },
-        first_step=USER_ACCOUNT,
     )
 
     form_list = (
@@ -575,7 +572,6 @@ class IndividualUserEnrolmentView(
             VERIFICATION: 3,
             PERSONAL_INFO: 4
         },
-        first_step=USER_ACCOUNT
     )
 
     form_list = (
@@ -615,7 +611,6 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
             VERIFICATION: 2,
             PERSONAL_INFO: 3,
         },
-        first_step=USER_ACCOUNT,
     )
 
     form_list = (
@@ -699,7 +694,6 @@ class ResendVerificationCodeView(
 
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_anon={RESEND_VERIFICATION: 1, VERIFICATION: 2},
-        first_step=RESEND_VERIFICATION,
         # logged in users should not get here
         step_counter_user={},
     )

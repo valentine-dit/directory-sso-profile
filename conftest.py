@@ -20,28 +20,6 @@ def user():
     )
 
 
-@pytest.fixture
-def request_logged_in(rf, user):
-    request = rf.get('/')
-    request.user = user
-    return request
-
-
-@pytest.fixture
-def api_response_200():
-    return create_response()
-
-
-@pytest.fixture
-def api_response_403():
-    return create_response(status_code=403)
-
-
-@pytest.fixture
-def api_response_500():
-    return create_response(status_code=500)
-
-
 @pytest.fixture(autouse=True)
 def feature_flags(settings):
     # solves this issue: https://github.com/pytest-dev/pytest-django/issues/601
