@@ -338,6 +338,10 @@ def session_client_referrer_factory(client, settings):
         constants.OVERSEAS_COMPANY,
         views.URL_OVERSEAS_BUSINESS_ENROLMNET
     ),
+    (
+        constants.NOT_COMPANY,
+        views.URL_INDIVIDUAL_ENROLMENT
+    )
 ))
 def test_enrolment_routing(client, choice, expected_url):
     url = reverse('enrolment-business-type')
@@ -346,6 +350,17 @@ def test_enrolment_routing(client, choice, expected_url):
 
     assert response.status_code == 302
     assert response.url == expected_url
+
+
+def test_enrolment_routing_individual_logged_in(client, user):
+    client.force_login(user)
+
+    url = reverse('enrolment-business-type')
+
+    response = client.post(url, {'choice': constants.NOT_COMPANY})
+
+    assert response.status_code == 302
+    assert response.url == reverse('enrolment-individual-interstitial')
 
 
 def test_companies_house_enrolment(
@@ -1568,3 +1583,29 @@ def test_overseas_business_enrolmnet(client):
     response = client.get(url)
 
     assert response.status_code == 200
+
+
+def test_enrolment_individual_interstitial_anonymous_user(client):
+    expected = reverse(
+        'enrolment-individual', kwargs={'step': views.PERSONAL_INFO}
+    )
+    url = reverse('enrolment-individual-interstitial')
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == expected
+
+
+def test_enrolment_individual_interstitial_logged_in_user(client, user):
+    client.force_login(user)
+
+    expected = reverse(
+        'enrolment-individual', kwargs={'step': views.PERSONAL_INFO}
+    )
+    url = reverse('enrolment-individual-interstitial')
+
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert expected.encode() in response.content

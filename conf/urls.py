@@ -118,6 +118,11 @@ urlpatterns = [
         name='enrolment-sole-trader'
     ),
     url(
+        r'^enrol/business-type/individual/start/$',
+        enrolment.views.IndividualUserEnrolmentInterstitial.as_view(),
+        name='enrolment-individual-interstitial'
+    ),
+    url(
         r'^enrol/business-type/individual/(?P<step>.+)/$',
         enrolment.views.IndividualUserEnrolmentView.as_view(
             url_name='enrolment-individual',
