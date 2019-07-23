@@ -16,7 +16,7 @@ def test_exporting_is_great_handles_auth(mock_get, settings):
     mock_get.assert_called_once_with(
         'http://b.co/api/profile_dashboard',
         params={'sso_user_id': 2, 'shared_secret': 123},
-        auth=helpers.exporting_is_great_client.auth
+        auth=helpers.exopps_client.auth
     )
-    assert helpers.exporting_is_great_client.auth.username == username
-    assert helpers.exporting_is_great_client.auth.password == password
+    assert helpers.exopps_client.auth.username == username
+    assert helpers.exopps_client.auth.password == password

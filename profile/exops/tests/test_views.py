@@ -1,9 +1,14 @@
-import http
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from django.core.urlresolvers import reverse
 
+from core.tests.helpers import create_response
 from profile.exops import views
+from profile.exops.helpers import exopps_client
+
+
+def response_factory(status_code):
+    return Mock(return_value=create_response(status_code))
 
 
 def test_export_opportunities_applications_exposes_context(
@@ -11,9 +16,8 @@ def test_export_opportunities_applications_exposes_context(
 ):
     client.force_login(user)
     settings.EXPORTING_OPPORTUNITIES_SEARCH_URL = 'http://find'
-    url = reverse('export-opportunities-applications')
 
-    response = client.get(url)
+    response = client.get(reverse('export-opportunities-applications'))
     context_data = response.context_data
 
     assert context_data['exops_tab_classes'] == 'active'
@@ -24,11 +28,9 @@ def test_export_opportunities_email_alerts_exposes_context(
     client, settings, user
 ):
     client.force_login(user)
-
     settings.EXPORTING_OPPORTUNITIES_SEARCH_URL = 'http://find'
-    url = reverse('export-opportunities-email-alerts')
 
-    response = client.get(url)
+    response = client.get(reverse('export-opportunities-email-alerts'))
     context_data = response.context_data
 
     assert context_data['exops_tab_classes'] == 'active'
@@ -36,103 +38,77 @@ def test_export_opportunities_email_alerts_exposes_context(
 
 
 def test_opportunities_applications_unauthenticated(client):
-    url = reverse('export-opportunities-applications')
-    response = client.get(url)
+    response = client.get(reverse('export-opportunities-applications'))
 
-    assert response.status_code == http.client.FOUND
+    assert response.status_code == 302
 
 
 def test_opportunities_email_alerts_unauthenticated(client):
-    url = reverse('export-opportunities-email-alerts')
-    response = client.get(url)
+    response = client.get(reverse('export-opportunities-email-alerts'))
 
-    assert response.status_code == http.client.FOUND
+    assert response.status_code == 302
 
 
-@patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
-def test_opportunities_applications_retrieve_not_found(
-    mock_retrieve_opportunities, api_response_403, client, user
-):
+@patch.object(exopps_client, 'get_opportunities', response_factory(403))
+def test_opportunities_applications_retrieve_not_found(client, user):
     client.force_login(user)
-    mock_retrieve_opportunities.return_value = api_response_403
-    url = reverse('export-opportunities-applications')
 
-    response = client.get(url)
+    response = client.get(reverse('export-opportunities-applications'))
 
     assert response.template_name == [
         views.ExportOpportunitiesApplicationsView.template_name_not_exops_user
     ]
 
 
-@patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
-def test_opportunities_applications_retrieve_found(
-    mock_retrieve_opportunities, api_response_200, client, user
-):
+@patch.object(exopps_client, 'get_opportunities', response_factory(200))
+def test_opportunities_applications_retrieve_found(client, user):
     client.force_login(user)
-    mock_retrieve_opportunities.return_value = api_response_200
 
-    url = reverse('export-opportunities-applications')
-    response = client.get(url)
+    response = client.get(reverse('export-opportunities-applications'))
 
     assert response.template_name == [
         views.ExportOpportunitiesApplicationsView.template_name_exops_user
     ]
 
 
-@patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
-def test_opportunities_applications_retrieve_error(
-    mock_retrieve_opportunities, api_response_500, client, user
-):
+@patch.object(exopps_client, 'get_opportunities', response_factory(500))
+def test_opportunities_applications_retrieve_error(client, user):
     client.force_login(user)
-    mock_retrieve_opportunities.return_value = api_response_500
-    url = reverse('export-opportunities-applications')
 
-    response = client.get(url)
+    response = client.get(reverse('export-opportunities-applications'))
 
     assert response.template_name == [
         views.ExportOpportunitiesApplicationsView.template_name_error
     ]
 
 
-@patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
-def test_opportunities_email_alerts_retrieve_not_found(
-    mock_retrieve_opportunities, api_response_403, client, user
-):
+@patch.object(exopps_client, 'get_opportunities', response_factory(403))
+def test_opportunities_email_alerts_retrieve_not_found(client, user):
     client.force_login(user)
-    mock_retrieve_opportunities.return_value = api_response_403
 
-    url = reverse('export-opportunities-email-alerts')
-    response = client.get(url)
+    response = client.get(reverse('export-opportunities-email-alerts'))
 
     assert response.template_name == [
         views.ExportOpportunitiesEmailAlertsView.template_name_not_exops_user
     ]
 
 
-@patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
-def test_opportunities_email_alerts_retrieve_found(
-    mock_retrieve_opportunities, api_response_200, client, user
-):
+@patch.object(exopps_client, 'get_opportunities', response_factory(200))
+def test_opportunities_email_alerts_retrieve_found(client, user):
     client.force_login(user)
-    mock_retrieve_opportunities.return_value = api_response_200
-    url = reverse('export-opportunities-email-alerts')
 
-    response = client.get(url)
+    response = client.get(reverse('export-opportunities-email-alerts'))
 
     assert response.template_name == [
         views.ExportOpportunitiesEmailAlertsView.template_name_exops_user
     ]
 
 
-@patch('profile.exops.helpers.exporting_is_great_client.get_opportunities')
-def test_opportunities_email_alerts_retrieve_error(
-    mock_retrieve_opportunities, api_response_500, client, user
-):
+@patch.object(exopps_client, 'get_opportunities', response_factory(500))
+def test_opportunities_email_alerts_retrieve_error(client, user):
     client.force_login(user)
-    mock_retrieve_opportunities.return_value = api_response_500
-    url = reverse('export-opportunities-email-alerts')
 
-    response = client.get(url)
+    response = client.get(reverse('export-opportunities-email-alerts'))
 
     assert response.template_name == [
         views.ExportOpportunitiesEmailAlertsView.template_name_error
