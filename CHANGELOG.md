@@ -14,6 +14,8 @@
 - TT-1574 - Update registration journey for nont Companies House listed company
 - TT-1671 - Add radio button help text to company types list
 - TT-1672 - Show banner prompting user to provide business or personal details if missing
+- TT-1634 - Show success page on companies house enrolment if no started from "start now"
+- TT-1632 - Show success page on non companies house enrolment if no started from "start now"
 
 ### Fixed bugs:
 - TT-1647 - Correcting long address not displayed correctly on business search page

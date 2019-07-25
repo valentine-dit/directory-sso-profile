@@ -33,7 +33,7 @@ class BusinessType(forms.Form):
             )
         ),
         (
-            constants.SOLE_TRADER,
+            constants.NON_COMPANIES_HOUSE_COMPANY,
             (
                 'I\'m a sole trader or I represent another type of UK '
                 'business not registered with Companies House'
@@ -286,7 +286,7 @@ class IndividualPersonalDetails(forms.Form):
     )
 
 
-class SoleTraderSearch(forms.Form):
+class NonCompaniesHouseSearch(forms.Form):
 
     MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
 
@@ -303,6 +303,7 @@ class SoleTraderSearch(forms.Form):
     postal_code = forms.CharField(
         label='Business postcode',
         widget=PostcodeInput,
+        required=False,
     )
     address = forms.CharField(
         help_text='Type your business address',
@@ -326,7 +327,7 @@ class SoleTraderSearch(forms.Form):
         value = self.cleaned_data['address'].strip().replace(', ', '\n')
         parts = value.split('\n')
 
-        postal_code = self.cleaned_data['postal_code']
+        postal_code = self.cleaned_data.get('postal_code', '')
         if value.count('\n') == 0:
             raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
         if postal_code not in value:
