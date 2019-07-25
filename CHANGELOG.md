@@ -16,6 +16,7 @@
 - TT-1672 - Show banner prompting user to provide business or personal details if missing
 
 ### Fixed bugs:
+- TT-1647 - Correcting long address not displayed correctly on business search page
 - No ticket - Upgrade vulnerable django version to django 1.11.22
 - TT-1645 - Fix progress indicator changing from long to short list in new session
 

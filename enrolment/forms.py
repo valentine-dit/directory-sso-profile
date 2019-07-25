@@ -210,7 +210,8 @@ class CompaniesHouseBusinessDetails(forms.Form):
     address = forms.CharField(
         disabled=True,
         required=False,
-        container_css_classes='border-active-blue read-only-input-container'
+        container_css_classes='border-active-blue read-only-input-container',
+        widget=Textarea(attrs={'rows': 3}),
         )
     sectors = forms.ChoiceField(
         label='What industry is your company in?',
@@ -236,7 +237,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
         # structure is a QueryDict
         if self.data and not isinstance(self.data, QueryDict):
             self.initial_to_data('company_name')
-            if not self.data.get('postal_code'):
+            iCf not self.data.get('postal_code'):
                 self.initial_to_data('postal_code')
 
     def delete_already_enrolled_fields(self):
