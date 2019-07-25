@@ -19,6 +19,7 @@
 - TT-1561 - Show different enrolment title depending on user journey
 
 ### Fixed bugs:
+- TT-1647 - Correcting long address not displayed correctly on business search page
 - No ticket - Upgrade vulnerable django version to django 1.11.22
 - TT-1645 - Fix progress indicator changing from long to short list in new session
 

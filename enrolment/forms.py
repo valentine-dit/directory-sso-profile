@@ -210,7 +210,8 @@ class CompaniesHouseBusinessDetails(forms.Form):
     address = forms.CharField(
         disabled=True,
         required=False,
-        container_css_classes='border-active-blue read-only-input-container'
+        container_css_classes='border-active-blue read-only-input-container',
+        widget=Textarea(attrs={'rows': 3}),
         )
     sectors = forms.ChoiceField(
         label='What industry is your company in?',
