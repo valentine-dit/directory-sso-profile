@@ -4,14 +4,16 @@
 
 {% block content %}
   <section class="container">
-      {% breadcrumbs 'Cannot create business profile' %}
-        <a href="{{ services_urls.great_domestic }}">Great.gov.uk</a>
-      {% endbreadcrumbs %}
+      {% with current_page='Cannot '|add:user_journey_verb %}
+        {% breadcrumbs current_page %}
+          <a href="{{ services_urls.great_domestic }}">Great.gov.uk</a>
+        {% endbreadcrumbs %}
+      {% endwith %}
       <div class="grid-row margin-top-45">
           <div class="column-two-thirds">
               <a href="{% url 'enrolment-business-type' %}" class="link">Back</a>
-              <h1 class="heading-xlarge margin-bottom-15 margin-top-15">You cannot create a business profile</h1>
-              <p class="margin-bottom-30">Only UK business can create a great.gov.uk account.</p>
+              <h1 class="heading-xlarge margin-bottom-15 margin-top-15">You cannot {{ user_journey_verb }}</h1>
+              <p class="margin-bottom-30">Only UK business can {{ user_journey_verb }}</p>
               <a class="link margin-top-15" href="{{ services_urls.great_international }}">View our site for international businesses.</a>
           </div>
       </div>

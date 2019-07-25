@@ -23,7 +23,7 @@ SESSION_KEY_INGRESS_ANON = 'ANON_INGRESS'
 SESSION_KEY_COMPANY_CHOICE = 'COMPANY_CHOICE'
 SESSION_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
 SESSION_KEY_REFERRER = 'REFERRER_URL'
-SESSION_KEY_SUPPRESS_SUCCESS_PAGE = 'SUPPRESS_SUCCESS_PAGE'
+SESSION_KEY_BUSINESS_PROFILE_INTENT = 'BUSINESS_PROFILE_INTENT'
 
 PROGRESS_STEP_LABEL_USER_ACCOUNT = (
     'Enter your business email address and set a password'
@@ -280,18 +280,50 @@ class CreateCompanyProfileMixin:
         })
 
 
-class BusinessProfileSuccessHandleMixin:
+class ExposeUserJourneyVerbMixin:
+    # The templates assume the strings are all lower case
+    LABEL_BUSINESS = 'create a business profile'
+    LABEL_ACCOUNT = 'create an great.gov.uk account'
+
+    def get_user_journey_verb(self):
+        if (
+            self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT) or
+            self.request.user.is_authenticated
+        ):
+            return self.LABEL_BUSINESS
+        return self.LABEL_ACCOUNT
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            user_journey_verb=self.get_user_journey_verb(),
+            **kwargs
+        )
+
+
+class UserJourneySuccessRoutingMixin:
+    # For user that started their journey from sso-profile, take them directly
+    # to their business profile, otherwise show them the success page.
+    # The motivation is users that started from sso-profle created the business
+    # profile as their end goal. Those that started elsewhere created a
+    # business profile as a mean to some other end - so show them a success
+    # page with a list of places they can go next.
+
+    def __new__(cls, *args, **kwargs):
+        assert FINISHED in cls.templates
+        return super().__new__(cls)
+
     def done(self, *args, **kwargs):
-        if self.request.session.get(SESSION_KEY_SUPPRESS_SUCCESS_PAGE):
+        if self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT):
             messages.success(self.request, 'Business profile created')
-            del self.request.session[SESSION_KEY_SUPPRESS_SUCCESS_PAGE]
+            del self.request.session[SESSION_KEY_BUSINESS_PROFILE_INTENT]
             return redirect('find-a-buyer')
         else:
             return TemplateResponse(self.request, self.templates[FINISHED])
 
 
 class BusinessTypeRoutingView(
-    RedirectAlreadyEnrolledMixin, StepsListMixin, FormView
+    RedirectAlreadyEnrolledMixin, StepsListMixin, ExposeUserJourneyVerbMixin,
+    FormView
 ):
     form_class = forms.BusinessType
     template_name = 'enrolment/business-type.html'
@@ -311,8 +343,15 @@ class BusinessTypeRoutingView(
     )
 
     def dispatch(self, *args, **kwargs):
-        if self.request.GET.get('suppress-success-page'):
-            self.request.session[SESSION_KEY_SUPPRESS_SUCCESS_PAGE] = True
+        if self.request.GET.get('business-profile-intent'):
+            # user has started the journey from sso-profile. They are signing
+            # up because their end goal is to have a business profile.
+            # The counter to this scenario is the user started their journey
+            # from outside of sso-profile and their intent is to gain access
+            # use other services, and creating a business profile is a step
+            # towards that goal. The business profile is a means to and end,
+            # not the desired end.
+            self.request.session[SESSION_KEY_BUSINESS_PROFILE_INTENT] = True
         if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
             return redirect(URL_COMPANIES_HOUSE_ENROLMENT)
         return super().dispatch(*args, **kwargs)
@@ -340,7 +379,8 @@ class BusinessTypeRoutingView(
 
 
 class EnrolmentStartView(
-    RedirectAlreadyEnrolledMixin, StepsListMixin, TemplateView
+    RedirectAlreadyEnrolledMixin, StepsListMixin, ExposeUserJourneyVerbMixin,
+    TemplateView
 ):
     template_name = 'enrolment/start.html'
 
@@ -373,6 +413,7 @@ class BaseEnrolmentWizardView(
     core.mixins.PreventCaptchaRevalidationMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
+    ExposeUserJourneyVerbMixin,
     NamedUrlSessionWizardView
 ):
 
@@ -391,8 +432,10 @@ class BaseEnrolmentWizardView(
 
 
 class CompaniesHouseEnrolmentView(
-    core.mixins.CreateUserProfileMixin, CreateCompanyProfileMixin,
-    BusinessProfileSuccessHandleMixin, BaseEnrolmentWizardView
+    core.mixins.CreateUserProfileMixin,
+    CreateCompanyProfileMixin,
+    UserJourneySuccessRoutingMixin,
+    BaseEnrolmentWizardView,
 ):
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
@@ -484,7 +527,7 @@ class CompaniesHouseEnrolmentView(
 
 class NonCompaniesHouseEnrolmentView(
     core.mixins.CreateUserProfileMixin, CreateCompanyProfileMixin,
-    BusinessProfileSuccessHandleMixin, BaseEnrolmentWizardView
+    UserJourneySuccessRoutingMixin, BaseEnrolmentWizardView
 ):
     steps_list_conf = helpers.StepsListConf(
         form_labels_user=[
@@ -547,7 +590,9 @@ class NonCompaniesHouseEnrolmentView(
         return super().done(form_list=form_list, form_dict=form_dict, **kwargs)
 
 
-class IndividualUserEnrolmentInterstitial(TemplateView):
+class IndividualUserEnrolmentInterstitial(
+    ExposeUserJourneyVerbMixin, TemplateView
+):
     template_name = 'enrolment/individual-interstitial.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -769,5 +814,5 @@ class ResendVerificationCodeView(
         return form_initial
 
 
-class EnrolmentOverseasBusinessView(TemplateView):
+class EnrolmentOverseasBusinessView(ExposeUserJourneyVerbMixin, TemplateView):
     template_name = 'enrolment/overseas-business.html'
