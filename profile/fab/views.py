@@ -208,7 +208,7 @@ class BusinessDetailsFormView(BaseFormView):
 
     def get_form_class(self):
         if self.request.user.company.is_sole_trader:
-            return forms.SoleTraderBusinessDetailsForm
+            return forms.NonCompaniesHouseBusinessDetailsForm
         return forms.CompaniesHouseBusinessDetailsForm
 
     success_message = 'Business details updated'

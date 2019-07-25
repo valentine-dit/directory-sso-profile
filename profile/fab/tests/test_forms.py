@@ -105,7 +105,9 @@ def test_companies_house_business_details_form():
 
 
 def test_sole_trader_business_details_form():
-    form = forms.SoleTraderBusinessDetailsForm(data={'sectors': 'MINING'})
+    form = forms.NonCompaniesHouseBusinessDetailsForm(
+        data={'sectors': 'MINING'}
+    )
 
     form.is_valid()
     assert form.cleaned_data['sectors'] == ['MINING']

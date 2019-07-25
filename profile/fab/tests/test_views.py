@@ -541,7 +541,8 @@ def test_business_details_sole_trader(
 
     assert response.status_code == 200
     assert isinstance(
-        response.context_data['form'], forms.SoleTraderBusinessDetailsForm
+        response.context_data['form'],
+        forms.NonCompaniesHouseBusinessDetailsForm
     )
 
 
