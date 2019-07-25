@@ -1,4 +1,3 @@
-
 from directory_constants import choices, expertise
 from directory_components import forms
 from directory_components.helpers import tokenize_keywords
@@ -379,7 +378,7 @@ class CompaniesHouseBusinessDetailsForm(forms.Form):
         self.cleaned_data.pop('date_of_creation', None)
 
 
-class SoleTraderBusinessDetailsForm(forms.Form):
+class NonCompaniesHouseBusinessDetailsForm(forms.Form):
     name = forms.CharField(
         label='Trading name'
     )

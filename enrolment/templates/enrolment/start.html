@@ -24,7 +24,7 @@
                             <span class="visually-hidden">Current:</span>
                             <span>
                                 {{ label }}
-                                <a id="start-now-button" class="button margin-top-15" href="{% url 'enrolment-business-type' %}">Start now</a>
+                                <a id="start-now-button" class="button margin-top-15" href="{% url 'enrolment-business-type' %}?suppress-success-page=True">Start now</a>
                             </span>
                         </li>
                     {% else %}

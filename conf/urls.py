@@ -111,7 +111,7 @@ urlpatterns = [
     ),
     url(
         r'^enrol/business-type/sole-trader/(?P<step>.+)/$',
-        enrolment.views.SoleTraderEnrolmentView.as_view(
+        enrolment.views.NonCompaniesHouseEnrolmentView.as_view(
             url_name='enrolment-sole-trader',
             done_step_name='finished'
         ),
