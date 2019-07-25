@@ -237,7 +237,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
         # structure is a QueryDict
         if self.data and not isinstance(self.data, QueryDict):
             self.initial_to_data('company_name')
-            iCf not self.data.get('postal_code'):
+            if not self.data.get('postal_code'):
                 self.initial_to_data('postal_code')
 
     def delete_already_enrolled_fields(self):
