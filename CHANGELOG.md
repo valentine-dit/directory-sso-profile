@@ -16,6 +16,8 @@
 - TT-1672 - Show banner prompting user to provide business or personal details if missing
 - TT-1634 - Show success page on companies house enrolment if no started from "start now"
 - TT-1632 - Show success page on non companies house enrolment if no started from "start now"
+- TT-1636 - please select pick lists tickets include TT-1638, TT-1640,  TT-1636
+- No ticket - Increase flake 8 coverage to 120 lines
 
 ### Fixed bugs:
 - No ticket - Upgrade vulnerable django version to django 1.11.22

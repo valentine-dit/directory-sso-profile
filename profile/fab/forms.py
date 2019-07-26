@@ -420,6 +420,7 @@ class ExpertiseRoutingForm(forms.Form):
     LANGUAGE = 'LANGUAGE'
 
     CHOICES = (
+        ('', 'Choose your expertise'),
         (INDUSTRY, 'Industry expertise'),
         (REGION, 'Regional expertise'),
         (COUNTRY, 'International expertise'),
@@ -466,6 +467,7 @@ class LanguageExpertiseForm(forms.Form):
 
 class ExpertiseProductsServicesRoutingForm(forms.Form):
     CHOICES = (
+        ('', 'Choose products and services'),
         (constants.FINANCIAL, 'Financial'),
         (constants.MANAGEMENT_CONSULTING, 'Management consulting'),
         (constants.HUMAN_RESOURCES, 'Human resources and recruitment'),
