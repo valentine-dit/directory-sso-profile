@@ -94,7 +94,7 @@ class UserAccount(forms.Form):
     )
     captcha = ReCaptchaField(
         label='',
-       label_suffix='',
+        label_suffix='',
      )
     terms_agreed = forms.BooleanField(label=TERMS_LABEL)
 
