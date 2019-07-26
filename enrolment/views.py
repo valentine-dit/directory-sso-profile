@@ -1,6 +1,6 @@
 import abc
 
-from directory_constants import company_types, urls
+from directory_constants import urls
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
 

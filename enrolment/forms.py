@@ -92,10 +92,10 @@ class UserAccount(forms.Form):
         label='Confirm password',
         widget=PasswordInput,
     )
-    #captcha = ReCaptchaField(
-    #    label='',
-    #   label_suffix='',
-    # )
+    captcha = ReCaptchaField(
+        label='',
+       label_suffix='',
+     )
     terms_agreed = forms.BooleanField(label=TERMS_LABEL)
 
     def clean_password_confirmed(self):
@@ -288,7 +288,9 @@ class IndividualPersonalDetails(forms.Form):
 class NonCompaniesHouseSearch(forms.Form):
 
     MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
-    COMPANY_TYPES = [('', 'Please select'),] + [(value, label) for value, label in choices.COMPANY_TYPES if value != 'COMPANIES_HOUSE']
+    COMPANY_TYPES = [('', 'Please select'), ] + [
+        (value, label) for value, label in choices.COMPANY_TYPES if value != 'COMPANIES_HOUSE'
+    ]
 
     company_type = forms.ChoiceField(
         label='Business category',
