@@ -603,7 +603,7 @@ def test_companies_house_enrolment_suppress_success_page(
 ):
     response = client.get(
         reverse('enrolment-business-type'),
-        {'suppress-success-page': True}
+        {'business-profile-intent': True}
     )
     assert response.status_code == 200
 
@@ -1258,7 +1258,7 @@ def test_non_companies_house_enrolment_suppress_success(
 ):
     response = client.get(
         reverse('enrolment-business-type'),
-        {'suppress-success-page': True}
+        {'business-profile-intent': True}
     )
     assert response.status_code == 200
 
@@ -1679,3 +1679,62 @@ def test_enrolment_individual_interstitial_logged_in_user(client, user):
 
     assert response.status_code == 200
     assert expected.encode() in response.content
+
+
+expose_user_jourey_urls = (
+    reverse('enrolment-individual', kwargs={'step': views.USER_ACCOUNT}),
+    reverse(
+        'enrolment-pre-verified',
+        kwargs={'step': views.USER_ACCOUNT}
+    ) + '?key=some-key',
+    reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}),
+    reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}),
+    reverse('enrolment-overseas-business'),
+    reverse('enrolment-business-type'),
+    reverse('enrolment-start'),
+)
+
+
+@pytest.mark.parametrize('url', expose_user_jourey_urls)
+def test_expose_user_journey_mixin_business_profile_intent(url, client):
+    response = client.get(
+        reverse('enrolment-business-type'),
+        {'business-profile-intent': True}
+    )
+    assert response.status_code == 200
+
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['user_journey_verb'] == (
+        views.ExposeUserJourneyVerbMixin.LABEL_BUSINESS
+    )
+
+
+@pytest.mark.parametrize(
+    'url',
+    expose_user_jourey_urls + (reverse('enrolment-individual-interstitial'),)
+
+)
+def test_expose_user_journey_mixin_logged_in(url, client, user):
+    client.force_login(user)
+
+    response = client.get(url)
+    # logged in users will be sent away from certain views
+    if response.status_code == 302:
+        response = client.get(response.url)
+
+    assert response.status_code == 200
+    assert response.context_data['user_journey_verb'] == (
+        views.ExposeUserJourneyVerbMixin.LABEL_BUSINESS
+    )
+
+
+@pytest.mark.parametrize('url', expose_user_jourey_urls)
+def test_expose_user_journey_mixin_account_intent(url, client):
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['user_journey_verb'] == (
+        views.ExposeUserJourneyVerbMixin.LABEL_ACCOUNT
+    )

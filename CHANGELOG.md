@@ -18,8 +18,10 @@
 - TT-1632 - Show success page on non companies house enrolment if no started from "start now"
 - TT-1636 - please select pick lists tickets include TT-1638, TT-1640,  TT-1636
 - No ticket - Increase flake 8 coverage to 120 lines
+- TT-1561 - Show different enrolment title depending on user journey
 
 ### Fixed bugs:
+- TT-1647 - Correcting long address not displayed correctly on business search page
 - No ticket - Upgrade vulnerable django version to django 1.11.22
 - TT-1645 - Fix progress indicator changing from long to short list in new session
 
