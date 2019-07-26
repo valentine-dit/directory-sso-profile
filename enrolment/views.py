@@ -1,6 +1,6 @@
 import abc
 
-from directory_constants import company_types, urls
+from directory_constants import urls
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
 
@@ -570,12 +570,6 @@ class NonCompaniesHouseEnrolmentView(
         PERSONAL_INFO: 'enrolment/non-companies-house-personal-details.html',
         FINISHED: 'enrolment/non-companies-house-success.html',
     }
-
-    def get_form_initial(self, step):
-        form_initial = super().get_form_initial(step=step)
-        if step == COMPANY_SEARCH:
-            form_initial.setdefault('company_type', company_types.SOLE_TRADER)
-        return form_initial
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

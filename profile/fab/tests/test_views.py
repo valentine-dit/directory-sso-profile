@@ -620,7 +620,7 @@ def test_expertise_products_services_routing_form_context(
 
 
 @pytest.mark.parametrize('choice', (
-    item for item, _ in forms.ExpertiseProductsServicesRoutingForm.CHOICES
+    item for item, _ in forms.ExpertiseProductsServicesRoutingForm.CHOICES if item
 ))
 def test_expertise_products_services_routing_form(
     choice, client, settings, user

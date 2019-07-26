@@ -5,7 +5,7 @@ clean:
 test_requirements:
 	pip install -r requirements_test.txt
 
-FLAKE8 := flake8 . --exclude=.venv,node_modules
+FLAKE8 := flake8 . --exclude=.venv,node_modules --max-line-length=120
 PYTEST := pytest . --ignore=node_modules -W ignore::DeprecationWarning --cov=. --cov-config=.coveragerc \
     --cov-report=html --cov-report=term --capture=no -vv -s $(pytest_args)
 COLLECT_STATIC := python manage.py collectstatic --noinput
