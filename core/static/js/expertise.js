@@ -9,6 +9,7 @@ dit.components.expertise = (function() {
     var noResultsLabel = options.noResultsLabel;
     var autocompleteId = multiselectElement.id + '_autocomplete';
     var containerElement = document.createElement('span');
+    var placeholder = multiselectElement.getAttribute('placeholder');
     multiselectElement.parentNode.insertBefore(containerElement, multiselectElement);
 
     accessibleAutocomplete({
@@ -19,6 +20,7 @@ dit.components.expertise = (function() {
       showAllValues: true,
       id: autocompleteId,
       onConfirm: handleAdd,
+      placeholder: placeholder || '',
       source: function(query, populateResults) {
         var filtered = [].filter.call(
           multiselectElement.options, 
