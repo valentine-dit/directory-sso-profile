@@ -5,7 +5,7 @@ import directory_validators.company
 import directory_validators.enrolment
 
 from django.conf import settings
-from django.forms import ImageField, Textarea
+from django.forms import ImageField, SelectMultiple, Textarea
 from django.utils.safestring import mark_safe
 
 from profile.fab import constants, validators
@@ -438,6 +438,7 @@ class RegionalExpertiseForm(forms.Form):
         label='Select the regions you have expertise in',
         choices=choices.EXPERTISE_REGION_CHOICES,
         required=False,
+        widget=SelectMultiple(attrs={'placeholder': 'Please select'}),
     )
 
 
@@ -446,6 +447,7 @@ class CountryExpertiseForm(forms.Form):
         label='Select the countries you have expertise in',
         choices=choices.COUNTRY_CHOICES,
         required=False,
+        widget=SelectMultiple(attrs={'placeholder': 'Please select'}),
     )
 
 
@@ -454,6 +456,7 @@ class IndustryExpertiseForm(forms.Form):
         label='Choose the industries you work with',
         choices=choices.INDUSTRIES,
         required=False,
+        widget=SelectMultiple(attrs={'placeholder': 'Please select'}),
     )
 
 
@@ -462,6 +465,7 @@ class LanguageExpertiseForm(forms.Form):
         label='Select the languages you have expertise in',
         choices=choices.EXPERTISE_LANGUAGES,
         required=False,
+        widget=SelectMultiple(attrs={'placeholder': 'Please select'}),
     )
 
 
@@ -500,7 +504,7 @@ class ExpertiseProductsServicesForm(forms.Form):
             directory_validators.company.keywords_word_limit,
             directory_validators.company.no_html,
         ],
-        widget=Textarea,
+        widget=Textarea(attrs={'placeholder': 'Please select'}),
         max_length=1000,
         required=False,
     )
