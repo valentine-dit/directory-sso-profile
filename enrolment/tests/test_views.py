@@ -369,8 +369,12 @@ def test_enrolment_routing(client, choice, expected_url):
     assert response.url == expected_url
 
 
-def test_enrolment_routing_individual_logged_in(client, user):
-    client.force_login(user)
+def test_enrolment_routing_individual_business_profile_intent(client, user):
+    response = client.get(
+        reverse('enrolment-business-type'),
+        {'business-profile-intent': True}
+    )
+    assert response.status_code == 200
 
     url = reverse('enrolment-business-type')
 
@@ -1667,11 +1671,16 @@ def test_enrolment_individual_interstitial_anonymous_user(client):
     assert response.url == expected
 
 
-def test_enrolment_individual_interstitial_logged_in_user(client, user):
-    client.force_login(user)
+def test_enrolment_individual_interstitial_create_business_profile_intent(
+    client, user
+):
+    response = client.get(
+        reverse('enrolment-business-type'), {'business-profile-intent': True}
+    )
+    assert response.status_code == 200
 
     expected = reverse(
-        'enrolment-individual', kwargs={'step': views.PERSONAL_INFO}
+        'enrolment-individual', kwargs={'step': views.USER_ACCOUNT}
     )
     url = reverse('enrolment-individual-interstitial')
 
@@ -1695,19 +1704,31 @@ expose_user_jourey_urls = (
 )
 
 
-@pytest.mark.parametrize('url', expose_user_jourey_urls)
-def test_expose_user_journey_mixin_business_profile_intent(url, client):
-    response = client.get(
-        reverse('enrolment-business-type'),
-        {'business-profile-intent': True}
-    )
+@pytest.mark.parametrize('intent_write_url', (
+    reverse('enrolment-business-type'),
+    reverse('enrolment-start'),
+))
+@pytest.mark.parametrize('params', (
+    {'business-profile-intent': True},
+    {
+        'next': (
+            'http%3A%2F%2Fprofile.trade.great%3A8006%2Fprofile%2Fenrol%2F%3F'
+            'business-profile-intent%3Dtrue'
+        )
+    },
+))
+@pytest.mark.parametrize('intent_read_url', expose_user_jourey_urls)
+def test_expose_user_journey_business_profile_intent(
+    intent_write_url, intent_read_url, params, client
+):
+    response = client.get(intent_write_url, params)
     assert response.status_code == 200
 
-    response = client.get(url)
+    response = client.get(intent_read_url)
 
     assert response.status_code == 200
     assert response.context_data['user_journey_verb'] == (
-        views.ExposeUserJourneyVerbMixin.LABEL_BUSINESS
+        views.ReadUserIntentMixin.LABEL_BUSINESS
     )
 
 
@@ -1726,15 +1747,14 @@ def test_expose_user_journey_mixin_logged_in(url, client, user):
 
     assert response.status_code == 200
     assert response.context_data['user_journey_verb'] == (
-        views.ExposeUserJourneyVerbMixin.LABEL_BUSINESS
+        views.ReadUserIntentMixin.LABEL_BUSINESS
     )
 
 
 @pytest.mark.parametrize('url', expose_user_jourey_urls)
 def test_expose_user_journey_mixin_account_intent(url, client):
     response = client.get(url)
-
     assert response.status_code == 200
     assert response.context_data['user_journey_verb'] == (
-        views.ExposeUserJourneyVerbMixin.LABEL_ACCOUNT
+        views.ReadUserIntentMixin.LABEL_ACCOUNT
     )

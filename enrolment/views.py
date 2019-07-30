@@ -3,9 +3,11 @@ import abc
 from directory_constants import urls
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
+from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib import messages
+from django.http import QueryDict
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView
@@ -280,26 +282,6 @@ class CreateCompanyProfileMixin:
         })
 
 
-class ExposeUserJourneyVerbMixin:
-    # The templates assume the strings are all lower case
-    LABEL_BUSINESS = 'create a business profile'
-    LABEL_ACCOUNT = 'create an great.gov.uk account'
-
-    def get_user_journey_verb(self):
-        if (
-            self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT) or
-            self.request.user.is_authenticated
-        ):
-            return self.LABEL_BUSINESS
-        return self.LABEL_ACCOUNT
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            user_journey_verb=self.get_user_journey_verb(),
-            **kwargs
-        )
-
-
 class UserJourneySuccessRoutingMixin:
     # For user that started their journey from sso-profile, take them directly
     # to their business profile, otherwise show them the success page.
@@ -321,9 +303,63 @@ class UserJourneySuccessRoutingMixin:
             return TemplateResponse(self.request, self.templates[FINISHED])
 
 
+class ReadUserIntentMixin:
+    """Expose whether the user's intent is to create a business profile"""
+    LABEL_BUSINESS = 'create a business profile'
+    LABEL_ACCOUNT = 'create an great.gov.uk account'
+
+    def has_business_profile_intent_in_session(self):
+        return self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT)
+
+    def get_user_journey_verb(self):
+        if (
+            self.has_business_profile_intent_in_session() or
+            self.request.user.is_authenticated
+        ):
+            return self.LABEL_BUSINESS
+        return self.LABEL_ACCOUNT
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            user_journey_verb=self.get_user_journey_verb(),
+            **kwargs
+        )
+
+
+class WriteUserIntentMixin:
+    """Save weather the user's intent is to create a business profile"""
+
+    def has_business_profile_intent_in_querystring(self):
+        params = self.request.GET
+        # catch the case where anonymous user clicked "start now" from FAB
+        # landing page then were sent to SSO login and then clicked "sign up"
+        # resulting in 'business-profile-intent' in the `next` param
+        if params.get('next'):
+            try:
+                url, querystring, *rest = unquote(params['next']).split('?')
+            except ValueError:
+                # querystring may be malformed
+                pass
+            else:
+                params = QueryDict(querystring)
+        return params.get('business-profile-intent')
+
+    def dispatch(self, *args, **kwargs):
+        if self.has_business_profile_intent_in_querystring():
+            # user has clicked a button to specifically create a business
+            # profile. They are signing up because their end goal is to have
+            # a business profile. The counter to this scenario is the user
+            # started their journey from outside of sso-profile and their
+            # intent is to gain access use other services, and creating a
+            # business profile is a step towards that goal. The business
+            # profile is a means to and end, not the desired end.
+            self.request.session[SESSION_KEY_BUSINESS_PROFILE_INTENT] = True
+        return super().dispatch(*args, **kwargs)
+
+
 class BusinessTypeRoutingView(
-    RedirectAlreadyEnrolledMixin, StepsListMixin, ExposeUserJourneyVerbMixin,
-    FormView
+    RedirectAlreadyEnrolledMixin, StepsListMixin, WriteUserIntentMixin,
+    ReadUserIntentMixin, FormView
 ):
     form_class = forms.BusinessType
     template_name = 'enrolment/business-type.html'
@@ -343,15 +379,6 @@ class BusinessTypeRoutingView(
     )
 
     def dispatch(self, *args, **kwargs):
-        if self.request.GET.get('business-profile-intent'):
-            # user has started the journey from sso-profile. They are signing
-            # up because their end goal is to have a business profile.
-            # The counter to this scenario is the user started their journey
-            # from outside of sso-profile and their intent is to gain access
-            # use other services, and creating a business profile is a step
-            # towards that goal. The business profile is a means to and end,
-            # not the desired end.
-            self.request.session[SESSION_KEY_BUSINESS_PROFILE_INTENT] = True
         if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
             return redirect(URL_COMPANIES_HOUSE_ENROLMENT)
         return super().dispatch(*args, **kwargs)
@@ -363,11 +390,8 @@ class BusinessTypeRoutingView(
         elif choice == constants.NON_COMPANIES_HOUSE_COMPANY:
             url = URL_NON_COMPANIES_HOUSE_ENROLMENT
         elif choice == constants.NOT_COMPANY:
-            # if the user already has an SSO account then they are trying to
-            # create a business account
-            if self.request.user.is_authenticated:
+            if self.has_business_profile_intent_in_session():
                 url = reverse('enrolment-individual-interstitial')
-            # otherwise the user is creating an account from scratch
             else:
                 url = URL_INDIVIDUAL_ENROLMENT
         elif choice == constants.OVERSEAS_COMPANY:
@@ -379,8 +403,8 @@ class BusinessTypeRoutingView(
 
 
 class EnrolmentStartView(
-    RedirectAlreadyEnrolledMixin, StepsListMixin, ExposeUserJourneyVerbMixin,
-    TemplateView
+    RedirectAlreadyEnrolledMixin, StepsListMixin, WriteUserIntentMixin,
+    ReadUserIntentMixin, TemplateView
 ):
     template_name = 'enrolment/start.html'
 
@@ -413,7 +437,7 @@ class BaseEnrolmentWizardView(
     core.mixins.PreventCaptchaRevalidationMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
-    ExposeUserJourneyVerbMixin,
+    ReadUserIntentMixin,
     NamedUrlSessionWizardView
 ):
 
@@ -585,12 +609,12 @@ class NonCompaniesHouseEnrolmentView(
 
 
 class IndividualUserEnrolmentInterstitial(
-    ExposeUserJourneyVerbMixin, TemplateView
+    ReadUserIntentMixin, TemplateView
 ):
     template_name = 'enrolment/individual-interstitial.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_anonymous:
+        if not self.has_business_profile_intent_in_session():
             url = reverse(
                 'enrolment-individual', kwargs={'step': PERSONAL_INFO}
             )
@@ -808,5 +832,5 @@ class ResendVerificationCodeView(
         return form_initial
 
 
-class EnrolmentOverseasBusinessView(ExposeUserJourneyVerbMixin, TemplateView):
+class EnrolmentOverseasBusinessView(ReadUserIntentMixin, TemplateView):
     template_name = 'enrolment/overseas-business.html'

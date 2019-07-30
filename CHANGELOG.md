@@ -19,6 +19,7 @@
 - TT-1636 - please select pick lists tickets include TT-1638, TT-1640,  TT-1636
 - No ticket - Increase flake 8 coverage to 120 lines
 - TT-1561 - Show different enrolment title depending on user journey
+- TT-1560 - Hide individual account interstitial if intent is create a business profile
 
 ### Fixed bugs:
 - TT-1647 - Correcting long address not displayed correctly on business search page
