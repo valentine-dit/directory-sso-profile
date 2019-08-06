@@ -17,7 +17,7 @@
       <h2 class="heading-large">Products and services</h2>
       <div id="selected-values"></div>
     </div>
-    <h1 class="heading-large margin-top-0">Add {{ category }} services</h1>
+    <h1 class="heading-large margin-top-30">Add {{ category }} services</h1>
     {{ block.super }}
 {% endblock %}
 
@@ -37,7 +37,8 @@
       selectedValuesElement: document.getElementById('selected-values'),
       noResultsLabel: 'No products and services selected.',
       choices: choices ? choices.split('|') : [],
-      showAllValues: true
+      showAllValues: true,
+      placeholder: keywordsElement.getAttribute('placeholder'),
     });
   </script>
 {% endblock %}

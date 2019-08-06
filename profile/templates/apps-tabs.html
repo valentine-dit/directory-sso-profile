@@ -1,12 +1,26 @@
 {% extends 'base.html' %}
 
+{% load banner from directory_components %}
+
 {% block content %}
     <div class="container">
+
+        {% if request.user.is_authenticated and not request.user.has_user_profile %}
+            <div class="margin-top-30">
+                {% if not request.user.company %}
+                    {% url 'enrolment-start' as url %}
+                {% else %}
+                    {% url 'find-a-buyer-personal-details' as url %}
+                {% endif %}
+                {% banner banner_content='Some profile details are missing. <a href="'|add:url|add:'">Please add them</a>.</p>' badge_content='Profile incomplete' %}
+            </div>
+        {% endif %}
+
         <div class="grid-row">
             <div class="column-two-thirds sso-profile-toolbar-labels-container">
                 <h1 class="heading-xlarge margin-top-30 margin-bottom-15" id="tabs-title">Account</h1>
-                {% if sso_is_logged_in %}
-                    <div>You are signed in as {{ sso_user.email }}.</div>
+                {% if request.user.is_authenticated %}
+                    <div>You are signed in as {{ request.user.email }}.</div>
                 {% endif %}
             </div>
         </div>

@@ -5,14 +5,16 @@
 {% block content %}
     <section class="container">
         {% breadcrumbs 'Create a great.gov.uk account' %}
-        	<a href="{{ services_urls.exred }}">Home</a>
+            <a href="{{ services_urls.great_domestic }}">Home</a>
         {% endbreadcrumbs %}
         <div class="width-two-thirds">
-            <h1 class="heading-xlarge">Create an account</h1>
-            <p>We'll email you a confirmation code while creating your account. Make sure you have access to your email.</p>
-			{% if not sso_is_logged_in %}
-            <p><a href="{{ sso_login_url }}">Sign in</a> if you have an account.</p>
-             {% endif %}
+            {% if request.user.is_authenticated %}
+                <h1 class="heading-xlarge">{{ user_journey_verb|capfirst }}</h1>
+            {% else %}
+                <h1 class="heading-xlarge">{{ user_journey_verb|capfirst}}</h1>
+                <p>We'll email you a confirmation code while creating your account. Make sure you have access to your email.</p>
+                <p><a href="{{ sso_login_url }}">Sign in</a> if you have an account.</p>
+            {% endif %}
             <div class="steps-progress-indicator font-medium padding-left-30" id="start-page-progress-indicator" aria-label="Process steps">
               <p id="steps-progress-explanation" class="visually-hidden">List of steps required to complete the process:</p>
               <ol aria-labelledby="steps-progress-explanation">

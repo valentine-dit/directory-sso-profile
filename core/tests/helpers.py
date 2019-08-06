@@ -1,6 +1,7 @@
 import requests
 
 from django.urls import reverse
+from formtools.wizard.views import normalize_name
 
 
 def create_response(status_code=200, json_body={}, content=None):
@@ -11,8 +12,9 @@ def create_response(status_code=200, json_body={}, content=None):
     return response
 
 
-def submit_step_factory(client, url_name, view_name, view_class):
+def submit_step_factory(client, url_name, view_class):
     step_names = iter([name for name, form in view_class.form_list])
+    view_name = normalize_name(view_class.__name__)
 
     def submit_step(data, step_name=None):
         step_name = step_name or next(step_names)

@@ -1,6 +1,7 @@
 {% extends 'apps-tabs.html' %}
 
 {% load static from staticfiles %}
+{% load success_box from directory_components %}
 
 {% block head_css %}
     {{ block.super }}
@@ -40,15 +41,17 @@
         <div>
         {% for message in messages %}
             {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                <div class="success-message-box border-teal teal-text">
-                    <h2 class="heading-large margin-30-m">{{ message }}</h2>
-                </div>
+                {% success_box heading="Completed" description=message box_class='width-full background-white margin-top-30' %}
             {% endif %}
         {% endfor %}
         </div>
     {% endif %}
 
     {% if not company.email_address or not company.description or not company.is_verified or not company.is_published %}
+    <div class="width-half">
+        <h3 class="heading-medium">Next steps</h3>
+        <p>Your business profile has not been published. Complete the steps below to promote your business to overseas buyers</p>
+    </div>
     <div id="alerts-top" class="grid-row alerts-container margin-bottom-15 margin-top-30">
         {% if not company.email_address %}
             <div class="column-two-thirds flag-red-text">
@@ -98,7 +101,7 @@
     <div id="main-content" class="grid-row">
         <div class="column-one-third" id="data-column">
 
-            <div id="logo-container">
+            <div id="logo-container" class="border-thin border-light-grey padding-15">
                 {% if not company.logo %}
                     <a id="add-image" href="{% url 'find-a-buyer-logo' %}" class="link">Add a logo</a>
                 {% else %}

@@ -12,46 +12,6 @@
   }
 }
 
-.button {
-  border: 0;
-  border-radius: 3px;
-  box-shadow: none;
-  cursor: pointer;
-  display: inline-block;
-  font-family: "Roboto",arial,helvetica,sans-serif;
-  padding: 12px 30px;
-  text-decoration: none;
-}
-
-.button-border {
-  border: 2px solid;
-  padding-bottom: 10px;
-  padding-top: 10px;
-}
-
-.button-border:active {
-  background-color: #ffffff;
-}
-.button-border:active {
-  background-color: #007ea3;
-  outline: 0;
-}
-.button-border:hover {
-  background-color: transparent;
-  color: #007ea3;
-}
-.button-border:link, .button-border:visited {
-  background-color: transparent;
-  color: #007ea3;
-}
-.button-border:focus {
-  outline: 3px solid #ffbf47;
-}
-
-.button.navigation-main-button {
-  padding: 8px 10px 5px;
-}
-
 .sso-profile-pill-button {
   border-radius: 8px;
   background-color: #dfd5c5;

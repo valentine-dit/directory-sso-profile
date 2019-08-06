@@ -7,7 +7,7 @@ from django.conf import settings
 
 
 def get_opportunities(sso_id):
-    response = exporting_is_great_client.get_opportunities(sso_id)
+    response = exopps_client.get_opportunities(sso_id)
     if response.status_code == http.client.FORBIDDEN:
         return None
     elif response.status_code == http.client.OK:
@@ -36,4 +36,4 @@ class ExportingIsGreatClient:
         return self.get(self.endpoints['opportunities'], params)
 
 
-exporting_is_great_client = ExportingIsGreatClient()
+exopps_client = ExportingIsGreatClient()

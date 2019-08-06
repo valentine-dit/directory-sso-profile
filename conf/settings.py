@@ -42,13 +42,15 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.contrib.auth',
     'raven.contrib.django.raven_compat',
     'django.contrib.sessions',
-    'django.contrib.contenttypes',  # required by DRF, not using any DB
-    'django.contrib.auth',
+    'django.contrib.contenttypes',  # required by DRF and auth, not using DB
     'django.contrib.messages',
+    'directory_sso_api_client',
     'captcha',
     'core',
+    'sso',
     'directory_constants',
     'directory_components',
     'profile',
@@ -57,6 +59,7 @@ INSTALLED_APPS = [
     'directory_healthcheck',
 ]
 
+
 MIDDLEWARE_CLASSES = [
     'directory_components.middleware.MaintenanceModeMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -64,8 +67,8 @@ MIDDLEWARE_CLASSES = [
     'core.middleware.PrefixUrlMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'directory_sso_api_client.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'sso.middleware.SSOUserMiddleware',
     'directory_components.middleware.NoCacheMiddlware',
 ]
 
@@ -82,7 +85,6 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'sso.context_processors.sso_processor',
                 'django.contrib.messages.context_processors.messages',
                 'directory_components.context_processors.urls_processor',
                 ('directory_components.context_processors.'
@@ -248,6 +250,7 @@ DIRECTORY_SSO_API_CLIENT_SENDER_ID = env.str(
 DIRECTORY_SSO_API_CLIENT_DEFAULT_TIMEOUT = 15
 
 SSO_PROXY_LOGIN_URL = env.str('SSO_PROXY_LOGIN_URL')
+LOGIN_URL = SSO_PROXY_LOGIN_URL
 SSO_PROXY_LOGOUT_URL = env.str('SSO_PROXY_LOGOUT_URL')
 SSO_PROXY_SIGNUP_URL = env.str('SSO_PROXY_SIGNUP_URL')
 SSO_PROXY_PASSWORD_RESET_URL = env.str('SSO_PROXY_PASSWORD_RESET_URL')
@@ -440,3 +443,8 @@ VALIDATOR_MAX_CASE_STUDY_VIDEO_SIZE_BYTES = env.int(
     'VALIDATOR_MAX_CASE_STUDY_VIDEO_SIZE_BYTES', 20 * 1024 * 1024
 )
 VALIDATOR_ALLOWED_IMAGE_FORMATS = ('PNG', 'JPG', 'JPEG')
+
+
+AUTH_USER_MODEL = 'sso.SSOUser'
+
+AUTHENTICATION_BACKENDS = ['sso.backends.SSOUserBackend']

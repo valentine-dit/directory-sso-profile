@@ -1,9 +1,10 @@
-import pytest
 from unittest import mock
-from core.tests.helpers import create_response
 
+from directory_components.forms import CharField, EmailField
 from requests.exceptions import HTTPError
+import pytest
 
+from core.tests.helpers import create_response
 from enrolment import forms, helpers
 
 
@@ -98,6 +99,20 @@ def test_create_user(mock_create_user):
     assert form.cleaned_data["user_details"] == data
 
 
+def test_verification_code_empty_email():
+
+    form = forms.UserAccountVerification()
+    assert isinstance(form.fields['email'], EmailField)
+
+
+def test_verification_code_with_email():
+
+    form = forms.UserAccountVerification(
+        initial={'email': 'test@test.com'}
+    )
+    assert isinstance(form.fields['email'], CharField)
+
+
 @mock.patch.object(helpers, 'get_company_profile', return_value={
     'company_status': 'active',
 })
@@ -162,10 +177,12 @@ def test_companies_house_search_company_active(client):
     ('thing\nthing\nEEE EEE', 'thing\nthing\nEEE EEE')
 ))
 def test_sole_trader_search_address_postcode_appended(address, expected):
-    form = forms.SoleTraderSearch(data={
+    form = forms.NonCompaniesHouseSearch(data={
         'company_name': 'thing',
+        'company_type': 'SOLE_TRADER',
         'address': address,
         'postal_code': 'EEE EEE',
+        'sectors': 'AEROSPACE',
     })
     assert form.is_valid()
 
@@ -174,12 +191,13 @@ def test_sole_trader_search_address_postcode_appended(address, expected):
 
 @pytest.mark.parametrize('address', ('thing\n', 'thing\n '))
 def test_sole_trader_search_address_too_short(address):
-    form = forms.SoleTraderSearch(data={
+    form = forms.NonCompaniesHouseSearch(data={
         'address': address,
         'postal_code': 'EEE EEE',
+        'sectors': 'AEROSPACE',
     })
     assert form.is_valid() is False
 
     assert form.errors['address'] == [
-        forms.SoleTraderSearch.MESSAGE_INVALID_ADDRESS
+        forms.NonCompaniesHouseSearch.MESSAGE_INVALID_ADDRESS
     ]

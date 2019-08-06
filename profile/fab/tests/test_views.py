@@ -3,6 +3,7 @@ import http
 from unittest import mock
 
 from directory_api_client.client import api_client
+from formtools.wizard.views import normalize_name
 import pytest
 from PIL import Image, ImageDraw
 from requests.exceptions import HTTPError
@@ -119,7 +120,6 @@ def submit_case_study_create_step(client):
     return submit_step_factory(
         client=client,
         url_name='find-a-buyer-case-study',
-        view_name='case_study_wizard_create_view',
         view_class=views.CaseStudyWizardCreateView,
     )
 
@@ -127,14 +127,17 @@ def submit_case_study_create_step(client):
 @pytest.fixture
 def submit_case_study_edit_step(client):
     url_name = 'find-a-buyer-case-study-edit'
-    view_name = 'case_study_wizard_edit_view'
     view_class = views.CaseStudyWizardEditView
+    view_name = normalize_name(view_class.__name__)
     step_names = iter([name for name, form in view_class.form_list])
 
     def submit_step(data, step_name=None):
         step_name = step_name or next(step_names)
+        url = reverse(url_name, kwargs={'step': step_name, 'id': 1})
+        response = client.get(url)
+        assert response.status_code == 200
         return client.post(
-            reverse(url_name, kwargs={'step': step_name, 'id': 1}),
+            url,
             {
                 view_name + '-current_step': step_name,
                 **{step_name + '-' + key: value for key, value in data.items()}
@@ -177,10 +180,9 @@ def case_study_data():
     }
 
 
-def test_find_a_buyer_exposes_context(
-    returned_client, sso_user_middleware, settings
-):
-    response = returned_client.get(reverse('find-a-buyer'))
+def test_find_a_buyer_exposes_context(client, settings, user):
+    client.force_login(user)
+    response = client.get(reverse('find-a-buyer'))
     context = response.context_data
 
     assert context['fab_tab_classes'] == 'active'
@@ -192,41 +194,42 @@ def test_find_a_buyer_exposes_context(
     assert context['FAB_REGISTER_URL'] == settings.FAB_REGISTER_URL
 
 
-def test_find_a_buyer_unauthenticated_enrolment(
-    sso_user_middleware_unauthenticated, returned_client, settings
-):
-    response = returned_client.get(reverse('find-a-buyer'))
+def test_find_a_buyer_unauthenticated_enrolment(client, settings):
+    profile_url = reverse('find-a-buyer')
+    enrolment_url = reverse('enrolment-start')
+    response = client.get(profile_url)
 
     assert response.status_code == http.client.FOUND
-    assert response.url == reverse('enrolment-start')
+    assert response.url == f'{enrolment_url}?next={profile_url}'
 
 
 def test_supplier_company_retrieve_found_business_profile_on(
-    mock_retrieve_company, sso_user_middleware, returned_client, settings,
-    default_company_profile
+    mock_retrieve_company, client, settings,
+    default_company_profile, user
 ):
+    client.force_login(user)
     mock_retrieve_company.return_value = create_response(
         200, default_company_profile
     )
 
-    response = returned_client.get(reverse('find-a-buyer'))
+    response = client.get(reverse('find-a-buyer'))
 
     assert response.template_name == ['fab/profile.html']
 
 
-def test_company_owner(sso_user_middleware, returned_client):
-    response = returned_client.get(reverse('find-a-buyer'))
+def test_company_owner(client, user):
+    client.force_login(user)
+    response = client.get(reverse('find-a-buyer'))
 
     assert response.context_data['is_profile_owner'] is True
 
 
-def test_non_company_owner(
-    mock_retrieve_supplier, sso_user_middleware, returned_client
-):
+def test_non_company_owner(mock_retrieve_supplier, client, user):
+    client.force_login(user)
     mock_retrieve_supplier.return_value = create_response(
         200, {'is_company_owner': False}
     )
-    response = returned_client.get(reverse('find-a-buyer'))
+    response = client.get(reverse('find-a-buyer'))
 
     assert response.context_data['is_profile_owner'] is False
 
@@ -235,14 +238,15 @@ def test_non_company_owner(
     'owner-transferred', 'user-added', 'user-removed'
 ))
 def test_success_message(
-    mock_retrieve_supplier, sso_user_middleware, returned_client, param
+    mock_retrieve_supplier, client, param, user
 ):
+    client.force_login(user)
     mock_retrieve_supplier.return_value = create_response(
         200, {'is_company_owner': False}
     )
 
     url = reverse('find-a-buyer')
-    response = returned_client.get(url, {param: True})
+    response = client.get(url, {param: True})
     for message in response.context['messages']:
         assert str(message) == views.FindABuyerView.SUCCESS_MESSAGES[param]
 
@@ -276,11 +280,12 @@ edit_data = (
 
 @pytest.mark.parametrize('url', edit_urls)
 def test_edit_page_initial_data(
-    returned_client, url, default_company_profile, sso_user_middleware
+    client, url, default_company_profile, user
 ):
+    client.force_login(user)
     company = helpers.CompanyParser(default_company_profile)
 
-    response = returned_client.get(url)
+    response = client.get(url)
     assert response.context_data['form'].initial == (
         company.serialize_for_form()
     )
@@ -302,24 +307,25 @@ success_urls = (
     'url,data,success_url', zip(edit_urls, edit_data, success_urls)
 )
 def test_edit_page_submmit_success(
-    returned_client, mock_update_company, sso_user, url, data,
-    sso_user_middleware, success_url
+    client, mock_update_company, user, url, data, success_url
 ):
-    response = returned_client.post(url, data)
+    client.force_login(user)
+    response = client.post(url, data)
 
     assert response.status_code == 302
     assert response.url == success_url
     assert mock_update_company.call_count == 1
     assert mock_update_company.call_args == mock.call(
-        sso_session_id=sso_user.session_id,
+        sso_session_id=user.session_id,
         data=data
     )
 
 
 def test_publish_not_publishable(
-    returned_client, sso_user, sso_user_middleware, mock_retrieve_company,
+    client, user, mock_retrieve_company,
     default_company_profile
 ):
+    client.force_login(user)
     mock_retrieve_company.return_value = create_response(
         200,
         {**default_company_profile, 'is_publishable': False}
@@ -327,58 +333,54 @@ def test_publish_not_publishable(
 
     url = reverse('find-a-buyer-publish')
 
-    response = returned_client.get(url)
+    response = client.get(url)
 
     assert response.status_code == 302
     assert response.url == reverse('find-a-buyer')
 
 
-def test_publish_publishable(
-    returned_client, sso_user, sso_user_middleware, mock_retrieve_company
-):
-
+def test_publish_publishable(client, user, mock_retrieve_company):
+    client.force_login(user)
     url = reverse('find-a-buyer-publish')
 
-    response = returned_client.get(url)
+    response = client.get(url)
 
     assert response.status_code == 200
 
 
-def test_edit_page_submmit_publish_success(
-    returned_client, mock_update_company, sso_user, sso_user_middleware
-):
+def test_edit_page_submmit_publish_success(client, mock_update_company, user):
+    client.force_login(user)
     url = reverse('find-a-buyer-publish')
     data = {
         'is_published_investment_support_directory': True,
         'is_published_find_a_supplier': True,
     }
-    response = returned_client.post(url, data)
+    response = client.post(url, data)
 
     assert response.status_code == 302
     assert response.url == reverse('find-a-buyer')
     assert mock_update_company.call_count == 1
     assert mock_update_company.call_args == mock.call(
-        sso_session_id=sso_user.session_id,
+        sso_session_id=user.session_id,
         data=data
     )
 
 
 def test_edit_page_submmit_publish_context(
-    returned_client, sso_user_middleware, default_company_profile
+    client, default_company_profile, user
 ):
+    client.force_login(user)
     company = helpers.CompanyParser(default_company_profile)
 
     url = reverse('find-a-buyer-publish')
-    response = returned_client.get(url)
+    response = client.get(url)
 
     assert response.status_code == 200
     assert response.context_data['company'] == company.serialize_for_template()
 
 
-def test_edit_page_logo_submmit_success(
-    returned_client, mock_update_company, sso_user,
-    sso_user_middleware
-):
+def test_edit_page_logo_submmit_success(client, mock_update_company, user):
+    client.force_login(user)
     url = reverse('find-a-buyer-logo')
     data = {
         'logo': SimpleUploadedFile(
@@ -388,32 +390,33 @@ def test_edit_page_logo_submmit_success(
         )
     }
 
-    response = returned_client.post(url, data)
+    response = client.post(url, data)
 
     assert response.status_code == 302
     assert response.url == reverse('find-a-buyer')
     assert mock_update_company.call_count == 1
     assert mock_update_company.call_args == mock.call(
-        sso_session_id=sso_user.session_id,
+        sso_session_id=user.session_id,
         data={'logo': mock.ANY}
     )
 
 
 @pytest.mark.parametrize('url,data', zip(edit_urls, edit_data))
 def test_edit_page_submmit_error(
-    returned_client, mock_update_company, url, data, sso_user_middleware
+    client, mock_update_company, url, data, user
 ):
+    client.force_login(user)
     mock_update_company.return_value = create_response(400)
 
     with pytest.raises(HTTPError):
-        returned_client.post(url, data)
+        client.post(url, data)
 
 
 def test_case_study_create(
-    submit_case_study_create_step, mock_create_case_study, mock_session_user,
-    case_study_data, client
+    submit_case_study_create_step, mock_create_case_study, case_study_data,
+    client, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
 
     response = submit_case_study_create_step(case_study_data[views.BASIC])
     assert response.status_code == 302
@@ -428,12 +431,12 @@ def test_case_study_create(
     assert mock_create_case_study.call_count == 1
 
 
-def test_case_study_edit(
+def test_case_study_edit_foo(
     submit_case_study_edit_step, mock_retrieve_private_case_study, client,
-    mock_update_case_study, mock_session_user, case_study_data,
-    default_private_case_study
+    mock_update_case_study, case_study_data,
+    default_private_case_study, user, rf
 ):
-    mock_session_user.login()
+    client.force_login(user)
 
     response = submit_case_study_edit_step(case_study_data[views.BASIC])
     assert response.status_code == 302
@@ -451,6 +454,7 @@ def test_case_study_edit(
         'image_two': mock.ANY,
     }
     del data['image_three']
+
     assert mock_update_case_study.call_args == mock.call(
         case_study_id='1',
         data=data,
@@ -459,11 +463,11 @@ def test_case_study_edit(
 
 
 def test_case_study_edit_not_found(
-    mock_retrieve_private_case_study, client, mock_session_user
+    mock_retrieve_private_case_study, client, user
 ):
     mock_retrieve_private_case_study.return_value = create_response(404)
 
-    mock_session_user.login()
+    client.force_login(user)
     url = reverse(
         'find-a-buyer-case-study-edit', kwargs={'id': '1', 'step': views.BASIC}
     )
@@ -474,9 +478,9 @@ def test_case_study_edit_not_found(
 
 
 def test_case_study_edit_found(
-    mock_retrieve_private_case_study, client, mock_session_user
+    mock_retrieve_private_case_study, client, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     url = reverse(
         'find-a-buyer-case-study-edit', kwargs={'id': '1', 'step': views.BASIC}
     )
@@ -486,10 +490,8 @@ def test_case_study_edit_found(
     assert response.status_code == 200
 
 
-def test_admin_tools(
-    settings, client, mock_session_user, default_company_profile
-):
-    mock_session_user.login()
+def test_admin_tools(settings, client, default_company_profile, user):
+    client.force_login(user)
 
     company = helpers.CompanyParser(default_company_profile)
 
@@ -512,9 +514,9 @@ def test_admin_tools(
 
 
 def test_admin_tools_no_collaborators(
-    settings, client, mock_session_user, mock_retrieve_collaborators
+    settings, client, mock_retrieve_collaborators, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
 
     mock_retrieve_collaborators.return_value = create_response(200, {})
 
@@ -526,9 +528,9 @@ def test_admin_tools_no_collaborators(
 
 
 def test_business_details_sole_trader(
-    settings, mock_session_user, mock_retrieve_company, client
+    settings, mock_retrieve_company, client, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_company.return_value = create_response(
         200, {'company_type': 'SOLE_TRADER'}
     )
@@ -539,14 +541,15 @@ def test_business_details_sole_trader(
 
     assert response.status_code == 200
     assert isinstance(
-        response.context_data['form'], forms.SoleTraderBusinessDetailsForm
+        response.context_data['form'],
+        forms.NonCompaniesHouseBusinessDetailsForm
     )
 
 
 def test_business_details_companies_house(
-    settings, mock_session_user, client, mock_retrieve_company
+    settings, client, mock_retrieve_company, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_company.return_value = create_response(
         200, {'company_type': 'COMPANIES_HOUSE'}
     )
@@ -579,10 +582,8 @@ def test_business_details_companies_house(
         reverse('find-a-buyer-expertise-languages'),
     ),
 ))
-def test_add_expertise_routing(
-    settings, choice, expected_url, client, mock_session_user
-):
-    mock_session_user.login()
+def test_add_expertise_routing(settings, choice, expected_url, client, user):
+    client.force_login(user)
     settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON'] = True
 
     url = reverse('find-a-buyer-expertise-routing')
@@ -593,7 +594,8 @@ def test_add_expertise_routing(
     assert response.url == expected_url
 
 
-def test_expertise_routing_form(client, settings, sso_user_middleware):
+def test_expertise_routing_form(client, settings, user):
+    client.force_login(user)
     url = reverse('find-a-buyer-expertise-routing')
 
     response = client.get(url)
@@ -603,9 +605,9 @@ def test_expertise_routing_form(client, settings, sso_user_middleware):
 
 
 def test_expertise_products_services_routing_form_context(
-    client, settings, mock_session_user, default_company_profile
+    client, settings, default_company_profile, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
 
     company = helpers.CompanyParser(default_company_profile)
 
@@ -618,12 +620,12 @@ def test_expertise_products_services_routing_form_context(
 
 
 @pytest.mark.parametrize('choice', (
-    item for item, _ in forms.ExpertiseProductsServicesRoutingForm.CHOICES
+    item for item, _ in forms.ExpertiseProductsServicesRoutingForm.CHOICES if item
 ))
 def test_expertise_products_services_routing_form(
-    choice, client, settings, mock_session_user
+    choice, client, settings, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
 
     url = reverse('find-a-buyer-expertise-products-services-routing')
 
@@ -636,9 +638,9 @@ def test_expertise_products_services_routing_form(
 
 
 def test_products_services_form_prepopulate(
-    mock_retrieve_company, mock_session_user, default_company_profile, client
+    mock_retrieve_company, default_company_profile, client, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_company.return_value = create_response(
         200,
         {
@@ -668,9 +670,9 @@ def test_products_services_form_prepopulate(
 
 
 def test_products_services_other_form(
-    mock_retrieve_company, mock_session_user, default_company_profile, client
+    mock_retrieve_company, default_company_profile, client, user
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_company.return_value = create_response(
         200,
         {
@@ -697,10 +699,10 @@ def test_products_services_other_form(
 
 
 def test_products_services_other_form_update(
-    client, mock_retrieve_company, mock_update_company, sso_user,
-    mock_session_user, default_company_profile
+    client, mock_retrieve_company, mock_update_company, user,
+    default_company_profile
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_company.return_value = create_response(
         200,
         {
@@ -741,10 +743,10 @@ def test_products_services_other_form_update(
 
 
 def test_products_services_form_update(
-    client, mock_retrieve_company, mock_update_company, sso_user,
-    mock_session_user, default_company_profile
+    client, mock_retrieve_company, mock_update_company, user,
+    default_company_profile
 ):
-    mock_session_user.login()
+    client.force_login(user)
     mock_retrieve_company.return_value = create_response(
         200,
         {
@@ -786,10 +788,8 @@ def test_products_services_form_update(
     )
 
 
-def test_products_services_exposes_category(
-    client, mock_session_user
-):
-    mock_session_user.login()
+def test_products_services_exposes_category(client, user):
+    client.force_login(user)
 
     url = reverse(
         'find-a-buyer-expertise-products-services',
@@ -798,3 +798,30 @@ def test_products_services_exposes_category(
     response = client.get(url)
 
     assert response.context_data['category'] == 'business support'
+
+
+def test_personal_details(client, mock_create_user_profile, user):
+    client.force_login(user)
+
+    data = {
+        'given_name': 'Foo',
+        'family_name': 'Example',
+        'job_title': 'Exampler',
+        'phone_number': '1232342',
+        'confirmed_is_company_representative': True,
+        'terms_agreed': True,
+    }
+    response = client.post(reverse('find-a-buyer-personal-details'), data)
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
+    assert mock_create_user_profile.call_count == 1
+    assert mock_create_user_profile.call_args == mock.call(
+        sso_session_id=user.session_id,
+        data={
+            'first_name': 'Foo',
+            'last_name': 'Example',
+            'job_title': 'Exampler',
+            'mobile_phone_number': '1232342'
+        }
+    )
