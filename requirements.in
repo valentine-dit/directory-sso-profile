@@ -1,4 +1,4 @@
-django==1.11.22
+django==1.11.23
 django-environ==0.4.5
 djangorestframework==3.9.1
 gunicorn==19.5.0

@@ -25,6 +25,7 @@
 - TT-1647 - Correcting long address not displayed correctly on business search page
 - No ticket - Upgrade vulnerable django version to django 1.11.22
 - TT-1645 - Fix progress indicator changing from long to short list in new session
+- No ticket - Upgraded django to 1.11.23 to fix vulnerability
 
 ## [07-17-2019 ](https://github.com/uktrade/directory-ui-supplier/releases/tag/07-17-2019 )
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.05...07-17-2019)
