@@ -33,7 +33,6 @@ DEBUG_SET_ENV_VARS := \
 	export DEBUG=true ;\
 	export SSO_SIGNATURE_SECRET=api_signature_debug; \
 	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great:8003/; \
-	export SSO_PROXY_API_OAUTH2_BASE_URL=http://sso.trade.great:8004/oauth2/; \
 	export SSO_PROXY_LOGIN_URL=http://sso.trade.great:8004/accounts/login/; \
 	export SSO_PROXY_LOGOUT_URL=http://sso.trade.great:8004/accounts/logout/?next=http://profile.trade.great:8006; \
 	export SSO_PROXY_PASSWORD_RESET_URL=http://sso.trade.great:8004/accounts/password/reset/; \
@@ -76,7 +75,6 @@ DEBUG_SET_ENV_VARS := \
 	export DIRECTORY_CONSTANTS_URL_INVESTMENT_SUPPORT_DIRECTORY=http://supplier.trade.great:8005/investment-support-directory/\
 	export DIRECTORY_API_CLIENT_API_KEY=debug; \
 	export STORAGE_CLASS_NAME=local-storage; \
-	export LOCAL_STORAGE_DOMAIN=http://0.0.0.0:8000; \
 	export REDIS_URL=redis://localhost:6379
 
 
