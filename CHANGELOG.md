@@ -28,6 +28,7 @@
 - TT-1645 - Fix progress indicator changing from long to short list in new session
 - No ticket - Upgraded django to 1.11.23 to fix vulnerability
 - No ticket - Remove obsolete settings
+- TT-1731 - Fix address error persistance issue when a valid postcode is entered on UI
 
 ## [07-17-2019 ](https://github.com/uktrade/directory-ui-supplier/releases/tag/07-17-2019 )
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.05...07-17-2019)
