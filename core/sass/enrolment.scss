@@ -9,15 +9,9 @@
 
 body.js-enabled {
   #id_search-company_number-container,
-  #id_business-details-company_number-container,
-  #id_search-address-container{
+  #id_search-address_line_1-container,
+  #id_search-address_line_2-container {
     display: none;
-  }
-}
-body.js-enabled {
-  #id_business-details-postal_code-container {
-    display: none;
-    margin-top: 20px;
   }
 }
 
@@ -25,10 +19,10 @@ textarea.form-control {
   width: 80%;
 }
 
-#id_business-details-company_number-container,
-#id_business-details-sic-container,
-#id_business-details-date_of_creation-container,
-#id_business-details-address-container {
+.hidden-input-container {
+  display: none;
+}
+.read-only-input-container {
   padding-bottom: 10px;
   margin-bottom: 0;
   border-left: 5px solid #0858CD;
@@ -47,26 +41,40 @@ textarea.form-control {
   }
 }
 
+body.js-enabled {
+  #id_search-address-container {
+    padding-bottom: 10px;
+    border-left: 5px solid #0858CD;
+    padding-left: 15px;
+    .form-label {
+      font-weight: bold;
+    }
+    .form-hint {
+      display: none;
+    }
+    textarea {
+      background: transparent;
+      border: 0;
+      padding: 0;
+    }
+  }
+}
+
 #id_business-details-address-container {
   margin-bottom: 20px;
 }
 
 #content {
-  .container {
-    overflow: hidden;
-  }
   form {
-    margin-top: 50px;
     input, select {
       width: 80%;
+    }
+    #id_verification-code {
+      width: 7ch;
     }
     button {
       margin-top: 40px;
     }
-  }
-
-  .breadcrumbs {
-    padding-top: 0;
   }
 
   #id_user-account-captcha-container {
@@ -78,18 +86,6 @@ textarea.form-control {
   }
   #id_verification-code-container {
     margin-bottom: 10px;
-  }
-
-  .grey-information-box {
-    border: 2px solid #DFD5C3;
-    background: #F5F2EC;
-    padding: 20px;
-    h2 {
-      margin: 0;
-    }
-    p {
-      margin-bottom: 5px;
-    }
   }
 }
 
@@ -133,57 +129,38 @@ textarea.form-control {
   }
 }
 
-#content {
-  nav.breadcrumbs {
-    padding-bottom: 0;
-    padding-left: 15px;
-  }
-}
-
-#progress-column {
-  float: right;
-  border-top: 5px solid $flag-red;
-  padding-top: 30px;
-  padding-left: 0;
-  margin-top: 2.5em;
-  a {
-    margin: 0;
-  }
-}
-
 #start-now-button {
   display: block;
-  margin-top: 15px;
-  width: 145px;
+  width: 200px;
+  text-align: center;
+  border-radius: 0;
   &:active {
     background-color: $mid-blue;
   }
 }
 
-#start-page-progress-indicator {
-  font-size: 1.5em;
-}
-
-#success-message-container {
-  margin-top: 80px;
-  .message-box {
-    position: relative;
-    border-left-width: 100px;
-    &:before {
-      content: '✓';
-      color: white;
-      position: absolute;
-      left: -70px;
-      font-weight: bold;
-      font-size: 50px;
-      top: 0;
-      line-height: 2.5em;
-    }
+.multiple-choice {
+  .radio-button-helptext {
+    display: none;
+    margin-left: -20px;
+    border-left-width: 5px;
+    border-style: solid;
+    margin-top: 10px;
+    margin-top: 15px;
+    margin-bottom: 5px;
+  }
+  input:checked + label + .radio-button-helptext {
+    display: inline-block;
   }
 }
 
-#next-container {
-  h2 {
-    margin: 0;
+.message-box.margin-bottom-5 {
+  margin-bottom: 5px;
+}
+@media (min-width: 769px) {
+  #id_user-account-password-container {
+    ul {
+      margin-left: 30px;
+    }
   }
 }

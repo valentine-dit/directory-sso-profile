@@ -1,0 +1,21 @@
+{% extends 'enrolment/base.html' %}
+
+{% load static from staticfiles %}
+{% load breadcrumbs message_box_with_icon from directory_components %}
+
+{% block content %}
+  <section class="container">
+      {% breadcrumbs 'Create a great.gov.uk account' %}
+         <a href="{{ services_urls.great_domestic }}">Great.gov.uk</a>
+      {% endbreadcrumbs %}
+      <div class="width-two-thirds margin-top-30">
+          <div id="success-message-container">
+            {% message_box_with_icon heading="Complete" description="Your account has been created." heading_level='h1' %}
+          </div>
+      </div>
+  </section>
+  <section class="container">
+    <h2 class="heading-medium margin-0">Next steps</h2>
+      <p>You can now <a href="{% url 'find-a-buyer' %}">publish your business profile</a> to promote your business to overseas buyers</p>
+  </section>
+{% endblock %}

@@ -1,6 +1,7 @@
 {% extends 'apps-tabs.html' %}
 
 {% load static from staticfiles %}
+{% load success_box from directory_components %}
 
 {% block head_css %}
     {{ block.super }}
@@ -14,7 +15,7 @@
         <div class="grid-row" >
             <div class="column-one-half">
                 <a href="{% url 'find-a-buyer-admin-tools' %}">Admin tools</a>
-                <span class="divider"></span>
+                <span class="divider margin-left-15 margin-right-15 background-mid-grey"></span>
                 <span class="background-denim-blue font-xsmall pill">Admin view</span>
             </div>
             <div class="column-one-half right-column">
@@ -32,7 +33,7 @@
                 {% endif %}
             </div>
         </div>
-        <hr>
+        <hr class="margin-top-15 margin-bottom-0 background-mid-grey">
     </div>
     {% endif %}
 
@@ -40,19 +41,21 @@
         <div>
         {% for message in messages %}
             {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                <div class="success-message-box border-teal teal-text">
-                    <h2 class="heading-large margin-30-m">{{ message }}</h2>
-                </div>
+                {% success_box heading="Completed" description=message box_class='width-full background-white margin-top-30' %}
             {% endif %}
         {% endfor %}
         </div>
     {% endif %}
 
     {% if not company.email_address or not company.description or not company.is_verified or not company.is_published %}
-    <div id="alerts-top" class="grid-row alerts-container">
+    <div class="width-half">
+        <h3 class="heading-medium">Next steps</h3>
+        <p>Your business profile has not been published. Complete the steps below to promote your business to overseas buyers</p>
+    </div>
+    <div id="alerts-top" class="grid-row alerts-container margin-bottom-15 margin-top-30">
         {% if not company.email_address %}
             <div class="column-two-thirds flag-red-text">
-                <h2 class="heading-medium">Add a business email address</h2>
+                <h2 class="heading-medium margin-0">Add a business email address</h2>
                 <p>Enter the email address you want overseas buyers to use.</p>
             </div>
             <div class="column-one-third alerts-button-container">
@@ -60,7 +63,7 @@
             </div>
         {% elif not company.description %}
             <div class="column-two-thirds flag-red-text">
-                <h2 class="heading-medium">Add a business description</h2>
+                <h2 class="heading-medium margin-0">Add a business description</h2>
                 <p>Enter a description of your business for overseas buyers to see.</p>
             </div>
             <div class="column-one-third alerts-button-container">
@@ -68,7 +71,7 @@
             </div>
         {% elif not company.is_verified %}
             <div class="column-two-thirds flag-red-text">
-                <h2 class="heading-medium">Confirm your identity</h2>
+                <h2 class="heading-medium margin-0">Confirm your identity</h2>
                 <p>For security reasons, we need to check you're who you say you are.</p>
             </div>
             <div class="column-one-third alerts-button-container">
@@ -77,7 +80,7 @@
         {% elif not company.is_published %}
             {% if company.is_uk_isd_company %}
                 <div class="column-two-thirds flag-red-text">
-                    <h2 class="heading-medium">Profile ready to publish</h2>
+                    <h2 class="heading-medium margin-0">Profile ready to publish</h2>
                     <p>Your profile is also ready to be published on the UK Investment Support Directory.</p>
                 </div>
                 <div class="column-one-third alerts-button-container">
@@ -85,7 +88,7 @@
                 </div>
             {% else %}
                 <div class="column-two-thirds flag-red-text">
-                    <h2 class="heading-medium">Publish business profile</h2>
+                    <h2 class="heading-medium margin-0">Publish business profile</h2>
                     <p>You can now publish your business profile.</p>
                 </div>
                 <div class="column-one-third alerts-button-container">
@@ -98,13 +101,19 @@
     <div id="main-content" class="grid-row">
         <div class="column-one-third" id="data-column">
 
-            <div id="logo-container">
+            <div id="logo-container" class="border-thin border-light-grey padding-15">
                 {% if not company.logo %}
                     <a id="add-image" href="{% url 'find-a-buyer-logo' %}" class="link">Add a logo</a>
                 {% else %}
                     <img alt="{{ company.name }}" src="{{ company.logo }}" />
                     <a id="edit-image" href="{% url 'find-a-buyer-logo' %}" class="link pencil-link">Edit</a>
                 {% endif %}
+
+            </div>
+
+            <div  id="company-name-mobile">
+                <h3 class="heading-medium">{{ company.name }}</h3>
+                <a href="{% url 'find-a-buyer-business-details' %}" class="link pencil-link">Edit</a>
             </div>
 
             <div>
@@ -201,10 +210,10 @@
             </div>
         </div>
         <div class="column-two-thirds" id="details-column">
-            <h2 class="heading-large" id="company-name">
-                {{ company.name }}
+            <div id="company-name">
+                <h2 class="heading-large">{{ company.name }}</h2>
                 <a href="{% url 'find-a-buyer-business-details' %}" class="link pencil-link">Edit</a>
-            </h2>
+            </div>
             <div class="{% if not company.email_address %}primary-action-required{% endif %} message-box border-medium border-stone background-white">
               <div class="grid-row">
                 <h3 class="box-heading heading-medium black-text column-one-half">Profile email</h3>
