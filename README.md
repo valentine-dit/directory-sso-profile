@@ -45,6 +45,10 @@ We use SASS CSS pre-compiler. If you're doing front-end work your local machine 
     $ source .venv/bin/activate
     $ pip install -r requirements_test.txt
 
+### Additional step on OSX
+
+A recent update to OSX removed a particular method from python around SSL. This will cause Captcha to fail in development. This can be re-installed by running the following in terminal: '/Applications/Python\ 3.6/Install\ Certificates.command'. Please read https://stackoverflow.com/questions/27835619/urllib-and-ssl-certificate-verify-failed-error for a more detailed explanation.
+
 ### Configuration
 
 Secrets such as API keys and environment specific configurations are placed in `conf/.env` - a file that is not added to version control. You will need to create that file locally in order for the project to run.
