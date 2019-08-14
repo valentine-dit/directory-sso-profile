@@ -868,9 +868,9 @@ def test_confirm_user_verify_code_incorrect_code(
 
 
 @pytest.mark.parametrize('company_type', company_types)
-def test_confirm_user_verify_code_incorrect_code_manual_email(
-    client, company_type, submit_step_builder,
-    mock_confirm_verification_code, steps_data
+def test_confirm_user_verify_code_manual_email(
+    company_type, submit_step_builder, mock_confirm_verification_code, steps_data,
+    client
 ):
     mock_confirm_verification_code.return_value = create_response(400)
     submit_step = submit_step_builder(company_type)
