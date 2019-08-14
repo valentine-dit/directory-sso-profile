@@ -5,8 +5,9 @@ clean:
 test_requirements:
 	pip install -r requirements_test.txt
 
-FLAKE8 := flake8 . --exclude=.venv
-PYTEST := pytest . --cov=. --cov-config=.coveragerc --cov-report=html --cov-report=term --capture=no -vv -s $(pytest_args)
+FLAKE8 := flake8 . --exclude=.venv,node_modules --max-line-length=120
+PYTEST := pytest . --ignore=node_modules -W ignore::DeprecationWarning --cov=. --cov-config=.coveragerc \
+    --cov-report=html --cov-report=term --capture=no -vv -s $(pytest_args)
 COLLECT_STATIC := python manage.py collectstatic --noinput
 CODECOV := \
 	if [ "$$CODECOV_REPO_TOKEN" != "" ]; then \
@@ -23,6 +24,9 @@ DJANGO_WEBSERVER := \
 django_webserver:
 	$(DJANGO_WEBSERVER)
 
+debug_test_last_failed:
+	make debug_test pytest_args='--last-failed'
+
 DEBUG_SET_ENV_VARS := \
 	export PORT=8006; \
 	export SECRET_KEY=debug; \
@@ -30,7 +34,7 @@ DEBUG_SET_ENV_VARS := \
 	export SSO_SIGNATURE_SECRET=api_signature_debug; \
 	export SSO_API_CLIENT_BASE_URL=http://sso.trade.great:8003/; \
 	export SSO_PROXY_API_OAUTH2_BASE_URL=http://sso.trade.great:8004/oauth2/; \
-	export SSO_PROXY_LOGIN_URL=http://sso.trade.great:8004/accounts/login/?next=http://profile.trade.great:8006; \
+	export SSO_PROXY_LOGIN_URL=http://sso.trade.great:8004/accounts/login/; \
 	export SSO_PROXY_LOGOUT_URL=http://sso.trade.great:8004/accounts/logout/?next=http://profile.trade.great:8006; \
 	export SSO_PROXY_PASSWORD_RESET_URL=http://sso.trade.great:8004/accounts/password/reset/; \
 	export SSO_PROXY_SIGNUP_URL=http://sso.trade.great:8004/accounts/signup/?next=http://profile.trade.great:8006; \

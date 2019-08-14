@@ -1,29 +1,29 @@
 import collections
 from http import cookies
-from datetime import datetime
 import re
+
+from directory_api_client.client import api_client
+from directory_ch_client.client import ch_search_api_client
+from directory_constants import choices
+from directory_sso_api_client.client import sso_api_client
+from directory_forms_api_client import actions
+from directory_constants import urls
+import directory_components
 
 from django.utils import formats
 from django.utils.dateparse import parse_datetime
 from django.conf import settings
 
-from directory_api_client.client import api_client
-from directory_ch_client.client import ch_search_api_client
-from directory_sso_api_client.client import sso_api_client
-from directory_forms_api_client import actions
-from directory_constants import urls
-
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
 SESSION_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'
 SESSION_KEY_IS_ENROLLED = 'IS_ENROLLED'
-
 
 StepsListConf = collections.namedtuple(
     'StepsListConf', ['form_labels_user', 'form_labels_anon']
 )
 ProgressIndicatorConf = collections.namedtuple(
     'ProgressIndicatorConf',
-    ['step_counter_user', 'step_counter_anon', 'first_step']
+    ['step_counter_user', 'step_counter_anon']
 )
 
 
@@ -64,14 +64,6 @@ def create_user(email, password):
     return response.json()
 
 
-def create_user_profile(sso_session_id, data):
-    response = sso_api_client.user.create_user_profile(
-        sso_session_id=sso_session_id, data=data
-    )
-    response.raise_for_status()
-    return response
-
-
 def user_has_company(sso_session_id):
     response = api_client.company.retrieve_private_profile(sso_session_id)
     if response.status_code == 404:
@@ -100,7 +92,7 @@ def create_company_profile(data):
 
 
 def send_verification_code_email(email, verification_code, form_url):
-    action = actions.GovNotifyAction(
+    action = actions.GovNotifyEmailAction(
         template_id=settings.CONFIRM_VERIFICATION_CODE_TEMPLATE_ID,
         email_address=email,
         form_url=form_url,
@@ -119,7 +111,7 @@ def send_verification_code_email(email, verification_code, form_url):
 
 
 def notify_already_registered(email, form_url):
-    action = actions.GovNotifyAction(
+    action = actions.GovNotifyEmailAction(
         email_address=email,
         template_id=settings.GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID,
         form_url=form_url,
@@ -162,7 +154,7 @@ def request_collaboration(company_number, email, name, form_url):
         collaborator_email=email,
     )
     response.raise_for_status()
-    action = actions.GovNotifyAction(
+    action = actions.GovNotifyEmailAction(
         email_address=response.json()['company_email'],
         template_id=settings.GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID,
         form_url=form_url,
@@ -176,9 +168,9 @@ def request_collaboration(company_number, email, name, form_url):
     response.raise_for_status()
 
 
-class CompanyProfileFormatter:
-    def __init__(self, unfomatted_companies_house_data):
-        self.data = unfomatted_companies_house_data
+class CompanyParser(directory_components.helpers.CompanyParser):
+
+    SIC_CODES = dict(choices.SIC_CODES)
 
     @property
     def number(self):
@@ -189,25 +181,17 @@ class CompanyProfileFormatter:
         return self.data['company_name']
 
     @property
-    def sic_code(self):
-        return ', '.join(self.data.get('sic_codes', []))
-
-    @property
-    def date_created(self):
-        date = self.data.get('date_of_creation')
-        if date:
-            date_format = COMPANIES_HOUSE_DATE_FORMAT
-            return datetime.strptime(date, date_format).strftime('%m %B %Y')
+    def nature_of_business(self):
+        return directory_components.helpers.values_to_labels(
+            values=self.data.get('sic_codes', []),
+            choices=self.SIC_CODES
+        )
 
     @property
     def address(self):
-        address = []
-        if self.data.get('registered_office_address'):
-            for field in ['address_line_1', 'address_line_2', 'locality']:
-                value = self.data['registered_office_address'].get(field)
-                if value:
-                    address.append(value)
-        return ', '.join(address)
+        address = self.data.get('registered_office_address', {})
+        names = ['address_line_1', 'address_line_2', 'locality', 'postal_code']
+        return ', '.join([address[name] for name in names if name in address])
 
     @property
     def postcode(self):

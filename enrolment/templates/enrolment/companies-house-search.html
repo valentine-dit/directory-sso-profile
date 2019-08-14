@@ -4,16 +4,17 @@
 
 {% block above_form %}
     {% if features.ENROLMENT_SELECT_BUSINESS_ON %}
-      <div class="grey-information-box" id="business-type-information-box">
-          <h2 class="heading-medium">Your business type</h2>
-          <p id="business-type">A business registered with Companies House</p>
-          <a href="{% url 'enrolment-business-type' %}" class="link" id="change-business-type">Change</a>
-      </div>
+      {% include 'enrolment/information_box_companies_type.html'  with is_in_companies_house=True %}
     {% endif %}
     <div id="form-step-body-text" id="business-details-information-box">
-        <h1 class="heading-large">Enter your business details</h1>
+        <h1 class="heading-xlarge margin-top-60">Enter your business details</h1>
     </div>
 {% endblock %}
+
+{% block below_form %}
+  <p><a class="link" href="{{ services_urls.great_domestic }}contact/triage/great-account/company-not-found/" id="cannot-find-company-name">I cannot find my business name</a></p>
+{% endblock %}
+
 
 {% block body_js %}
     {{ block.super }}

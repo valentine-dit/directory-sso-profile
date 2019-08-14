@@ -1,11 +1,13 @@
 {% extends 'enrolment/base.html' %}
 
 {% load static from staticfiles %}
-{% load message_box from directory_components %}
+{% load breadcrumbs message_box from directory_components %}
 
 {% block content %}
   <section class="container">
-      {% include 'enrolment/breadcrumbs.html' %}
+      {% breadcrumbs 'Create a great.gov.uk account' %}
+        <a href="{{ services_urls.great_domestic }}">Home</a>
+      {% endbreadcrumbs %}
       <div class="grid-row">
           <div class="column-two-thirds">
               <div id="failure-message-container">
@@ -17,7 +19,7 @@
 
   <section id="next-container">
     <div class="container">
-      <h2 class="heading-medium">Next steps</h2>
+      <h2 class="heading-medium margin-0">Next steps</h2>
       <a class="link" href="{{ services_urls.contact_us }}">Report error</a>
     </div>
   </section>

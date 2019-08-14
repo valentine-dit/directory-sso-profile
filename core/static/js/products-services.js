@@ -11,6 +11,7 @@ dit.components.productsServicesTypeahead = (function() {
     var autocompleteId = multiselectElement.id + '_autocomplete';
     var showAllValues = options.showAllValues || false;//true;
     var containerElement = document.createElement('span');
+    var placeholder = options.placeholder || '';
     multiselectElement.parentNode.insertBefore(containerElement, multiselectElement);
 
     accessibleAutocomplete({
@@ -21,6 +22,7 @@ dit.components.productsServicesTypeahead = (function() {
       showAllValues: showAllValues,
       id: autocompleteId,
       onConfirm: handleAdd,
+      placeholder: placeholder,
       source: function(query, populateResults) {
         var selectedValues = getSelectedValues();
         var filtered = [].filter.call(

@@ -1,9 +1,9 @@
 from captcha.fields import ReCaptchaField
-from directory_components import forms, fields, widgets
-from directory_constants import choices, urls
+from directory_components import forms
+from directory_constants import choices
 from requests.exceptions import HTTPError
 from directory_validators.company import (
-    no_company_with_insufficient_companies_house_data as compant_type_validator
+    no_company_with_insufficient_companies_house_data as company_type_validator
 )
 from directory_validators.enrolment import (
     company_number as company_number_validator
@@ -13,9 +13,9 @@ from django.forms import HiddenInput, PasswordInput, Textarea, ValidationError
 from django.utils.safestring import mark_safe
 from django.http.request import QueryDict
 
+from core.forms import TERMS_LABEL
 from enrolment import constants, helpers
-from enrolment.fields import DateField
-
+from enrolment.widgets import PostcodeInput, RadioSelect
 
 INDUSTRY_CHOICES = (
     (('', 'Please select'),) + choices.INDUSTRIES + (('OTHER', 'Other'),)
@@ -33,7 +33,7 @@ class BusinessType(forms.Form):
             )
         ),
         (
-            constants.SOLE_TRADER,
+            constants.NON_COMPANIES_HOUSE_COMPANY,
             (
                 'I\'m a sole trader or I represent another type of UK '
                 'business not registered with Companies House'
@@ -52,9 +52,16 @@ class BusinessType(forms.Form):
             )
         ),
     )
-    choice = fields.ChoiceField(
+    choice = forms.ChoiceField(
         label='',
-        widget=widgets.RadioSelect(),
+        widget=RadioSelect(
+            help_text={
+                constants.NOT_COMPANY: (
+                    'You can create an account as an individual, but you will '
+                    'not be able to create a business profile'
+                )
+            }
+        ),
         choices=CHOICES,
     )
 
@@ -62,40 +69,34 @@ class BusinessType(forms.Form):
 class UserAccount(forms.Form):
     PASSWORD_HELP_TEXT = (
         '<p>Your password must:</p>'
-        '<ul class="list list-bullet">'
+        '<ul class="list list-bullet margin-l-30-m">'
         '<li>be at least 10 characters</li>'
-        '<li>contain at least 1 letter</li>'
-        '<li>contain at least 1 number</li>'
-        '<li>not contain the word "password"</li>'
+        '<li>have at least 1 letter</li>'
+        '<li>have at least 1 number</li>'
+        '<li>not contain the words which are easy to guess such as "password"'
+        '</li>'
         '</ul>'
     )
     MESSAGE_NOT_MATCH = "Passwords don't match"
     MESSAGE_PASSWORD_INVALID = 'Invalid Password'
 
-    email = fields.EmailField(
+    email = forms.EmailField(
         label='Your email address'
     )
-    password = fields.CharField(
+    password = forms.CharField(
+        label='Set a password',
         help_text=mark_safe(PASSWORD_HELP_TEXT),
         widget=PasswordInput
     )
-    password_confirmed = fields.CharField(
+    password_confirmed = forms.CharField(
         label='Confirm password',
         widget=PasswordInput,
     )
-
     captcha = ReCaptchaField(
         label='',
         label_suffix='',
-    )
-
-    terms_agreed = fields.BooleanField(
-        label=mark_safe(
-            'Tick this box to accept the '
-            f'<a href="{urls.TERMS_AND_CONDITIONS}" target="_blank">terms and '
-            'conditions</a> of the great.gov.uk service.'
-        ),
-    )
+     )
+    terms_agreed = forms.BooleanField(label=TERMS_LABEL)
 
     def clean_password_confirmed(self):
         value = self.cleaned_data['password_confirmed']
@@ -123,8 +124,8 @@ class UserAccountVerification(forms.Form):
 
     MESSAGE_INVALID_CODE = 'Invalid code'
     # email field can be overridden in __init__ to allow user to enter email
-    email = fields.CharField(label='', widget=HiddenInput, disabled=True)
-    code = fields.CharField(
+    email = forms.CharField(label='', widget=HiddenInput, disabled=True)
+    code = forms.CharField(
         label='Confirmation Code',
         min_length=5,
         max_length=5,
@@ -134,9 +135,7 @@ class UserAccountVerification(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.initial.get('email') is None:
-            self.fields['email'] = fields.EmailField(
-                label='Your email address'
-            )
+            self.fields['email'] = forms.EmailField(label='Your email address')
 
 
 class CompaniesHouseSearch(forms.Form):
@@ -145,10 +144,10 @@ class CompaniesHouseSearch(forms.Form):
         "<p>Check that you've entered the right name.</p>"
     )
     MESSAGE_COMPANY_NOT_ACTIVE = 'Company not active.'
-    company_name = fields.CharField(
+    company_name = forms.CharField(
         label='Registered company name',
     )
-    company_number = fields.CharField(
+    company_number = forms.CharField(
         validators=[company_number_validator],
     )
 
@@ -160,7 +159,7 @@ class CompaniesHouseSearch(forms.Form):
         cleaned_data = super().clean()
         if 'company_number' in cleaned_data:
             try:
-                compant_type_validator(cleaned_data['company_number'])
+                company_type_validator(cleaned_data['company_number'])
             except ValidationError as error:
                 raise ValidationError({
                     'company_name': error
@@ -180,37 +179,43 @@ class CompaniesHouseSearch(forms.Form):
 
 
 class CompaniesHouseBusinessDetails(forms.Form):
-    company_name = fields.CharField(
-        label='Registered company name'
+    company_name = forms.CharField(
+        label='Registered company name',
     )
-    company_number = fields.CharField(
+    company_number = forms.CharField(
         disabled=True,
         required=False,
+        container_css_classes='border-active-blue read-only-input-container'
     )
-    sic = fields.CharField(
+    sic = forms.CharField(
         label='Nature of business',
         disabled=True,
         required=False,
+        container_css_classes='border-active-blue read-only-input-container'
     )
-    date_of_creation = DateField(
+    date_of_creation = forms.DateField(
         label='Incorporated on',
-        input_formats=['%m %B %Y'],
+        input_formats=['%d %B %Y'],
         disabled=True,
         required=False,
+        container_css_classes='border-active-blue read-only-input-container'
     )
-    postal_code = fields.CharField(
-        label='Business postcode',
-        required=False,
-    )
-    address = fields.CharField(
+    postal_code = forms.CharField(
         disabled=True,
         required=False,
+        container_css_classes='hidden-input-container',
     )
-    sectors = fields.ChoiceField(
+    address = forms.CharField(
+        disabled=True,
+        required=False,
+        container_css_classes='border-active-blue read-only-input-container',
+        widget=Textarea(attrs={'rows': 3}),
+        )
+    sectors = forms.ChoiceField(
         label='What industry is your company in?',
         choices=INDUSTRY_CHOICES,
     )
-    website = fields.URLField(
+    website = forms.URLField(
         label='What\'s your business web address (optional)',
         help_text='The website address must start with http:// or https://',
         required=False,
@@ -238,11 +243,11 @@ class CompaniesHouseBusinessDetails(forms.Form):
         del self.fields['website']
 
     def set_form_initial(self, company_profile):
-        company = helpers.CompanyProfileFormatter(company_profile)
+        company = helpers.CompanyParser(company_profile)
         self.initial['company_name'] = company.name
         self.initial['company_number'] = company.number
-        self.initial['sic'] = company.sic_code
-        self.initial['date_of_creation'] = company.date_created
+        self.initial['sic'] = company.nature_of_business
+        self.initial['date_of_creation'] = company.date_of_creation
         self.initial['address'] = company.address
         self.initial['postal_code'] = company.postcode
 
@@ -266,105 +271,71 @@ class CompaniesHouseBusinessDetails(forms.Form):
         return [self.cleaned_data['sectors']]
 
 
-class PersonalDetails(forms.Form):
-
-    given_name = fields.CharField(
+class IndividualPersonalDetails(forms.Form):
+    given_name = forms.CharField(
         label='First name',
     )
-    family_name = fields.CharField(
+    family_name = forms.CharField(
         label='Last name',
     )
-    job_title = fields.CharField()
-    phone_number = fields.CharField(
+    phone_number = forms.CharField(
         label='Phone number (optional)',
         required=False
     )
-    confirmed_is_company_representative = fields.BooleanField(
-        label=(
-            'I confirm that I have the right to act for this business. I '
-            'understand that great.gov.uk might write to this business to '
-            'confirm I can create an account.'
-        )
-    )
 
 
-class SoleTraderSearch(forms.Form):
+class NonCompaniesHouseSearch(forms.Form):
 
     MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
+    COMPANY_TYPES = [('', 'Please select'), ] + [
+        (value, label) for value, label in choices.COMPANY_TYPES if value != 'COMPANIES_HOUSE'
+    ]
 
-    company_name = fields.CharField(
+    company_type = forms.ChoiceField(
+        label='Business category',
+        choices=COMPANY_TYPES
+    )
+    company_name = forms.CharField(
         label='Business name'
     )
-    postal_code = fields.CharField(
+    postal_code = forms.CharField(
         label='Business postcode',
+        widget=PostcodeInput,
+        required=False,
     )
-    address = fields.CharField(
+    address = forms.CharField(
         help_text='Type your business address',
         widget=Textarea(attrs={'rows': 4}),
-    )
-
-    def clean_address(self):
-        value = self.cleaned_data['address'].strip().replace(', ', '\n')
-        postal_code = self.cleaned_data['postal_code']
-        if value.count('\n') == 0:
-            raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
-        if postal_code not in value:
-            value = f'{value}\n{postal_code}'
-        return value
-
-
-class SoleTraderBusinessDetails(forms.Form):
-    company_name = fields.CharField(
-        label='Business name'
-    )
-    postal_code = fields.CharField(
-        label='Business postcode',
         required=False,
-        disabled=True
     )
-    address = fields.CharField(
-        disabled=True,
-        required=False,
-        widget=Textarea(attrs={'rows': 3}),
-    )
-    sectors = fields.ChoiceField(
+    sectors = forms.ChoiceField(
         label='What industry is your business in?',
         choices=INDUSTRY_CHOICES,
     )
-    website = fields.URLField(
+    website = forms.URLField(
         label='What\'s your business web address (optional)',
         help_text='The website address must start with http:// or https://',
         required=False,
     )
 
-    def __init__(self, initial, *args, **kwargs):
-        super().__init__(initial=initial, *args, **kwargs)
-        # force the form to use the initial value rather than the value
-        # the user submitted in previous sessions
-        # on GET the data structure is a MultiValueDict. on POST the data
-        # structure is a QueryDict
-        if self.data and not isinstance(self.data, QueryDict):
-            self.initial_to_data('company_name')
-            self.initial_to_data('postal_code')
-            self.initial_to_data('address')
-
-    def initial_to_data(self, field_name):
-        self.data.setlist(
-            self.add_prefix(field_name),
-            [self.initial[field_name]]
-        )
-
-    def clean_address(self):
-        address_parts = self.cleaned_data['address'].split('\n')
-        self.cleaned_data['address_line_1'] = address_parts[0].strip()
-        self.cleaned_data['address_line_2'] = address_parts[1].strip()
-        return self.cleaned_data['address']
-
     def clean_sectors(self):
         return [self.cleaned_data['sectors']]
 
+    def clean_address(self):
+        value = self.cleaned_data['address'].strip().replace(', ', '\n')
+        parts = value.split('\n')
+
+        postal_code = self.cleaned_data.get('postal_code', '')
+        if value.count('\n') == 0:
+            raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
+        if postal_code not in value:
+            value = f'{value}\n{postal_code}'
+        self.cleaned_data['address_line_1'] = parts[0].strip()
+        self.cleaned_data['address_line_2'] = parts[1].strip()
+        return value
+
 
 class ResendVerificationCode(forms.Form):
-    email = fields.EmailField(
+    email = forms.EmailField(
         label='Your email address'
     )

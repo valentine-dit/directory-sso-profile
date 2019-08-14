@@ -4,14 +4,10 @@
 
 {% block above_form %}
     {% if features.ENROLMENT_SELECT_BUSINESS_ON %}
-      <div class="grey-information-box" id="business-type-information-box">
-          <h2 class="heading-medium">Your business type</h2>
-          <p id="business-type">A business registered with Companies House</p>
-          <a href="{% url 'enrolment-business-type' %}" class="link" id="change-business-type">Change</a>
-      </div>
+      {% include 'enrolment/information_box_companies_type.html' with is_in_companies_house=True %}
     {% endif %}
     <div id="form-step-body-text">
-        <h1 class="heading-large">Enter your business details</h1>
+        <h1 class="heading-xlarge margin-top-60">Enter your business details</h1>
     </div>
 {% endblock %}
 

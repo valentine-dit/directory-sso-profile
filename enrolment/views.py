@@ -1,29 +1,37 @@
 import abc
 
+from directory_constants import urls
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
+from urllib.parse import unquote
 
 from django.conf import settings
+from django.contrib import messages
+from django.http import QueryDict
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView
 from django.template.response import TemplateResponse
 
+import core.forms
+import core.helpers
 import core.mixins
 from enrolment import constants, forms, helpers
-from directory_constants import urls
 
 
 SESSION_KEY_ENROL_KEY = 'ENROL_KEY'
-
 SESSION_KEY_ENROL_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
 SESSION_KEY_INGRESS_ANON = 'ANON_INGRESS'
 SESSION_KEY_COMPANY_CHOICE = 'COMPANY_CHOICE'
 SESSION_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
 SESSION_KEY_REFERRER = 'REFERRER_URL'
+SESSION_KEY_BUSINESS_PROFILE_INTENT = 'BUSINESS_PROFILE_INTENT'
 
 PROGRESS_STEP_LABEL_USER_ACCOUNT = (
     'Enter your business email address and set a password'
+)
+PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT = (
+    'Enter your email address and set a password'
 )
 PROGRESS_STEP_LABEL_VERIFICATION = 'Enter your confirmation code'
 PROGRESS_STEP_LABEL_PERSONAL_INFO = 'Enter your details'
@@ -39,25 +47,31 @@ PERSONAL_INFO = 'personal-details'
 FINISHED = 'finished'
 FAILURE = 'failure'
 
-URL_SOLE_TRADER_ENROLMENT = reverse_lazy(
+URL_NON_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
     'enrolment-sole-trader', kwargs={'step': USER_ACCOUNT}
 )
 URL_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
     'enrolment-companies-house', kwargs={'step': USER_ACCOUNT}
 )
+URL_INDIVIDUAL_ENROLMENT = reverse_lazy(
+    'enrolment-individual', kwargs={'step': USER_ACCOUNT}
+)
+URL_OVERSEAS_BUSINESS_ENROLMNET = reverse_lazy(
+    'enrolment-overseas-business'
+)
 
 
 class RedirectLoggedInMixin:
     def dispatch(self, request, *args, **kwargs):
-        if request.sso_user:
+        if request.user.is_authenticated:
             return redirect('about')
         return super().dispatch(request, *args, **kwargs)
 
 
 class RedirectAlreadyEnrolledMixin:
     def dispatch(self, request, *args, **kwargs):
-        if request.sso_user:
-            if helpers.user_has_company(request.sso_user.session_id):
+        if request.user.is_authenticated:
+            if helpers.user_has_company(request.user.session_id):
                 return redirect('about')
         return super().dispatch(request, *args, **kwargs)
 
@@ -75,7 +89,7 @@ class StepsListMixin(abc.ABC):
         pass  # pragma: no cover
 
     def should_show_anon_progress_indicator(self):
-        return self.request.sso_user is None
+        return self.request.user.is_anonymous
 
     @property
     def step_labels(self):
@@ -110,20 +124,19 @@ class ProgressIndicatorMixin:
         pass  # pragma: no cover
 
     def get(self, *args, **kwargs):
-        if self.steps.current == self.progress_conf.first_step:
-            self.request.session[SESSION_KEY_INGRESS_ANON] = (
-                self.request.sso_user is None
+        if (
+            SESSION_KEY_INGRESS_ANON not in self.storage.extra_data and
+            self.kwargs['step'] == self.steps.first
+        ):
+            self.storage.extra_data[SESSION_KEY_INGRESS_ANON] = bool(
+                self.request.user.is_anonymous
             )
         return super().get(*args, **kwargs)
 
-    def render_done(self, *args, **kwargs):
-        self.request.session.pop(SESSION_KEY_INGRESS_ANON, None)
-        return super().render_done(*args, **kwargs)
-
     def should_show_anon_progress_indicator(self):
-        if self.request.session.get(SESSION_KEY_INGRESS_ANON):
+        if self.storage.extra_data.get(SESSION_KEY_INGRESS_ANON):
             return True
-        return self.request.sso_user is None
+        return self.request.user.is_anonymous
 
     @property
     def step_counter(self):
@@ -167,10 +180,10 @@ class UserAccountEnrolmentHandlerMixin:
         if skipped_first_step:
             return False
 
-        return self.request.sso_user is None
+        return self.request.user.is_anonymous
 
     def verification_condition(self):
-        return self.request.sso_user is None
+        return self.request.user.is_anonymous
 
     condition_dict = {
         USER_ACCOUNT: user_account_condition,
@@ -244,6 +257,7 @@ class CreateCompanyProfileMixin:
             'address_line_2',
             'company_name',
             'company_number',
+            'company_type',
             'date_of_creation',
             'family_name',
             'given_name',
@@ -261,51 +275,91 @@ class CreateCompanyProfileMixin:
 
     def create_company_profile(self, data):
         helpers.create_company_profile({
-            'sso_id': self.request.sso_user.id,
-            'company_email': self.request.sso_user.email,
-            'contact_email_address': self.request.sso_user.email,
+            'sso_id': self.request.user.id,
+            'company_email': self.request.user.email,
+            'contact_email_address': self.request.user.email,
             **data,
         })
 
 
-class CreateUserProfileMixin:
+class UserJourneySuccessRoutingMixin:
+    # For user that started their journey from sso-profile, take them directly
+    # to their business profile, otherwise show them the success page.
+    # The motivation is users that started from sso-profle created the business
+    # profile as their end goal. Those that started elsewhere created a
+    # business profile as a mean to some other end - so show them a success
+    # page with a list of places they can go next.
 
-    def serialize_user_profile(self, form):
-        return {
-            'first_name': form.cleaned_data['given_name'],
-            'last_name': form.cleaned_data['family_name'],
-            'job_title': form.cleaned_data['job_title'],
-            'mobile_phone_number': form.cleaned_data.get('phone_number'),
-        }
+    def __new__(cls, *args, **kwargs):
+        assert FINISHED in cls.templates
+        return super().__new__(cls)
 
-    def create_user_profile(self, form):
-        helpers.create_user_profile(
-            sso_session_id=self.request.sso_user.session_id,
-            data=self.serialize_user_profile(form),
+    def done(self, *args, **kwargs):
+        if self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT):
+            messages.success(self.request, 'Business profile created')
+            del self.request.session[SESSION_KEY_BUSINESS_PROFILE_INTENT]
+            return redirect('find-a-buyer')
+        else:
+            return TemplateResponse(self.request, self.templates[FINISHED])
+
+
+class ReadUserIntentMixin:
+    """Expose whether the user's intent is to create a business profile"""
+    LABEL_BUSINESS = 'create a business profile'
+    LABEL_ACCOUNT = 'create an great.gov.uk account'
+
+    def has_business_profile_intent_in_session(self):
+        return self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT)
+
+    def get_user_journey_verb(self):
+        if (
+            self.has_business_profile_intent_in_session() or
+            self.request.user.is_authenticated
+        ):
+            return self.LABEL_BUSINESS
+        return self.LABEL_ACCOUNT
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            user_journey_verb=self.get_user_journey_verb(),
+            **kwargs
         )
 
 
-class ServicesRefererDetectorMixin:
-    def get_referrer_context(self):
-        context = {}
-        referrer_url = self.request.session.get(SESSION_KEY_REFERRER)
-        if referrer_url and referrer_url.startswith(urls.SERVICES_FAB):
-            context = {'fab_referrer': True}
-        self.request.session.pop(SESSION_KEY_REFERRER, None)
-        return context
+class WriteUserIntentMixin:
+    """Save weather the user's intent is to create a business profile"""
 
-    def dispatch(self, request, *args, **kwargs):
-        referrer_entry_points = [urls.SERVICES_FAB]
-        referrer_url = request.META.get('HTTP_REFERER')
-        if referrer_url:
-            for url in referrer_entry_points:
-                if referrer_url.startswith(url):
-                    self.request.session[SESSION_KEY_REFERRER] = referrer_url
-        return super().dispatch(request, *args, **kwargs)
+    def has_business_profile_intent_in_querystring(self):
+        params = self.request.GET
+        # catch the case where anonymous user clicked "start now" from FAB
+        # landing page then were sent to SSO login and then clicked "sign up"
+        # resulting in 'business-profile-intent' in the `next` param
+        if params.get('next'):
+            try:
+                url, querystring, *rest = unquote(params['next']).split('?')
+            except ValueError:
+                # querystring may be malformed
+                pass
+            else:
+                params = QueryDict(querystring)
+        return params.get('business-profile-intent')
+
+    def dispatch(self, *args, **kwargs):
+        if self.has_business_profile_intent_in_querystring():
+            # user has clicked a button to specifically create a business
+            # profile. They are signing up because their end goal is to have
+            # a business profile. The counter to this scenario is the user
+            # started their journey from outside of sso-profile and their
+            # intent is to gain access use other services, and creating a
+            # business profile is a step towards that goal. The business
+            # profile is a means to and end, not the desired end.
+            self.request.session[SESSION_KEY_BUSINESS_PROFILE_INTENT] = True
+        return super().dispatch(*args, **kwargs)
 
 
 class BusinessTypeRoutingView(
-    RedirectAlreadyEnrolledMixin, StepsListMixin, FormView
+    RedirectAlreadyEnrolledMixin, StepsListMixin, WriteUserIntentMixin,
+    ReadUserIntentMixin, FormView
 ):
     form_class = forms.BusinessType
     template_name = 'enrolment/business-type.html'
@@ -333,8 +387,15 @@ class BusinessTypeRoutingView(
         choice = form.cleaned_data['choice']
         if choice == constants.COMPANIES_HOUSE_COMPANY:
             url = URL_COMPANIES_HOUSE_ENROLMENT
-        elif choice == constants.SOLE_TRADER:
-            url = URL_SOLE_TRADER_ENROLMENT
+        elif choice == constants.NON_COMPANIES_HOUSE_COMPANY:
+            url = URL_NON_COMPANIES_HOUSE_ENROLMENT
+        elif choice == constants.NOT_COMPANY:
+            if self.has_business_profile_intent_in_session():
+                url = reverse('enrolment-individual-interstitial')
+            else:
+                url = URL_INDIVIDUAL_ENROLMENT
+        elif choice == constants.OVERSEAS_COMPANY:
+            url = URL_OVERSEAS_BUSINESS_ENROLMNET
         else:
             raise NotImplementedError()
         self.request.session[SESSION_KEY_COMPANY_CHOICE] = choice
@@ -342,8 +403,8 @@ class BusinessTypeRoutingView(
 
 
 class EnrolmentStartView(
-    RedirectAlreadyEnrolledMixin, StepsListMixin, ServicesRefererDetectorMixin,
-    TemplateView
+    RedirectAlreadyEnrolledMixin, StepsListMixin, WriteUserIntentMixin,
+    ReadUserIntentMixin, TemplateView
 ):
     template_name = 'enrolment/start.html'
 
@@ -363,8 +424,8 @@ class EnrolmentStartView(
     )
 
     def dispatch(self, request, *args, **kwargs):
-        if request.sso_user:
-            if helpers.user_has_company(request.sso_user.session_id):
+        if request.user.is_authenticated:
+            if helpers.user_has_company(request.user.session_id):
                 return redirect('find-a-buyer')
         return super().dispatch(request, *args, **kwargs)
 
@@ -376,7 +437,7 @@ class BaseEnrolmentWizardView(
     core.mixins.PreventCaptchaRevalidationMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
-    ServicesRefererDetectorMixin,
+    ReadUserIntentMixin,
     NamedUrlSessionWizardView
 ):
 
@@ -395,7 +456,10 @@ class BaseEnrolmentWizardView(
 
 
 class CompaniesHouseEnrolmentView(
-    CreateUserProfileMixin, CreateCompanyProfileMixin, BaseEnrolmentWizardView
+    core.mixins.CreateUserProfileMixin,
+    CreateCompanyProfileMixin,
+    UserJourneySuccessRoutingMixin,
+    BaseEnrolmentWizardView,
 ):
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
@@ -410,7 +474,6 @@ class CompaniesHouseEnrolmentView(
             BUSINESS_INFO: 4,
             PERSONAL_INFO: 5,
         },
-        first_step=USER_ACCOUNT,
     )
     steps_list_conf = helpers.StepsListConf(
         form_labels_user=[
@@ -432,7 +495,7 @@ class CompaniesHouseEnrolmentView(
         (VERIFICATION, forms.UserAccountVerification),
         (COMPANY_SEARCH, forms.CompaniesHouseSearch),
         (BUSINESS_INFO, forms.CompaniesHouseBusinessDetails),
-        (PERSONAL_INFO, forms.PersonalDetails),
+        (PERSONAL_INFO, core.forms.PersonalDetails),
     )
 
     templates = {
@@ -441,7 +504,7 @@ class CompaniesHouseEnrolmentView(
         COMPANY_SEARCH: 'enrolment/companies-house-search.html',
         BUSINESS_INFO: 'enrolment/companies-house-business-details.html',
         PERSONAL_INFO: 'enrolment/companies-house-personal-details.html',
-        FINISHED: 'enrolment/success-companies-house.html',
+        FINISHED: 'enrolment/companies-house-success.html',
     }
 
     def get_form_kwargs(self, step=None):
@@ -463,8 +526,8 @@ class CompaniesHouseEnrolmentView(
 
     def serialize_form_list(self, form_list):
         return {
+            **super().serialize_form_list(form_list),
             'company_type': 'COMPANIES_HOUSE',
-            **super().serialize_form_list(form_list)
         }
 
     def done(self, form_list, form_dict, **kwargs):
@@ -477,21 +540,18 @@ class CompaniesHouseEnrolmentView(
         if is_enrolled:
             helpers.request_collaboration(
                 company_number=data['company_number'],
-                email=self.request.sso_user.email,
+                email=self.request.user.email,
                 name=f"{data['given_name']} {data['family_name']}",
                 form_url=self.request.path,
             )
         else:
             self.create_company_profile(data)
-        return TemplateResponse(
-            self.request,
-            self.templates[FINISHED],
-            context=self.get_referrer_context()
-        )
+        return super().done(form_list=form_list, form_dict=form_dict, **kwargs)
 
 
-class SoleTraderEnrolmentView(
-    CreateUserProfileMixin, CreateCompanyProfileMixin, BaseEnrolmentWizardView
+class NonCompaniesHouseEnrolmentView(
+    core.mixins.CreateUserProfileMixin, CreateCompanyProfileMixin,
+    UserJourneySuccessRoutingMixin, BaseEnrolmentWizardView
 ):
     steps_list_conf = helpers.StepsListConf(
         form_labels_user=[
@@ -510,61 +570,104 @@ class SoleTraderEnrolmentView(
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
             COMPANY_SEARCH: 2,
-            BUSINESS_INFO: 3,
-            PERSONAL_INFO: 4,
+            PERSONAL_INFO: 3,
         },
         step_counter_anon={
             USER_ACCOUNT: 2,
             VERIFICATION: 3,
             COMPANY_SEARCH: 4,
-            BUSINESS_INFO: 4,
             PERSONAL_INFO: 5,
         },
-        first_step=USER_ACCOUNT,
     )
 
     form_list = (
         (USER_ACCOUNT, forms.UserAccount),
         (VERIFICATION, forms.UserAccountVerification),
-        (COMPANY_SEARCH, forms.SoleTraderSearch),
-        (BUSINESS_INFO, forms.SoleTraderBusinessDetails),
-        (PERSONAL_INFO, forms.PersonalDetails),
+        (COMPANY_SEARCH, forms.NonCompaniesHouseSearch),
+        (PERSONAL_INFO, core.forms.PersonalDetails),
     )
 
     templates = {
         USER_ACCOUNT: 'enrolment/user-account.html',
         VERIFICATION: 'enrolment/user-account-verification.html',
-        COMPANY_SEARCH: 'enrolment/sole-trader-search.html',
-        BUSINESS_INFO: 'enrolment/sole-trader-business-details.html',
-        PERSONAL_INFO: 'enrolment/sole-trader-personal-details.html',
-        FINISHED: 'enrolment/success-sole-trader.html',
+        COMPANY_SEARCH: 'enrolment/non-companies-house-business-details.html',
+        PERSONAL_INFO: 'enrolment/non-companies-house-personal-details.html',
+        FINISHED: 'enrolment/non-companies-house-success.html',
     }
 
-    def get_form_initial(self, step):
-        form_initial = super().get_form_initial(step)
-        if step == BUSINESS_INFO:
-            data = self.get_cleaned_data_for_step(COMPANY_SEARCH)
-            if data:
-                form_initial['address'] = data['address'].replace(', ', '\n')
-                form_initial['postal_code'] = data['postal_code']
-                form_initial['company_name'] = data['company_name']
-        return form_initial
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.steps.current == PERSONAL_INFO:
+            context['company'] = self.get_cleaned_data_for_step(COMPANY_SEARCH)
+        return context
 
     def done(self, form_list, form_dict, **kwargs):
         self.create_user_profile(form_dict[PERSONAL_INFO])
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
+        return super().done(form_list=form_list, form_dict=form_dict, **kwargs)
+
+
+class IndividualUserEnrolmentInterstitial(
+    ReadUserIntentMixin, TemplateView
+):
+    template_name = 'enrolment/individual-interstitial.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not self.has_business_profile_intent_in_session():
+            url = reverse(
+                'enrolment-individual', kwargs={'step': PERSONAL_INFO}
+            )
+            return redirect(url)
+        return super().dispatch(request, *args, **kwargs)
+
+
+class IndividualUserEnrolmentView(
+    core.mixins.CreateUserProfileMixin, BaseEnrolmentWizardView
+):
+    steps_list_conf = helpers.StepsListConf(
+        form_labels_user=[
+            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            PROGRESS_STEP_LABEL_PERSONAL_INFO
+        ],
+        form_labels_anon=[
+            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT,
+            PROGRESS_STEP_LABEL_VERIFICATION,
+            PROGRESS_STEP_LABEL_PERSONAL_INFO
+        ],
+    )
+
+    progress_conf = helpers.ProgressIndicatorConf(
+        step_counter_user={
+            PERSONAL_INFO: 3
+        },
+        step_counter_anon={
+            USER_ACCOUNT: 2,
+            VERIFICATION: 3,
+            PERSONAL_INFO: 4
+        },
+    )
+
+    form_list = (
+        (USER_ACCOUNT, forms.UserAccount),
+        (VERIFICATION, forms.UserAccountVerification),
+        (PERSONAL_INFO, forms.IndividualPersonalDetails),
+    )
+
+    templates = {
+        USER_ACCOUNT: 'enrolment/individual-user-account.html',
+        VERIFICATION: 'enrolment/user-account-verification.html',
+        PERSONAL_INFO: 'enrolment/individual-personal-details.html',
+        FINISHED: 'enrolment/individual-success.html',
+    }
+
+    def done(self, form_list, form_dict, **kwargs):
+        self.create_user_profile(form_dict[PERSONAL_INFO])
         return TemplateResponse(
             self.request,
-            self.templates[FINISHED],
-            context=self.get_referrer_context()
+            self.templates[FINISHED]
         )
-
-    def serialize_form_list(self, form_list):
-        return {
-            'company_type': 'SOLE_TRADER',
-            **super().serialize_form_list(form_list)
-        }
 
 
 class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
@@ -583,20 +686,18 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
             VERIFICATION: 2,
             PERSONAL_INFO: 3,
         },
-        first_step=USER_ACCOUNT,
     )
 
     form_list = (
         (USER_ACCOUNT, forms.UserAccount),
         (VERIFICATION, forms.UserAccountVerification),
-        (PERSONAL_INFO, forms.PersonalDetails),
+        (PERSONAL_INFO, core.forms.PersonalDetails),
     )
 
     templates = {
         USER_ACCOUNT: 'enrolment/user-account.html',
         VERIFICATION: 'enrolment/user-account-verification.html',
         PERSONAL_INFO: 'enrolment/preverified-personal-details.html',
-        FINISHED: 'enrolment/success-pre-verified.html',
         FAILURE: 'enrolment/failure-pre-verified.html',
     }
 
@@ -627,16 +728,16 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
         try:
             self.claim_company(self.serialize_form_list(form_list))
         except HTTPError:
-            template_name = self.templates[FAILURE]
+            return TemplateResponse(self.request, self.templates[FAILURE])
         else:
-            template_name = self.templates[FINISHED]
-        return TemplateResponse(self.request, template_name)
+            messages.success(self.request, 'Business profile created')
+            return redirect('find-a-buyer')
 
     def claim_company(self, data):
         helpers.claim_company(
             enrolment_key=self.request.session[SESSION_KEY_ENROL_KEY],
             personal_name=f'{data["given_name"]} {data["family_name"]}',
-            sso_session_id=self.request.sso_user.session_id,
+            sso_session_id=self.request.user.session_id,
         )
 
     def serialize_form_list(self, form_list):
@@ -668,7 +769,6 @@ class ResendVerificationCodeView(
 
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_anon={RESEND_VERIFICATION: 1, VERIFICATION: 2},
-        first_step=RESEND_VERIFICATION,
         # logged in users should not get here
         step_counter_user={},
     )
@@ -688,8 +788,10 @@ class ResendVerificationCodeView(
         choice = self.request.session.get(SESSION_KEY_COMPANY_CHOICE)
         if choice == constants.COMPANIES_HOUSE_COMPANY:
             url = URL_COMPANIES_HOUSE_ENROLMENT
-        elif choice == constants.SOLE_TRADER:
-            url = URL_SOLE_TRADER_ENROLMENT
+        elif choice == constants.NON_COMPANIES_HOUSE_COMPANY:
+            url = URL_NON_COMPANIES_HOUSE_ENROLMENT
+        elif choice == constants.NOT_COMPANY:
+            url = URL_INDIVIDUAL_ENROLMENT
         else:
             url = reverse('enrolment-business-type')
         response = self.validate_code(
@@ -728,3 +830,7 @@ class ResendVerificationCodeView(
             if data:
                 form_initial['email'] = data['email']
         return form_initial
+
+
+class EnrolmentOverseasBusinessView(ReadUserIntentMixin, TemplateView):
+    template_name = 'enrolment/overseas-business.html'
