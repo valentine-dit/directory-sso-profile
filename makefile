@@ -75,7 +75,8 @@ DEBUG_SET_ENV_VARS := \
 	export DIRECTORY_CONSTANTS_URL_INVESTMENT_SUPPORT_DIRECTORY=http://supplier.trade.great:8005/investment-support-directory/\
 	export DIRECTORY_API_CLIENT_API_KEY=debug; \
 	export STORAGE_CLASS_NAME=local-storage; \
-	export REDIS_URL=redis://localhost:6379
+	export REDIS_URL=redis://localhost:6379; \
+	export FEATURE_REQUEST_VERIFICATION_ENABLED=true
 
 
 DEBUG_TEST_SET_ENV_VARS := \

@@ -19,7 +19,11 @@ class CompanyParser(directory_components.helpers.CompanyParser):
 
     @property
     def is_sole_trader(self):
-        return self.data['company_type'] != 'COMPANIES_HOUSE'
+        return self.data['company_type'] == 'SOLE_TRADER'
+
+    @property
+    def is_identity_check_message_sent(self):
+        return self.data['is_identity_check_message_sent']
 
     def serialize_for_template(self):
         if not self.data:
@@ -36,9 +40,7 @@ class CompanyParser(directory_components.helpers.CompanyParser):
             'expertise_countries': self.expertise_countries_label,
             'expertise_languages': self.expertise_languages_label,
             'has_expertise': self.has_expertise,
-            'expertise_products_services': (
-                self.expertise_products_services_label
-            ),
+            'expertise_products_services': self.expertise_products_services_label,
         }
 
     def serialize_for_form(self):
