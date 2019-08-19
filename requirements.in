@@ -1,4 +1,4 @@
-django==1.11.22
+django==1.11.23
 django-environ==0.4.5
 djangorestframework==3.9.1
 gunicorn==19.5.0
@@ -8,7 +8,7 @@ whitenoise==3.1
 sigauth==4.0.1
 directory-validators==5.1.0
 directory-healthcheck==1.0.1
-directory-components==26.2.0
+directory-components==27.5.0
 directory-constants==18.3.0
 urllib3>=1.24.2<2.0.0
 django-formtools==2.0
@@ -16,7 +16,7 @@ django-recaptcha==1.2.0
 directory-ch-client==2.1.0
 directory-sso-api-client==6.0.1
 directory-forms-api-client==5.0.0
-directory-api-client==15.1.0
+directory-api-client==16.0.0
 django-redis==4.8.0
 django-storages==1.5.1
 boto3==1.7.30

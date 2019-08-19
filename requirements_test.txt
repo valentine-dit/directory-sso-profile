@@ -14,10 +14,10 @@ chardet==3.0.4
 codecov==2.0.15
 contextlib2==0.5.5
 coverage==4.5.1           # via codecov, pytest-cov
-directory-api-client==15.1.0
+directory-api-client==16.0.0
 directory-ch-client==2.1.0
 directory-client-core==6.1.0
-directory-components==26.2.0
+directory-components==27.5.0
 directory-constants==18.3.0
 directory-forms-api-client==5.0.0
 directory-healthcheck==1.0.1
@@ -29,7 +29,7 @@ django-health-check==3.8.0
 django-recaptcha==1.2.0
 django-redis==4.8.0
 django-storages==1.5.1
-django==1.11.22
+django==1.11.23
 djangorestframework==3.9.1
 docutils==0.14
 entrypoints==0.3          # via flake8

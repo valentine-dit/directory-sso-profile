@@ -407,6 +407,32 @@ def test_companies_house_enrolment(
     assert response.status_code == 302
 
 
+def test_companies_house_enrolment_already_has_profile(
+    client, submit_companies_house_step, steps_data, user
+):
+    user.has_user_profile = True
+    client.force_login(user)
+
+    response = submit_companies_house_step(
+        data=steps_data[views.COMPANY_SEARCH],
+        step_name=views.COMPANY_SEARCH,
+    )
+
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=views.BUSINESS_INFO,
+    )
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+    assert response.status_code == 200
+    assert response.template_name == (
+        views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
+    )
+
+
 def test_companies_house_enrolment_change_company_name(
     client, submit_companies_house_step, steps_data, user
 ):
@@ -708,6 +734,46 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
         company_number='12345678',
         email='jim@example.com',
         name='Foo Example',
+        form_url=(
+            reverse('enrolment-companies-house', kwargs={'step': 'finished'})
+        )
+    )
+
+
+@mock.patch('enrolment.views.helpers.request_collaboration')
+def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
+    mock_request_collaboration, client, steps_data,
+    submit_companies_house_step, mock_enrolment_send,
+    mock_validate_company_number, user
+):
+    mock_validate_company_number.return_value = create_response(400)
+    user.has_user_profile = True
+    client.force_login(user)
+
+    response = submit_companies_house_step(
+        data=steps_data[views.COMPANY_SEARCH],
+        step_name=views.COMPANY_SEARCH,
+    )
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=views.BUSINESS_INFO,
+    )
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.status_code == 200
+    assert response.template_name == (
+        views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
+    )
+    assert mock_enrolment_send.call_count == 0
+    assert mock_request_collaboration.call_count == 1
+    assert mock_request_collaboration.call_args == mock.call(
+        company_number='12345678',
+        email='jim@example.com',
+        name='jim@example.com',
         form_url=(
             reverse('enrolment-companies-house', kwargs={'step': 'finished'})
         )
@@ -1257,6 +1323,32 @@ def test_non_companies_house_enrolment_submit_end_to_end_logged_in(
     })
 
 
+def test_non_companies_house_enrolment_has_user_profile(
+    client, submit_non_companies_house_step, steps_data, user
+):
+    user.has_user_profile = True
+    client.force_login(user)
+
+    url = reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT})
+    response = client.get(url)
+
+    assert response.status_code == 302
+
+    response = submit_non_companies_house_step(
+        steps_data[BUSINESS_INFO_NON_COMPANIES_HOUSE],
+        step_name=resolve(response.url).kwargs['step']
+    )
+
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.status_code == 200
+    assert response.template_name == (
+        views.NonCompaniesHouseEnrolmentView.templates[views.FINISHED]
+    )
+
+
 def test_non_companies_house_enrolment_suppress_success(
     client, submit_non_companies_house_step, steps_data, user
 ):
@@ -1445,6 +1537,7 @@ def test_claim_preverified_failure(
         [
             views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
             views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+            views.PROGRESS_STEP_LABEL_VERIFICATION,
             views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
         ]
     ),
@@ -1453,6 +1546,7 @@ def test_claim_preverified_failure(
         False,
         [
             views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+            views.PROGRESS_STEP_LABEL_VERIFICATION,
             views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
         ]
     ),
@@ -1461,14 +1555,14 @@ def test_claim_preverified_failure(
         True,
         [
             views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            views.PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
+            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
         ],
     ),
     (
         False,
         False,
         [
-            views.PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
+            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
         ]
     ),
 ))
@@ -1480,17 +1574,12 @@ def test_steps_list_mixin(
     class TestView(views.StepsListMixin, TemplateView):
         template_name = 'directory_components/base.html'
 
-        steps_list_conf = helpers.StepsListConf(
-            form_labels_user=[
-                views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-                views.PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
-            ],
-            form_labels_anon=[
-                views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-                views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
-                views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
-            ],
-        )
+        steps_list_labels = [
+            views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+            views.PROGRESS_STEP_LABEL_VERIFICATION,
+            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+        ]
 
     request = rf.get('/')
     request.user = AnonymousUser() if is_anon else user
@@ -1506,15 +1595,10 @@ def test_steps_list_mixin_no_business_type(rf, settings):
     class TestView(views.StepsListMixin, TemplateView):
         template_name = 'directory_components/base.html'
 
-        steps_list_conf = helpers.StepsListConf(
-            form_labels_user=[
-                views.PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
-            ],
-            form_labels_anon=[
-                views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
-                views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
-            ],
-        )
+        steps_list_labels = [
+            views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+        ]
 
     request = rf.get('/')
     request.user = AnonymousUser()

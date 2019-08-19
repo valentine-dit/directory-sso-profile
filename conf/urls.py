@@ -110,7 +110,7 @@ urlpatterns = [
         name='enrolment-companies-house'
     ),
     url(
-        r'^enrol/business-type/sole-trader/(?P<step>.+)/$',
+        r'^enrol/business-type/non-companies-house-company/(?P<step>.+)/$',
         enrolment.views.NonCompaniesHouseEnrolmentView.as_view(
             url_name='enrolment-sole-trader',
             done_step_name='finished'
@@ -293,6 +293,11 @@ urlpatterns = [
         r'^find-a-buyer/admin/$',
         company_required(profile.fab.views.AdminToolsView.as_view()),
         name='find-a-buyer-admin-tools'
+    ),
+    url(
+        r'^find-a-buyer/verify/request/$',
+        company_required(profile.fab.views.IdentityVerificationRequestFormView.as_view()),
+        name='find-a-buyer-request-to-verify'
     ),
 ]
 

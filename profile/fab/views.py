@@ -420,3 +420,23 @@ class PersonalDetailsFormView(
     def form_valid(self, form):
         self.create_user_profile(form)
         return super().form_valid(form)
+
+
+class IdentityVerificationRequestFormView(SuccessMessageMixin, FormView):
+    template_name = 'fab/request-verify.html'
+    form_class = forms.IdentityVerificationRequestForm
+    success_url = reverse_lazy('find-a-buyer')
+    success_message = 'Request to verify sent'
+
+    def dispatch(self, *args, **kwargs):
+        if (
+            not settings.FEATURE_FLAGS['REQUEST_VERIFICATION_ON'] or
+            self.request.user.company.is_identity_check_message_sent
+        ):
+            return redirect(self.success_url)
+        return super().dispatch(*args, **kwargs)
+
+    def form_valid(self, form):
+        response = api_client.company.verify_identity_request(sso_session_id=self.request.user.session_id)
+        response.raise_for_status()
+        return super().form_valid(form)

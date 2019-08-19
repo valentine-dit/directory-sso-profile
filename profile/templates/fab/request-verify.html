@@ -1,0 +1,33 @@
+{% extends 'fab/base-form.html' %}
+
+{% load breadcrumbs render_form from directory_components %}
+{% load static from staticfiles %}
+
+{% block head_css %}
+    {{ block.super }}
+    <link href="{% static 'css/company-profile.css' %}" media="all" rel="stylesheet" />
+{% endblock %}
+
+{% block form_button %}
+    <button class="button padding-left-60 padding-right-60">Request to verify</button>
+{% endblock %}
+
+{% block form_contents %}
+    {% breadcrumbs 'Verification' %}
+        <a href="{% url 'about' %}">Home</a>
+        <a href="{% url 'find-a-buyer' %}">Business profile</a>
+    {% endbreadcrumbs %}
+
+    <h1 class="heading-xlarge margin-top-60 margin-bottom-30">Request to verify</h1>
+    <p>Once you have requested to be verified a representative from DIT will contact you and will ask for the following documents to be sent to proof of verification</p>
+    
+    <h3 class="heading-small margin-top-45">Proof that you represent {{ request.user.company.name }}</h3>
+    <p>You can use any of the following documents addressed to {{ request.user.company.name }}</p>
+    
+    <ul class="list list-bullet">
+        <li>VAT certificate</li>
+        <li>Indemnity insurance</li>
+        <li>Bank, building society or credit card statement. The statement must be no more than three months old and show your name and current address.</li>
+    </ul>
+    {{ block.super }}
+{% endblock %}

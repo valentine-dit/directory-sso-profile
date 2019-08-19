@@ -50,9 +50,14 @@
     {% if not company.email_address or not company.description or not company.is_verified or not company.is_published %}
     <div class="width-half">
         <h3 class="heading-medium">Next steps</h3>
-        <p>Your business profile has not been published. Complete the steps below to promote your business to overseas buyers</p>
+        {% if features.REQUEST_VERIFICATION_ON and company.is_identity_check_message_sent %}
+            <p>We will be in contact within the next XX days and have sent you a confirmation email to {{ request.user.email }}</p>
+        {% else %}
+            <p>Your business profile has not been published. Complete the steps below to promote your business to overseas buyers</p>
+        {% endif %}
     </div>
     <div id="alerts-top" class="grid-row alerts-container margin-bottom-15 margin-top-30">
+
         {% if not company.email_address %}
             <div class="column-two-thirds flag-red-text">
                 <h2 class="heading-medium margin-0">Add a business email address</h2>
@@ -60,6 +65,14 @@
             </div>
             <div class="column-one-third alerts-button-container">
                 <a class="button button-ghost-white" href="{% url 'find-a-buyer-email' %}">Add a business email address</a>
+            </div>
+        {% elif features.REQUEST_VERIFICATION_ON and company.company_type != 'COMPANIES_HOUSE' and not company.is_identity_check_message_sent %}
+            <div class="column-two-thirds flag-red-text">
+                <h2 class="heading-medium margin-0">Profile ready to be verified</h2>
+                <p>Your business profile is ready to be verified</p>
+            </div>
+            <div class="column-one-third alerts-button-container">
+                <a class="button button-ghost-white" href="{% url 'find-a-buyer-request-to-verify' %}">Request to verify</a>
             </div>
         {% elif not company.description %}
             <div class="column-two-thirds flag-red-text">

@@ -34,6 +34,7 @@ PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT = (
     'Enter your email address and set a password'
 )
 PROGRESS_STEP_LABEL_VERIFICATION = 'Enter your confirmation code'
+PROGRESS_STEP_LABEL_RESEND_VERIFICATION = 'Resend verification'
 PROGRESS_STEP_LABEL_PERSONAL_INFO = 'Enter your details'
 PROGRESS_STEP_LABEL_BUSINESS_TYPE = 'Select your business type'
 PROGRESS_STEP_LABEL_BUSINESS_DETAILS = 'Enter your business details'
@@ -85,7 +86,7 @@ class StepsListMixin(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def steps_list_conf(self):
+    def steps_list_labels(self):
         pass  # pragma: no cover
 
     def should_show_anon_progress_indicator(self):
@@ -93,14 +94,21 @@ class StepsListMixin(abc.ABC):
 
     @property
     def step_labels(self):
-        if self.should_show_anon_progress_indicator():
-            labels = self.steps_list_conf.form_labels_anon[:]
-        else:
-            labels = self.steps_list_conf.form_labels_user[:]
+        labels = self.steps_list_labels[:]
+        if not self.should_show_anon_progress_indicator():
+            self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_USER_ACCOUNT)
+            self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_VERIFICATION)
+            if self.request.user.has_user_profile:
+                self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_PERSONAL_INFO)
+
         if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
-            if PROGRESS_STEP_LABEL_BUSINESS_TYPE in labels:
-                labels.remove(PROGRESS_STEP_LABEL_BUSINESS_TYPE)
+            self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_BUSINESS_TYPE)
+
         return labels
+
+    def remove_label(self, labels, label):
+        if label in labels:
+            labels.remove(label)
 
     def get_context_data(self, *args, **kwargs):
         return super().get_context_data(
@@ -164,7 +172,7 @@ class RestartOnStepSkipped:
         return super().render(*args, **kwargs)
 
 
-class UserAccountEnrolmentHandlerMixin:
+class CreateUserAccountMixin:
 
     def user_account_condition(self):
         # user has gone straight to verification code entry step, skipping the
@@ -185,9 +193,15 @@ class UserAccountEnrolmentHandlerMixin:
     def verification_condition(self):
         return self.request.user.is_anonymous
 
+    def personal_info_condition(self):
+        if self.request.user.is_anonymous:
+            return True
+        return not self.request.user.has_user_profile
+
     condition_dict = {
         USER_ACCOUNT: user_account_condition,
         VERIFICATION: verification_condition,
+        PERSONAL_INFO: personal_info_condition
     }
 
     def get_form_initial(self, step):
@@ -198,8 +212,7 @@ class UserAccountEnrolmentHandlerMixin:
                 form_initial['email'] = data['email']
         return form_initial
 
-    def render_next_step(self, form, **kwargs):
-        response = super().render_next_step(form, **kwargs)
+    def process_step(self, form):
         if form.prefix == USER_ACCOUNT:
             # Check if we have a user, else the user is already registered
             if form.cleaned_data['user_details']:
@@ -214,7 +227,11 @@ class UserAccountEnrolmentHandlerMixin:
                     email=form.cleaned_data['email'],
                     form_url=self.request.path
                 )
-        elif form.prefix == VERIFICATION:
+        return super().process_step(form)
+
+    def render_next_step(self, form, **kwargs):
+        response = super().render_next_step(form=form, **kwargs)
+        if form.prefix == VERIFICATION:
             response = self.validate_code(form=form, response=response)
         return response
 
@@ -247,7 +264,12 @@ class UserAccountEnrolmentHandlerMixin:
             return response
 
 
-class CreateCompanyProfileMixin:
+class CreateBusinessProfileMixin:
+
+    def __new__(cls, *args, **kwargs):
+        assert FINISHED in cls.templates
+        return super().__new__(cls)
+
     def serialize_form_list(self, form_list):
         data = {}
         for form in form_list:
@@ -281,8 +303,6 @@ class CreateCompanyProfileMixin:
             **data,
         })
 
-
-class UserJourneySuccessRoutingMixin:
     # For user that started their journey from sso-profile, take them directly
     # to their business profile, otherwise show them the success page.
     # The motivation is users that started from sso-profle created the business
@@ -290,11 +310,9 @@ class UserJourneySuccessRoutingMixin:
     # business profile as a mean to some other end - so show them a success
     # page with a list of places they can go next.
 
-    def __new__(cls, *args, **kwargs):
-        assert FINISHED in cls.templates
-        return super().__new__(cls)
-
-    def done(self, *args, **kwargs):
+    def done(self, form_list, *args, **kwargs):
+        data = self.serialize_form_list(form_list)
+        self.create_company_profile(data)
         if self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT):
             messages.success(self.request, 'Business profile created')
             del self.request.session[SESSION_KEY_BUSINESS_PROFILE_INTENT]
@@ -363,20 +381,13 @@ class BusinessTypeRoutingView(
 ):
     form_class = forms.BusinessType
     template_name = 'enrolment/business-type.html'
-    steps_list_conf = helpers.StepsListConf(
-        form_labels_user=[
-            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
-            PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ],
-        form_labels_anon=[
-            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            PROGRESS_STEP_LABEL_USER_ACCOUNT,
-            PROGRESS_STEP_LABEL_VERIFICATION,
-            PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
-            PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ],
-    )
+    steps_list_labels = [
+        PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+        PROGRESS_STEP_LABEL_USER_ACCOUNT,
+        PROGRESS_STEP_LABEL_VERIFICATION,
+        PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
+        PROGRESS_STEP_LABEL_PERSONAL_INFO,
+    ]
 
     def dispatch(self, *args, **kwargs):
         if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
@@ -408,20 +419,13 @@ class EnrolmentStartView(
 ):
     template_name = 'enrolment/start.html'
 
-    steps_list_conf = helpers.StepsListConf(
-        form_labels_user=[
-            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
-            PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ],
-        form_labels_anon=[
-            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            PROGRESS_STEP_LABEL_USER_ACCOUNT,
-            PROGRESS_STEP_LABEL_VERIFICATION,
-            PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
-            PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ],
-    )
+    steps_list_labels = [
+        PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+        PROGRESS_STEP_LABEL_USER_ACCOUNT,
+        PROGRESS_STEP_LABEL_VERIFICATION,
+        PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
+        PROGRESS_STEP_LABEL_PERSONAL_INFO,
+    ]
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -433,16 +437,14 @@ class EnrolmentStartView(
 class BaseEnrolmentWizardView(
     RedirectAlreadyEnrolledMixin,
     RestartOnStepSkipped,
-    UserAccountEnrolmentHandlerMixin,
     core.mixins.PreventCaptchaRevalidationMixin,
+    core.mixins.CreateUserProfileMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
     ReadUserIntentMixin,
+    CreateUserAccountMixin,
     NamedUrlSessionWizardView
 ):
-
-    def get_template_names(self):
-        return [self.templates[self.steps.current]]
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
@@ -454,13 +456,16 @@ class BaseEnrolmentWizardView(
             )
         return context
 
+    def get_template_names(self):
+        return [self.templates[self.steps.current]]
 
-class CompaniesHouseEnrolmentView(
-    core.mixins.CreateUserProfileMixin,
-    CreateCompanyProfileMixin,
-    UserJourneySuccessRoutingMixin,
-    BaseEnrolmentWizardView,
-):
+    def process_step(self, form):
+        if form.prefix == PERSONAL_INFO:
+            self.create_user_profile(form)
+        return super().process_step(form)
+
+
+class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizardView):
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
             COMPANY_SEARCH: 2,
@@ -475,20 +480,13 @@ class CompaniesHouseEnrolmentView(
             PERSONAL_INFO: 5,
         },
     )
-    steps_list_conf = helpers.StepsListConf(
-        form_labels_user=[
-            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
-            PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ],
-        form_labels_anon=[
-            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            PROGRESS_STEP_LABEL_USER_ACCOUNT,
-            PROGRESS_STEP_LABEL_VERIFICATION,
-            PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
-            PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ],
-    )
+    steps_list_labels = [
+        PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+        PROGRESS_STEP_LABEL_USER_ACCOUNT,
+        PROGRESS_STEP_LABEL_VERIFICATION,
+        PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
+        PROGRESS_STEP_LABEL_PERSONAL_INFO,
+    ]
 
     form_list = (
         (USER_ACCOUNT, forms.UserAccount),
@@ -531,42 +529,36 @@ class CompaniesHouseEnrolmentView(
         }
 
     def done(self, form_list, form_dict, **kwargs):
-        self.create_user_profile(form_dict[PERSONAL_INFO])
         data = self.serialize_form_list(form_list)
         is_enrolled = helpers.get_is_enrolled(
             company_number=data['company_number'],
             session=self.request.session,
         )
         if is_enrolled:
+            if self.personal_info_condition():
+                name = f"{data['given_name']} {data['family_name']}"
+            else:
+                name = self.request.user.email
             helpers.request_collaboration(
                 company_number=data['company_number'],
                 email=self.request.user.email,
-                name=f"{data['given_name']} {data['family_name']}",
+                name=name,
                 form_url=self.request.path,
             )
+            return TemplateResponse(self.request, self.templates[FINISHED])
         else:
-            self.create_company_profile(data)
-        return super().done(form_list=form_list, form_dict=form_dict, **kwargs)
+            return super().done(form_list, form_dict=form_dict, **kwargs)
 
 
-class NonCompaniesHouseEnrolmentView(
-    core.mixins.CreateUserProfileMixin, CreateCompanyProfileMixin,
-    UserJourneySuccessRoutingMixin, BaseEnrolmentWizardView
-):
-    steps_list_conf = helpers.StepsListConf(
-        form_labels_user=[
-            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
-            PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ],
-        form_labels_anon=[
-            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            PROGRESS_STEP_LABEL_USER_ACCOUNT,
-            PROGRESS_STEP_LABEL_VERIFICATION,
-            PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
-            PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ],
-    )
+class NonCompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizardView):
+    steps_list_labels = [
+        PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+        PROGRESS_STEP_LABEL_USER_ACCOUNT,
+        PROGRESS_STEP_LABEL_VERIFICATION,
+        PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
+        PROGRESS_STEP_LABEL_PERSONAL_INFO,
+    ]
+
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
             COMPANY_SEARCH: 2,
@@ -601,16 +593,8 @@ class NonCompaniesHouseEnrolmentView(
             context['company'] = self.get_cleaned_data_for_step(COMPANY_SEARCH)
         return context
 
-    def done(self, form_list, form_dict, **kwargs):
-        self.create_user_profile(form_dict[PERSONAL_INFO])
-        data = self.serialize_form_list(form_list)
-        self.create_company_profile(data)
-        return super().done(form_list=form_list, form_dict=form_dict, **kwargs)
 
-
-class IndividualUserEnrolmentInterstitial(
-    ReadUserIntentMixin, TemplateView
-):
+class IndividualUserEnrolmentInterstitial(ReadUserIntentMixin, TemplateView):
     template_name = 'enrolment/individual-interstitial.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -622,21 +606,13 @@ class IndividualUserEnrolmentInterstitial(
         return super().dispatch(request, *args, **kwargs)
 
 
-class IndividualUserEnrolmentView(
-    core.mixins.CreateUserProfileMixin, BaseEnrolmentWizardView
-):
-    steps_list_conf = helpers.StepsListConf(
-        form_labels_user=[
-            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            PROGRESS_STEP_LABEL_PERSONAL_INFO
-        ],
-        form_labels_anon=[
-            PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT,
-            PROGRESS_STEP_LABEL_VERIFICATION,
-            PROGRESS_STEP_LABEL_PERSONAL_INFO
-        ],
-    )
+class IndividualUserEnrolmentView(BaseEnrolmentWizardView):
+    steps_list_labels = [
+        PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+        PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT,
+        PROGRESS_STEP_LABEL_VERIFICATION,
+        PROGRESS_STEP_LABEL_PERSONAL_INFO
+    ]
 
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
@@ -662,23 +638,28 @@ class IndividualUserEnrolmentView(
         FINISHED: 'enrolment/individual-success.html',
     }
 
-    def done(self, form_list, form_dict, **kwargs):
-        self.create_user_profile(form_dict[PERSONAL_INFO])
-        return TemplateResponse(
-            self.request,
-            self.templates[FINISHED]
-        )
+    def get(self, *args, **kwargs):
+        # at this point all the steps will be hidden as the user is logged
+        # in and has a user profile, so the normal `get` method fails with
+        # IndexError, meaning `done` will not be hit. Working around this:
+        if self.kwargs['step'] == FINISHED:
+            return self.done()
+        return super().get(*args, **kwargs)
+
+    def get_template_names(self):
+        return [self.templates[self.steps.current]]
+
+    def done(self, *args, **kwargs):
+        return TemplateResponse(self.request, self.templates[FINISHED])
 
 
 class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
-    steps_list_conf = helpers.StepsListConf(
-        form_labels_user=[PROGRESS_STEP_LABEL_PERSONAL_INFO],
-        form_labels_anon=[
-            PROGRESS_STEP_LABEL_USER_ACCOUNT,
-            PROGRESS_STEP_LABEL_VERIFICATION,
-            PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ],
-    )
+    steps_list_labels = [
+        PROGRESS_STEP_LABEL_USER_ACCOUNT,
+        PROGRESS_STEP_LABEL_VERIFICATION,
+        PROGRESS_STEP_LABEL_PERSONAL_INFO,
+    ]
+
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={PERSONAL_INFO: 1},
         step_counter_anon={
@@ -752,7 +733,7 @@ class ResendVerificationCodeView(
     RestartOnStepSkipped,
     ProgressIndicatorMixin,
     StepsListMixin,
-    UserAccountEnrolmentHandlerMixin,
+    CreateUserAccountMixin,
     NamedUrlSessionWizardView
 ):
 
@@ -772,14 +753,10 @@ class ResendVerificationCodeView(
         # logged in users should not get here
         step_counter_user={},
     )
-    steps_list_conf = helpers.StepsListConf(
-        form_labels_anon=[
-            'Resend verification',
-            PROGRESS_STEP_LABEL_VERIFICATION,
-        ],
-        # logged in users should not get here
-        form_labels_user=[],
-    )
+    steps_list_labels = [
+        PROGRESS_STEP_LABEL_RESEND_VERIFICATION,
+        PROGRESS_STEP_LABEL_VERIFICATION,
+    ]
 
     def get_template_names(self):
         return [self.templates[self.steps.current]]
@@ -800,8 +777,7 @@ class ResendVerificationCodeView(
         )
         return response
 
-    def render_next_step(self, form, **kwargs):
-        response = super().render_next_step(form, **kwargs)
+    def process_step(self, form):
         if form.prefix == RESEND_VERIFICATION:
             email = form.cleaned_data['email']
             verification_code = helpers.regenerate_verification_code(email)
@@ -811,7 +787,7 @@ class ResendVerificationCodeView(
                     verification_code=verification_code,
                     form_url=self.request.path,
                 )
-        return response
+        return super().process_step(form)
 
     def get_context_data(self, *args, **kwargs):
         return super().get_context_data(
