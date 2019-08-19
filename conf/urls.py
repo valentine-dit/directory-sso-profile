@@ -294,6 +294,11 @@ urlpatterns = [
         company_required(profile.fab.views.AdminToolsView.as_view()),
         name='find-a-buyer-admin-tools'
     ),
+    url(
+        r'^find-a-buyer/verify/request/$',
+        company_required(profile.fab.views.IdentityVerificationRequestFormView.as_view()),
+        name='find-a-buyer-request-to-verify'
+    ),
 ]
 
 urlpatterns = [

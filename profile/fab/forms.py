@@ -536,3 +536,7 @@ class ExpertiseProductsServicesOtherForm(forms.Form):
         return tokenize_keywords(
             self.cleaned_data['expertise_products_services']
         )
+
+
+class IdentityVerificationRequestForm(forms.Form):
+    pass
