@@ -166,6 +166,30 @@ def request_collaboration(company_number, email, name, form_url):
     response.raise_for_status()
 
 
+def register_new_member(company_number, sso_id, email, name, form_url, mobile_number=''):
+    data = {
+        'company_number': company_number,
+        'sso_id': sso_id,
+        'company_email': email,
+        'name': name,
+        'mobile_number': mobile_number
+    }
+    response = api_client.company.register_new_collaborator(data=data)
+    response.raise_for_status()
+    action = actions.GovNotifyEmailAction(
+        email_address=response.json()['company_email'],
+        template_id=settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID,
+        form_url=form_url
+    )
+    response = action.save({
+        'name': name,
+        'email': email,
+        'profile_remove_member_url': settings.SSO_PROFILE_MANAGE_COLLABORATORS_URL,
+        'report_abuse_url': urls.FEEDBACK
+    })
+    response.raise_for_status()
+
+
 class CompanyParser(directory_components.helpers.CompanyParser):
 
     SIC_CODES = dict(choices.SIC_CODES)
