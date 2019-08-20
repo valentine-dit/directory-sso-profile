@@ -31,6 +31,7 @@ def default_company_profile():
         'name': 'Cool Company',
         'is_publishable': True,
         'expertise_products_services': {},
+        'is_identity_check_message_sent': False,
     }
 
 
@@ -825,3 +826,50 @@ def test_personal_details(client, mock_create_user_profile, user):
             'mobile_phone_number': '1232342'
         }
     )
+
+
+@mock.patch.object(api_client.company, 'verify_identity_request')
+def test_request_identity_verification(mock_verify_identity_request, client, user):
+    mock_verify_identity_request.return_value = create_response()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-request-to-verify')
+
+    response = client.post(url)
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
+    assert mock_verify_identity_request.call_count == 1
+    assert mock_verify_identity_request.call_args == mock.call(sso_session_id=user.session_id)
+
+    response = client.get(response.url)
+    assert response.status_code == 200
+    for message in response.context['messages']:
+        assert str(message) == views.IdentityVerificationRequestFormView.success_message
+
+
+@mock.patch.object(api_client.company, 'verify_identity_request')
+def test_request_identity_verification_already_sent(mock_verify_identity_request, client, user):
+    user.company.data['is_identity_check_message_sent'] = True
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-request-to-verify')
+
+    response = client.post(url)
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
+    assert mock_verify_identity_request.call_count == 0
+
+
+@mock.patch.object(api_client.company, 'verify_identity_request')
+def test_request_identity_verification_feature_off(mock_verify_identity_request, client, user, settings):
+    settings.FEATURE_FLAGS['REQUEST_VERIFICATION_ON'] = False
+    user.company.data['is_identity_check_message_sent'] = False
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-request-to-verify')
+
+    response = client.post(url)
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
+    assert mock_verify_identity_request.call_count == 0
