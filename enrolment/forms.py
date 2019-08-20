@@ -117,7 +117,6 @@ class UserAccount(forms.Form):
                     self.add_error('password', self.MESSAGE_PASSWORD_INVALID)
                 else:
                     raise
-        return None
 
 
 class UserAccountVerification(forms.Form):

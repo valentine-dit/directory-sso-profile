@@ -557,8 +557,7 @@ def test_companies_house_enrolment_submit_end_to_end(
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'sectors': ['AEROSPACE'],
-        'given_name': 'Foo',
-        'family_name': 'Example',
+        'name': user.full_name,
         'job_title': 'Exampler',
         'phone_number': '1232342',
         'company_type': 'COMPANIES_HOUSE',
@@ -621,8 +620,7 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'sectors': ['AEROSPACE'],
-        'given_name': 'Foo',
-        'family_name': 'Example',
+        'name': user.full_name,
         'job_title': 'Exampler',
         'phone_number': '1232342'
     })
@@ -733,7 +731,7 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     assert mock_request_collaboration.call_args == mock.call(
         company_number='12345678',
         email='jim@example.com',
-        name='Foo Example',
+        name=user.full_name,
         form_url=(
             reverse('enrolment-companies-house', kwargs={'step': 'finished'})
         )
@@ -773,7 +771,7 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
     assert mock_request_collaboration.call_args == mock.call(
         company_number='12345678',
         email='jim@example.com',
-        name='jim@example.com',
+        name=user.full_name,
         form_url=(
             reverse('enrolment-companies-house', kwargs={'step': 'finished'})
         )
@@ -1316,8 +1314,7 @@ def test_non_companies_house_enrolment_submit_end_to_end_logged_in(
         'postal_code': 'EEA 3AD',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
-        'given_name': 'Foo',
-        'family_name': 'Example',
+        'name': user.full_name,
         'job_title': 'Exampler',
         'phone_number': '1232342',
     })
@@ -1342,7 +1339,6 @@ def test_non_companies_house_enrolment_has_user_profile(
     assert response.status_code == 302
 
     response = client.get(response.url)
-
     assert response.status_code == 200
     assert response.template_name == (
         views.NonCompaniesHouseEnrolmentView.templates[views.FINISHED]
@@ -1689,11 +1685,12 @@ def test_individual_enrolment_submit_end_to_end(
     client.get(response.url)
 
     assert mock_create_user_profile.call_count == 1
-    assert mock_create_user_profile.call_args == mock.call(data={
-        'first_name': 'Foo',
-        'last_name': 'Example',
-        'job_title': None,
-        'mobile_phone_number': '1232342',
+    assert mock_create_user_profile.call_args == mock.call(
+        data={
+            'first_name': 'Foo',
+            'last_name': 'Example',
+            'job_title': None,
+            'mobile_phone_number': '1232342',
         },
         sso_session_id='123'
     )
@@ -1725,12 +1722,13 @@ def test_individual_enrolment_submit_end_to_end_logged_in(
     assert response.status_code == 200
 
     assert mock_create_user_profile.call_count == 1
-    assert mock_create_user_profile.call_args == mock.call(data={
-        'first_name': 'Foo',
-        'last_name': 'Example',
-        'job_title': None,
-        'mobile_phone_number': '1232342',
-    },
+    assert mock_create_user_profile.call_args == mock.call(
+        data={
+            'first_name': 'Foo',
+            'last_name': 'Example',
+            'job_title': None,
+            'mobile_phone_number': '1232342',
+        },
         sso_session_id='123'
     )
 

@@ -281,8 +281,6 @@ class CreateBusinessProfileMixin:
             'company_number',
             'company_type',
             'date_of_creation',
-            'family_name',
-            'given_name',
             'sectors',
             'job_title',
             'phone_number',
@@ -296,10 +294,12 @@ class CreateBusinessProfileMixin:
         }
 
     def create_company_profile(self, data):
+        user = self.request.user
         helpers.create_company_profile({
-            'sso_id': self.request.user.id,
-            'company_email': self.request.user.email,
-            'contact_email_address': self.request.user.email,
+            'sso_id': user.id,
+            'company_email': user.email,
+            'contact_email_address': user.email,
+            'name': user.full_name,
             **data,
         })
 
@@ -535,14 +535,10 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
             session=self.request.session,
         )
         if is_enrolled:
-            if self.personal_info_condition():
-                name = f"{data['given_name']} {data['family_name']}"
-            else:
-                name = self.request.user.email
             helpers.request_collaboration(
                 company_number=data['company_number'],
                 email=self.request.user.email,
-                name=name,
+                name=self.request.user.full_name,
                 form_url=self.request.path,
             )
             return TemplateResponse(self.request, self.templates[FINISHED])

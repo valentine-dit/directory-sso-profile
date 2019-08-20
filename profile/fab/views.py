@@ -317,9 +317,18 @@ class AdminToolsView(TemplateView):
             FAB_REMOVE_USER_URL=settings.FAB_REMOVE_USER_URL,
             FAB_TRANSFER_ACCOUNT_URL=settings.FAB_TRANSFER_ACCOUNT_URL,
             company=self.request.user.company.serialize_for_template(),
-            has_collaborators=helpers.has_collaborators(
-                self.request.user.session_id
-            ),
+            has_collaborators=bool(helpers.retrieve_collaborators(self.request.user.session_id)),
+            **kwargs,
+        )
+
+
+class AdminCollaboratorsListView(TemplateView):
+
+    template_name = 'fab/admin-collaborator-list.html'
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            collaborators=helpers.retrieve_collaborators(self.request.user.session_id),
             **kwargs,
         )
 
