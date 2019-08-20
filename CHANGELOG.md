@@ -3,6 +3,18 @@
 ## Pre-release
 
 ### Implemented enhancements
+- TT-1733 - Add request for individual verification feature
+- TT-1723 - Add collaborator list admin view
+  
+### Fixed bugs:
+- TT-1728 - Not ask personal details to individual upgrading to business profile
+- No ticket - Remove obsolete settings
+- TT-1731 - Fix address error persistence issue when a valid postcode is entered on UI
+
+## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
+[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)
+
+### Implemented enhancements
 - TT-990  - Update registration journey of individual user
 - TT-1566 - Handle overseas busienss enrolment
 - TT-1564 - Update registration journey SSO user with Companies House company
@@ -22,13 +34,10 @@
 - TT-1560 - Hide individual account interstitial if intent is create a business profile
 
 ### Fixed bugs:
-- TT-1728 - Not ask personal details to individual upgrading to business profile
+
 - TT-1647 - Correcting long address not displayed correctly on business search page
-- No ticket - Upgrade vulnerable django version to django 1.11.22
 - TT-1645 - Fix progress indicator changing from long to short list in new session
-- No ticket - Upgraded django to 1.11.23 to fix vulnerability
-- No ticket - Remove obsolete settings
-- TT-1731 - Fix address error persistance issue when a valid postcode is entered on UI
+- No ticket - Upgraded django to 1.11.23 to fix vulnerabilityI
 
 ## [07-17-2019 ](https://github.com/uktrade/directory-ui-supplier/releases/tag/07-17-2019 )
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.05...07-17-2019)

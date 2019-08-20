@@ -1,6 +1,7 @@
 import directory_healthcheck.views
 
 from django.contrib.auth.decorators import user_passes_test
+from django.conf import settings
 from django.conf.urls import include, url
 from django.urls import reverse_lazy
 from django.views.generic import RedirectView
@@ -19,8 +20,15 @@ def company_required(function):
         lambda user: bool(user.company),
         reverse_lazy('find-a-buyer'),
     )
-    if function:
-        return login_required(inner(function))
+    return login_required(inner(function))
+
+
+def company_admin_required(function):
+    inner = user_passes_test(
+        lambda user: user.is_company_admin,
+        reverse_lazy('find-a-buyer'),
+    )
+    return login_required(inner(function))
 
 
 healthcheck_urls = [
@@ -294,7 +302,25 @@ urlpatterns = [
         company_required(profile.fab.views.AdminToolsView.as_view()),
         name='find-a-buyer-admin-tools'
     ),
+
+
+    url(
+        r'^find-a-buyer/verify/request/$',
+        company_required(profile.fab.views.IdentityVerificationRequestFormView.as_view()),
+        name='find-a-buyer-request-to-verify'
+    ),
 ]
+
+
+if settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON']:
+    urlpatterns += [
+        url(
+            r'^find-a-buyer/admin/collaborators-list/$',
+            company_admin_required(profile.fab.views.AdminCollaboratorsListView.as_view()),
+            name='find-a-buyer-admin-collaborator-list'
+        ),
+    ]
+
 
 urlpatterns = [
     url(
