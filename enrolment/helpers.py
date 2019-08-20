@@ -174,7 +174,7 @@ def register_new_member(company_number, sso_id, email, name, form_url, mobile_nu
         'name': name,
         'mobile_number': mobile_number
     }
-    response = api_client.company.register_new_collaborator(data=data)
+    response = api_client.company.add_collaborator(data=data)
     response.raise_for_status()
     action = actions.GovNotifyEmailAction(
         email_address=response.json()['company_email'],
