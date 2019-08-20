@@ -315,9 +315,14 @@ urlpatterns = [
 if settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON']:
     urlpatterns += [
         url(
-            r'^find-a-buyer/admin/collaborators-list/$',
+            r'^find-a-buyer/admin/collaborators/$',
             company_admin_required(profile.fab.views.AdminCollaboratorsListView.as_view()),
             name='find-a-buyer-admin-collaborator-list'
+        ),
+        url(
+            r'^find-a-buyer/admin/collaborator/(?P<sso_id>[0-9]+)/$',
+            company_admin_required(profile.fab.views.AdminCollaboratorEditFormView.as_view()),
+            name='find-a-buyer-admin-collaborator-edit'
         ),
     ]
 

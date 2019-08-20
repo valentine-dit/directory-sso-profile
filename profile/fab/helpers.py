@@ -62,3 +62,15 @@ def retrieve_collaborators(sso_session_id):
     response = api_client.company.retrieve_collaborators(sso_session_id=sso_session_id)
     response.raise_for_status()
     return response.json()
+
+
+def retrieve_collaborator(sso_session_id, collaborator_sso_id):
+    for collaborator in retrieve_collaborators(sso_session_id):
+        if collaborator['sso_id'] == collaborator_sso_id:
+            return collaborator
+
+
+def remove_collaborator(sso_session_id, sso_ids):
+    response = api_client.company.remove_collaborators(sso_session_id=sso_session_id, sso_ids=sso_ids)
+    response.raise_for_status()
+    assert response.status_code == 200

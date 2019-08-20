@@ -9,6 +9,7 @@ from django.urls import reverse, reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.files.storage import DefaultStorage
 from django.shortcuts import redirect, Http404
+from django.utils.functional import cached_property
 from django.views.generic import TemplateView, FormView
 
 import core.mixins
@@ -331,6 +332,48 @@ class AdminCollaboratorsListView(TemplateView):
             collaborators=helpers.retrieve_collaborators(self.request.user.session_id),
             **kwargs,
         )
+
+
+class AdminCollaboratorEditFormView(SuccessMessageMixin, FormView):
+    template_name = 'fab/admin-collaborator-edit.html'
+    form_class = forms.AdminCollaboratorEditForm
+    success_url = reverse_lazy('find-a-buyer-admin-collaborator-list')
+
+    def dispatch(self, *args, **kwargs):
+        if not self.collaborator:
+            raise Http404()
+        if self.collaborator['sso_id'] == self.request.user.id:
+            return redirect(self.success_url)
+        return super().dispatch(*args, **kwargs)
+
+    @cached_property
+    def collaborator(self):
+        return helpers.retrieve_collaborator(
+            sso_session_id=self.request.user.session_id,
+            collaborator_sso_id=int(self.kwargs['sso_id'])
+        )
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(collaborator=self.collaborator, **kwargs)
+
+    def get_form_kwargs(self, *args, **kwargs):
+        kwargs = super().get_form_kwargs(*args, **kwargs)
+        return {**kwargs, 'current_role': self.collaborator['role']}
+
+    def form_valid(self, form):
+        if form.cleaned_data['action'] == forms.REMOVE_COLLABORATOR:
+            helpers.remove_collaborator(
+                sso_session_id=self.request.user.session_id,
+                sso_ids=[self.collaborator['sso_id']],
+            )
+        else:
+            raise NotImplementedError
+        return super().form_valid(form)
+
+    def get_success_message(self, cleaned_data):
+        if cleaned_data['action'] == forms.REMOVE_COLLABORATOR:
+            return 'Collaborator removed'
+        raise NotImplementedError
 
 
 class ProductsServicesRoutingFormView(FormView):
