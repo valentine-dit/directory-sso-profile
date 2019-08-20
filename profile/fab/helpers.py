@@ -4,15 +4,20 @@ from directory_api_client.client import api_client
 import directory_components.helpers
 
 
-def get_company_profile(sso_sesison_id):
-    response = api_client.company.retrieve_private_profile(
-        sso_session_id=sso_sesison_id
-    )
+def get_company_profile(sso_session_id):
+    response = api_client.company.retrieve_private_profile(sso_session_id)
     if response.status_code == http.client.NOT_FOUND:
         return None
-    elif response.status_code == http.client.OK:
-        return response.json()
     response.raise_for_status()
+    return response.json()
+
+
+def get_supplier_profile(sso_session_id):
+    response = api_client.supplier.retrieve_profile(sso_session_id)
+    if response.status_code == http.client.NOT_FOUND:
+        return None
+    response.raise_for_status()
+    return response.json()
 
 
 class CompanyParser(directory_components.helpers.CompanyParser):
@@ -53,13 +58,7 @@ class CompanyParser(directory_components.helpers.CompanyParser):
         }
 
 
-def unslugify(slug):
-    return (slug.replace('-', ' ')).capitalize()
-
-
-def has_collaborators(sso_session_id):
-    response = api_client.company.retrieve_collaborators(
-        sso_session_id=sso_session_id
-    )
+def retrieve_collaborators(sso_session_id):
+    response = api_client.company.retrieve_collaborators(sso_session_id=sso_session_id)
     response.raise_for_status()
-    return bool(response.json())
+    return response.json()

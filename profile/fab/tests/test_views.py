@@ -2,6 +2,7 @@ from io import BytesIO
 import http
 from unittest import mock
 
+from directory_constants import user_roles
 from directory_api_client.client import api_client
 from formtools.wizard.views import normalize_name
 import pytest
@@ -11,8 +12,9 @@ from requests.exceptions import HTTPError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 
-from core.tests.helpers import create_response, submit_step_factory
+from core.tests.helpers import create_response, reload_urlconf, submit_step_factory
 from profile.fab import constants, forms, helpers, views
+from sso.models import SSOUser
 
 
 def create_test_image(extension):
@@ -100,7 +102,7 @@ def mock_update_company(default_company_profile):
 def mock_retrieve_supplier():
     patch = mock.patch.object(
         api_client.supplier, 'retrieve_profile',
-        return_value=create_response(200, {'is_company_owner': True})
+        return_value=create_response(200, {'is_company_owner': True, 'role': user_roles.ADMIN})
     )
     yield patch.start()
     patch.stop()
@@ -873,3 +875,64 @@ def test_request_identity_verification_feature_off(mock_verify_identity_request,
     assert response.status_code == 302
     assert response.url == reverse('find-a-buyer')
     assert mock_verify_identity_request.call_count == 0
+
+
+@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
+@mock.patch.object(api_client.company, 'retrieve_collaborators')
+def test_collaborator_list_feature_off(mock_retrieve_collaborators, mock_is_company_admin, client, user, settings):
+    url = reverse('find-a-buyer-admin-collaborator-list')
+
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
+    reload_urlconf()
+    mock_is_company_admin.return_value = True
+    client.force_login(user)
+
+    response = client.get(url)
+    assert response.status_code == 404
+    assert mock_retrieve_collaborators.call_count == 0
+
+
+@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
+@mock.patch.object(api_client.company, 'retrieve_collaborators')
+def test_collaborator_list_not_admin(mock_retrieve_collaborators, mock_is_company_admin, client, user, settings):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+    mock_is_company_admin.return_value = False
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-collaborator-list')
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url.startswith(reverse('find-a-buyer'))
+    assert mock_retrieve_collaborators.call_count == 0
+
+
+@mock.patch.object(api_client.company, 'retrieve_collaborators')
+def test_collaborator_list_anon_user(mock_retrieve_collaborators, client, settings):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    url = reverse('find-a-buyer-admin-collaborator-list')
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url.startswith(settings.LOGIN_URL)
+    assert mock_retrieve_collaborators.call_count == 0
+
+
+@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
+@mock.patch.object(api_client.company, 'retrieve_collaborators')
+def test_collaborator_list(mock_retrieve_collaborators, mock_is_company_admin, client, user, settings):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    mock_is_company_admin.return_value = True
+    client.force_login(user)
+    mock_retrieve_collaborators.return_value = create_response(json_body=[])
+
+    url = reverse('find-a-buyer-admin-collaborator-list')
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['collaborators'] == []
