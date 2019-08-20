@@ -32,6 +32,7 @@
 - No ticket - Increase flake 8 coverage to 120 lines
 - TT-1561 - Show different enrolment title depending on user journey
 - TT-1560 - Hide individual account interstitial if intent is create a business profile
+– TT-1732 – added context to incomplete business profile banner
 
 ### Fixed bugs:
 
