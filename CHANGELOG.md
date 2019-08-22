@@ -6,6 +6,7 @@
 - TT-1733 - Add request for individual verification feature
 - TT-1723 - Add collaborator list admin view
 - TT-1716 - Support removing collaborators
+- TT-1732 – added context to incomplete business profile banner
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
