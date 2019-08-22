@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% load static from staticfiles %}
+{% load breadcrumbs from directory_components %}
+
+{% block head_css %}
+    {{ block.super }}
+    <link href="{% static 'css/company-profile.css' %}" media="all" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+    <div class="background-stone-40 padding-bottom-45 margin-bottom-45">
+        <div class="container">
+            {% breadcrumbs 'Profile settings' %}
+                <a href="{% url 'about' %}">Home</a>
+                <a href="{% url 'find-a-buyer' %}">Business profile</a>
+            {% endbreadcrumbs %}
+            <h1 class="heading-xlarge margin-top-45">Profile settings</h1>
+        </div>
+    </div>
+    <div class="container" id="associated-accounts-container">
+       <div class="grid-row grey-text">
+            <div class="column-one-quarter">
+                <div class="bold-small margin-bottom-15">Collaborator management</div>
+                <div class="margin-bottom-15">Invite collaborators</div>
+                <div class="margin-bottom-45 bold-small">
+                    <a href="{% url 'find-a-buyer-admin-collaborator-list' %}" class="link">Collaborators</a>
+                </div>
+                <div class="bold-small margin-bottom-15">Business profile management</div>
+                <div class="margin-bottom-15">Publish settings</div>
+                <div class="margin-bottom-45">Delete business profile</div>
+                <a href="{% url 'find-a-buyer-admin-collaborator-list' %}">Back</a>
+            </div>
+            <div class="column-three-quarters">
+                <h2 class="heading-large margin-top-0 margin-bottom-15">Remove profile from account</h2>
+                <p>You will no longer have access to this business profile.</p>
+                <form method="post" enctype="multipart/form-data">
+                    {{ form }}
+                    <button class="button">Confirm to remove business profile</button>
+                </form>
+                <a class="link" href="{% url 'find-a-buyer-admin-collaborator-list' %}">Cancel</a>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

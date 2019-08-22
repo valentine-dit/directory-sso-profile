@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-{% load render_form from directory_components %}
 {% load static from staticfiles %}
 
 {% block head_css %}
@@ -28,9 +27,7 @@
             <div class="column-one-half">
                 {% block form_contents %}
                     <form method="post" enctype="multipart/form-data">
-                        {% block form %}
-                            {% render_form form %}
-                        {% endblock %}
+                        {% block form %}{{ form }}{% endblock %}
                         {% block form_button %}
                             <button class="button">Save and continue</button>
                         {% endblock %}

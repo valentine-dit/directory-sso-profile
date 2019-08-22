@@ -59,10 +59,16 @@
                           <th class="border-white padding-top-15 padding-bottom-10" scope="row">{{ collaborator.name|default:collaborator.company_email }}</th>
                           <td class="border-white padding-top-15 padding-bottom-10">{{ collaborator.role|title }}</td>
                           {% if collaborator.sso_id == request.user.id %}
-                              <td class="border-white padding-top-15 padding-bottom-10 numeric">Remove profile from my account</td>
+                              <td class="border-white padding-top-15 padding-bottom-10 numeric">
+                                <a href="{% url 'find-a-buyer-admin-disconnect' %}" class="link">Remove profile from my account</a>
+                              </td>
                           {% else %}
                               <td class="border-white padding-top-15 padding-bottom-10 numeric">
-                                <a href="{% url 'find-a-buyer-admin-collaborator-edit' sso_id=collaborator.sso_id %}" class="link">Edit</a>
+                                {% if request.user.is_company_admin %}
+                                  <a href="{% url 'find-a-buyer-admin-collaborator-edit' sso_id=collaborator.sso_id %}" class="link">Edit</a>
+                                {% else %}
+                                  <span>N/A</span>
+                                {% endif %}
                               </td>
                           {% endif %}
                         </tr>

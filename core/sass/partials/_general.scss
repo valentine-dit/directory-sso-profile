@@ -1,3 +1,5 @@
+@import 'partials/colours';
+
 
 .information-breakout {
   background-image: url(/static/images/EiG_Profile_welcome_pointed_hand_grey.png);
@@ -12,7 +14,7 @@
 
 .sso-profile-tab-container {
   margin-top: 30px;
-  background-color: #F0F3F2;
+  background-color: $stone-90;
 
   .grid-row {
     margin: 0;
@@ -25,7 +27,7 @@
 
 .sso-profile-tab-container li.active {
   background-color: white;
-  border-top: 5px solid #E41F13;
+  border-top: 5px solid $flag-red;
 }
 
 .sso-profile-tab-container li a {

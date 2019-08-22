@@ -1,7 +1,7 @@
 from directory_api_client.client import api_client
 from formtools.wizard.views import NamedUrlSessionWizardView
 from raven.contrib.django.raven_compat.models import client as sentry_client
-from requests.exceptions import RequestException
+from requests.exceptions import HTTPError, RequestException
 
 from django.conf import settings
 from django.contrib import messages
@@ -376,6 +376,22 @@ class AdminCollaboratorEditFormView(SuccessMessageMixin, FormView):
         raise NotImplementedError
 
 
+class AdminDisconnectFormView(SuccessMessageMixin, FormView):
+    template_name = 'fab/admin-disconnect.html'
+    form_class = forms.NoOperationForm
+    success_message = 'Business profile removed from account.'
+    success_url = reverse_lazy('find-a-buyer')
+
+    def form_valid(self, form):
+        try:
+            helpers.disconnect_from_company(self.request.user.session_id)
+        except HTTPError as error:
+            if error.response.status_code == 400:
+                form.add_error(field=None, error=error.response.json())
+                return self.form_invalid(form)
+        return super().form_valid(form)
+
+
 class ProductsServicesRoutingFormView(FormView):
 
     form_class = forms.ExpertiseProductsServicesRoutingForm
@@ -476,7 +492,7 @@ class PersonalDetailsFormView(
 
 class IdentityVerificationRequestFormView(SuccessMessageMixin, FormView):
     template_name = 'fab/request-verify.html'
-    form_class = forms.IdentityVerificationRequestForm
+    form_class = forms.NoOperationForm
     success_url = reverse_lazy('find-a-buyer')
     success_message = 'Request to verify sent'
 

@@ -541,7 +541,7 @@ class ExpertiseProductsServicesOtherForm(forms.Form):
         )
 
 
-class IdentityVerificationRequestForm(forms.Form):
+class NoOperationForm(forms.Form):
     pass
 
 
