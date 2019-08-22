@@ -990,8 +990,9 @@ def test_edit_collaborator_retrieve(client, user, settings):
     assert response.status_code == 200
 
 
+@pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_MEMBER, forms.CHANGE_COLLABORATOR_TO_ADMIN))
 @pytest.mark.xfail(raises=NotImplementedError, strict=True)
-def test_edit_collaborator_change_editor_to_member(mock_retrieve_collaborators, client, user, settings):
+def test_edit_collaborator_change_editor_to_other(mock_retrieve_collaborators, client, user, settings, action):
     mock_retrieve_collaborators.return_value = create_response(json_body=[
         {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
         {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com'}
@@ -1002,14 +1003,15 @@ def test_edit_collaborator_change_editor_to_member(mock_retrieve_collaborators, 
     client.force_login(user)
 
     url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
-    response = client.post(url, data={'action': forms.CHANGE_COLLABORATOR_TO_MEMBER})
+    response = client.post(url, data={'action': action})
 
     assert response.status_code == 302
     assert response.url == reverse('find-a-buyer-admin-collaborator-list')
 
 
+@pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_EDITOR, forms.CHANGE_COLLABORATOR_TO_ADMIN))
 @pytest.mark.xfail(raises=NotImplementedError, strict=True)
-def test_edit_collaborator_change_member_to_editor(mock_retrieve_collaborators, client, user, settings):
+def test_edit_collaborator_change_member_to_otherr(mock_retrieve_collaborators, client, user, settings, action):
     mock_retrieve_collaborators.return_value = create_response(json_body=[
         {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
         {'sso_id': 1234, 'role': user_roles.MEMBER, 'company_email': 'jim@example.com'}
@@ -1020,7 +1022,26 @@ def test_edit_collaborator_change_member_to_editor(mock_retrieve_collaborators, 
     client.force_login(user)
 
     url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
-    response = client.post(url, data={'action': forms.CHANGE_COLLABORATOR_TO_EDITOR})
+    response = client.post(url, data={'action': action})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-collaborator-list')
+
+
+@pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_MEMBER, forms.CHANGE_COLLABORATOR_TO_EDITOR))
+@pytest.mark.xfail(raises=NotImplementedError, strict=True)
+def test_edit_collaborator_change_admin_to_other(mock_retrieve_collaborators, client, user, settings, action):
+    mock_retrieve_collaborators.return_value = create_response(json_body=[
+        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
+        {'sso_id': 1234, 'role': user_roles.ADMIN, 'company_email': 'jim@example.com'}
+    ])
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
+    response = client.post(url, data={'action': action})
 
     assert response.status_code == 302
     assert response.url == reverse('find-a-buyer-admin-collaborator-list')
