@@ -1,4 +1,4 @@
-from directory_constants import choices, expertise
+from directory_constants import choices, expertise, user_roles
 from directory_components import forms
 from directory_components.helpers import tokenize_keywords
 import directory_validators.company
@@ -13,6 +13,9 @@ from profile.fab import constants, validators
 
 INDUSTRY_CHOICES = [('', 'Select an industry')] + list(choices.INDUSTRIES)
 EMPLOYEES_CHOICES = [('', 'Select employees')] + list(choices.EMPLOYEES)
+REMOVE_COLLABORATOR = 'REMOVE'
+CHANGE_COLLABORATOR_TO_EDITOR = 'CHANGE_TO_EDITOR'
+CHANGE_COLLABORATOR_TO_MEMBER = 'CHANGE_TO_MEMBER'
 
 
 class SocialLinksForm(forms.Form):
@@ -540,3 +543,28 @@ class ExpertiseProductsServicesOtherForm(forms.Form):
 
 class IdentityVerificationRequestForm(forms.Form):
     pass
+
+
+class AdminCollaboratorEditForm(forms.Form):
+
+    CHOICES = {
+        user_roles.MEMBER: [
+            ('', 'Please select'),
+            (REMOVE_COLLABORATOR, 'Remove'),
+            (CHANGE_COLLABORATOR_TO_EDITOR, 'Upgrade to Editor'),
+        ],
+        user_roles.EDITOR: [
+            ('', 'Please select'),
+            (REMOVE_COLLABORATOR, 'Remove'),
+            (CHANGE_COLLABORATOR_TO_MEMBER, 'Downgrade to Member'),
+        ]
+    }
+
+    def __init__(self, current_role, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['action'].choices = self.CHOICES[current_role]
+
+    action = forms.ChoiceField(
+        label='',
+        choices=[]  # set in __init__
+    )

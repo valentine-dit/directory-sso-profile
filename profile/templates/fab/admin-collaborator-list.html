@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% load static from staticfiles %}
-{% load breadcrumbs from directory_components %}
+{% load breadcrumbs success_box from directory_components %}
 
 {% block head_css %}
     {{ block.super }}
@@ -19,15 +19,28 @@
         </div>
     </div>
     <div class="container" id="associated-accounts-container">
+
+      {% if messages %}
+          <div>
+          {% for message in messages %}
+              {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                  {% success_box heading="Completed" description=message box_class='width-full background-white margin-top-30' %}
+              {% endif %}
+          {% endfor %}
+          </div>
+      {% endif %}
+
        <div class="grid-row grey-text">
             <div class="column-one-quarter">
-                <div class="bold-small margin-bottom-15">Collaborator management</div>
-                <div class="margin-bottom-15 active-blue-text">Invite collaborators</div>
-                <div class="margin-bottom-45 active-blue-text bold-small">Collaborators</div>
+                <div class="bold-small margin-bottom-15 ">Collaborator management</div>
+                <div class="margin-bottom-15">Invite collaborators</div>
+                <div class="margin-bottom-45 bold-small">
+                    <a href="{% url 'find-a-buyer-admin-collaborator-list' %}" class="link">Collaborators</a>
+                </div>
 
                 <div class="bold-small margin-bottom-15">Business profile management</div>
-                <div class="margin-bottom-15 active-blue-text">Publish settings</div>
-                <div class="margin-bottom-45 active-blue-text">Delete business profile</div>
+                <div class="margin-bottom-15">Publish settings</div>
+                <div class="margin-bottom-45">Delete business profile</div>
                 <a href="{% url 'find-a-buyer' %}">Back</a>
             </div>
             <div class="column-three-quarters">
@@ -48,7 +61,9 @@
                           {% if collaborator.sso_id == request.user.id %}
                               <td class="border-white padding-top-15 padding-bottom-10 numeric">Remove profile from my account</td>
                           {% else %}
-                              <td class="border-white padding-top-15 padding-bottom-10 numeric">Edit</td>
+                              <td class="border-white padding-top-15 padding-bottom-10 numeric">
+                                <a href="{% url 'find-a-buyer-admin-collaborator-edit' sso_id=collaborator.sso_id %}" class="link">Edit</a>
+                              </td>
                           {% endif %}
                         </tr>
                     {% endfor %}
