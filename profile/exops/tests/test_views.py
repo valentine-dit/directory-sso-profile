@@ -8,7 +8,7 @@ from profile.exops.helpers import exopps_client
 
 
 def response_factory(status_code):
-    return Mock(return_value=create_response(status_code))
+    return Mock(return_value=create_response(status_code=status_code))
 
 
 def test_export_opportunities_applications_exposes_context(

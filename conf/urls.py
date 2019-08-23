@@ -329,6 +329,11 @@ if settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON']:
             company_required(profile.fab.views.AdminDisconnectFormView.as_view()),
             name='find-a-buyer-admin-disconnect'
         ),
+        url(
+            r'^find-a-buyer/admin/transfer/$',
+            company_admin_required(profile.fab.views.AdminInviteNewAdminFormView.as_view()),
+            name='find-a-buyer-admin-invite-administrator'
+        ),
     ]
 
 

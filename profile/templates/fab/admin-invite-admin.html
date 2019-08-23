@@ -1,0 +1,25 @@
+{% extends 'fab/admin-base.html' %}
+
+{% load static from staticfiles %}
+{% load breadcrumbs from directory_components %}
+
+{% block breadcrumbs %}
+    {% breadcrumbs 'Remove profile' %}
+        <a href="{{ services_urls.great_domestic }}">great.gov.uk</a>
+        <a href="{% url 'find-a-buyer' %}">Business profile</a>
+        <a href="{% url 'find-a-buyer-admin-collaborator-list' %}">Profile settings</a>
+    {% endbreadcrumbs %}
+{% endblock %}
+
+{% block inner_content %}
+    <div class="width-two-thirds">
+        <h2 class="heading-large margin-top-0 margin-bottom-15">Choose a new administrator</h2>
+        <p>You must choose a new administrator before you can remove this profile from your account.</p>
+        <p>Invite a new collaborator to become administrator.</p>
+        <form method="post" enctype="multipart/form-data">
+            {{ form }}
+            <button class="button">Send invitation</button>
+        </form>
+        <a class="link" href="{% url 'find-a-buyer-admin-collaborator-list' %}">Cancel</a>
+    </div>
+{% endblock %}

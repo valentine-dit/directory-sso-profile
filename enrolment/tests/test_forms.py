@@ -17,7 +17,7 @@ def mock_clean():
 
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
 def test_create_user_password_invalid_not_matching(mock_create_user):
-    mock_create_user.return_value = create_response(400)
+    mock_create_user.return_value = create_response(status_code=400)
     form = forms.UserAccount(
         data={
             'email': 'test@test.com',
@@ -33,7 +33,7 @@ def test_create_user_password_invalid_not_matching(mock_create_user):
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
 def test_create_user_password_invalid(mock_create_user):
     data = {'password': 'validation error'}
-    mock_create_user.return_value = create_response(400, data)
+    mock_create_user.return_value = create_response(status_code=400, json_body=data)
 
     form = forms.UserAccount(
         data={
@@ -50,7 +50,7 @@ def test_create_user_password_invalid(mock_create_user):
 
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
 def test_create_user_password_existing_user(mock_create_user):
-    mock_create_user.return_value = create_response(400)
+    mock_create_user.return_value = create_response(status_code=400)
 
     form = forms.UserAccount(
         data={
@@ -67,7 +67,7 @@ def test_create_user_password_existing_user(mock_create_user):
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
 def test_create_user_error(mock_create_user):
 
-    mock_create_user.return_value = create_response(401)
+    mock_create_user.return_value = create_response(status_code=401)
     form = forms.UserAccount(
         data={
             'email': 'test@test.com',
@@ -84,7 +84,7 @@ def test_create_user_error(mock_create_user):
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
 def test_create_user(mock_create_user):
     data = {'email': 'test@test.com', 'verification_code': '12345'}
-    mock_create_user.return_value = create_response(201, data)
+    mock_create_user.return_value = create_response(status_code=201, json_body=data)
 
     form = forms.UserAccount(
         data={

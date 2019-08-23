@@ -22,7 +22,7 @@ def test_get_company_profile_ok_saves_to_session(mock_get_company_profile):
         'registered_office_address': {'one': '555', 'two': 'fake street'},
     }
 
-    mock_get_company_profile.return_value = create_response(200, data)
+    mock_get_company_profile.return_value = create_response(data)
     helpers.get_company_profile('123456', session)
 
     assert session['COMPANY_PROFILE-123456'] == data
@@ -39,7 +39,7 @@ def test_get_company_profile_ok(mock_get_company_profile):
         'registered_office_address': {'one': '555', 'two': 'fake street'},
     }
 
-    mock_get_company_profile.return_value = create_response(200, data)
+    mock_get_company_profile.return_value = create_response(data)
     result = helpers.get_company_profile('123456', session)
 
     assert mock_get_company_profile.call_count == 1
@@ -50,7 +50,7 @@ def test_get_company_profile_ok(mock_get_company_profile):
 
 @mock.patch.object(helpers.ch_search_api_client.company, 'get_company_profile')
 def test_get_company_profile_not_ok(mock_get_company_profile):
-    mock_get_company_profile.return_value = create_response(400)
+    mock_get_company_profile.return_value = create_response(status_code=400)
     with pytest.raises(HTTPError):
         helpers.get_company_profile('123456', {})
 
@@ -63,7 +63,7 @@ def test_create_user(mock_create_user):
         'verification_code': '12345',
         'cookies': RequestsCookieJar(),
     }
-    mock_create_user.return_value = create_response(200, data)
+    mock_create_user.return_value = create_response(data)
     result = helpers.create_user(
         email='test@test1234.com',
         password='1234',
@@ -76,7 +76,7 @@ def test_create_user(mock_create_user):
 @mock.patch.object(helpers.sso_api_client.user, 'create_user')
 def test_create_user_duplicate(mock_create_user):
 
-    mock_create_user.return_value = create_response(400)
+    mock_create_user.return_value = create_response(status_code=400)
     result = helpers.create_user(
         email='test@test1234.com',
         password='1234',
@@ -96,7 +96,7 @@ def test_send_verification_code_email(mock_submit):
     }
     form_url = 'test'
 
-    mock_submit.return_value = create_response(201)
+    mock_submit.return_value = create_response(status_code=201)
     helpers.send_verification_code_email(
         email=email,
         verification_code=verification_code,
@@ -151,7 +151,7 @@ def test_notify_already_registered(mock_submit):
     email = 'test@test123.com'
     form_url = 'test'
 
-    mock_submit.return_value = create_response(201)
+    mock_submit.return_value = create_response(status_code=201)
     helpers.notify_already_registered(
         email=email,
         form_url=form_url,
@@ -182,7 +182,7 @@ def test_notify_already_registered(mock_submit):
 @mock.patch.object(helpers.api_client.company, 'request_collaboration')
 def test_request_collaboration(mock_request_collaboration, mock_submit):
     mock_request_collaboration.return_value = create_response(
-        201, {'company_email': 'company@example.com'}
+        status_code=201, json_body={'company_email': 'company@example.com'}
     )
 
     helpers.request_collaboration(

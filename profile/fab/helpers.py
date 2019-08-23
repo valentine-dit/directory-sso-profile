@@ -80,3 +80,9 @@ def disconnect_from_company(sso_session_id):
     response = api_client.supplier.disconnect_from_company(sso_session_id)
     response.raise_for_status()
     assert response.status_code == 200
+
+
+def create_admin_transfer_invite(sso_session_id, email):
+    response = api_client.company.create_transfer_invite(sso_session_id=sso_session_id, new_owner_email=email)
+    response.raise_for_status()
+    assert response.status_code == 201

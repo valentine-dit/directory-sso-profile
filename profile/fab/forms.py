@@ -52,9 +52,7 @@ class SocialLinksForm(forms.Form):
 
 
 class EmailAddressForm(forms.Form):
-    email_address = forms.EmailField(
-        label='Email address'
-    )
+    email_address = forms.EmailField(label='Email address')
 
 
 class DescriptionForm(forms.Form):
@@ -577,3 +575,7 @@ class AdminCollaboratorEditForm(forms.Form):
         label='',
         choices=[]  # set in __init__
     )
+
+
+class AdminInviteNewAdminForm(forms.Form):
+    new_owner_email = forms.EmailField(label='Enter the email address of the new profile administrator')

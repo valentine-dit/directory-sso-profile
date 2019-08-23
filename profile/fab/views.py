@@ -391,6 +391,31 @@ class AdminDisconnectFormView(SuccessMessageMixin, FormView):
                 return self.form_invalid(form)
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        is_sole_collaborator = len(helpers.retrieve_collaborators(self.request.user.session_id)) == 1
+        return super().get_context_data(is_sole_collaborator=is_sole_collaborator, **kwargs)
+
+
+class AdminInviteNewAdminFormView(SuccessMessageMixin, FormView):
+    template_name = 'fab/admin-invite-admin.html'
+    form_class = forms.AdminInviteNewAdminForm
+    success_message = (
+        'We have sent an invite to %(new_owner_email)s to become the new administrator for the business profile. '
+        'You will be notified when this happens.'
+    )
+    success_url = reverse_lazy('find-a-buyer-admin-collaborator-list')
+
+    def form_valid(self, form):
+        try:
+            helpers.create_admin_transfer_invite(
+                sso_session_id=self.request.user.session_id, email=form.cleaned_data['new_owner_email']
+            )
+        except HTTPError as error:
+            if error.response.status_code == 400:
+                form.add_error(field=None, error=error.response.json())
+                return self.form_invalid(form)
+        return super().form_valid(form)
+
 
 class ProductsServicesRoutingFormView(FormView):
 
