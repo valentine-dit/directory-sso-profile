@@ -530,11 +530,11 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
 
     def done(self, form_list, form_dict, **kwargs):
         data = self.serialize_form_list(form_list)
-        print(data)
         is_enrolled = helpers.get_is_enrolled(
             company_number=data['company_number'],
             session=self.request.session,
         )
+
         if is_enrolled:
             helpers.register_new_member(
                 company_number=data['company_number'],
@@ -542,7 +542,7 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
                 email=self.request.user.email,
                 name=self.request.user.full_name,
                 form_url=self.request.path,
-                mobile_number=data.get('mobile_number', '')
+                mobile_number=''
             )
             return TemplateResponse(self.request, self.templates[FINISHED])
         else:

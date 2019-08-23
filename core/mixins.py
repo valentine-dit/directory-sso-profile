@@ -41,7 +41,14 @@ class CreateUserProfileMixin:
         }
 
     def create_user_profile(self, form):
-        helpers.create_user_profile(
+        response = helpers.create_user_profile(
             sso_session_id=self.request.user.session_id,
             data=self.serialize_user_profile(form),
         )
+
+        parsed = response.json()
+
+        self.request.user.has_user_profile = True
+        self.request.user.first_name = parsed['first_name']
+        self.request.user.last_name = parsed['last_name']
+
