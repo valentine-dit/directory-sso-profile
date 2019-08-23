@@ -1,78 +1,46 @@
-{% extends 'base.html' %}
+{% extends 'fab/admin-base.html' %}
 
 {% load static from staticfiles %}
-{% load breadcrumbs success_box from directory_components %}
+{% load breadcrumbs from directory_components %}
 
-{% block head_css %}
-    {{ block.super }}
-    <link href="{% static 'css/company-profile.css' %}" media="all" rel="stylesheet" />
+{% block breadcrumbs %}
+    {% breadcrumbs 'Collaborators' %}
+        <a href="{% url 'about' %}">Home</a>
+        <a href="{% url 'find-a-buyer' %}">Business profile</a>
+    {% endbreadcrumbs %}
 {% endblock %}
 
-{% block content %}
-    <div class="background-stone-40 padding-bottom-45 margin-bottom-45">
-        <div class="container">
-            {% breadcrumbs 'Profile settings' %}
-                <a href="{% url 'about' %}">Home</a>
-                <a href="{% url 'find-a-buyer' %}">Business profile</a>
-            {% endbreadcrumbs %}
-            <h1 class="heading-xlarge margin-top-45">Profile settings</h1>
-        </div>
-    </div>
-    <div class="container" id="associated-accounts-container">
 
-      {% if messages %}
-          <div>
-          {% for message in messages %}
-              {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                  {% success_box heading="Completed" description=message box_class='width-full background-white margin-top-30' %}
-              {% endif %}
-          {% endfor %}
-          </div>
-      {% endif %}
-
-       <div class="grid-row grey-text">
-            <div class="column-one-quarter">
-                <div class="bold-small margin-bottom-15 ">Collaborator management</div>
-                <div class="margin-bottom-15">Invite collaborators</div>
-                <div class="margin-bottom-45 bold-small">
-                    <a href="{% url 'find-a-buyer-admin-collaborator-list' %}" class="link">Collaborators</a>
-                </div>
-
-                <div class="bold-small margin-bottom-15">Business profile management</div>
-                <div class="margin-bottom-15">Publish settings</div>
-                <div class="margin-bottom-45">Delete business profile</div>
-                <a href="{% url 'find-a-buyer' %}">Back</a>
-            </div>
-            <div class="column-three-quarters">
-                <h2 class="heading-large margin-top-0">Collaborators</h2>
-                <table>
-                  <thead>
-                    <tr>
-                      <th class="border-light-grey padding-top-15 padding-bottom-15" scope="col">People</th>
-                      <th class="border-light-grey padding-top-15 padding-bottom-15" scope="col">Role</th>
-                      <th class="border-light-grey padding-top-15 padding-bottom-15 numeric" scope="col">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for collaborator in collaborators %}
-                        <tr>
-                          <th class="border-white padding-top-15 padding-bottom-10" scope="row">{{ collaborator.name|default:collaborator.company_email }}</th>
-                          <td class="border-white padding-top-15 padding-bottom-10">{{ collaborator.role|title }}</td>
-                          {% if collaborator.sso_id == request.user.id %}
-                              <td class="border-white padding-top-15 padding-bottom-10 numeric">Remove profile from my account</td>
-                          {% else %}
-                              <td class="border-white padding-top-15 padding-bottom-10 numeric">
-                                <a href="{% url 'find-a-buyer-admin-collaborator-edit' sso_id=collaborator.sso_id %}" class="link">Edit</a>
-                              </td>
-                          {% endif %}
-                        </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-
-            </div>
-        </div>
-    </div>
-
+{% block inner_content %}
+  <h2 class="heading-large margin-top-0">Collaborators</h2>
+  <table>
+    <thead>
+      <tr>
+        <th class="border-light-grey padding-top-15 padding-bottom-15" scope="col">People</th>
+        <th class="border-light-grey padding-top-15 padding-bottom-15" scope="col">Role</th>
+        <th class="border-light-grey padding-top-15 padding-bottom-15 numeric" scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for collaborator in collaborators %}
+          <tr>
+            <th class="border-white padding-top-15 padding-bottom-10" scope="row">{{ collaborator.name|default:collaborator.company_email }}</th>
+            <td class="border-white padding-top-15 padding-bottom-10">{{ collaborator.role|title }}</td>
+            {% if collaborator.sso_id == request.user.id %}
+                <td class="border-white padding-top-15 padding-bottom-10 numeric">
+                  <a href="{% url 'find-a-buyer-admin-disconnect' %}" class="link">Remove profile from my account</a>
+                </td>
+            {% else %}
+                <td class="border-white padding-top-15 padding-bottom-10 numeric">
+                  {% if request.user.is_company_admin %}
+                    <a href="{% url 'find-a-buyer-admin-collaborator-edit' sso_id=collaborator.sso_id %}" class="link">Edit</a>
+                  {% else %}
+                    <span>N/A</span>
+                  {% endif %}
+                </td>
+            {% endif %}
+          </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock %}
-

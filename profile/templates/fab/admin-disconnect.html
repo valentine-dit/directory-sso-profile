@@ -1,0 +1,22 @@
+{% extends 'fab/admin-base.html' %}
+
+{% load static from staticfiles %}
+{% load breadcrumbs from directory_components %}
+
+{% block breadcrumbs %}
+    {% breadcrumbs 'Remove profile from account' %}
+        <a href="{% url 'about' %}">Home</a>
+        <a href="{% url 'find-a-buyer' %}">Business profile</a>
+    {% endbreadcrumbs %}
+{% endblock %}
+
+
+{% block inner_content %}
+    <h2 class="heading-large margin-top-0 margin-bottom-15">Remove profile from account</h2>
+    <p>You will no longer have access to this business profile.</p>
+    <form method="post" enctype="multipart/form-data">
+        {{ form }}
+        <button class="button">Confirm to remove business profile</button>
+    </form>
+    <a class="link" href="{% url 'find-a-buyer-admin-collaborator-list' %}">Cancel</a>
+{% endblock %}

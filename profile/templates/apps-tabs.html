@@ -4,7 +4,7 @@
 
 {% block content %}
     <div class="container">
-
+        {% block breadcrumbs %}{% endblock %}
         {% if request.user.is_authenticated and not request.user.has_user_profile %}
             <div class="margin-top-30">
                 {% if not request.user.company %}

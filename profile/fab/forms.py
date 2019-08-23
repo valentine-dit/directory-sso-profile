@@ -16,6 +16,7 @@ EMPLOYEES_CHOICES = [('', 'Select employees')] + list(choices.EMPLOYEES)
 REMOVE_COLLABORATOR = 'REMOVE'
 CHANGE_COLLABORATOR_TO_EDITOR = 'CHANGE_TO_EDITOR'
 CHANGE_COLLABORATOR_TO_MEMBER = 'CHANGE_TO_MEMBER'
+CHANGE_COLLABORATOR_TO_ADMIN = 'CHANGE_TO_ADMIN'
 
 
 class SocialLinksForm(forms.Form):
@@ -541,7 +542,7 @@ class ExpertiseProductsServicesOtherForm(forms.Form):
         )
 
 
-class IdentityVerificationRequestForm(forms.Form):
+class NoOperationForm(forms.Form):
     pass
 
 
@@ -550,13 +551,21 @@ class AdminCollaboratorEditForm(forms.Form):
     CHOICES = {
         user_roles.MEMBER: [
             ('', 'Please select'),
-            (REMOVE_COLLABORATOR, 'Remove'),
+            (CHANGE_COLLABORATOR_TO_ADMIN, 'Upgrade to Admin'),
             (CHANGE_COLLABORATOR_TO_EDITOR, 'Upgrade to Editor'),
+            (REMOVE_COLLABORATOR, 'Remove'),
         ],
         user_roles.EDITOR: [
             ('', 'Please select'),
-            (REMOVE_COLLABORATOR, 'Remove'),
+            (CHANGE_COLLABORATOR_TO_ADMIN, 'Upgrade to Admin'),
             (CHANGE_COLLABORATOR_TO_MEMBER, 'Downgrade to Member'),
+            (REMOVE_COLLABORATOR, 'Remove'),
+        ],
+        user_roles.ADMIN: [
+            ('', 'Please select'),
+            (CHANGE_COLLABORATOR_TO_EDITOR, 'Downgrade to Editor'),
+            (CHANGE_COLLABORATOR_TO_MEMBER, 'Downgrade to Member'),
+            (REMOVE_COLLABORATOR, 'Remove'),
         ]
     }
 

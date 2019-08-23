@@ -11,10 +11,10 @@ from requests.exceptions import HTTPError
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
+from django.forms.forms import NON_FIELD_ERRORS
 
 from core.tests.helpers import create_response, reload_urlconf, submit_step_factory
 from profile.fab import constants, forms, helpers, views
-from sso.models import SSOUser
 
 
 def create_test_image(extension):
@@ -109,11 +109,12 @@ def mock_retrieve_supplier():
 
 
 @pytest.fixture(autouse=True)
-def mock_retrieve_collaborators():
-    patch = mock.patch.object(
-        api_client.company, 'retrieve_collaborators',
-        return_value=create_response(200, {'ssoID': '12345'})
-    )
+def mock_retrieve_collaborators(user):
+    response = create_response(json_body=[
+        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
+        {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com'}
+    ])
+    patch = mock.patch.object(api_client.company, 'retrieve_collaborators', return_value=response)
     yield patch.start()
     patch.stop()
 
@@ -516,12 +517,10 @@ def test_admin_tools(settings, client, default_company_profile, user):
     assert response.context_data['company'] == company.serialize_for_template()
 
 
-def test_admin_tools_no_collaborators(
-    settings, client, mock_retrieve_collaborators, user
-):
+def test_admin_tools_no_collaborators(settings, client, mock_retrieve_collaborators, user):
     client.force_login(user)
 
-    mock_retrieve_collaborators.return_value = create_response(200, {})
+    mock_retrieve_collaborators.return_value = create_response(200, [])
 
     url = reverse('find-a-buyer-admin-tools')
     response = client.get(url)
@@ -887,12 +886,10 @@ def test_collaborator_list_feature_off(client, settings):
     assert response.status_code == 404
 
 
-@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
-@mock.patch.object(api_client.company, 'retrieve_collaborators')
-def test_collaborator_list_not_admin(mock_retrieve_collaborators, mock_is_company_admin, client, user, settings):
+def test_collaborator_list_no_company(mock_retrieve_collaborators, mock_retrieve_company, client, user, settings):
     settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    mock_retrieve_company.return_value = create_response(404)
     reload_urlconf()
-    mock_is_company_admin.return_value = False
     client.force_login(user)
 
     url = reverse('find-a-buyer-admin-collaborator-list')
@@ -903,7 +900,6 @@ def test_collaborator_list_not_admin(mock_retrieve_collaborators, mock_is_compan
     assert mock_retrieve_collaborators.call_count == 0
 
 
-@mock.patch.object(api_client.company, 'retrieve_collaborators')
 def test_collaborator_list_anon_user(mock_retrieve_collaborators, client, settings):
     settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
     reload_urlconf()
@@ -916,13 +912,10 @@ def test_collaborator_list_anon_user(mock_retrieve_collaborators, client, settin
     assert mock_retrieve_collaborators.call_count == 0
 
 
-@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
-@mock.patch.object(api_client.company, 'retrieve_collaborators')
-def test_collaborator_list(mock_retrieve_collaborators, mock_is_company_admin, client, user, settings):
+def test_collaborator_list(mock_retrieve_collaborators, client, user, settings):
     settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
     reload_urlconf()
 
-    mock_is_company_admin.return_value = True
     client.force_login(user)
     mock_retrieve_collaborators.return_value = create_response(json_body=[])
 
@@ -943,15 +936,16 @@ def test_edit_collaborator_feature_off(client, settings):
     assert response.status_code == 404
 
 
-@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
-@mock.patch.object(api_client.company, 'retrieve_collaborators')
-def test_edit_collaborator_not_admin(mock_retrieve_collaborators, mock_is_company_admin, client, user, settings):
+@pytest.mark.parametrize('role', (user_roles.EDITOR, user_roles.MEMBER))
+def test_edit_collaborator_not_admin(
+    mock_retrieve_supplier, mock_retrieve_collaborators, client, user, settings, role
+):
+    mock_retrieve_supplier.return_value = create_response(200, {'is_company_owner': False, 'role': role})
     settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
     reload_urlconf()
-    mock_is_company_admin.return_value = False
     client.force_login(user)
 
-    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': '1234'})
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
     response = client.get(url)
 
     assert response.status_code == 302
@@ -959,18 +953,11 @@ def test_edit_collaborator_not_admin(mock_retrieve_collaborators, mock_is_compan
     assert mock_retrieve_collaborators.call_count == 0
 
 
-@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
-@mock.patch.object(api_client.company, 'retrieve_collaborators')
-def test_edit_collaborator_edit_not_found(mock_retrieve_collaborators, mock_is_company_admin, client, user, settings):
+def test_edit_collaborator_edit_not_found(client, user, settings):
     settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
     reload_urlconf()
 
-    mock_is_company_admin.return_value = True
     client.force_login(user)
-    mock_retrieve_collaborators.return_value = create_response(json_body=[
-        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
-        {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com'}
-    ])
 
     url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 43})
     response = client.get(url)
@@ -978,18 +965,11 @@ def test_edit_collaborator_edit_not_found(mock_retrieve_collaborators, mock_is_c
     assert response.status_code == 404
 
 
-@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
-@mock.patch.object(api_client.company, 'retrieve_collaborators')
-def test_edit_collaborator_edit_self(mock_retrieve_collaborators, mock_is_company_admin, client, user, settings):
+def test_edit_collaborator_edit_self(client, user, settings):
     settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
     reload_urlconf()
 
-    mock_is_company_admin.return_value = True
     client.force_login(user)
-    mock_retrieve_collaborators.return_value = create_response(json_body=[
-        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
-        {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com'}
-    ])
 
     url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': user.id})
     response = client.get(url)
@@ -998,18 +978,11 @@ def test_edit_collaborator_edit_self(mock_retrieve_collaborators, mock_is_compan
     assert response.url == reverse('find-a-buyer-admin-collaborator-list')
 
 
-@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
-@mock.patch.object(api_client.company, 'retrieve_collaborators')
-def test_edit_collaborator_retrieve(mock_retrieve_collaborators, mock_is_company_admin, client, user, settings):
+def test_edit_collaborator_retrieve(client, user, settings):
     settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
     reload_urlconf()
 
-    mock_is_company_admin.return_value = True
     client.force_login(user)
-    mock_retrieve_collaborators.return_value = create_response(json_body=[
-        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
-        {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com'}
-    ])
 
     url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
     response = client.get(url)
@@ -1017,67 +990,70 @@ def test_edit_collaborator_retrieve(mock_retrieve_collaborators, mock_is_company
     assert response.status_code == 200
 
 
+@pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_MEMBER, forms.CHANGE_COLLABORATOR_TO_ADMIN))
 @pytest.mark.xfail(raises=NotImplementedError, strict=True)
-@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
-@mock.patch.object(api_client.company, 'retrieve_collaborators')
-def test_edit_collaborator_change_editor_to_member(
-    mock_retrieve_collaborators, mock_is_company_admin, client, user, settings
-):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
-    mock_is_company_admin.return_value = True
-    client.force_login(user)
+def test_edit_collaborator_change_editor_to_other(mock_retrieve_collaborators, client, user, settings, action):
     mock_retrieve_collaborators.return_value = create_response(json_body=[
         {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
         {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com'}
     ])
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
 
     url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
-    response = client.post(url, data={'action': forms.CHANGE_COLLABORATOR_TO_MEMBER})
+    response = client.post(url, data={'action': action})
 
     assert response.status_code == 302
     assert response.url == reverse('find-a-buyer-admin-collaborator-list')
 
 
+@pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_EDITOR, forms.CHANGE_COLLABORATOR_TO_ADMIN))
 @pytest.mark.xfail(raises=NotImplementedError, strict=True)
-@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
-@mock.patch.object(api_client.company, 'retrieve_collaborators')
-def test_edit_collaborator_change_member_to_editor(
-    mock_retrieve_collaborators, mock_is_company_admin, client, user, settings
-):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
-    mock_is_company_admin.return_value = True
-    client.force_login(user)
+def test_edit_collaborator_change_member_to_otherr(mock_retrieve_collaborators, client, user, settings, action):
     mock_retrieve_collaborators.return_value = create_response(json_body=[
         {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
         {'sso_id': 1234, 'role': user_roles.MEMBER, 'company_email': 'jim@example.com'}
     ])
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
 
     url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
-    response = client.post(url, data={'action': forms.CHANGE_COLLABORATOR_TO_EDITOR})
+    response = client.post(url, data={'action': action})
 
     assert response.status_code == 302
     assert response.url == reverse('find-a-buyer-admin-collaborator-list')
 
 
-@mock.patch.object(SSOUser, 'is_company_admin', new_callable=mock.PropertyMock)
-@mock.patch.object(api_client.company, 'retrieve_collaborators')
-@mock.patch.object(api_client.company, 'remove_collaborators')
-def test_edit_collaborator_edit_remove_collaborator(
-    mock_remove_collaborators, mock_retrieve_collaborators, mock_is_company_admin, client, user, settings
-):
+@pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_MEMBER, forms.CHANGE_COLLABORATOR_TO_EDITOR))
+@pytest.mark.xfail(raises=NotImplementedError, strict=True)
+def test_edit_collaborator_change_admin_to_other(mock_retrieve_collaborators, client, user, settings, action):
+    mock_retrieve_collaborators.return_value = create_response(json_body=[
+        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
+        {'sso_id': 1234, 'role': user_roles.ADMIN, 'company_email': 'jim@example.com'}
+    ])
     settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
     reload_urlconf()
 
-    mock_is_company_admin.return_value = True
     client.force_login(user)
-    mock_retrieve_collaborators.return_value = create_response(json_body=[
-        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
-        {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com'}
-    ])
+
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
+    response = client.post(url, data={'action': action})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-collaborator-list')
+
+
+@mock.patch.object(api_client.company, 'remove_collaborators')
+def test_edit_collaborator_edit_remove_collaborator(mock_remove_collaborators, client, user, settings):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
     mock_remove_collaborators.return_value = create_response()
 
     url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
@@ -1089,3 +1065,48 @@ def test_edit_collaborator_edit_remove_collaborator(
     assert mock_remove_collaborators.call_args == mock.call(
         sso_session_id=user.session_id, sso_ids=[1234]
     )
+
+
+@mock.patch.object(api_client.supplier, 'disconnect_from_company')
+def test_admin_disconnect_remote_error(mock_disconnect_from_company, client, user, settings):
+    errors = ['Something went wrong']
+    mock_disconnect_from_company.return_value = create_response(400, errors)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-disconnect')
+    response = client.post(url)
+
+    assert response.status_code == 200
+    assert response.context_data['form'].is_valid() is False
+    assert response.context_data['form'].errors == {NON_FIELD_ERRORS: errors}
+
+
+@mock.patch.object(api_client.supplier, 'disconnect_from_company')
+def test_admin_disconnect(mock_disconnect_from_company, client, user, settings):
+    mock_disconnect_from_company.return_value = create_response(200)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-disconnect')
+    response = client.post(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
+    assert mock_disconnect_from_company.call_count == 1
+    assert mock_disconnect_from_company.call_args == mock.call(user.session_id)
+
+
+def test_products_services_form_incorrect_value(client, user):
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-expertise-products-services', kwargs={'category': 'foo'})
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-expertise-products-services-routing')
