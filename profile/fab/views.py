@@ -318,7 +318,7 @@ class AdminToolsView(TemplateView):
             FAB_REMOVE_USER_URL=settings.FAB_REMOVE_USER_URL,
             FAB_TRANSFER_ACCOUNT_URL=settings.FAB_TRANSFER_ACCOUNT_URL,
             company=self.request.user.company.serialize_for_template(),
-            has_collaborators=bool(helpers.retrieve_collaborators(self.request.user.session_id)),
+            has_collaborators=len(helpers.retrieve_collaborators(self.request.user.session_id)) > 1,
             **kwargs,
         )
 
@@ -389,11 +389,13 @@ class AdminDisconnectFormView(SuccessMessageMixin, FormView):
             if error.response.status_code == 400:
                 form.add_error(field=None, error=error.response.json())
                 return self.form_invalid(form)
+            else:
+                raise
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        is_sole_collaborator = len(helpers.retrieve_collaborators(self.request.user.session_id)) == 1
-        return super().get_context_data(is_sole_collaborator=is_sole_collaborator, **kwargs)
+        is_sole_admin = helpers.is_sole_admin(self.request.user.session_id)
+        return super().get_context_data(is_sole_admin=is_sole_admin, **kwargs)
 
 
 class AdminInviteNewAdminFormView(SuccessMessageMixin, FormView):
@@ -405,6 +407,22 @@ class AdminInviteNewAdminFormView(SuccessMessageMixin, FormView):
     )
     success_url = reverse_lazy('find-a-buyer-admin-collaborator-list')
 
+    @cached_property
+    def collaborators(self):
+        return helpers.retrieve_collaborators(self.request.user.session_id)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['collaborator_choices'] = [
+            (item['company_email'], item['name'] or item['company_email'])
+            for item in self.collaborators
+        ]
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        has_collaborators = len(self.collaborators) > 1
+        return super().get_context_data(has_collaborators=has_collaborators, **kwargs)
+
     def form_valid(self, form):
         try:
             helpers.create_admin_transfer_invite(
@@ -412,8 +430,13 @@ class AdminInviteNewAdminFormView(SuccessMessageMixin, FormView):
             )
         except HTTPError as error:
             if error.response.status_code == 400:
-                form.add_error(field=None, error=error.response.json())
+                parsed = error.response.json()
+                if 'new_owner_email' in parsed:
+                    parsed = parsed['new_owner_email']
+                form.add_error(field=None, error=parsed)
                 return self.form_invalid(form)
+            else:
+                raise
         return super().form_valid(form)
 
 

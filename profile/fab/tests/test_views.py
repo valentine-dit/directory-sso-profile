@@ -100,8 +100,8 @@ def mock_retrieve_supplier():
 @pytest.fixture(autouse=True)
 def mock_retrieve_collaborators(user):
     response = create_response([
-        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
-        {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com'}
+        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email, 'name': 'jim example'},
+        {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com', 'name': 'bob example'}
     ])
     patch = mock.patch.object(api_client.company, 'retrieve_collaborators', return_value=response)
     yield patch.start()
@@ -590,9 +590,7 @@ def test_expertise_products_services_routing_form_context(client, settings, comp
 @pytest.mark.parametrize('choice', (
     item for item, _ in forms.ExpertiseProductsServicesRoutingForm.CHOICES if item
 ))
-def test_expertise_products_services_routing_form(
-    choice, client, settings, user
-):
+def test_expertise_products_services_routing_form(choice, client, settings, user):
     client.force_login(user)
 
     url = reverse('find-a-buyer-expertise-products-services-routing')
@@ -1014,7 +1012,7 @@ def test_edit_collaborator_edit_remove_collaborator(mock_remove_collaborators, c
 
 
 @mock.patch.object(api_client.supplier, 'disconnect_from_company')
-def test_admin_disconnect_remote_error(mock_disconnect_from_company, client, user, settings):
+def test_admin_disconnect_remote_validation_error(mock_disconnect_from_company, client, user, settings):
     errors = ['Something went wrong']
     mock_disconnect_from_company.return_value = create_response(errors, status_code=400)
     settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
@@ -1028,6 +1026,19 @@ def test_admin_disconnect_remote_error(mock_disconnect_from_company, client, use
     assert response.status_code == 200
     assert response.context_data['form'].is_valid() is False
     assert response.context_data['form'].errors == {NON_FIELD_ERRORS: errors}
+
+
+@mock.patch.object(api_client.supplier, 'disconnect_from_company')
+def test_admin_disconnect_remote_error(mock_disconnect_from_company, client, user, settings):
+    mock_disconnect_from_company.return_value = create_response(status_code=500)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-disconnect')
+    with pytest.raises(HTTPError):
+        client.post(url)
 
 
 @mock.patch.object(api_client.supplier, 'disconnect_from_company')
@@ -1051,7 +1062,7 @@ def test_admin_disconnect(mock_disconnect_from_company, client, user, settings):
 def test_admin_disconnect_is_sole_collaborator(mock_retrieve_collaborators, count, expected, client, user, settings):
     collaborators = [
         {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
-        {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com'}
+        {'sso_id': 1234, 'role': user_roles.ADMIN, 'company_email': 'jim@example.com'}
     ]
     mock_retrieve_collaborators.return_value = create_response(collaborators[:count])
 
@@ -1064,7 +1075,7 @@ def test_admin_disconnect_is_sole_collaborator(mock_retrieve_collaborators, coun
     response = client.get(url)
 
     assert response.status_code == 200
-    assert response.context_data['is_sole_collaborator'] is expected
+    assert response.context_data['is_sole_admin'] is expected
 
 
 def test_products_services_form_incorrect_value(client, user):
@@ -1096,9 +1107,9 @@ def test_admin_invite_administrator_not_admin(
 
 
 @mock.patch.object(api_client.company, 'create_transfer_invite')
-def test_admin_invite_administrator_remote_error(mock_create_transfer_invite, client, user, settings):
-    errors = {'new_owner_email': ['Something went wrong']}
-    mock_create_transfer_invite.return_value = create_response(errors, status_code=400)
+def test_admin_invite_administrator_remote_validation_error(mock_create_transfer_invite, client, user, settings):
+    errors = ['Something went wrong']
+    mock_create_transfer_invite.return_value = create_response({'new_owner_email': errors}, status_code=400)
     settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
     reload_urlconf()
 
@@ -1109,7 +1120,20 @@ def test_admin_invite_administrator_remote_error(mock_create_transfer_invite, cl
 
     assert response.status_code == 200
     assert response.context_data['form'].is_valid() is False
-    assert response.context_data['form'].errors == errors
+    assert response.context_data['form'].errors == {NON_FIELD_ERRORS: errors}
+
+
+@mock.patch.object(api_client.company, 'create_transfer_invite')
+def test_admin_invite_administrator_remote_error(mock_create_transfer_invite, client, user, settings):
+    mock_create_transfer_invite.return_value = create_response(status_code=500)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-invite-administrator')
+    with pytest.raises(HTTPError):
+        client.post(url, {'new_owner_email': 'jim@example.com'})
 
 
 @mock.patch.object(api_client.company, 'create_transfer_invite')

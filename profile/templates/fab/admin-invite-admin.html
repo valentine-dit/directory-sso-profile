@@ -15,9 +15,20 @@
     <div class="width-two-thirds">
         <h2 class="heading-large margin-top-0 margin-bottom-15">Choose a new administrator</h2>
         <p>You must choose a new administrator before you can remove this profile from your account.</p>
-        <p>Invite a new collaborator to become administrator.</p>
+        <p>Invite a new collaborator to become administrator{% if has_collaborators %} or select one of the collaborators below{% endif %}.</p>
         <form method="post" enctype="multipart/form-data">
-            {{ form }}
+            {% if form.non_field_errors %}
+              <div class="error-message margin-bottom-30">
+                <div class="{{ form.error_css_class }}">
+                  {{ form.non_field_errors }}
+                </div>
+              </div>
+            {% endif %}
+            {% if has_collaborators %}
+                {% include 'directory_components/form_widgets/form_field.html' with field=form.collaborator %}
+            <p class="bold-small">Or</p>
+            {% endif %}
+            {% include 'directory_components/form_widgets/form_field.html' with field=form.new_owner_email %}
             <button class="button">Send invitation</button>
         </form>
         <a class="link" href="{% url 'find-a-buyer-admin-collaborator-list' %}">Cancel</a>
