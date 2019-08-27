@@ -5,7 +5,7 @@ import directory_validators.company
 import directory_validators.enrolment
 
 from django.conf import settings
-from django.forms import ImageField, SelectMultiple, Textarea
+from django.forms import ImageField, SelectMultiple, Textarea, ValidationError
 from django.utils.safestring import mark_safe
 
 from profile.fab import constants, validators
@@ -52,9 +52,7 @@ class SocialLinksForm(forms.Form):
 
 
 class EmailAddressForm(forms.Form):
-    email_address = forms.EmailField(
-        label='Email address'
-    )
+    email_address = forms.EmailField(label='Email address')
 
 
 class DescriptionForm(forms.Form):
@@ -323,15 +321,6 @@ class PublishForm(forms.Form):
     LABEL_ISD = 'Ready to publish on UK Investment Support Directory'
     LABEL_FAS = 'Publish profile on great.gov.uk/trade/'
 
-    def __init__(self, company, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if company.get('is_published_investment_support_directory'):
-            field = self.fields['is_published_investment_support_directory']
-            field.widget.label = self.LABEL_UNPUBLISH_ISD
-        if company.get('is_published_find_a_supplier'):
-            field = self.fields['is_published_find_a_supplier']
-            field.widget.label = self.LABEL_UNPUBLISH_FAS
-
     is_published_investment_support_directory = forms.BooleanField(
         label=LABEL_ISD,
         required=False
@@ -340,6 +329,15 @@ class PublishForm(forms.Form):
         label=LABEL_FAS,
         required=False
     )
+
+    def __init__(self, company, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if company.get('is_published_investment_support_directory'):
+            field = self.fields['is_published_investment_support_directory']
+            field.widget.label = self.LABEL_UNPUBLISH_ISD
+        if company.get('is_published_find_a_supplier'):
+            field = self.fields['is_published_find_a_supplier']
+            field.widget.label = self.LABEL_UNPUBLISH_FAS
 
 
 class CompaniesHouseBusinessDetailsForm(forms.Form):
@@ -577,3 +575,29 @@ class AdminCollaboratorEditForm(forms.Form):
         label='',
         choices=[]  # set in __init__
     )
+
+
+class AdminInviteNewAdminForm(forms.Form):
+    MESSAGE_EMAIL_REQUIRED = 'Please select an existing collaborator or specify an email address'
+
+    collaborator = forms.ChoiceField(
+        label='',
+        widget=forms.RadioSelect(use_nice_ids=True,),
+        choices=[],  # set in __init__
+        required=False,
+    )
+    new_owner_email = forms.EmailField(
+        label='Enter the email address of the new profile administrator',
+        required=False,
+    )
+
+    def __init__(self, collaborator_choices, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['collaborator'].choices = collaborator_choices
+
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('new_owner_email') or cleaned_data.get('collaborator')
+        if not email:
+            raise ValidationError(self.MESSAGE_EMAIL_REQUIRED)
+        cleaned_data['new_owner_email'] = email

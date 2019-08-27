@@ -171,8 +171,10 @@
 
 #content {
   form {
-    margin-top: 45px;
-    margin-bottom: 45px;
+    &:not(.no-default-margin) {
+      margin-top: 45px;
+      margin-bottom: 45px;
+    }
     .button {
       margin-top: 45px;
     }

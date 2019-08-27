@@ -13,7 +13,7 @@ def test_create_user_profile(mock_create_user_profile):
         'job_title': 'Director',
         'mobile_phone_number': '08888888888',
     }
-    mock_create_user_profile.return_value = create_response(201, data)
+    mock_create_user_profile.return_value = create_response(status_code=201, json_body=data)
     helpers.create_user_profile(
         sso_session_id=1,
         data=data
