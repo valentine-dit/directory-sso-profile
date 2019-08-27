@@ -14,6 +14,7 @@
 - TT-1728 - Not ask personal details to individual upgrading to business profile
 - No ticket - Remove obsolete settings
 - TT-1731 - Fix address error persistence issue when a valid postcode is entered on UI
+- TT-1709 - Account creation content change
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)
