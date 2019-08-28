@@ -334,6 +334,11 @@ if settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON']:
             company_admin_required(profile.fab.views.AdminInviteNewAdminFormView.as_view()),
             name='find-a-buyer-admin-invite-administrator'
         ),
+        url(
+            r'^find-a-buyer/admin/invite/$',
+            company_admin_required(profile.fab.views.AdminInviteCollaboratorFormView.as_view()),
+            name='find-a-buyer-admin-invite-collaborator'
+        ),
     ]
 
 

@@ -440,6 +440,28 @@ class AdminInviteNewAdminFormView(SuccessMessageMixin, FormView):
         return super().form_valid(form)
 
 
+class AdminInviteCollaboratorFormView(SuccessMessageMixin, FormView):
+    template_name = 'fab/admin-invite-collaborator.html'
+    form_class = forms.AdminInviteCollaboratorForm
+    success_message = (
+        'We have sent a confirmation to %(collaborator_email)s with an invitation to become a collaborator'
+    )
+    success_url = reverse_lazy('find-a-buyer-admin-collaborator-list')
+
+    def form_valid(self, form):
+        try:
+            helpers.create_collaboration_invite(
+                sso_session_id=self.request.user.session_id, collaborator_email=form.cleaned_data['collaborator_email']
+            )
+        except HTTPError as error:
+            if error.response.status_code == 400:
+                form.add_error(field=None, error=error.response.json())
+                return self.form_invalid(form)
+            else:
+                raise
+        return super().form_valid(form)
+
+
 class ProductsServicesRoutingFormView(FormView):
 
     form_class = forms.ExpertiseProductsServicesRoutingForm

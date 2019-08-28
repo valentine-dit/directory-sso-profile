@@ -9,6 +9,7 @@
 - TT-1732 - Added context to incomplete business profile banner
 - TT-1713 - Allow user to remove themselves from the business profile
 - TT-1714 - Allow single collaborator to invite other admin
+- TT-1727 - Allow inviting collaborator
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile

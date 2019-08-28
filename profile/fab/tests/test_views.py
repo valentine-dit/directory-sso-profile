@@ -820,42 +820,6 @@ def test_request_identity_verification_feature_off(mock_verify_identity_request,
     assert mock_verify_identity_request.call_count == 0
 
 
-def test_collaborator_list_feature_off(client, settings):
-    url = reverse('find-a-buyer-admin-collaborator-list')
-
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
-    reload_urlconf()
-
-    response = client.get(url)
-    assert response.status_code == 404
-
-
-def test_collaborator_list_no_company(mock_retrieve_collaborators, mock_retrieve_company, client, user, settings):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    mock_retrieve_company.return_value = create_response(status_code=404)
-    reload_urlconf()
-    client.force_login(user)
-
-    url = reverse('find-a-buyer-admin-collaborator-list')
-    response = client.get(url)
-
-    assert response.status_code == 302
-    assert response.url.startswith(reverse('find-a-buyer'))
-    assert mock_retrieve_collaborators.call_count == 0
-
-
-def test_collaborator_list_anon_user(mock_retrieve_collaborators, client, settings):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
-    url = reverse('find-a-buyer-admin-collaborator-list')
-    response = client.get(url)
-
-    assert response.status_code == 302
-    assert response.url.startswith(settings.LOGIN_URL)
-    assert mock_retrieve_collaborators.call_count == 0
-
-
 def test_collaborator_list(mock_retrieve_collaborators, client, user, settings):
     settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
     reload_urlconf()
@@ -1089,23 +1053,6 @@ def test_products_services_form_incorrect_value(client, user):
     assert response.url == reverse('find-a-buyer-expertise-products-services-routing')
 
 
-@pytest.mark.parametrize('role', (user_roles.EDITOR, user_roles.MEMBER))
-def test_admin_invite_administrator_not_admin(
-    mock_retrieve_supplier, mock_retrieve_collaborators, client, user, settings, role
-):
-    mock_retrieve_supplier.return_value = create_response({'is_company_owner': False, 'role': role})
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-    client.force_login(user)
-
-    url = reverse('find-a-buyer-admin-invite-administrator')
-    response = client.get(url)
-
-    assert response.status_code == 302
-    assert response.url.startswith(reverse('find-a-buyer'))
-    assert mock_retrieve_collaborators.call_count == 0
-
-
 @mock.patch.object(api_client.company, 'create_transfer_invite')
 def test_admin_invite_administrator_remote_validation_error(mock_create_transfer_invite, client, user, settings):
     errors = ['Something went wrong']
@@ -1153,3 +1100,117 @@ def test_admin_invite_administrator(mock_create_transfer_invite, client, user, s
     assert mock_create_transfer_invite.call_args == mock.call(
         sso_session_id=user.session_id, new_owner_email='jim@example.com'
     )
+
+
+@pytest.mark.parametrize('url', (
+    reverse('find-a-buyer-admin-invite-administrator'),
+    reverse('find-a-buyer-admin-invite-collaborator'),
+    reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': '123'})
+))
+def test_admin_not_admin_role(mock_retrieve_supplier, client, user, settings, url):
+    mock_retrieve_supplier.return_value = create_response({'is_company_owner': False, 'role': user_roles.EDITOR})
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+    client.force_login(user)
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url.startswith(reverse('find-a-buyer'))
+
+
+@pytest.mark.parametrize('url', (
+    reverse('find-a-buyer-admin-collaborator-list'),
+    reverse('find-a-buyer-admin-disconnect'),
+))
+def test_admin_no_company(mock_retrieve_company, client, user, settings, url):
+    mock_retrieve_company.return_value = create_response(status_code=404)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+    client.force_login(user)
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url.startswith(reverse('find-a-buyer'))
+
+
+@pytest.mark.parametrize('url', (
+    reverse('find-a-buyer-admin-invite-administrator'),
+    reverse('find-a-buyer-admin-invite-collaborator'),
+    reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': '123'}),
+    reverse('find-a-buyer-admin-collaborator-list'),
+    reverse('find-a-buyer-admin-disconnect'),
+))
+def test_admin_feature_off(client, settings, url):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
+    reload_urlconf()
+
+    response = client.get(url)
+    assert response.status_code == 404
+
+
+@pytest.mark.parametrize('url', (
+    reverse('find-a-buyer-admin-invite-administrator'),
+    reverse('find-a-buyer-admin-invite-collaborator'),
+    reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': '123'}),
+    reverse('find-a-buyer-admin-collaborator-list'),
+    reverse('find-a-buyer-admin-disconnect'),
+))
+def test_admin_anon_user(client, settings, url):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url.startswith(settings.LOGIN_URL)
+
+
+@pytest.mark.xfail(raises=NotImplementedError, strict=True)
+def test_admin_invite_collaborator(settings, client, user):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-invite-collaborator')
+    response = client.post(url, {'collaborator_email': 'jim@example.com', 'role': user_roles.ADMIN})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-collaborator-list')
+
+    response = client.get(response.url)
+    expected = 'We have sent a confirmation to jim@example.com with an invitation to become a collaborator'
+    for message in response.context['messages']:
+        assert str(message) == expected
+
+
+@pytest.mark.xfail(raises=NotImplementedError, strict=True)
+def test_admin_invite_collaborator_remote_validation_error(settings, client, user):
+    errors = {'collaborator_email': ['woe']}
+    # add mock so endpoint returns 400 response with errors
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-invite-collaborator')
+    response = client.post(url, {'collaborator_email': 'jim@example.com', 'role': user_roles.ADMIN})
+
+    assert response.status_code == 200
+    assert response.context_data['form'].is_valid() is False
+    assert response.context_data['form'].errors == errors
+
+
+@pytest.mark.xfail(raises=NotImplementedError, strict=True)
+def test_admin_invite_collaborator_not_admin_remote_error(settings, client, user):
+    # add mock so endpoint returns 500 response
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-invite-collaborator')
+    with pytest.raises(HTTPError):
+        client.post(url, {'collaborator_email': 'jim@example.com', 'role': user_roles.ADMIN})

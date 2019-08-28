@@ -92,3 +92,7 @@ def create_admin_transfer_invite(sso_session_id, email):
 def is_sole_admin(sso_session_id):
     collaborators = retrieve_collaborators(sso_session_id)
     return [collaborator['role'] for collaborator in collaborators].count(user_roles.ADMIN) == 1
+
+
+def create_collaboration_invite(sso_session_id, collaborator_email):
+    raise NotImplementedError
