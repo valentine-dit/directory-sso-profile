@@ -10,6 +10,7 @@
 - TT-1713 - Allow user to remove themselves from the business profile
 - TT-1714 - Allow single collaborator to invite other admin
 - TT-1727 - Allow inviting collaborator
+- TT-1673 - Handle backfill details after login
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
