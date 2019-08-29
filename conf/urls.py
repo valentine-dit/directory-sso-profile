@@ -315,9 +315,24 @@ urlpatterns = [
 if settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON']:
     urlpatterns += [
         url(
-            r'^find-a-buyer/admin/collaborators-list/$',
-            company_admin_required(profile.fab.views.AdminCollaboratorsListView.as_view()),
+            r'^find-a-buyer/admin/collaborators/$',
+            company_required(profile.fab.views.AdminCollaboratorsListView.as_view()),
             name='find-a-buyer-admin-collaborator-list'
+        ),
+        url(
+            r'^find-a-buyer/admin/collaborator/(?P<sso_id>[0-9]+)/$',
+            company_admin_required(profile.fab.views.AdminCollaboratorEditFormView.as_view()),
+            name='find-a-buyer-admin-collaborator-edit'
+        ),
+        url(
+            r'^find-a-buyer/admin/disconnect/$',
+            company_required(profile.fab.views.AdminDisconnectFormView.as_view()),
+            name='find-a-buyer-admin-disconnect'
+        ),
+        url(
+            r'^find-a-buyer/admin/transfer/$',
+            company_admin_required(profile.fab.views.AdminInviteNewAdminFormView.as_view()),
+            name='find-a-buyer-admin-invite-administrator'
         ),
     ]
 

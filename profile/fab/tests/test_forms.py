@@ -3,6 +3,8 @@ from profile.fab import validators
 
 import pytest
 
+from django.forms.forms import NON_FIELD_ERRORS
+
 
 def test_description_form_contains_email():
     form = forms.DescriptionForm({
@@ -111,3 +113,10 @@ def test_sole_trader_business_details_form():
 
     form.is_valid()
     assert form.cleaned_data['sectors'] == ['MINING']
+
+
+def test_admin_invite_missing_email():
+    form = forms.AdminInviteNewAdminForm(collaborator_choices=[], data={})
+
+    assert form.is_valid() is False
+    assert form.errors == {NON_FIELD_ERRORS: [form.MESSAGE_EMAIL_REQUIRED]}

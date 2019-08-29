@@ -5,11 +5,16 @@
 ### Implemented enhancements
 - TT-1733 - Add request for individual verification feature
 - TT-1723 - Add collaborator list admin view
-  
+- TT-1716 - Support removing collaborators
+- TT-1732 - Added context to incomplete business profile banner
+- TT-1713 - Allow user to remove themselves from the business profile
+- TT-1714 - Allow single collaborator to invite other admin
+
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
 - No ticket - Remove obsolete settings
 - TT-1731 - Fix address error persistence issue when a valid postcode is entered on UI
+- TT-1709 - Account creation content change
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)

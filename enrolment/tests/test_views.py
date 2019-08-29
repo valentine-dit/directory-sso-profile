@@ -109,7 +109,7 @@ def preverified_company_data():
 def mock_retrieve_preverified_company(preverified_company_data):
     patch = mock.patch.object(
         helpers.api_client.enrolment, 'retrieve_prepeveried_company',
-        return_value=create_response(200, preverified_company_data)
+        return_value=create_response(preverified_company_data)
     )
     yield patch.start()
     patch.stop()
@@ -150,7 +150,7 @@ def mock_clean():
 def mock_retrieve_public_profile(client):
     patch = mock.patch.object(
         helpers.api_client.company, 'retrieve_public_profile',
-        return_value=create_response(404)
+        return_value=create_response(status_code=404)
     )
     yield patch.start()
     patch.stop()
@@ -160,7 +160,7 @@ def mock_retrieve_public_profile(client):
 def mock_validate_company_number(client):
     patch = mock.patch.object(
         helpers.api_client.company, 'validate_company_number',
-        return_value=create_response(200)
+        return_value=create_response(status_code=200)
     )
     yield patch.start()
     patch.stop()
@@ -170,7 +170,7 @@ def mock_validate_company_number(client):
 def mock_request_collaboration(client):
     patch = mock.patch.object(
         helpers.api_client.company, 'request_collaboration',
-        return_value=create_response(200)
+        return_value=create_response()
     )
     yield patch.start()
     patch.stop()
@@ -180,7 +180,7 @@ def mock_request_collaboration(client):
 def mock_enrolment_send(client):
     patch = mock.patch.object(
         helpers.api_client.enrolment, 'send_form',
-        return_value=create_response(201)
+        return_value=create_response(status_code=201)
     )
     yield patch.start()
     patch.stop()
@@ -190,7 +190,7 @@ def mock_enrolment_send(client):
 def mock_claim_company(client):
     patch = mock.patch.object(
         helpers.api_client.enrolment, 'claim_prepeveried_company',
-        return_value=create_response(200)
+        return_value=create_response()
     )
     yield patch.start()
     patch.stop()
@@ -198,7 +198,7 @@ def mock_claim_company(client):
 
 @pytest.fixture(autouse=True)
 def mock_create_user():
-    response = create_response(200, {
+    response = create_response({
         'email': 'test@test.com',
         'verification_code': '123456',
     })
@@ -214,7 +214,7 @@ def mock_create_user():
 def mock_user_has_company():
     patch = mock.patch.object(
         helpers.api_client.company, 'retrieve_private_profile',
-        return_value=create_response(404)
+        return_value=create_response(status_code=404)
     )
     yield patch.start()
     patch.stop()
@@ -222,7 +222,7 @@ def mock_user_has_company():
 
 @pytest.fixture(autouse=True)
 def mock_confirm_verification_code():
-    response = create_response(200)
+    response = create_response()
     patch = mock.patch.object(
         helpers.sso_api_client.user, 'verify_verification_code',
         return_value=response
@@ -247,7 +247,7 @@ def mock_confirm_verification_code():
 
 @pytest.fixture(autouse=True)
 def mock_regenerate_verification_code():
-    response = create_response(200, {
+    response = create_response({
         'code': '12345',
         'expiration_date': '2018-01-17T12:00:01Z'
     })
@@ -670,7 +670,7 @@ def test_companies_house_enrolment_has_company(
 ):
     client.force_login(user)
 
-    mock_user_has_company.return_value = create_response(200)
+    mock_user_has_company.return_value = create_response()
 
     url = reverse('enrolment-companies-house', kwargs={'step': step})
     response = client.get(url)
@@ -687,7 +687,7 @@ def test_companies_house_enrolment_has_company_error(
 ):
     client.force_login(user)
 
-    mock_user_has_company.return_value = create_response(500)
+    mock_user_has_company.return_value = create_response(status_code=500)
 
     url = reverse('enrolment-companies-house', kwargs={'step': step})
 
@@ -701,7 +701,7 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     submit_companies_house_step, mock_enrolment_send,
     mock_validate_company_number, user
 ):
-    mock_validate_company_number.return_value = create_response(400)
+    mock_validate_company_number.return_value = create_response(status_code=400)
 
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
@@ -746,7 +746,7 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
     submit_companies_house_step, mock_enrolment_send,
     mock_validate_company_number, user
 ):
-    mock_validate_company_number.return_value = create_response(400)
+    mock_validate_company_number.return_value = create_response(status_code=400)
     user.has_user_profile = True
     client.force_login(user)
 
@@ -814,7 +814,7 @@ def test_user_has_company_redirect_on_start(
     client, mock_user_has_company, user
 ):
     client.force_login(user)
-    mock_user_has_company.return_value = create_response(200)
+    mock_user_has_company.return_value = create_response()
 
     url = reverse('enrolment-start')
     response = client.get(url)
@@ -827,7 +827,7 @@ def test_user_has_no_company_redirect_on_start(
     client, mock_user_has_company, user
 ):
     client.force_login(user)
-    mock_user_has_company.return_value = create_response(404)
+    mock_user_has_company.return_value = create_response(status_code=404)
 
     url = reverse('enrolment-start')
     response = client.get(url)
@@ -852,7 +852,7 @@ def test_create_user_enrolment_already_exists(
     company_type, form_url_name, steps_data, mock_create_user,
     submit_step_builder, mock_notify_already_registered
 ):
-    mock_create_user.return_value = create_response(400)
+    mock_create_user.return_value = create_response(status_code=400)
 
     submit_step = submit_step_builder(company_type)
 
@@ -920,7 +920,7 @@ def test_confirm_user_verify_code_incorrect_code(
 ):
     submit_step = submit_step_builder(company_type)
 
-    mock_confirm_verification_code.return_value = create_response(400)
+    mock_confirm_verification_code.return_value = create_response(status_code=400)
 
     response = submit_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
@@ -938,7 +938,7 @@ def test_confirm_user_verify_code_incorrect_code_manual_email(
     client, company_type, submit_step_builder,
     mock_confirm_verification_code, steps_data
 ):
-    mock_confirm_verification_code.return_value = create_response(400)
+    mock_confirm_verification_code.return_value = create_response(status_code=400)
     submit_step = submit_step_builder(company_type)
 
     response = submit_step(
@@ -961,7 +961,7 @@ def test_confirm_user_verify_code_remote_error(
 ):
     submit_step = submit_step_builder(company_type)
 
-    mock_confirm_verification_code.return_value = create_response(500)
+    mock_confirm_verification_code.return_value = create_response(status_code=500)
 
     response = submit_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
@@ -1024,7 +1024,7 @@ def test_confirm_user_resend_verification_code_user_verified(
         steps_data,
 ):
 
-    mock_regenerate_verification_code.return_value = create_response(404)
+    mock_regenerate_verification_code.return_value = create_response(status_code=404)
 
     response = submit_resend_verification_house_step(
         steps_data[views.RESEND_VERIFICATION]
@@ -1047,7 +1047,7 @@ def test_confirm_user_resend_verification_code_no_user(
         steps_data,
 ):
 
-    mock_regenerate_verification_code.return_value = create_response(404)
+    mock_regenerate_verification_code.return_value = create_response(status_code=404)
 
     response = submit_resend_verification_house_step(
         steps_data[views.RESEND_VERIFICATION]
@@ -1390,7 +1390,7 @@ def test_non_companies_house_enrolment_has_company(
 ):
     client.force_login(user)
 
-    mock_user_has_company.return_value = create_response(200)
+    mock_user_has_company.return_value = create_response()
 
     url = reverse('enrolment-sole-trader', kwargs={'step': step})
     response = client.get(url)
@@ -1405,7 +1405,7 @@ def test_non_companies_house_enrolment_has_company_error(
 ):
     client.force_login(user)
 
-    mock_user_has_company.return_value = create_response(500)
+    mock_user_has_company.return_value = create_response(status_code=500)
 
     url = reverse('enrolment-sole-trader', kwargs={'step': step})
 
@@ -1434,7 +1434,7 @@ def test_claim_preverified_no_key(
 
 
 def test_claim_preverified_bad_key(client, mock_retrieve_preverified_company):
-    mock_retrieve_preverified_company.return_value = create_response(404)
+    mock_retrieve_preverified_company.return_value = create_response(status_code=404)
 
     url = reverse('enrolment-pre-verified', kwargs={'step': 'user-account'})
     response = client.get(url, {'key': '123'})
@@ -1505,7 +1505,7 @@ def test_claim_preverified_failure(
     submit_pre_verified_step, mock_claim_company, client, steps_data,
     user
 ):
-    mock_claim_company.return_value = create_response(400)
+    mock_claim_company.return_value = create_response(status_code=400)
 
     url = reverse('enrolment-pre-verified', kwargs={'step': 'user-account'})
     response = client.get(url, {'key': 'some-key'})

@@ -318,7 +318,7 @@ class CreateBusinessProfileMixin:
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
         if self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT):
-            messages.success(self.request, 'Business profile created')
+            messages.success(self.request, 'Account created')
             del self.request.session[SESSION_KEY_BUSINESS_PROFILE_INTENT]
             return redirect('find-a-buyer')
         else:
