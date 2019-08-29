@@ -274,6 +274,8 @@ class CreateBusinessProfileMixin:
         data = {}
         for form in form_list:
             data.update(form.cleaned_data)
+
+        print("CreateBusinessProfileMixin, serialize_form_list, {}".format(data))
         whitelist = [
             'address_line_1',
             'address_line_2',
@@ -287,6 +289,8 @@ class CreateBusinessProfileMixin:
             'postal_code',
             'sic',
             'website',
+            'given_name',
+            'family_name',
         ]
         return {
             key: value for key, value in data.items()
@@ -536,14 +540,15 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
         )
 
         if is_enrolled:
-            helpers.register_new_member(
-                company_number=data['company_number'],
-                sso_id=self.request.user.id,
-                email=self.request.user.email,
-                name=self.request.user.full_name,
-                form_url=self.request.path,
-                mobile_number=''
-            )
+            helpers.add_new_collaborator(data={
+                'company_number': data['company_number'],
+                'company_name': data['company_name'],
+                'sso_id': self.request.user.id,
+                'email': self.request.user.email,
+                'name': ' '.join([data['given_name'], data['family_name']]),
+                'form_url': self.request.path,
+                'mobile_number': data.get('phone_number', '')
+            })
             return TemplateResponse(self.request, self.templates[FINISHED])
         else:
             return super().done(form_list, form_dict=form_dict, **kwargs)

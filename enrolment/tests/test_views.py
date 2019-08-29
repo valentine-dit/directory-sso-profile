@@ -557,7 +557,8 @@ def test_companies_house_enrolment_submit_end_to_end(
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'sectors': ['AEROSPACE'],
-        'name': user.full_name,
+        'given_name': 'Foo',
+        'family_name': 'Example',
         'job_title': 'Exampler',
         'phone_number': '1232342',
         'company_type': 'COMPANIES_HOUSE',
@@ -620,9 +621,10 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'sectors': ['AEROSPACE'],
-        'name': user.full_name,
         'job_title': 'Exampler',
-        'phone_number': '1232342'
+        'phone_number': '1232342',
+        'given_name': 'Foo',
+        'family_name': 'Example',
     })
 
 
@@ -1314,9 +1316,10 @@ def test_non_companies_house_enrolment_submit_end_to_end_logged_in(
         'postal_code': 'EEA 3AD',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
-        'name': user.full_name,
         'job_title': 'Exampler',
         'phone_number': '1232342',
+        'given_name': 'Foo',
+        'family_name': 'Example',
     })
 
 

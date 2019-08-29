@@ -166,24 +166,26 @@ def request_collaboration(company_number, email, name, form_url):
     response.raise_for_status()
 
 
-def register_new_member(company_number, sso_id, email, name, form_url, mobile_number=''):
-    data = {
-        'company_number': company_number,
-        'sso_id': sso_id,
-        'company_email': email,
-        'name': name,
-        'mobile_number': mobile_number
+def add_new_collaborator(data):
+
+    data_add = {
+        'company': data['company_number'],
+        'sso_id': data['sso_id'],
+        'company_email': data['email'],
+        'name': data['name'],
+        'mobile_number': data.get('mobile_number', '')
     }
-    response = api_client.company.add_collaborator(data=data)
+    response = api_client.company.add_collaborator(data=data_add)
     response.raise_for_status()
     action = actions.GovNotifyEmailAction(
         email_address=response.json()['company_email'],
         template_id=settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID,
-        form_url=form_url
+        form_url=data['form_url']
     )
     response = action.save({
-        'name': name,
-        'email': email,
+        'company_name': data['company_name'],
+        'name': data['name'],
+        'email': data['email'],
         'profile_remove_member_url': settings.SSO_PROFILE_MANAGE_COLLABORATORS_URL,
         'report_abuse_url': urls.FEEDBACK
     })
