@@ -13,6 +13,7 @@ from profile.fab import constants, validators
 
 INDUSTRY_CHOICES = [('', 'Select an industry')] + list(choices.INDUSTRIES)
 EMPLOYEES_CHOICES = [('', 'Select employees')] + list(choices.EMPLOYEES)
+USER_ROLE_CHOICES = [('', 'Select role')] + list(choices.USER_ROLES)
 REMOVE_COLLABORATOR = 'REMOVE'
 CHANGE_COLLABORATOR_TO_EDITOR = 'CHANGE_TO_EDITOR'
 CHANGE_COLLABORATOR_TO_MEMBER = 'CHANGE_TO_MEMBER'
@@ -601,3 +602,11 @@ class AdminInviteNewAdminForm(forms.Form):
         if not email:
             raise ValidationError(self.MESSAGE_EMAIL_REQUIRED)
         cleaned_data['new_owner_email'] = email
+
+
+class AdminInviteCollaboratorForm(forms.Form):
+    collaborator_email = forms.EmailField(label='Email address of collaborator', required=False,)
+    role = forms.ChoiceField(
+        choices=USER_ROLE_CHOICES,
+        container_css_classes='width-half'
+    )

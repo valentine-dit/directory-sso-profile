@@ -1786,38 +1786,35 @@ expose_user_jourey_urls = (
 )
 
 
-@pytest.mark.parametrize('intent_write_url', (
-    reverse('enrolment-business-type'),
-    reverse('enrolment-start'),
-))
-@pytest.mark.parametrize('params', (
-    {'business-profile-intent': True},
-    {
-        'next': (
-            'http%3A%2F%2Fprofile.trade.great%3A8006%2Fprofile%2Fenrol%2F%3F'
-            'business-profile-intent%3Dtrue'
-        )
-    },
+@pytest.mark.parametrize('intent_write_url', (reverse('enrolment-business-type'), reverse('enrolment-start')))
+@pytest.mark.parametrize('params,verb', (
+    ({'backfill-details-intent': True}, views.ReadUserIntentMixin.LABEL_BACKFILL_DETAILS),
+    ({'business-profile-intent': True}, views.ReadUserIntentMixin.LABEL_BUSINESS),
+    (
+        {
+            'next': (
+                'http%3A%2F%2Fprofile.trade.great%3A8006%2Fprofile%2Fenrol%2F%3F'
+                'business-profile-intent%3Dtrue'
+            )
+        },
+        views.ReadUserIntentMixin.LABEL_BUSINESS
+    ),
+    ({}, views.ReadUserIntentMixin.LABEL_ACCOUNT),
 ))
 @pytest.mark.parametrize('intent_read_url', expose_user_jourey_urls)
-def test_expose_user_journey_business_profile_intent(
-    intent_write_url, intent_read_url, params, client
-):
+def test_expose_user_journey_intent(intent_write_url, intent_read_url, params, client, verb):
     response = client.get(intent_write_url, params)
     assert response.status_code == 200
 
     response = client.get(intent_read_url)
 
     assert response.status_code == 200
-    assert response.context_data['user_journey_verb'] == (
-        views.ReadUserIntentMixin.LABEL_BUSINESS
-    )
+    assert response.context_data['user_journey_verb'] == verb
 
 
 @pytest.mark.parametrize(
     'url',
     expose_user_jourey_urls + (reverse('enrolment-individual-interstitial'),)
-
 )
 def test_expose_user_journey_mixin_logged_in(url, client, user):
     client.force_login(user)
