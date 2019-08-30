@@ -149,7 +149,7 @@ def mock_clean():
 @pytest.fixture(autouse=True)
 def mock_retrieve_public_profile(client):
     patch = mock.patch.object(
-        helpers.api_client.company, 'retrieve_public_profile',
+        helpers.api_client.company, 'published_profile_retrieve',
         return_value=create_response(status_code=404)
     )
     yield patch.start()
@@ -167,9 +167,9 @@ def mock_validate_company_number(client):
 
 
 @pytest.fixture(autouse=True)
-def mock_request_collaboration(client):
+def mock_collaborator_request_create(client):
     patch = mock.patch.object(
-        helpers.api_client.company, 'request_collaboration',
+        helpers.api_client.company, 'collaborator_request_create',
         return_value=create_response()
     )
     yield patch.start()
@@ -213,7 +213,7 @@ def mock_create_user():
 @pytest.fixture(autouse=True)
 def mock_user_has_company():
     patch = mock.patch.object(
-        helpers.api_client.company, 'retrieve_private_profile',
+        helpers.api_client.company, 'profile_retrieve',
         return_value=create_response(status_code=404)
     )
     yield patch.start()
@@ -693,9 +693,9 @@ def test_companies_house_enrolment_has_company_error(
         client.get(url)
 
 
-@mock.patch('enrolment.views.helpers.request_collaboration')
+@mock.patch('enrolment.views.helpers.collaborator_request_create')
 def test_companies_house_enrolment_submit_end_to_end_company_has_account(
-    mock_request_collaboration, client, steps_data,
+    mock_collaborator_request_create, client, steps_data,
     submit_companies_house_step, mock_enrolment_send,
     mock_validate_company_number, user
 ):
@@ -727,8 +727,8 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
         views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
     )
     assert mock_enrolment_send.call_count == 0
-    assert mock_request_collaboration.call_count == 1
-    assert mock_request_collaboration.call_args == mock.call(
+    assert mock_collaborator_request_create.call_count == 1
+    assert mock_collaborator_request_create.call_args == mock.call(
         company_number='12345678',
         email='jim@example.com',
         name=user.full_name,
@@ -738,9 +738,9 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     )
 
 
-@mock.patch('enrolment.views.helpers.request_collaboration')
+@mock.patch('enrolment.views.helpers.collaborator_request_create')
 def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
-    mock_request_collaboration, client, steps_data,
+    mock_collaborator_request_create, client, steps_data,
     submit_companies_house_step, mock_enrolment_send,
     mock_validate_company_number, user
 ):
@@ -767,8 +767,8 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
         views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
     )
     assert mock_enrolment_send.call_count == 0
-    assert mock_request_collaboration.call_count == 1
-    assert mock_request_collaboration.call_args == mock.call(
+    assert mock_collaborator_request_create.call_count == 1
+    assert mock_collaborator_request_create.call_args == mock.call(
         company_number='12345678',
         email='jim@example.com',
         name=user.full_name,

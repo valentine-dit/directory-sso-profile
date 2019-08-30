@@ -63,7 +63,7 @@ def create_user(email, password):
 
 
 def user_has_company(sso_session_id):
-    response = api_client.company.retrieve_private_profile(sso_session_id)
+    response = api_client.company.profile_retrieve(sso_session_id)
     if response.status_code == 404:
         return False
     elif response.status_code == 200:
@@ -146,8 +146,8 @@ def regenerate_verification_code(email):
     return response.json()
 
 
-def request_collaboration(company_number, email, name, form_url):
-    response = api_client.company.request_collaboration(
+def collaborator_request_create(company_number, email, name, form_url):
+    response = api_client.company.collaborator_request_create(
         company_number=company_number,
         collaborator_email=email,
     )
@@ -160,7 +160,7 @@ def request_collaboration(company_number, email, name, form_url):
     response = action.save({
         'name': name,
         'email': email,
-        'add_collaborator_url': settings.FAB_ADD_USER_URL,
+        'collaborator_create_url': settings.FAB_ADD_USER_URL,
         'report_abuse_url': urls.FEEDBACK,
     })
     response.raise_for_status()

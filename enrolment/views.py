@@ -547,7 +547,7 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
             session=self.request.session,
         )
         if is_enrolled:
-            helpers.request_collaboration(
+            helpers.collaborator_request_create(
                 company_number=data['company_number'],
                 email=self.request.user.email,
                 name=self.request.user.full_name,
