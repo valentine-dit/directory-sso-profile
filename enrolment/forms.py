@@ -95,7 +95,7 @@ class UserAccount(forms.Form):
     captcha = ReCaptchaField(
         label='',
         label_suffix='',
-     )
+    )
     terms_agreed = forms.BooleanField(label=TERMS_LABEL)
 
     def clean_password_confirmed(self):
