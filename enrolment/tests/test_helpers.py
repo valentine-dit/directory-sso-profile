@@ -9,6 +9,7 @@ from django.conf import settings
 
 from enrolment import helpers
 from core.tests.helpers import create_response
+from directory_constants import user_roles
 
 
 @mock.patch.object(helpers.ch_search_api_client.company, 'get_company_profile')
@@ -208,5 +209,82 @@ def test_request_collaboration(mock_request_collaboration, mock_submit):
                 settings.GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID
             ),
             'email_address': 'company@example.com'
+        }
+    })
+
+
+@mock.patch.object(helpers, 'get_company_admin')
+def test_get_company_admin_ok(mock_get_company_admin):
+    data = {
+        'sso_id': 1,
+        'company': '12345678',
+        'company_email': 'jim@example.com',
+        'date_joined': '2001-01-01T00:00:00.000000Z',
+        'is_company_owner': True,
+        'role': 'ADMIN',
+        'name': 'Jim'
+    }
+
+    mock_get_company_admin.return_value = create_response(data)
+    result = helpers.get_company_admin('123456')
+
+    assert mock_get_company_admin.call_count == 1
+    assert mock_get_company_admin.call_args == mock.call('123456')
+    assert result.json() == data
+
+
+@mock.patch.object(helpers.api_client.company, 'retrieve_collaborators')
+def test_get_company_admin_not_ok(mock_retrieve_collaborators):
+    mock_retrieve_collaborators.return_value = create_response(status_code=400)
+    with pytest.raises(HTTPError):
+        helpers.get_company_admin('123456')
+
+
+@mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
+@mock.patch.object(helpers.api_client.company, 'add_collaborator')
+@mock.patch.object(helpers, 'get_company_admin')
+def test_add_collaborator(mock_get_company_admin, mock_add_collaborator, mock_submit):
+
+    mock_get_company_admin.return_value = {'company_email': 'admin@xyzcorp.com'}
+
+    mock_add_collaborator.return_value = create_response(
+        status_code=201, json_body={
+            'sso_id': 300,
+            'name': 'Abc',
+            'company': 'Xyz corp',
+            'company_email': 'xyz@xyzcorp.com',
+            'mobile_number': '9876543210',
+            'role': user_roles.MEMBER
+        }
+    )
+
+    helpers.add_new_collaborator(data={
+        'company_number': 1234,
+        'company_name': 'Xyz corp',
+        'sso_id': 300,
+        'email': 'xyz@xyzcorp.com',
+        'name': 'Abc',
+        'form_url': '/the/form/',
+        'mobile_number': '9876543210',
+        'sso_session_id': 12345
+    })
+
+    assert mock_submit.call_args == mock.call({
+        'data': {
+            'company_name': 'Xyz corp',
+            'name': 'Abc',
+            'email': 'xyz@xyzcorp.com',
+            'profile_remove_member_url': settings.SSO_PROFILE_MANAGE_COLLABORATORS_URL,
+            'report_abuse_url': urls.FEEDBACK,
+        },
+        'meta': {
+            'action_name': 'gov-notify-email',
+            'form_url': '/the/form/',
+            'sender': {},
+            'spam_control': {},
+            'template_id': (
+                settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID
+            ),
+            'email_address': 'admin@xyzcorp.com'
         }
     })

@@ -7,7 +7,7 @@ from directory_ch_client.client import ch_search_api_client
 from directory_constants import choices
 from directory_sso_api_client.client import sso_api_client
 from directory_forms_api_client import actions
-from directory_constants import urls
+from directory_constants import urls, user_roles
 import directory_components
 
 from django.utils import formats
@@ -166,6 +166,18 @@ def request_collaboration(company_number, email, name, form_url):
     response.raise_for_status()
 
 
+def get_company_admin(sso_session_id):
+    response = api_client.company.retrieve_collaborators(sso_session_id=sso_session_id)
+    response.raise_for_status()
+    collaborators = response.json()
+    admins = [collaborator for collaborator in collaborators
+              if collaborator['role'] == user_roles.ADMIN]
+    if admins:
+        return admins[0]
+
+    return None
+
+
 def add_new_collaborator(data):
 
     data_add = {
@@ -173,23 +185,32 @@ def add_new_collaborator(data):
         'sso_id': data['sso_id'],
         'company_email': data['email'],
         'name': data['name'],
-        'mobile_number': data.get('mobile_number', '')
+        'mobile_number': data.get('mobile_number', ''),
+        'role': user_roles.MEMBER
     }
+
     response = api_client.company.add_collaborator(data=data_add)
     response.raise_for_status()
-    action = actions.GovNotifyEmailAction(
-        email_address=response.json()['company_email'],
-        template_id=settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID,
-        form_url=data['form_url']
-    )
-    response = action.save({
-        'company_name': data['company_name'],
-        'name': data['name'],
-        'email': data['email'],
-        'profile_remove_member_url': settings.SSO_PROFILE_MANAGE_COLLABORATORS_URL,
-        'report_abuse_url': urls.FEEDBACK
-    })
-    response.raise_for_status()
+
+    company_admin = get_company_admin(data['sso_session_id'])
+
+    if company_admin:
+        action = actions.GovNotifyEmailAction(
+            email_address=company_admin['company_email'],
+            template_id=settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID,
+            form_url=data['form_url']
+        )
+        response = action.save({
+            'company_name': data['company_name'],
+            'name': data['name'],
+            'email': data['email'],
+            'profile_remove_member_url': settings.SSO_PROFILE_MANAGE_COLLABORATORS_URL,
+            'report_abuse_url': urls.FEEDBACK
+        })
+        response.raise_for_status()
+    else:
+        raise ValueError("A company must have at-least one admin, "
+                         "none found for {}".format(data['company_name']))
 
 
 class CompanyParser(directory_components.helpers.CompanyParser):
