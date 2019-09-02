@@ -167,7 +167,7 @@ def collaborator_request_create(company_number, email, name, form_url):
 
 
 def get_company_admin(sso_session_id):
-    response = api_client.company.retrieve_collaborators(sso_session_id=sso_session_id)
+    response = api_client.company.collaborator_list(sso_session_id=sso_session_id)
     response.raise_for_status()
     collaborators = response.json()
     admins = [collaborator for collaborator in collaborators
@@ -189,7 +189,7 @@ def add_new_collaborator(data):
         'role': user_roles.MEMBER
     }
 
-    response = api_client.company.add_collaborator(data=data_add)
+    response = api_client.company.collaborator_create(data=data_add)
     response.raise_for_status()
 
     company_admin = get_company_admin(data['sso_session_id'])

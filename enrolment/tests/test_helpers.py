@@ -233,7 +233,7 @@ def test_get_company_admin_ok(mock_get_company_admin):
     assert result.json() == data
 
 
-@mock.patch.object(helpers.api_client.company, 'retrieve_collaborators')
+@mock.patch.object(helpers.api_client.company, 'collaborator_list')
 def test_get_company_admin_not_ok(mock_retrieve_collaborators):
     mock_retrieve_collaborators.return_value = create_response(status_code=400)
     with pytest.raises(HTTPError):

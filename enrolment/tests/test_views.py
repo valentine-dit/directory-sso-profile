@@ -187,7 +187,7 @@ def mock_add_collaborator(client):
         'role': user_roles.MEMBER
     })
     patch = mock.patch.object(
-        helpers.api_client.company, 'add_collaborator',
+        helpers.api_client.company, 'collaborator_create',
         return_value=response
     )
     yield patch.start()
