@@ -3,6 +3,8 @@
 ## Pre-release
 
 ### Implemented enhancements
+- TT-1725 - Send email to company admin when a new user is added to company profile
+- TT-1734 - Add second user to already registered company profile
 - TT-1733 - Add request for individual verification feature
 - TT-1723 - Add collaborator list admin view
 - TT-1716 - Support removing collaborators
