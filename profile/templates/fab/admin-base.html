@@ -35,7 +35,7 @@
                                 <a href="{% url name %}" class="link">Invite collaborators</a>
                             </li>
                         {% endwith %}
-                        {% with name='find-a-buyer-admin-collaborator-list' %}
+                        {% with name='find-a-buyer-admin-tools' %}
                             <li class="{% if request.resolver_match.url_name == name %}bold-small{% endif %}">
                                 <a href="{% url name %}" class="link">Collaborators</a>
                             </li>
@@ -53,7 +53,7 @@
                         <li>Delete business profile</li>
                     </ul>
                 </section>
-                <a href="{% url 'find-a-buyer-admin-collaborator-list' %}">Back</a>
+                <a href="{% url 'find-a-buyer-admin-tools' %}">Back</a>
             </div>
             <div class="column-three-quarters">
                 {% block inner_content %}{% endblock %}

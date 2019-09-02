@@ -52,12 +52,12 @@ def test_get_supplier_profile_not_found(mock_retrieve_profile):
     assert profile is None
 
 
-@mock.patch.object(api_client.company, 'retrieve_private_profile')
-def test_get_company_profile_not_found(mock_retrieve_private_profile):
-    mock_retrieve_private_profile.return_value = create_response(status_code=404)
+@mock.patch.object(api_client.company, 'profile_retrieve')
+def test_get_company_profile_not_found(mock_profile_retrieve):
+    mock_profile_retrieve.return_value = create_response(status_code=404)
 
     profile = helpers.get_company_profile('1234')
 
-    assert mock_retrieve_private_profile.call_count == 1
-    assert mock_retrieve_private_profile.call_args == mock.call('1234')
+    assert mock_profile_retrieve.call_count == 1
+    assert mock_profile_retrieve.call_args == mock.call('1234')
     assert profile is None
