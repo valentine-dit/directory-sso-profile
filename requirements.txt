@@ -11,7 +11,7 @@ botocore==1.10.84         # via boto3, s3transfer
 certifi==2018.4.16        # via requests
 chardet==3.0.4            # via requests
 contextlib2==0.5.5        # via raven
-directory-api-client==16.2.0
+directory-api-client==17.1.0
 directory-ch-client==2.1.0
 directory-client-core==6.1.0  # via directory-api-client, directory-ch-client, directory-forms-api-client, directory-sso-api-client
 directory-components==27.12.0

@@ -298,13 +298,6 @@ urlpatterns = [
         name='find-a-buyer-expertise-products-services'
     ),
     url(
-        r'^find-a-buyer/admin/$',
-        company_required(profile.fab.views.AdminToolsView.as_view()),
-        name='find-a-buyer-admin-tools'
-    ),
-
-
-    url(
         r'^find-a-buyer/verify/request/$',
         company_required(profile.fab.views.IdentityVerificationRequestFormView.as_view()),
         name='find-a-buyer-request-to-verify'
@@ -315,9 +308,9 @@ urlpatterns = [
 if settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON']:
     urlpatterns += [
         url(
-            r'^find-a-buyer/admin/collaborators/$',
+            r'^find-a-buyer/admin/$',
             company_required(profile.fab.views.AdminCollaboratorsListView.as_view()),
-            name='find-a-buyer-admin-collaborator-list'
+            name='find-a-buyer-admin-tools'
         ),
         url(
             r'^find-a-buyer/admin/collaborator/(?P<sso_id>[0-9]+)/$',
@@ -334,8 +327,25 @@ if settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON']:
             company_admin_required(profile.fab.views.AdminInviteNewAdminFormView.as_view()),
             name='find-a-buyer-admin-invite-administrator'
         ),
+        url(
+            r'^find-a-buyer/admin/invite/$',
+            company_admin_required(profile.fab.views.AdminInviteCollaboratorFormView.as_view()),
+            name='find-a-buyer-admin-invite-collaborator'
+        ),
+        url(
+            r'^find-a-buyer/admin/invite/delete/$',
+            company_admin_required(profile.fab.views.AdminInviteCollaboratorDeleteFormView.as_view()),
+            name='find-a-buyer-collaboration-invite-delete'
+        ),
     ]
-
+else:
+    urlpatterns += [
+        url(
+            r'^find-a-buyer/admin/$',
+            company_required(profile.fab.views.AdminToolsView.as_view()),
+            name='find-a-buyer-admin-tools'
+        ),
+    ]
 
 urlpatterns = [
     url(

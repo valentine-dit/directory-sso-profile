@@ -26,6 +26,8 @@ SESSION_KEY_COMPANY_CHOICE = 'COMPANY_CHOICE'
 SESSION_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
 SESSION_KEY_REFERRER = 'REFERRER_URL'
 SESSION_KEY_BUSINESS_PROFILE_INTENT = 'BUSINESS_PROFILE_INTENT'
+SESSION_KEY_BACKFILL_DETAILS_INTENT = 'BACKFILL_DETAILS_INTENT'
+
 
 PROGRESS_STEP_LABEL_USER_ACCOUNT = (
     'Enter your business email address and set a password'
@@ -327,11 +329,17 @@ class ReadUserIntentMixin:
     """Expose whether the user's intent is to create a business profile"""
     LABEL_BUSINESS = 'create a business profile'
     LABEL_ACCOUNT = 'create an great.gov.uk account'
+    LABEL_BACKFILL_DETAILS = 'Update your details'
 
     def has_business_profile_intent_in_session(self):
         return self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT)
 
+    def has_backfill_details_intent_in_session(self):
+        return self.request.session.get(SESSION_KEY_BACKFILL_DETAILS_INTENT)
+
     def get_user_journey_verb(self):
+        if self.has_backfill_details_intent_in_session():
+            return self.LABEL_BACKFILL_DETAILS
         if (
             self.has_business_profile_intent_in_session() or
             self.request.user.is_authenticated
@@ -349,7 +357,7 @@ class ReadUserIntentMixin:
 class WriteUserIntentMixin:
     """Save weather the user's intent is to create a business profile"""
 
-    def has_business_profile_intent_in_querystring(self):
+    def has_intent_in_querystring(self, intent_name):
         params = self.request.GET
         # catch the case where anonymous user clicked "start now" from FAB
         # landing page then were sent to SSO login and then clicked "sign up"
@@ -362,10 +370,14 @@ class WriteUserIntentMixin:
                 pass
             else:
                 params = QueryDict(querystring)
-        return params.get('business-profile-intent')
+        return params.get(intent_name)
 
     def dispatch(self, *args, **kwargs):
-        if self.has_business_profile_intent_in_querystring():
+        if self.has_intent_in_querystring('backfill-details-intent'):
+            # user was prompted to backfill their company or business
+            # details after logging in
+            self.request.session[SESSION_KEY_BACKFILL_DETAILS_INTENT] = True
+        elif self.has_intent_in_querystring('business-profile-intent'):
             # user has clicked a button to specifically create a business
             # profile. They are signing up because their end goal is to have
             # a business profile. The counter to this scenario is the user

@@ -1,3 +1,4 @@
+from directory_constants import user_roles
 from directory_api_client.client import api_client
 from formtools.wizard.views import NamedUrlSessionWizardView
 from raven.contrib.django.raven_compat.models import client as sentry_client
@@ -49,9 +50,7 @@ class FindABuyerView(TemplateView):
     def is_company_profile_owner(self):
         if not self.request.user.company:
             return False
-        response = api_client.supplier.retrieve_profile(
-            sso_session_id=self.request.user.session_id,
-        )
+        response = api_client.supplier.retrieve_profile(self.request.user.session_id)
         response.raise_for_status()
         parsed = response.json()
         return parsed['is_company_owner']
@@ -85,7 +84,7 @@ class BaseFormView(FormView):
 
     def form_valid(self, form):
         try:
-            response = api_client.company.update_profile(
+            response = api_client.company.profile_update(
                 sso_session_id=self.request.user.session_id,
                 data=self.serialize_form(form)
             )
@@ -274,7 +273,7 @@ class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
 class CaseStudyWizardEditView(BaseCaseStudyWizardView):
 
     def get_form_initial(self, step):
-        response = api_client.company.retrieve_private_case_study(
+        response = api_client.company.case_study_retrieve(
             sso_session_id=self.request.user.session_id,
             case_study_id=self.kwargs['id'],
         )
@@ -284,7 +283,7 @@ class CaseStudyWizardEditView(BaseCaseStudyWizardView):
         return response.json()
 
     def done(self, form_list, *args, **kwags):
-        response = api_client.company.update_case_study(
+        response = api_client.company.case_study_update(
             data=self.serialize_form_list(form_list),
             case_study_id=self.kwargs['id'],
             sso_session_id=self.request.user.session_id,
@@ -300,7 +299,7 @@ class CaseStudyWizardEditView(BaseCaseStudyWizardView):
 
 class CaseStudyWizardCreateView(BaseCaseStudyWizardView):
     def done(self, form_list, *args, **kwags):
-        response = api_client.company.create_case_study(
+        response = api_client.company.case_study_create(
             sso_session_id=self.request.user.session_id,
             data=self.serialize_form_list(form_list),
         )
@@ -318,7 +317,7 @@ class AdminToolsView(TemplateView):
             FAB_REMOVE_USER_URL=settings.FAB_REMOVE_USER_URL,
             FAB_TRANSFER_ACCOUNT_URL=settings.FAB_TRANSFER_ACCOUNT_URL,
             company=self.request.user.company.serialize_for_template(),
-            has_collaborators=len(helpers.retrieve_collaborators(self.request.user.session_id)) > 1,
+            has_collaborators=len(helpers.collaborator_list(self.request.user.session_id)) > 1,
             **kwargs,
         )
 
@@ -329,7 +328,7 @@ class AdminCollaboratorsListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            collaborators=helpers.retrieve_collaborators(self.request.user.session_id),
+            collaborators=helpers.collaborator_list(self.request.user.session_id),
             **kwargs,
         )
 
@@ -337,7 +336,13 @@ class AdminCollaboratorsListView(TemplateView):
 class AdminCollaboratorEditFormView(SuccessMessageMixin, FormView):
     template_name = 'fab/admin-collaborator-edit.html'
     form_class = forms.AdminCollaboratorEditForm
-    success_url = reverse_lazy('find-a-buyer-admin-collaborator-list')
+    success_url = reverse_lazy('find-a-buyer-admin-tools')
+    success_messages = {
+        forms.REMOVE_COLLABORATOR: 'Collaborator removed',
+        forms.CHANGE_COLLABORATOR_TO_EDITOR: 'Collaborator role changed to Editor',
+        forms.CHANGE_COLLABORATOR_TO_MEMBER: 'Collaborator role changed to Member',
+        forms.CHANGE_COLLABORATOR_TO_ADMIN: 'Collaborator role changed to Admin',
+    }
 
     def dispatch(self, *args, **kwargs):
         if not self.collaborator:
@@ -361,19 +366,27 @@ class AdminCollaboratorEditFormView(SuccessMessageMixin, FormView):
         return {**kwargs, 'current_role': self.collaborator['role']}
 
     def form_valid(self, form):
-        if form.cleaned_data['action'] == forms.REMOVE_COLLABORATOR:
+        action = form.cleaned_data['action']
+        if action == forms.REMOVE_COLLABORATOR:
             helpers.remove_collaborator(
                 sso_session_id=self.request.user.session_id,
-                sso_ids=[self.collaborator['sso_id']],
+                sso_id=self.collaborator['sso_id'],
             )
         else:
-            raise NotImplementedError
+            role = {
+                forms.CHANGE_COLLABORATOR_TO_EDITOR: user_roles.EDITOR,
+                forms.CHANGE_COLLABORATOR_TO_MEMBER: user_roles.MEMBER,
+                forms.CHANGE_COLLABORATOR_TO_ADMIN: user_roles.ADMIN,
+            }[action]
+            helpers.collaborator_role_update(
+                sso_session_id=self.request.user.session_id,
+                sso_id=self.collaborator['sso_id'],
+                role=role,
+            )
         return super().form_valid(form)
 
     def get_success_message(self, cleaned_data):
-        if cleaned_data['action'] == forms.REMOVE_COLLABORATOR:
-            return 'Collaborator removed'
-        raise NotImplementedError
+        return self.success_messages[cleaned_data['action']]
 
 
 class AdminDisconnectFormView(SuccessMessageMixin, FormView):
@@ -401,21 +414,27 @@ class AdminDisconnectFormView(SuccessMessageMixin, FormView):
 class AdminInviteNewAdminFormView(SuccessMessageMixin, FormView):
     template_name = 'fab/admin-invite-admin.html'
     form_class = forms.AdminInviteNewAdminForm
-    success_message = (
-        'We have sent an invite to %(new_owner_email)s to become the new administrator for the business profile. '
-        'You will be notified when this happens.'
-    )
-    success_url = reverse_lazy('find-a-buyer-admin-collaborator-list')
+    success_url = reverse_lazy('find-a-buyer-admin-tools')
+
+    def get_success_message(self, cleaned_data):
+        if cleaned_data['collaborator_email']:
+            message = (
+                'We have sent an invite to %(collaborator_email)s to become the new administrator for the business '
+                'profile. You will be notified when this happens.'
+            )
+        else:
+            message = 'Collaborator role changed to Admin'
+        return message
 
     @cached_property
     def collaborators(self):
-        return helpers.retrieve_collaborators(self.request.user.session_id)
+        return helpers.collaborator_list(self.request.user.session_id)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['collaborator_choices'] = [
-            (item['company_email'], item['name'] or item['company_email'])
-            for item in self.collaborators
+            (item['sso_id'], item['name'] or item['company_email'])
+            for item in self.collaborators if item['role'] != user_roles.ADMIN
         ]
         return kwargs
 
@@ -425,18 +444,70 @@ class AdminInviteNewAdminFormView(SuccessMessageMixin, FormView):
 
     def form_valid(self, form):
         try:
-            helpers.create_admin_transfer_invite(
-                sso_session_id=self.request.user.session_id, email=form.cleaned_data['new_owner_email']
-            )
+            if form.cleaned_data['collaborator_email']:
+                helpers.collaborator_invite_create(
+                    sso_session_id=self.request.user.session_id,
+                    collaborator_email=form.cleaned_data['collaborator_email'],
+                    role=user_roles.ADMIN
+                )
+            else:
+                helpers.collaborator_role_update(
+                    sso_session_id=self.request.user.session_id,
+                    sso_id=form.cleaned_data['sso_id'],
+                    role=user_roles.ADMIN
+                )
         except HTTPError as error:
             if error.response.status_code == 400:
                 parsed = error.response.json()
-                if 'new_owner_email' in parsed:
-                    parsed = parsed['new_owner_email']
+                if 'collaborator_email' in parsed:
+                    parsed = parsed['collaborator_email']
                 form.add_error(field=None, error=parsed)
                 return self.form_invalid(form)
             else:
                 raise
+        return super().form_valid(form)
+
+
+class AdminInviteCollaboratorFormView(SuccessMessageMixin, FormView):
+    template_name = 'fab/admin-invite-collaborator.html'
+    form_class = forms.AdminInviteCollaboratorForm
+    success_message = (
+        'We have sent a confirmation to %(collaborator_email)s with an invitation to become a collaborator'
+    )
+    success_url = reverse_lazy('find-a-buyer-admin-invite-collaborator')
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            collaborator_invites=helpers.collaborator_invite_list(self.request.user.session_id),
+            **kwargs,
+        )
+
+    def form_valid(self, form):
+        try:
+            helpers.collaborator_invite_create(
+                sso_session_id=self.request.user.session_id,
+                collaborator_email=form.cleaned_data['collaborator_email'],
+                role=form.cleaned_data['role'],
+            )
+        except HTTPError as error:
+            if error.response.status_code == 400:
+                form.add_error(field=None, error=error.response.json())
+                return self.form_invalid(form)
+            else:
+                raise
+        return super().form_valid(form)
+
+
+class AdminInviteCollaboratorDeleteFormView(SuccessMessageMixin, FormView):
+    form_class = forms.AdminInviteCollaboratorDeleteForm
+    success_message = ('Invitation successfully deleted')
+    success_url = reverse_lazy('find-a-buyer-admin-invite-collaborator')
+
+    def form_valid(self, form):
+        helpers.collaborator_invite_delete(
+            sso_session_id=self.request.user.session_id,
+            invite_key=form.cleaned_data['invite_key'],
+        )
         return super().form_valid(form)
 
 
@@ -553,6 +624,6 @@ class IdentityVerificationRequestFormView(SuccessMessageMixin, FormView):
         return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):
-        response = api_client.company.verify_identity_request(sso_session_id=self.request.user.session_id)
+        response = api_client.company.verify_identity_request(self.request.user.session_id)
         response.raise_for_status()
         return super().form_valid(form)

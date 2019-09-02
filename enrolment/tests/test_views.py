@@ -149,7 +149,7 @@ def mock_clean():
 @pytest.fixture(autouse=True)
 def mock_retrieve_public_profile(client):
     patch = mock.patch.object(
-        helpers.api_client.company, 'retrieve_public_profile',
+        helpers.api_client.company, 'published_profile_retrieve',
         return_value=create_response(status_code=404)
     )
     yield patch.start()
@@ -167,9 +167,9 @@ def mock_validate_company_number(client):
 
 
 @pytest.fixture(autouse=True)
-def mock_request_collaboration(client):
+def mock_collaborator_request_create(client):
     patch = mock.patch.object(
-        helpers.api_client.company, 'request_collaboration',
+        helpers.api_client.company, 'collaborator_request_create',
         return_value=create_response()
     )
     yield patch.start()
@@ -231,7 +231,7 @@ def mock_create_user():
 @pytest.fixture(autouse=True)
 def mock_user_has_company():
     patch = mock.patch.object(
-        helpers.api_client.company, 'retrieve_private_profile',
+        helpers.api_client.company, 'profile_retrieve',
         return_value=create_response(status_code=404)
     )
     yield patch.start()
@@ -722,9 +722,9 @@ def test_companies_house_enrolment_has_company_error(
 
 @mock.patch('enrolment.views.helpers.add_new_collaborator')
 def test_companies_house_enrolment_submit_end_to_end_company_has_account(
-    mock_add_collaborator,
-    client, steps_data, submit_companies_house_step,
-    mock_enrolment_send, mock_validate_company_number, user
+    mock_add_collaborator, client, steps_data,
+    submit_companies_house_step, mock_enrolment_send,
+    mock_validate_company_number, user
 ):
     mock_validate_company_number.return_value = create_response(status_code=400)
 
@@ -753,7 +753,7 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     assert response.template_name == (
         views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
     )
-    assert mock_enrolment_send.call_count == 0
+
     assert mock_add_collaborator.call_count == 1
     assert mock_add_collaborator.call_args == mock.call(data={
         'sso_id': 1,
@@ -1825,38 +1825,35 @@ expose_user_jourey_urls = (
 )
 
 
-@pytest.mark.parametrize('intent_write_url', (
-    reverse('enrolment-business-type'),
-    reverse('enrolment-start'),
-))
-@pytest.mark.parametrize('params', (
-    {'business-profile-intent': True},
-    {
-        'next': (
-            'http%3A%2F%2Fprofile.trade.great%3A8006%2Fprofile%2Fenrol%2F%3F'
-            'business-profile-intent%3Dtrue'
-        )
-    },
+@pytest.mark.parametrize('intent_write_url', (reverse('enrolment-business-type'), reverse('enrolment-start')))
+@pytest.mark.parametrize('params,verb', (
+    ({'backfill-details-intent': True}, views.ReadUserIntentMixin.LABEL_BACKFILL_DETAILS),
+    ({'business-profile-intent': True}, views.ReadUserIntentMixin.LABEL_BUSINESS),
+    (
+        {
+            'next': (
+                'http%3A%2F%2Fprofile.trade.great%3A8006%2Fprofile%2Fenrol%2F%3F'
+                'business-profile-intent%3Dtrue'
+            )
+        },
+        views.ReadUserIntentMixin.LABEL_BUSINESS
+    ),
+    ({}, views.ReadUserIntentMixin.LABEL_ACCOUNT),
 ))
 @pytest.mark.parametrize('intent_read_url', expose_user_jourey_urls)
-def test_expose_user_journey_business_profile_intent(
-    intent_write_url, intent_read_url, params, client
-):
+def test_expose_user_journey_intent(intent_write_url, intent_read_url, params, client, verb):
     response = client.get(intent_write_url, params)
     assert response.status_code == 200
 
     response = client.get(intent_read_url)
 
     assert response.status_code == 200
-    assert response.context_data['user_journey_verb'] == (
-        views.ReadUserIntentMixin.LABEL_BUSINESS
-    )
+    assert response.context_data['user_journey_verb'] == verb
 
 
 @pytest.mark.parametrize(
     'url',
     expose_user_jourey_urls + (reverse('enrolment-individual-interstitial'),)
-
 )
 def test_expose_user_journey_mixin_logged_in(url, client, user):
     client.force_login(user)

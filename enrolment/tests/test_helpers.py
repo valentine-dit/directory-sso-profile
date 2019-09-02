@@ -180,13 +180,13 @@ def test_notify_already_registered(mock_submit):
 @mock.patch(
     'directory_forms_api_client.client.forms_api_client.submit_generic'
 )
-@mock.patch.object(helpers.api_client.company, 'request_collaboration')
-def test_request_collaboration(mock_request_collaboration, mock_submit):
-    mock_request_collaboration.return_value = create_response(
+@mock.patch.object(helpers.api_client.company, 'collaborator_request_create')
+def test_collaborator_request_create(mock_collaborator_request_create, mock_submit):
+    mock_collaborator_request_create.return_value = create_response(
         status_code=201, json_body={'company_email': 'company@example.com'}
     )
 
-    helpers.request_collaboration(
+    helpers.collaborator_request_create(
         company_number='12334',
         email='test@example.com',
         name='Foo Bar',
@@ -197,7 +197,7 @@ def test_request_collaboration(mock_request_collaboration, mock_submit):
         'data': {
             'name': 'Foo Bar',
             'email': 'test@example.com',
-            'add_collaborator_url': settings.FAB_ADD_USER_URL,
+            'collaborator_create_url': settings.FAB_ADD_USER_URL,
             'report_abuse_url': urls.FEEDBACK,
         },
         'meta': {

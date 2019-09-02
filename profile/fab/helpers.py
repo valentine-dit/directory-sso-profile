@@ -6,7 +6,7 @@ import directory_components.helpers
 
 
 def get_company_profile(sso_session_id):
-    response = api_client.company.retrieve_private_profile(sso_session_id)
+    response = api_client.company.profile_retrieve(sso_session_id)
     if response.status_code == http.client.NOT_FOUND:
         return None
     response.raise_for_status()
@@ -59,20 +59,20 @@ class CompanyParser(directory_components.helpers.CompanyParser):
         }
 
 
-def retrieve_collaborators(sso_session_id):
-    response = api_client.company.retrieve_collaborators(sso_session_id=sso_session_id)
+def collaborator_list(sso_session_id):
+    response = api_client.company.collaborator_list(sso_session_id=sso_session_id)
     response.raise_for_status()
     return response.json()
 
 
 def retrieve_collaborator(sso_session_id, collaborator_sso_id):
-    for collaborator in retrieve_collaborators(sso_session_id):
+    for collaborator in collaborator_list(sso_session_id):
         if collaborator['sso_id'] == collaborator_sso_id:
             return collaborator
 
 
-def remove_collaborator(sso_session_id, sso_ids):
-    response = api_client.company.remove_collaborators(sso_session_id=sso_session_id, sso_ids=sso_ids)
+def remove_collaborator(sso_session_id, sso_id):
+    response = api_client.company.collaborator_disconnect(sso_session_id=sso_session_id, sso_id=sso_id)
     response.raise_for_status()
     assert response.status_code == 200
 
@@ -83,12 +83,28 @@ def disconnect_from_company(sso_session_id):
     assert response.status_code == 200
 
 
-def create_admin_transfer_invite(sso_session_id, email):
-    response = api_client.company.create_transfer_invite(sso_session_id=sso_session_id, new_owner_email=email)
-    response.raise_for_status()
-    assert response.status_code == 201
-
-
 def is_sole_admin(sso_session_id):
-    collaborators = retrieve_collaborators(sso_session_id)
+    collaborators = collaborator_list(sso_session_id)
     return [collaborator['role'] for collaborator in collaborators].count(user_roles.ADMIN) == 1
+
+
+def collaborator_invite_create(sso_session_id, collaborator_email, role):
+    data = {'collaborator_email': collaborator_email, 'role': role}
+    response = api_client.company.collaborator_invite_create(sso_session_id=sso_session_id, data=data)
+    response.raise_for_status()
+
+
+def collaborator_invite_list(sso_session_id):
+    response = api_client.company.collaborator_invite_list(sso_session_id=sso_session_id)
+    response.raise_for_status()
+    return response.json()
+
+
+def collaborator_invite_delete(sso_session_id, invite_key):
+    response = api_client.company.collaborator_invite_delete(sso_session_id=sso_session_id, invite_key=invite_key)
+    response.raise_for_status()
+
+
+def collaborator_role_update(sso_session_id, sso_id, role):
+    response = api_client.company.collaborator_role_update(sso_session_id=sso_session_id, sso_id=sso_id, role=role)
+    response.raise_for_status()

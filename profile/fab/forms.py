@@ -13,6 +13,7 @@ from profile.fab import constants, validators
 
 INDUSTRY_CHOICES = [('', 'Select an industry')] + list(choices.INDUSTRIES)
 EMPLOYEES_CHOICES = [('', 'Select employees')] + list(choices.EMPLOYEES)
+USER_ROLE_CHOICES = [('', 'Select role')] + list(choices.USER_ROLES)
 REMOVE_COLLABORATOR = 'REMOVE'
 CHANGE_COLLABORATOR_TO_EDITOR = 'CHANGE_TO_EDITOR'
 CHANGE_COLLABORATOR_TO_MEMBER = 'CHANGE_TO_MEMBER'
@@ -580,24 +581,34 @@ class AdminCollaboratorEditForm(forms.Form):
 class AdminInviteNewAdminForm(forms.Form):
     MESSAGE_EMAIL_REQUIRED = 'Please select an existing collaborator or specify an email address'
 
-    collaborator = forms.ChoiceField(
+    sso_id = forms.ChoiceField(
         label='',
         widget=forms.RadioSelect(use_nice_ids=True,),
         choices=[],  # set in __init__
         required=False,
     )
-    new_owner_email = forms.EmailField(
+    collaborator_email = forms.EmailField(
         label='Enter the email address of the new profile administrator',
         required=False,
     )
 
     def __init__(self, collaborator_choices, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['collaborator'].choices = collaborator_choices
+        self.fields['sso_id'].choices = collaborator_choices
 
     def clean(self):
-        cleaned_data = super().clean()
-        email = cleaned_data.get('new_owner_email') or cleaned_data.get('collaborator')
-        if not email:
+        super().clean()
+        if not self.cleaned_data.get('collaborator_email') and not self.cleaned_data.get('sso_id'):
             raise ValidationError(self.MESSAGE_EMAIL_REQUIRED)
-        cleaned_data['new_owner_email'] = email
+
+
+class AdminInviteCollaboratorForm(forms.Form):
+    collaborator_email = forms.EmailField(label='Email address of collaborator', required=False,)
+    role = forms.ChoiceField(
+        choices=USER_ROLE_CHOICES,
+        container_css_classes='width-half'
+    )
+
+
+class AdminInviteCollaboratorDeleteForm(forms.Form):
+    invite_key = forms.CharField()

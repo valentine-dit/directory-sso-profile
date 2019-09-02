@@ -7,7 +7,7 @@
     {% breadcrumbs 'Remove profile' %}
         <a href="{{ services_urls.great_domestic }}">great.gov.uk</a>
         <a href="{% url 'find-a-buyer' %}">Business profile</a>
-        <a href="{% url 'find-a-buyer-admin-collaborator-list' %}">Profile settings</a>
+        <a href="{% url 'find-a-buyer-admin-tools' %}">Profile settings</a>
     {% endbreadcrumbs %}
 {% endblock %}
 
@@ -25,12 +25,12 @@
               </div>
             {% endif %}
             {% if has_collaborators %}
-                {% include 'directory_components/form_widgets/form_field.html' with field=form.collaborator %}
+                {% include 'directory_components/form_widgets/form_field.html' with field=form.sso_id %}
             <p class="bold-small">Or</p>
             {% endif %}
-            {% include 'directory_components/form_widgets/form_field.html' with field=form.new_owner_email %}
+            {% include 'directory_components/form_widgets/form_field.html' with field=form.collaborator_email %}
             <button class="button">Send invitation</button>
         </form>
-        <a class="link" href="{% url 'find-a-buyer-admin-collaborator-list' %}">Cancel</a>
+        <a class="link" href="{% url 'find-a-buyer-admin-tools' %}">Cancel</a>
     </div>
 {% endblock %}
