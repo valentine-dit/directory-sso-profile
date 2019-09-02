@@ -241,7 +241,7 @@ def test_get_company_admin_not_ok(mock_retrieve_collaborators):
 
 
 @mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
-@mock.patch.object(helpers.api_client.company, 'add_collaborator')
+@mock.patch.object(helpers.api_client.company, 'collaborator_create')
 @mock.patch.object(helpers, 'get_company_admin')
 def test_add_collaborator(mock_get_company_admin, mock_add_collaborator, mock_submit):
 
