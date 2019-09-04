@@ -166,16 +166,12 @@ def collaborator_request_create(company_number, email, name, form_url):
     response.raise_for_status()
 
 
-def get_company_admin(sso_session_id):
+def get_company_admins(sso_session_id):
     response = api_client.company.collaborator_list(sso_session_id=sso_session_id)
     response.raise_for_status()
     collaborators = response.json()
-    admins = [collaborator for collaborator in collaborators
-              if collaborator['role'] == user_roles.ADMIN]
-    if admins:
-        return admins[0]
-
-    return None
+    return [collaborator for collaborator in collaborators
+            if collaborator['role'] == user_roles.ADMIN]
 
 
 def add_new_collaborator(data):
@@ -192,25 +188,27 @@ def add_new_collaborator(data):
     response = api_client.company.collaborator_create(data=data_add)
     response.raise_for_status()
 
-    company_admin = get_company_admin(data['sso_session_id'])
 
-    if company_admin:
+def notify_admins(email_data, email_template_id):
+
+    company_admins = get_company_admins(email_data['sso_session_id'])
+
+    assert company_admins, f"No admin found for {email_data['company_name']}"
+
+    for admin in company_admins:
         action = actions.GovNotifyEmailAction(
-            email_address=company_admin['company_email'],
-            template_id=settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID,
-            form_url=data['form_url']
+            email_address=admin['company_email'],
+            template_id=email_template_id,
+            form_url=email_data['form_url']
         )
         response = action.save({
-            'company_name': data['company_name'],
-            'name': data['name'],
-            'email': data['email'],
-            'profile_remove_member_url': settings.SSO_PROFILE_MANAGE_COLLABORATORS_URL,
-            'report_abuse_url': urls.FEEDBACK
+            'company_name': email_data['company_name'],
+            'name': email_data['name'],
+            'email': email_data['email'],
+            'profile_remove_member_url': email_data['profile_remove_member_url'],
+            'report_abuse_url': email_data['report_abuse_url']
         })
         response.raise_for_status()
-    else:
-        raise ValueError("A company must have at-least one admin, "
-                         "none found for {}".format(data['company_name']))
 
 
 class CompanyParser(directory_components.helpers.CompanyParser):

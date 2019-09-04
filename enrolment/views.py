@@ -557,14 +557,25 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
         if is_enrolled:
             helpers.add_new_collaborator(data={
                 'company_number': data['company_number'],
-                'company_name': data['company_name'],
                 'sso_id': self.request.user.id,
                 'email': self.request.user.email,
                 'name': name,
-                'form_url': self.request.path,
                 'mobile_number': data.get('phone_number', ''),
-                'sso_session_id': self.request.user.session_id
             })
+
+            helpers.notify_admins(email_data={
+                'sso_session_id': self.request.user.session_id,
+                'company_name': data['company_name'],
+                'name': name,
+                'email': self.request.user.email,
+                'form_url': self.request.path,
+                'profile_remove_member_url': settings.SSO_PROFILE_MANAGE_COLLABORATORS_URL,
+                'report_abuse_url': urls.FEEDBACK
+
+                },
+                email_template_id=settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID
+            )
+
             return TemplateResponse(self.request, self.templates[FINISHED])
         else:
             return super().done(form_list, form_dict=form_dict, **kwargs)

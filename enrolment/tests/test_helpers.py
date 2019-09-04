@@ -213,7 +213,7 @@ def test_collaborator_request_create(mock_collaborator_request_create, mock_subm
     })
 
 
-@mock.patch.object(helpers, 'get_company_admin')
+@mock.patch.object(helpers, 'get_company_admins')
 def test_get_company_admin_ok(mock_get_company_admin):
     data = {
         'sso_id': 1,
@@ -226,7 +226,7 @@ def test_get_company_admin_ok(mock_get_company_admin):
     }
 
     mock_get_company_admin.return_value = create_response(data)
-    result = helpers.get_company_admin('123456')
+    result = helpers.get_company_admins('123456')
 
     assert mock_get_company_admin.call_count == 1
     assert mock_get_company_admin.call_args == mock.call('123456')
@@ -237,49 +237,44 @@ def test_get_company_admin_ok(mock_get_company_admin):
 def test_get_company_admin_not_ok(mock_retrieve_collaborators):
     mock_retrieve_collaborators.return_value = create_response(status_code=400)
     with pytest.raises(HTTPError):
-        helpers.get_company_admin('123456')
+        helpers.get_company_admins('123456')
 
 
-@mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
-@mock.patch.object(helpers.api_client.company, 'collaborator_create')
-@mock.patch.object(helpers, 'get_company_admin')
-def test_add_collaborator(mock_get_company_admin, mock_add_collaborator, mock_submit):
+@mock.patch(
+    'directory_forms_api_client.client.forms_api_client.submit_generic'
+)
+@mock.patch('enrolment.helpers.get_company_admins')
+def test_notify_admins_ok(mock_get_company_admins, mock_submit):
+    mock_get_company_admins.return_value = [{
+        'company_email': 'admin@xyzcorp.com',
+        'company': '12345',
+        'sso_id': 1,
+        'name': 'Jim Abc',
+        'mobile_number': '123456789',
+        'role': user_roles.ADMIN
+    }]
 
-    mock_get_company_admin.return_value = {'company_email': 'admin@xyzcorp.com'}
-
-    mock_add_collaborator.return_value = create_response(
-        status_code=201, json_body={
-            'sso_id': 300,
-            'name': 'Abc',
-            'company': 'Xyz corp',
-            'company_email': 'xyz@xyzcorp.com',
-            'mobile_number': '9876543210',
-            'role': user_roles.MEMBER
-        }
-    )
-
-    helpers.add_new_collaborator(data={
-        'company_number': 1234,
-        'company_name': 'Xyz corp',
-        'sso_id': 300,
-        'email': 'xyz@xyzcorp.com',
-        'name': 'Abc',
-        'form_url': '/the/form/',
-        'mobile_number': '9876543210',
-        'sso_session_id': 12345
-    })
+    helpers.notify_admins(email_data={
+        'sso_session_id': 1234,
+        'company_name': 'XYZ corp',
+        'name': 'John Doe',
+        'email': 'johndoe@xyz.com',
+        'form_url': 'the/form/url',
+        'profile_remove_member_url': 'remove/member/url',
+        'report_abuse_url': 'report/abuse/url'
+    }, email_template_id=settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID)
 
     assert mock_submit.call_args == mock.call({
         'data': {
-            'company_name': 'Xyz corp',
-            'name': 'Abc',
-            'email': 'xyz@xyzcorp.com',
-            'profile_remove_member_url': settings.SSO_PROFILE_MANAGE_COLLABORATORS_URL,
-            'report_abuse_url': urls.FEEDBACK,
+            'company_name': 'XYZ corp',
+            'name': 'John Doe',
+            'email': 'johndoe@xyz.com',
+            'profile_remove_member_url': 'remove/member/url',
+            'report_abuse_url': 'report/abuse/url'
         },
         'meta': {
             'action_name': 'gov-notify-email',
-            'form_url': '/the/form/',
+            'form_url': 'the/form/url',
             'sender': {},
             'spam_control': {},
             'template_id': (
@@ -287,4 +282,42 @@ def test_add_collaborator(mock_get_company_admin, mock_add_collaborator, mock_su
             ),
             'email_address': 'admin@xyzcorp.com'
         }
+    })
+
+
+@mock.patch('enrolment.helpers.get_company_admins')
+def test_notify_admins_not_ok(mock_get_company_admins):
+    mock_get_company_admins.return_value = []
+
+    with pytest.raises(AssertionError):
+        helpers.notify_admins(email_data={
+            'sso_session_id': 1234,
+            'company_name': 'XYZ corp',
+            'name': 'John Doe',
+            'email': 'johndoe@xyz.com',
+            'form_url': 'the/form/url',
+            'profile_remove_member_url': 'remove/member/url',
+            'report_abuse_url': 'report/abuse/url'
+        }, email_template_id=1234)
+
+
+@mock.patch.object(helpers.api_client.company, 'collaborator_create')
+def test_add_collaborator(mock_add_collaborator):
+
+    helpers.add_new_collaborator(data={
+        'company_number': 1234,
+        'sso_id': 300,
+        'email': 'xyz@xyzcorp.com',
+        'name': 'Abc',
+        'mobile_number': '9876543210',
+    })
+
+    assert mock_add_collaborator.call_count == 1
+    assert mock_add_collaborator.call_args == mock.call(data={
+        'company': 1234,
+        'sso_id': 300,
+        'company_email': 'xyz@xyzcorp.com',
+        'name': 'Abc',
+        'mobile_number': '9876543210',
+        'role': user_roles.MEMBER
     })

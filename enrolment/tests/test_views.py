@@ -720,13 +720,30 @@ def test_companies_house_enrolment_has_company_error(
         client.get(url)
 
 
+@mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
 @mock.patch('enrolment.views.helpers.add_new_collaborator')
+@mock.patch('enrolment.helpers.get_company_admins')
 def test_companies_house_enrolment_submit_end_to_end_company_has_account(
-    mock_add_collaborator, client, steps_data,
-    submit_companies_house_step, mock_enrolment_send,
-    mock_validate_company_number, user
+    mock_get_company_admins, mock_add_collaborator, mock_gov_notify, client,
+    steps_data, submit_companies_house_step,
+    mock_enrolment_send, mock_validate_company_number, user
 ):
     mock_validate_company_number.return_value = create_response(status_code=400)
+    mock_get_company_admins.return_value = [{
+        'company_email': 'admin@xyzcorp.com',
+        'company': '12345',
+        'sso_id': 1,
+        'name': 'Jim Abc',
+        'mobile_number': '123456789',
+        'role': user_roles.ADMIN
+    }, {
+        'company_email': 'admin2@xyzcorp.com',
+        'company': '12345',
+        'sso_id': 2,
+        'name': 'Pete Abc',
+        'mobile_number': '123436789',
+        'role': user_roles.ADMIN
+    }]
 
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
@@ -757,21 +774,21 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     assert mock_add_collaborator.call_count == 1
     assert mock_add_collaborator.call_args == mock.call(data={
         'sso_id': 1,
-        'sso_session_id': '123',
         'name': 'Foo Example',
         'company_number': '12345678',
-        'company_name': 'Example corp',
         'email': 'jim@example.com',
         'mobile_number': '1232342',
-        'form_url': (
-            reverse('enrolment-companies-house', kwargs={'step': 'finished'})
-        )
     })
 
+    assert mock_get_company_admins.call_count == 1
+    assert mock_gov_notify.call_count == 2
 
+
+@mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
 @mock.patch('enrolment.views.helpers.add_new_collaborator')
+@mock.patch('enrolment.helpers.get_company_admins')
 def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
-    mock_add_collaborator, client, steps_data,
+    mock_get_company_admins, mock_add_collaborator, mock_gov_notify, client, steps_data,
     submit_companies_house_step, mock_enrolment_send,
     mock_validate_company_number, user
 ):
@@ -779,6 +796,22 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
     user.has_user_profile = True
     user.first_name = 'Foo'
     user.last_name = 'Bar'
+
+    mock_get_company_admins.return_value = [{
+        'company_email': 'admin@xyzcorp.com',
+        'company': '12345',
+        'sso_id': 1,
+        'name': 'Jim Abc',
+        'mobile_number': '123456789',
+        'role': user_roles.ADMIN
+    }, {
+        'company_email': 'admin2@xyzcorp.com',
+        'company': '12345',
+        'sso_id': 2,
+        'name': 'Pete Abc',
+        'mobile_number': '123436789',
+        'role': user_roles.ADMIN
+    }]
 
     client.force_login(user)
 
@@ -804,16 +837,14 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
     assert mock_add_collaborator.call_count == 1
     assert mock_add_collaborator.call_args == mock.call(data={
         'sso_id': 1,
-        'sso_session_id': '123',
         'name': 'Foo Bar',
         'company_number': '12345678',
-        'company_name': 'Example corp',
         'email': 'jim@example.com',
         'mobile_number': '',
-        'form_url': (
-            reverse('enrolment-companies-house', kwargs={'step': 'finished'})
-        )
     })
+
+    assert mock_get_company_admins.call_count == 1
+    assert mock_gov_notify.call_count == 2
 
 
 def test_verification_missing_url(
