@@ -40,7 +40,6 @@ DEBUG_SET_ENV_VARS := \
 	export SSO_PROXY_REDIRECT_FIELD_NAME=next; \
 	export SSO_SESSION_COOKIE=debug_sso_session_cookie; \
 	export SSO_PROFILE_URL=http://profile.trade.great:8006; \
-	export SSO_PROFILE_MANAGE_COLLABORATORS_URL=http://profile.trade.great:8006/find-a-buyer/admin; \
 	export SESSION_COOKIE_SECURE=false; \
 	export UTM_COOKIE_DOMAIN=.trade.great; \
 	export GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K; \

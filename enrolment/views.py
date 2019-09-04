@@ -569,7 +569,9 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
                 'name': name,
                 'email': self.request.user.email,
                 'form_url': self.request.path,
-                'profile_remove_member_url': settings.SSO_PROFILE_MANAGE_COLLABORATORS_URL,
+                'profile_remove_member_url': self.request.build_absolute_uri(
+                    reverse('find-a-buyer-admin-tools')
+                ),
                 'report_abuse_url': urls.FEEDBACK
             }, form_url=None)
 
