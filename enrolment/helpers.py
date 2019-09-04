@@ -170,26 +170,16 @@ def get_company_admins(sso_session_id):
     response = api_client.company.collaborator_list(sso_session_id=sso_session_id)
     response.raise_for_status()
     collaborators = response.json()
-    return [collaborator for collaborator in collaborators
-            if collaborator['role'] == user_roles.ADMIN]
+    print(collaborators)
+    return [collaborator for collaborator in collaborators if collaborator['role'] == user_roles.ADMIN]
 
 
-def add_new_collaborator(data):
-
-    data_add = {
-        'company': data['company_number'],
-        'sso_id': data['sso_id'],
-        'company_email': data['email'],
-        'name': data['name'],
-        'mobile_number': data.get('mobile_number', ''),
-        'role': user_roles.MEMBER
-    }
-
-    response = api_client.company.collaborator_create(data=data_add)
+def create_company_member(data):
+    response = api_client.company.collaborator_create(data={**data, 'role': user_roles.MEMBER})
     response.raise_for_status()
 
 
-def notify_admins(email_data, email_template_id):
+def notify_company_admins_member_joined(email_data, form_url):
 
     company_admins = get_company_admins(email_data['sso_session_id'])
 
@@ -198,8 +188,8 @@ def notify_admins(email_data, email_template_id):
     for admin in company_admins:
         action = actions.GovNotifyEmailAction(
             email_address=admin['company_email'],
-            template_id=email_template_id,
-            form_url=email_data['form_url']
+            template_id=settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID,
+            form_url=form_url
         )
         response = action.save({
             'company_name': email_data['company_name'],

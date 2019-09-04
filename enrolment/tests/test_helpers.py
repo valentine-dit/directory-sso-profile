@@ -213,9 +213,10 @@ def test_collaborator_request_create(mock_collaborator_request_create, mock_subm
     })
 
 
-@mock.patch.object(helpers, 'get_company_admins')
-def test_get_company_admin_ok(mock_get_company_admin):
-    data = {
+@mock.patch.object(helpers.api_client.company, 'collaborator_list')
+def test_get_company_admin_ok(mock_get_collaborator_list):
+
+    data = [{
         'sso_id': 1,
         'company': '12345678',
         'company_email': 'jim@example.com',
@@ -223,19 +224,20 @@ def test_get_company_admin_ok(mock_get_company_admin):
         'is_company_owner': True,
         'role': 'ADMIN',
         'name': 'Jim'
-    }
+    }]
 
-    mock_get_company_admin.return_value = create_response(data)
-    result = helpers.get_company_admins('123456')
+    mock_get_collaborator_list.return_value = create_response(status_code=200, json_body=data)
 
-    assert mock_get_company_admin.call_count == 1
-    assert mock_get_company_admin.call_args == mock.call('123456')
-    assert result.json() == data
+    admins_list = helpers.get_company_admins('123456')
+
+    assert mock_get_collaborator_list.call_count == 1
+    assert mock_get_collaborator_list.call_args == mock.call(sso_session_id='123456')
+    assert admins_list == data
 
 
 @mock.patch.object(helpers.api_client.company, 'collaborator_list')
-def test_get_company_admin_not_ok(mock_retrieve_collaborators):
-    mock_retrieve_collaborators.return_value = create_response(status_code=400)
+def test_get_company_admin_not_ok(mock_get_collaborator_list):
+    mock_get_collaborator_list.return_value = create_response(status_code=400)
     with pytest.raises(HTTPError):
         helpers.get_company_admins('123456')
 
@@ -244,7 +246,7 @@ def test_get_company_admin_not_ok(mock_retrieve_collaborators):
     'directory_forms_api_client.client.forms_api_client.submit_generic'
 )
 @mock.patch('enrolment.helpers.get_company_admins')
-def test_notify_admins_ok(mock_get_company_admins, mock_submit):
+def test_notify_company_admins_member_joined_ok(mock_get_company_admins, mock_submit):
     mock_get_company_admins.return_value = [{
         'company_email': 'admin@xyzcorp.com',
         'company': '12345',
@@ -254,15 +256,14 @@ def test_notify_admins_ok(mock_get_company_admins, mock_submit):
         'role': user_roles.ADMIN
     }]
 
-    helpers.notify_admins(email_data={
+    helpers.notify_company_admins_member_joined(email_data={
         'sso_session_id': 1234,
         'company_name': 'XYZ corp',
         'name': 'John Doe',
         'email': 'johndoe@xyz.com',
-        'form_url': 'the/form/url',
         'profile_remove_member_url': 'remove/member/url',
         'report_abuse_url': 'report/abuse/url'
-    }, email_template_id=settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID)
+    }, form_url='the/form/url')
 
     assert mock_submit.call_args == mock.call({
         'data': {
@@ -286,11 +287,11 @@ def test_notify_admins_ok(mock_get_company_admins, mock_submit):
 
 
 @mock.patch('enrolment.helpers.get_company_admins')
-def test_notify_admins_not_ok(mock_get_company_admins):
+def test_notify_company_admins_member_joined_not_ok(mock_get_company_admins):
     mock_get_company_admins.return_value = []
 
     with pytest.raises(AssertionError):
-        helpers.notify_admins(email_data={
+        helpers.notify_company_admins_member_joined(email_data={
             'sso_session_id': 1234,
             'company_name': 'XYZ corp',
             'name': 'John Doe',
@@ -298,16 +299,16 @@ def test_notify_admins_not_ok(mock_get_company_admins):
             'form_url': 'the/form/url',
             'profile_remove_member_url': 'remove/member/url',
             'report_abuse_url': 'report/abuse/url'
-        }, email_template_id=1234)
+        }, form_url=None)
 
 
 @mock.patch.object(helpers.api_client.company, 'collaborator_create')
 def test_add_collaborator(mock_add_collaborator):
 
-    helpers.add_new_collaborator(data={
-        'company_number': 1234,
+    helpers.create_company_member(data={
+        'company': 1234,
         'sso_id': 300,
-        'email': 'xyz@xyzcorp.com',
+        'company_email': 'xyz@xyzcorp.com',
         'name': 'Abc',
         'mobile_number': '9876543210',
     })
