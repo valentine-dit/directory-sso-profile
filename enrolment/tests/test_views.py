@@ -1,6 +1,5 @@
 from unittest import mock
 
-from directory_constants import user_roles
 from formtools.wizard.views import NamedUrlSessionWizardView
 from freezegun import freeze_time
 import pytest
