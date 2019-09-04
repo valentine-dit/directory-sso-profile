@@ -2,10 +2,10 @@ import collections
 from http import cookies
 import re
 
-from directory_api_client.client import api_client
-from directory_ch_client.client import ch_search_api_client
+from directory_api_client import api_client
+from directory_ch_client import ch_search_api_client
 from directory_constants import choices
-from directory_sso_api_client.client import sso_api_client
+from directory_sso_api_client import sso_api_client
 from directory_forms_api_client import actions
 from directory_constants import urls, user_roles
 import directory_components
@@ -49,17 +49,6 @@ def get_company_profile(number, session):
         response.raise_for_status()
         session[session_key] = response.json()
     return session[session_key]
-
-
-def create_user(email, password):
-    response = sso_api_client.user.create_user(email, password)
-    if response.status_code == 400:
-        # Check for non-password errors and ignore since we want to proceed
-        # For example we don't want to inform user of existing accounts
-        if not response.json().get('password'):
-            return None
-    response.raise_for_status()
-    return response.json()
 
 
 def user_has_company(sso_session_id):
@@ -242,3 +231,14 @@ def parse_set_cookie_header(cookie_header):
     for cookie in split:
         simple_cookies.load(cookie)
     return simple_cookies
+
+
+def collaborator_invite_retrieve(invite_key):
+    response = api_client.company.collaborator_invite_retrieve(invite_key=invite_key)
+    if response.status_code == 200:
+        return response.json()
+
+
+def collaborator_invite_accept(sso_session_id, invite_key):
+    response = api_client.company.collaborator_invite_accept(sso_session_id=sso_session_id, invite_key=invite_key)
+    response.raise_for_status()

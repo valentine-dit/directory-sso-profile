@@ -1,6 +1,6 @@
-
 from unittest import mock
 
+from directory_constants import user_roles
 from formtools.wizard.views import NamedUrlSessionWizardView
 from freezegun import freeze_time
 import pytest
@@ -30,6 +30,15 @@ company_types = (
 )
 BUSINESS_INFO_NON_COMPANIES_HOUSE = 'business-info-non-companies-house'
 BUSINESS_INFO_COMPANIES_HOUSE = 'business-info-companies-house'
+
+
+@pytest.fixture
+def submit_collaborator_enrolment_step(client):
+    return submit_step_factory(
+        client=client,
+        url_name='enrolment-collaboration',
+        view_class=views.CollaboratorEnrolmentView,
+    )
 
 
 @pytest.fixture
@@ -111,6 +120,32 @@ def mock_retrieve_preverified_company(preverified_company_data):
         helpers.api_client.enrolment, 'retrieve_prepeveried_company',
         return_value=create_response(preverified_company_data)
     )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_collaborator_invite_accept():
+    patch = mock.patch.object(
+        helpers.api_client.company, 'collaborator_invite_accept',
+        return_value=create_response()
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_collaborator_invite_retrieve():
+    response = create_response({
+        'uuid': 'daca6991-21a1-4318-bc84-69349b89c26d',
+        'collaborator_email': 'jim@example.com',
+        'company': '1',
+        'requestor': '2',
+        'accepted': False,
+        'accepted_date': None,
+        'role': user_roles.ADMIN,
+    })
+    patch = mock.patch.object(helpers.api_client.company, 'collaborator_invite_retrieve', return_value=response)
     yield patch.start()
     patch.stop()
 
@@ -911,7 +946,7 @@ def test_create_user_enrolment_already_exists(
     company_type, form_url_name, steps_data, mock_create_user,
     submit_step_builder, mock_notify_already_registered
 ):
-    mock_create_user.return_value = create_response(status_code=400)
+    mock_create_user.return_value = create_response(json_body={'email': ['already registered']}, status_code=400)
 
     submit_step = submit_step_builder(company_type)
 
@@ -922,6 +957,25 @@ def test_create_user_enrolment_already_exists(
         email='jim@example.com',
         form_url=reverse(form_url_name, kwargs={'step': views.USER_ACCOUNT})
     )
+
+
+@pytest.mark.parametrize(
+    'company_type,form_url_name',
+    zip(company_types, ['enrolment-companies-house', 'enrolment-sole-trader'])
+)
+def test_create_user_enrolment_bad_password(
+    company_type, form_url_name, steps_data, mock_create_user, submit_step_builder, client
+):
+    mock_create_user.return_value = create_response(json_body={'password': ['something is wrong']}, status_code=400)
+
+    submit_step = submit_step_builder(company_type)
+
+    response = submit_step(steps_data[views.USER_ACCOUNT])
+
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+    assert response.context_data['form'].errors == {'password': ['something is wrong']}
 
 
 @pytest.mark.parametrize('company_type', company_types)
@@ -1751,7 +1805,7 @@ def test_individual_enrolment_submit_end_to_end(
         data={
             'first_name': 'Foo',
             'last_name': 'Example',
-            'job_title': None,
+            'job_title': 'Exampler',
             'mobile_phone_number': '1232342',
         },
         sso_session_id='123'
@@ -1788,7 +1842,7 @@ def test_individual_enrolment_submit_end_to_end_logged_in(
         data={
             'first_name': 'Foo',
             'last_name': 'Example',
-            'job_title': None,
+            'job_title': 'Exampler',
             'mobile_phone_number': '1232342',
         },
         sso_session_id='123'
@@ -1836,10 +1890,7 @@ def test_enrolment_individual_interstitial_create_business_profile_intent(
 
 expose_user_jourey_urls = (
     reverse('enrolment-individual', kwargs={'step': views.USER_ACCOUNT}),
-    reverse(
-        'enrolment-pre-verified',
-        kwargs={'step': views.USER_ACCOUNT}
-    ) + '?key=some-key',
+    reverse('enrolment-pre-verified', kwargs={'step': views.USER_ACCOUNT}) + '?key=some-key',
     reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}),
     reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}),
     reverse('enrolment-overseas-business'),
@@ -1853,13 +1904,12 @@ expose_user_jourey_urls = (
     ({'backfill-details-intent': True}, views.ReadUserIntentMixin.LABEL_BACKFILL_DETAILS),
     ({'business-profile-intent': True}, views.ReadUserIntentMixin.LABEL_BUSINESS),
     (
-        {
-            'next': (
-                'http%3A%2F%2Fprofile.trade.great%3A8006%2Fprofile%2Fenrol%2F%3F'
-                'business-profile-intent%3Dtrue'
-            )
-        },
+        {'next': 'http%3A%2F%2Fprofile.trade.great%3A8006%2Fprofile%2Fenrol%2F%3Fbusiness-profile-intent%3Dtrue'},
         views.ReadUserIntentMixin.LABEL_BUSINESS
+    ),
+    (
+        {'next': 'http%3A%2F%2Fprofile.trade.great%3A8006%2Fprofile%2Fenrol%2F'},
+        views.ReadUserIntentMixin.LABEL_ACCOUNT
     ),
     ({}, views.ReadUserIntentMixin.LABEL_ACCOUNT),
 ))
@@ -1899,3 +1949,103 @@ def test_expose_user_journey_mixin_account_intent(url, client):
     assert response.context_data['user_journey_verb'] == (
         views.ReadUserIntentMixin.LABEL_ACCOUNT
     )
+
+
+def test_collaborator_enrolment_wrong_invite_key(client, mock_collaborator_invite_retrieve):
+    mock_collaborator_invite_retrieve.return_value = create_response(status_code=404)
+
+    url = reverse('enrolment-collaboration', kwargs={'step': views.USER_ACCOUNT})
+    response = client.get(f'{url}?invite_key=abc')
+
+    assert response.status_code == 404
+
+
+def test_collaborator_enrolment_submit_end_to_end(
+    client, submit_collaborator_enrolment_step, user,
+    mock_create_user_profile, steps_data, mock_collaborator_invite_accept,
+):
+    url = reverse('enrolment-collaboration', kwargs={'step': views.USER_ACCOUNT})
+    client.get(f'{url}?invite_key=abc')
+
+    response = submit_collaborator_enrolment_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_collaborator_enrolment_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    client.force_login(user)
+
+    response = submit_collaborator_enrolment_step(steps_data[views.PERSONAL_INFO])
+    assert response.status_code == 302
+
+    client.get(response.url)
+
+    assert mock_create_user_profile.call_count == 1
+    assert mock_create_user_profile.call_args == mock.call(
+        data={
+            'first_name': 'Foo',
+            'last_name': 'Example',
+            'job_title': 'Exampler',
+            'mobile_phone_number': '1232342',
+        },
+        sso_session_id='123'
+    )
+    assert mock_collaborator_invite_accept.call_count == 1
+    assert mock_collaborator_invite_accept.call_args == mock.call(invite_key='abc', sso_session_id='123')
+
+
+def test_collaborator_enrolment_submit_end_to_end_logged_in(
+    client, submit_collaborator_enrolment_step, user, mock_create_user_profile, steps_data,
+    mock_collaborator_invite_accept
+):
+    client.force_login(user)
+
+    url = reverse('enrolment-collaboration', kwargs={'step': views.USER_ACCOUNT})
+    client.get(f'{url}?invite_key=abc')
+
+    url = reverse('enrolment-individual', kwargs={'step': views.USER_ACCOUNT})
+    response = client.get(url)
+    assert response.status_code == 302
+
+    step = resolve(response.url).kwargs['step']
+
+    assert step == views.PERSONAL_INFO
+
+    response = submit_collaborator_enrolment_step(
+        steps_data[views.PERSONAL_INFO],
+        step_name=step
+    )
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
+
+    assert mock_create_user_profile.call_count == 1
+    assert mock_create_user_profile.call_args == mock.call(
+        data={
+            'first_name': 'Foo',
+            'last_name': 'Example',
+            'job_title': 'Exampler',
+            'mobile_phone_number': '1232342',
+        },
+        sso_session_id='123'
+    )
+    assert mock_collaborator_invite_accept.call_count == 1
+    assert mock_collaborator_invite_accept.call_args == mock.call(invite_key='abc', sso_session_id='123')
+
+
+def test_collaborator_enrolment_submit_end_to_end_already_has_profile(
+    client, user, mock_create_user_profile, mock_collaborator_invite_accept
+):
+    user.has_user_profile = True
+    client.force_login(user)
+
+    url = reverse('enrolment-collaboration', kwargs={'step': views.USER_ACCOUNT})
+    response = client.get(f'{url}?invite_key=abc')
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
+    assert mock_create_user_profile.call_count == 0
+    assert mock_collaborator_invite_accept.call_count == 1
+    assert mock_collaborator_invite_accept.call_args == mock.call(invite_key='abc', sso_session_id='123')

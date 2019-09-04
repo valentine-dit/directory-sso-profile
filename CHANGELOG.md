@@ -13,6 +13,7 @@
 - TT-1714 - Allow single collaborator to invite other admin
 - TT-1727 - Allow inviting collaborator
 - TT-1673 - Handle backfill details after login
+- TT-1748 - Collaboration invitee journey
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile

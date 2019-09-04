@@ -1,13 +1,8 @@
 from captcha.fields import ReCaptchaField
 from directory_components import forms
 from directory_constants import choices
-from requests.exceptions import HTTPError
-from directory_validators.company import (
-    no_company_with_insufficient_companies_house_data as company_type_validator
-)
-from directory_validators.enrolment import (
-    company_number as company_number_validator
-)
+from directory_validators.company import no_company_with_insufficient_companies_house_data as company_type_validator
+from directory_validators.enrolment import company_number as company_number_validator
 
 from django.forms import HiddenInput, PasswordInput, Textarea, ValidationError
 from django.utils.safestring import mark_safe
@@ -78,7 +73,6 @@ class UserAccount(forms.Form):
         '</ul>'
     )
     MESSAGE_NOT_MATCH = "Passwords don't match"
-    MESSAGE_PASSWORD_INVALID = 'Invalid Password'
 
     email = forms.EmailField(
         label='Your email address'
@@ -98,25 +92,29 @@ class UserAccount(forms.Form):
     )
     terms_agreed = forms.BooleanField(label=TERMS_LABEL)
 
+    remote_password_error = forms.CharField(
+        required=False,
+        widget=HiddenInput,
+    )
+
+    def clean(self):
+        if self.add_prefix('remote_password_error') in self.data:
+            self.errors.clear()
+            raise ValidationError({'password': self.data[self.add_prefix('remote_password_error')]})
+        super().clean()
+
     def clean_password_confirmed(self):
         value = self.cleaned_data['password_confirmed']
         if value != self.cleaned_data['password']:
             raise ValidationError(self.MESSAGE_NOT_MATCH)
         return value
 
-    def clean(self):
-        cleaned_data = super().clean()
-        if not self.errors:
-            try:
-                cleaned_data['user_details'] = helpers.create_user(
-                    email=cleaned_data['email'],
-                    password=cleaned_data['password'],
-                )
-            except HTTPError as error:
-                if error.response.status_code == 400:
-                    self.add_error('password', self.MESSAGE_PASSWORD_INVALID)
-                else:
-                    raise
+
+class UserAccountCollaboration(UserAccount):
+    email = forms.EmailField(
+        label='Your email address',
+        disabled=True
+    )
 
 
 class UserAccountVerification(forms.Form):
@@ -279,6 +277,7 @@ class IndividualPersonalDetails(forms.Form):
     family_name = forms.CharField(
         label='Last name',
     )
+    job_title = forms.CharField()
     phone_number = forms.CharField(
         label='Phone number (optional)',
         required=False
