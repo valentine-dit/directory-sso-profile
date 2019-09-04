@@ -571,7 +571,6 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
                 'form_url': self.request.path,
                 'profile_remove_member_url': settings.SSO_PROFILE_MANAGE_COLLABORATORS_URL,
                 'report_abuse_url': urls.FEEDBACK
-
                 },
                 email_template_id=settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID
             )
