@@ -1,10 +1,8 @@
 from unittest import mock
 
 from directory_components.forms import CharField, EmailField
-from requests.exceptions import HTTPError
 import pytest
 
-from core.tests.helpers import create_response
 from enrolment import forms, helpers
 
 
@@ -15,9 +13,7 @@ def mock_clean():
     patch.stop()
 
 
-@mock.patch.object(helpers.sso_api_client.user, 'create_user')
-def test_create_user_password_invalid_not_matching(mock_create_user):
-    mock_create_user.return_value = create_response(status_code=400)
+def test_create_user_password_invalid_not_matching():
     form = forms.UserAccount(
         data={
             'email': 'test@test.com',
@@ -28,75 +24,6 @@ def test_create_user_password_invalid_not_matching(mock_create_user):
 
     assert form.is_valid() is False
     assert "Passwords don't match" in form.errors['password_confirmed']
-
-
-@mock.patch.object(helpers.sso_api_client.user, 'create_user')
-def test_create_user_password_invalid(mock_create_user):
-    data = {'password': 'validation error'}
-    mock_create_user.return_value = create_response(status_code=400, json_body=data)
-
-    form = forms.UserAccount(
-        data={
-            'email': 'test@test.com',
-            'password': '12P',
-            'password_confirmed': '12P',
-            'terms_agreed': True,
-        }
-    )
-
-    assert form.is_valid() is False
-    assert "Invalid Password" in form.errors['password']
-
-
-@mock.patch.object(helpers.sso_api_client.user, 'create_user')
-def test_create_user_password_existing_user(mock_create_user):
-    mock_create_user.return_value = create_response(status_code=400)
-
-    form = forms.UserAccount(
-        data={
-            'email': 'test@test.com',
-            'password': '12P',
-            'password_confirmed': '12P',
-            'terms_agreed': True,
-        }
-    )
-    assert form.is_valid() is True
-    assert not form.cleaned_data['user_details']
-
-
-@mock.patch.object(helpers.sso_api_client.user, 'create_user')
-def test_create_user_error(mock_create_user):
-
-    mock_create_user.return_value = create_response(status_code=401)
-    form = forms.UserAccount(
-        data={
-            'email': 'test@test.com',
-            'password': '12P',
-            'password_confirmed': '12P',
-            'terms_agreed': True,
-        }
-    )
-
-    with pytest.raises(HTTPError):
-        form.is_valid()
-
-
-@mock.patch.object(helpers.sso_api_client.user, 'create_user')
-def test_create_user(mock_create_user):
-    data = {'email': 'test@test.com', 'verification_code': '12345'}
-    mock_create_user.return_value = create_response(status_code=201, json_body=data)
-
-    form = forms.UserAccount(
-        data={
-            'email': 'test@test.com',
-            'password': 'ABCdefg12345',
-            'password_confirmed': 'ABCdefg12345',
-            'terms_agreed': True,
-        }
-    )
-
-    assert form.is_valid() is True
-    assert form.cleaned_data["user_details"] == data
 
 
 def test_verification_code_empty_email():
