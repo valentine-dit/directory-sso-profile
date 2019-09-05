@@ -313,9 +313,7 @@ class CreateBusinessProfileMixin:
             'phone_number',
             'postal_code',
             'sic',
-            'website',
-            'given_name',
-            'family_name',
+            'website'
         ]
         return {
             key: value for key, value in data.items()
@@ -328,6 +326,7 @@ class CreateBusinessProfileMixin:
             'sso_id': user.id,
             'company_email': user.email,
             'contact_email_address': user.email,
+            'name': user.full_name,
             **data,
         })
 
@@ -574,29 +573,25 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
         )
 
         if is_enrolled:
-            if self.request.user.full_name:
-                name = self.request.user.full_name
-            else:
-                name = f'{data["given_name"]} {data["family_name"]}'
             helpers.create_company_member(data={
                 'company': data['company_number'],
                 'sso_id': self.request.user.id,
                 'company_email': self.request.user.email,
-                'name': name,
+                'name': self.request.user.full_name,
                 'mobile_number': data.get('phone_number', ''),
             })
 
-            helpers.notify_company_admins_member_joined(email_data={
-                'sso_session_id': self.request.user.session_id,
-                'company_name': data['company_name'],
-                'name': name,
-                'email': self.request.user.email,
-                'form_url': self.request.path,
-                'profile_remove_member_url': self.request.build_absolute_uri(
-                    reverse('find-a-buyer-admin-tools')
-                ),
-                'report_abuse_url': urls.FEEDBACK
-            }, form_url=None)
+            helpers.notify_company_admins_member_joined(
+                sso_session_id=self.request.user.session_id,
+                email_data={
+                    'company_name': data['company_name'],
+                    'name': self.request.user.full_name,
+                    'email': self.request.user.email,
+                    'profile_remove_member_url': self.request.build_absolute_uri(
+                        reverse('find-a-buyer-admin-tools')
+                    ),
+                    'report_abuse_url': urls.FEEDBACK
+                }, form_url=self.request.path)
 
             return TemplateResponse(self.request, self.templates[FINISHED])
         else:

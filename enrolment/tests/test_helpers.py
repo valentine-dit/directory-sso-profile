@@ -225,14 +225,16 @@ def test_notify_company_admins_member_joined_ok(mock_get_company_admins, mock_su
         'role': user_roles.ADMIN
     }]
 
-    helpers.notify_company_admins_member_joined(email_data={
-        'sso_session_id': 1234,
-        'company_name': 'XYZ corp',
-        'name': 'John Doe',
-        'email': 'johndoe@xyz.com',
-        'profile_remove_member_url': 'remove/member/url',
-        'report_abuse_url': 'report/abuse/url'
-    }, form_url='the/form/url')
+    helpers.notify_company_admins_member_joined(
+        sso_session_id=1234,
+        email_data={
+            'company_name': 'XYZ corp',
+            'name': 'John Doe',
+            'email': 'johndoe@xyz.com',
+            'profile_remove_member_url': 'remove/member/url',
+            'report_abuse_url': 'report/abuse/url'
+        },
+        form_url='the/form/url')
 
     assert mock_submit.call_args == mock.call({
         'data': {
@@ -260,15 +262,17 @@ def test_notify_company_admins_member_joined_not_ok(mock_get_company_admins):
     mock_get_company_admins.return_value = []
 
     with pytest.raises(AssertionError):
-        helpers.notify_company_admins_member_joined(email_data={
-            'sso_session_id': 1234,
-            'company_name': 'XYZ corp',
-            'name': 'John Doe',
-            'email': 'johndoe@xyz.com',
-            'form_url': 'the/form/url',
-            'profile_remove_member_url': 'remove/member/url',
-            'report_abuse_url': 'report/abuse/url'
-        }, form_url=None)
+        helpers.notify_company_admins_member_joined(
+            sso_session_id=1234,
+            email_data={
+                'company_name': 'XYZ corp',
+                'name': 'John Doe',
+                'email': 'johndoe@xyz.com',
+                'form_url': 'the/form/url',
+                'profile_remove_member_url': 'remove/member/url',
+                'report_abuse_url': 'report/abuse/url'
+            },
+            form_url=None)
 
 
 @mock.patch.object(helpers.api_client.company, 'collaborator_create')

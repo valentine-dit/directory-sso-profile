@@ -167,8 +167,8 @@ def create_company_member(data):
     response.raise_for_status()
 
 
-def notify_company_admins_member_joined(email_data, form_url):
-    company_admins = get_company_admins(email_data['sso_session_id'])
+def notify_company_admins_member_joined(sso_session_id, email_data, form_url):
+    company_admins = get_company_admins(sso_session_id)
     assert company_admins, f"No admin found for {email_data['company_name']}"
     for admin in company_admins:
         action = actions.GovNotifyEmailAction(
@@ -176,13 +176,7 @@ def notify_company_admins_member_joined(email_data, form_url):
             template_id=settings.GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID,
             form_url=form_url
         )
-        response = action.save({
-            'company_name': email_data['company_name'],
-            'name': email_data['name'],
-            'email': email_data['email'],
-            'profile_remove_member_url': email_data['profile_remove_member_url'],
-            'report_abuse_url': email_data['report_abuse_url']
-        })
+        response = action.save(email_data)
         response.raise_for_status()
 
 

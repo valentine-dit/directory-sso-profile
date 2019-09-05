@@ -638,8 +638,7 @@ def test_companies_house_enrolment_submit_end_to_end(
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'sectors': ['AEROSPACE'],
-        'given_name': 'Foo',
-        'family_name': 'Example',
+        'name': user.full_name,
         'job_title': 'Exampler',
         'phone_number': '1232342',
         'company_type': 'COMPANIES_HOUSE',
@@ -707,8 +706,7 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
         'sectors': ['AEROSPACE'],
         'job_title': 'Exampler',
         'phone_number': '1232342',
-        'given_name': 'Foo',
-        'family_name': 'Example'
+        'name': user.full_name,
     })
 
 
@@ -817,7 +815,7 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     assert mock_add_collaborator.call_count == 1
     assert mock_add_collaborator.call_args == mock.call(data={
         'sso_id': 1,
-        'name': 'Foo Example',
+        'name': user.full_name,
         'company': '12345678',
         'company_email': 'jim@example.com',
         'mobile_number': '1232342',
@@ -1430,8 +1428,7 @@ def test_non_companies_house_enrolment_submit_end_to_end_logged_in(
         'address_line_2': 'London',
         'job_title': 'Exampler',
         'phone_number': '1232342',
-        'given_name': 'Foo',
-        'family_name': 'Example'
+        'name': user.full_name,
     })
 
 
