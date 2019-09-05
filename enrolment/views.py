@@ -573,12 +573,11 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
             session=self.request.session,
         )
 
-        if self.request.user.full_name:
-            name = self.request.user.full_name
-        else:
-            name = f'{data["given_name"]} {data["family_name"]}'
-
         if is_enrolled:
+            if self.request.user.full_name:
+                name = self.request.user.full_name
+            else:
+                name = f'{data["given_name"]} {data["family_name"]}'
             helpers.create_company_member(data={
                 'company': data['company_number'],
                 'sso_id': self.request.user.id,

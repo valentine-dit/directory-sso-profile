@@ -159,7 +159,6 @@ def get_company_admins(sso_session_id):
     response = api_client.company.collaborator_list(sso_session_id=sso_session_id)
     response.raise_for_status()
     collaborators = response.json()
-    print(collaborators)
     return [collaborator for collaborator in collaborators if collaborator['role'] == user_roles.ADMIN]
 
 
@@ -169,11 +168,8 @@ def create_company_member(data):
 
 
 def notify_company_admins_member_joined(email_data, form_url):
-
     company_admins = get_company_admins(email_data['sso_session_id'])
-
     assert company_admins, f"No admin found for {email_data['company_name']}"
-
     for admin in company_admins:
         action = actions.GovNotifyEmailAction(
             email_address=admin['company_email'],
