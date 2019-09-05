@@ -93,12 +93,13 @@ class UserAccount(forms.Form):
     terms_agreed = forms.BooleanField(label=TERMS_LABEL)
 
     remote_password_error = forms.CharField(
+        label='',
         required=False,
         widget=HiddenInput,
     )
 
     def clean(self):
-        if self.add_prefix('remote_password_error') in self.data:
+        if self.data.get(self.add_prefix('remote_password_error')):
             self.errors.clear()
             raise ValidationError({'password': self.data[self.add_prefix('remote_password_error')]})
         super().clean()
