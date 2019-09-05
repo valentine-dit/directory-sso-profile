@@ -12,6 +12,7 @@
 - TT-1727 - Allow inviting collaborator
 - TT-1673 - Handle backfill details after login
 - TT-1748 - Collaboration invitee journey
+- no ticket - Add IDs to relevant elements on CH enrolement success page
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
