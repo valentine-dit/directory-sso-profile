@@ -46,7 +46,8 @@ PROGRESS_STEP_LABEL_BUSINESS_DETAILS = 'Enter your business details'
 RESEND_VERIFICATION = 'resend'
 USER_ACCOUNT = 'user-account'
 VERIFICATION = 'verification'
-COMPANY_SEARCH = 'search'
+COMPANY_SEARCH = 'company-search'
+ADDRESS_SEARCH = 'address-search'
 BUSINESS_INFO = 'business-details'
 PERSONAL_INFO = 'personal-details'
 FINISHED = 'finished'
@@ -487,8 +488,8 @@ class BaseEnrolmentWizardView(
         if self.steps.current == PERSONAL_INFO:
             context['company'] = self.get_cleaned_data_for_step(BUSINESS_INFO)
         elif self.steps.current == VERIFICATION:
-            context['verification_missing_url'] = urls.build_great_url(
-                'contact/triage/great-account/verification-missing/'
+            context['verification_missing_url'] = (
+                urls.domestic.CONTACT_US / 'triage/great-account/verification-missing/'
             )
         return context
 
@@ -505,6 +506,7 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
             COMPANY_SEARCH: 2,
+            ADDRESS_SEARCH: 2,
             BUSINESS_INFO: 2,
             PERSONAL_INFO: 3,
         },
@@ -512,6 +514,7 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
             USER_ACCOUNT: 2,
             VERIFICATION: 3,
             COMPANY_SEARCH: 4,
+            ADDRESS_SEARCH: 4,
             BUSINESS_INFO: 4,
             PERSONAL_INFO: 5,
         },
@@ -527,7 +530,8 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
     form_list = (
         (USER_ACCOUNT, forms.UserAccount),
         (VERIFICATION, forms.UserAccountVerification),
-        (COMPANY_SEARCH, forms.CompaniesHouseSearch),
+        (COMPANY_SEARCH, forms.CompaniesHouseCompanySearch),
+        (ADDRESS_SEARCH, forms.CompaniesHouseAddressSearch),
         (BUSINESS_INFO, forms.CompaniesHouseBusinessDetails),
         (PERSONAL_INFO, core.forms.PersonalDetails),
     )
@@ -535,10 +539,22 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
     templates = {
         USER_ACCOUNT: 'enrolment/user-account.html',
         VERIFICATION: 'enrolment/user-account-verification.html',
-        COMPANY_SEARCH: 'enrolment/companies-house-search.html',
+        COMPANY_SEARCH: 'enrolment/companies-house-company-search.html',
+        ADDRESS_SEARCH: 'enrolment/address-search.html',
         BUSINESS_INFO: 'enrolment/companies-house-business-details.html',
         PERSONAL_INFO: 'enrolment/companies-house-personal-details.html',
         FINISHED: 'enrolment/companies-house-success.html',
+    }
+
+    def address_search_condition(self):
+        company = self.get_cleaned_data_for_step(COMPANY_SEARCH)
+        if not company:
+            return True
+        return helpers.is_companies_house_details_incomplete(company['company_number'])
+
+    condition_dict = {
+        ADDRESS_SEARCH: address_search_condition,
+        **CreateUserAccountMixin.condition_dict
     }
 
     def get_form_kwargs(self, step=None):
@@ -546,17 +562,30 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
         if step == BUSINESS_INFO:
             previous_data = self.get_cleaned_data_for_step(COMPANY_SEARCH)
             if previous_data:
-                form_kwargs['company_data'] = helpers.get_company_profile(
-                    number=previous_data['company_number'],
-                    session=self.request.session,
-                )
-                form_kwargs['is_enrolled'] = helpers.get_is_enrolled(
-                    company_number=previous_data['company_number'],
-                    session=self.request.session,
-                )
-        elif step == COMPANY_SEARCH:
-            form_kwargs['session'] = self.request.session
+                form_kwargs['is_enrolled'] = helpers.get_is_enrolled(previous_data['company_number'])
         return form_kwargs
+
+    def get_form_initial(self, step):
+        form_initial = super().get_form_initial(step)
+        if step == ADDRESS_SEARCH:
+            company = self.get_cleaned_data_for_step(COMPANY_SEARCH)
+            form_initial['company_name'] = company['company_name']
+        elif step == BUSINESS_INFO:
+            company_search_step_data = self.get_cleaned_data_for_step(COMPANY_SEARCH)
+            company_data = helpers.get_companies_house_profile(company_search_step_data['company_number'])
+            company = helpers.CompanyParser(company_data)
+            form_initial['company_name'] = company.name
+            form_initial['company_number'] = company.number
+            form_initial['sic'] = company.nature_of_business
+            form_initial['date_of_creation'] = company.date_of_creation
+            if company.address:
+                form_initial['address'] = company.address
+                form_initial['postal_code'] = company.postcode
+            else:
+                address_step_data = self.get_cleaned_data_for_step(ADDRESS_SEARCH)
+                form_initial['address'] = address_step_data['address']
+                form_initial['postal_code'] = address_step_data['postal_code']
+        return form_initial
 
     def serialize_form_list(self, form_list):
         return {
@@ -566,10 +595,7 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
 
     def done(self, form_list, form_dict, **kwargs):
         data = self.serialize_form_list(form_list)
-        is_enrolled = helpers.get_is_enrolled(
-            company_number=data['company_number'],
-            session=self.request.session,
-        )
+        is_enrolled = helpers.get_is_enrolled(data['company_number'])
         if is_enrolled:
             helpers.collaborator_request_create(
                 company_number=data['company_number'],
@@ -593,13 +619,13 @@ class NonCompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWi
 
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
-            COMPANY_SEARCH: 2,
+            ADDRESS_SEARCH: 2,
             PERSONAL_INFO: 3,
         },
         step_counter_anon={
             USER_ACCOUNT: 2,
             VERIFICATION: 3,
-            COMPANY_SEARCH: 4,
+            ADDRESS_SEARCH: 4,
             PERSONAL_INFO: 5,
         },
     )
@@ -607,14 +633,14 @@ class NonCompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWi
     form_list = (
         (USER_ACCOUNT, forms.UserAccount),
         (VERIFICATION, forms.UserAccountVerification),
-        (COMPANY_SEARCH, forms.NonCompaniesHouseSearch),
+        (ADDRESS_SEARCH, forms.NonCompaniesHouseSearch),
         (PERSONAL_INFO, core.forms.PersonalDetails),
     )
 
     templates = {
         USER_ACCOUNT: 'enrolment/user-account.html',
         VERIFICATION: 'enrolment/user-account-verification.html',
-        COMPANY_SEARCH: 'enrolment/non-companies-house-business-details.html',
+        ADDRESS_SEARCH: 'enrolment/address-search.html',
         PERSONAL_INFO: 'enrolment/non-companies-house-personal-details.html',
         FINISHED: 'enrolment/non-companies-house-success.html',
     }
@@ -622,7 +648,7 @@ class NonCompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWi
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.steps.current == PERSONAL_INFO:
-            context['company'] = self.get_cleaned_data_for_step(COMPANY_SEARCH)
+            context['company'] = self.get_cleaned_data_for_step(ADDRESS_SEARCH)
         return context
 
 
@@ -893,10 +919,8 @@ class ResendVerificationCodeView(
 
     def get_context_data(self, *args, **kwargs):
         return super().get_context_data(
-            verification_missing_url=urls.build_great_url(
-                'contact/triage/great-account/verification-missing/'
-            ),
-            contact_url=urls.build_great_url('contact/domestic/'),
+            verification_missing_url=urls.domestic.CONTACT_US / 'triage/great-account/verification-missing/',
+            contact_url=urls.domestic.CONTACT_US / 'domestic/',
             *args,
             **kwargs
         )

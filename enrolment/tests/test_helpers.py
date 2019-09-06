@@ -5,6 +5,7 @@ import pytest
 from requests.exceptions import HTTPError
 
 from django.conf import settings
+from django.core.cache import cache
 
 from enrolment import helpers
 from core.tests.helpers import create_response
@@ -12,7 +13,6 @@ from core.tests.helpers import create_response
 
 @mock.patch.object(helpers.ch_search_api_client.company, 'get_company_profile')
 def test_get_company_profile_ok_saves_to_session(mock_get_company_profile):
-    session = {}
     data = {
         'company_number': '12345678',
         'company_name': 'Example corp',
@@ -22,14 +22,13 @@ def test_get_company_profile_ok_saves_to_session(mock_get_company_profile):
     }
 
     mock_get_company_profile.return_value = create_response(data)
-    helpers.get_company_profile('123456', session)
+    helpers.get_companies_house_profile('123456')
 
-    assert session['COMPANY_PROFILE-123456'] == data
+    assert cache.get('COMPANY_PROFILE-123456') == data
 
 
 @mock.patch.object(helpers.ch_search_api_client.company, 'get_company_profile')
 def test_get_company_profile_ok(mock_get_company_profile):
-    session = {}
     data = {
         'company_number': '12345678',
         'company_name': 'Example corp',
@@ -39,19 +38,19 @@ def test_get_company_profile_ok(mock_get_company_profile):
     }
 
     mock_get_company_profile.return_value = create_response(data)
-    result = helpers.get_company_profile('123456', session)
+    result = helpers.get_companies_house_profile('123456')
 
     assert mock_get_company_profile.call_count == 1
     assert mock_get_company_profile.call_args == mock.call('123456')
     assert result == data
-    assert session['COMPANY_PROFILE-123456'] == data
+    assert cache.get('COMPANY_PROFILE-123456') == data
 
 
 @mock.patch.object(helpers.ch_search_api_client.company, 'get_company_profile')
 def test_get_company_profile_not_ok(mock_get_company_profile):
     mock_get_company_profile.return_value = create_response(status_code=400)
     with pytest.raises(HTTPError):
-        helpers.get_company_profile('123456', {})
+        helpers.get_companies_house_profile('123456')
 
 
 @mock.patch(
@@ -130,7 +129,7 @@ def test_notify_already_registered(mock_submit):
         'data': {
             'login_url': settings.SSO_PROXY_LOGIN_URL,
             'password_reset_url': settings.SSO_PROXY_PASSWORD_RESET_URL,
-            'contact_us_url': urls.FEEDBACK,
+            'contact_us_url': urls.domestic.FEEDBACK,
         },
         'meta': {
             'action_name': 'gov-notify-email',
@@ -166,7 +165,7 @@ def test_collaborator_request_create(mock_collaborator_request_create, mock_subm
             'name': 'Foo Bar',
             'email': 'test@example.com',
             'collaborator_create_url': settings.FAB_ADD_USER_URL,
-            'report_abuse_url': urls.FEEDBACK,
+            'report_abuse_url': urls.domestic.FEEDBACK,
         },
         'meta': {
             'action_name': 'gov-notify-email',

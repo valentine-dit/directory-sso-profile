@@ -4,19 +4,22 @@ import re
 
 from directory_api_client import api_client
 from directory_ch_client import ch_search_api_client
-from directory_constants import choices
+from directory_constants import choices, urls
 from directory_sso_api_client import sso_api_client
 from directory_forms_api_client import actions
-from directory_constants import urls
 import directory_components
 
+from django.core.cache import cache
 from django.utils import formats
 from django.utils.dateparse import parse_datetime
 from django.conf import settings
 
+from enrolment import constants
+
+
 COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
-SESSION_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'
-SESSION_KEY_IS_ENROLLED = 'IS_ENROLLED'
+CACHE_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'
+CACHE_KEY_IS_ENROLLED = 'IS_ENROLLED'
 
 
 ProgressIndicatorConf = collections.namedtuple(
@@ -42,13 +45,15 @@ def claim_company(enrolment_key, personal_name, sso_session_id):
     response.raise_for_status()
 
 
-def get_company_profile(number, session):
-    session_key = f'{SESSION_KEY_COMPANY_PROFILE}-{number}'
-    if session_key not in session:
+def get_companies_house_profile(number):
+    key = f'{CACHE_KEY_COMPANY_PROFILE}-{number}'
+    value = cache.get(key)
+    if not value:
         response = ch_search_api_client.company.get_company_profile(number)
         response.raise_for_status()
-        session[session_key] = response.json()
-    return session[session_key]
+        value = response.json()
+        cache.set(key=key, value=value, timeout=60*60)
+    return value
 
 
 def user_has_company(sso_session_id):
@@ -60,16 +65,18 @@ def user_has_company(sso_session_id):
     response.raise_for_status()
 
 
-def get_is_enrolled(company_number, session):
-    session_key = f'{SESSION_KEY_IS_ENROLLED}-{company_number}'
-    if session_key not in session:
+def get_is_enrolled(company_number):
+    key = f'{CACHE_KEY_IS_ENROLLED}-{company_number}'
+    value = cache.get(key)
+    if not value:
         response = api_client.company.validate_company_number(company_number)
         if response.status_code == 400:
-            session[session_key] = True
+            value = True
         else:
             response.raise_for_status()
-            session[session_key] = False
-    return session[session_key]
+            value = False
+        cache.set(key=key, value=value, timeout=60*60)
+    return value
 
 
 def create_company_profile(data):
@@ -107,7 +114,7 @@ def notify_already_registered(email, form_url):
     response = action.save({
         'login_url': settings.SSO_PROXY_LOGIN_URL,
         'password_reset_url': settings.SSO_PROXY_PASSWORD_RESET_URL,
-        'contact_us_url': urls.FEEDBACK,
+        'contact_us_url': urls.domestic.FEEDBACK,
     })
 
     response.raise_for_status()
@@ -150,7 +157,7 @@ def collaborator_request_create(company_number, email, name, form_url):
         'name': name,
         'email': email,
         'collaborator_create_url': settings.FAB_ADD_USER_URL,
-        'report_abuse_url': urls.FEEDBACK,
+        'report_abuse_url': urls.domestic.FEEDBACK,
     })
     response.raise_for_status()
 
@@ -207,3 +214,7 @@ def collaborator_invite_retrieve(invite_key):
 def collaborator_invite_accept(sso_session_id, invite_key):
     response = api_client.company.collaborator_invite_accept(sso_session_id=sso_session_id, invite_key=invite_key)
     response.raise_for_status()
+
+
+def is_companies_house_details_incomplete(company_number):
+    return any(company_number.startswith(prefix) for prefix in constants.COMPANY_NUMBER_PREFIXES_INCOMPLETE_INFO)
