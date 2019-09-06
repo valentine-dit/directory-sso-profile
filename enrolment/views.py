@@ -300,6 +300,7 @@ class CreateBusinessProfileMixin:
         data = {}
         for form in form_list:
             data.update(form.cleaned_data)
+
         whitelist = [
             'address_line_1',
             'address_line_2',
@@ -312,7 +313,7 @@ class CreateBusinessProfileMixin:
             'phone_number',
             'postal_code',
             'sic',
-            'website',
+            'website'
         ]
         return {
             key: value for key, value in data.items()
@@ -570,13 +571,28 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
             company_number=data['company_number'],
             session=self.request.session,
         )
+
         if is_enrolled:
-            helpers.collaborator_request_create(
-                company_number=data['company_number'],
-                email=self.request.user.email,
-                name=self.request.user.full_name,
-                form_url=self.request.path,
-            )
+            helpers.create_company_member(data={
+                'company': data['company_number'],
+                'sso_id': self.request.user.id,
+                'company_email': self.request.user.email,
+                'name': self.request.user.full_name,
+                'mobile_number': data.get('phone_number', ''),
+            })
+
+            helpers.notify_company_admins_member_joined(
+                sso_session_id=self.request.user.session_id,
+                email_data={
+                    'company_name': data['company_name'],
+                    'name': self.request.user.full_name,
+                    'email': self.request.user.email,
+                    'profile_remove_member_url': self.request.build_absolute_uri(
+                        reverse('find-a-buyer-admin-tools')
+                    ),
+                    'report_abuse_url': urls.FEEDBACK
+                }, form_url=self.request.path)
+
             return TemplateResponse(self.request, self.templates[FINISHED])
         else:
             return super().done(form_list, form_dict=form_dict, **kwargs)
