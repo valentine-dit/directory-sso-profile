@@ -9,7 +9,6 @@ from django.contrib.auth.decorators import login_required
 
 import core.views
 import enrolment.views
-import profile.eig_apps.views
 import profile.exops.views
 import profile.fab.views
 import profile.soo.views
@@ -72,12 +71,17 @@ urlpatterns = [
     ),
     url(
         r'^$',
-        profile.eig_apps.views.LandingPageView.as_view(),
+        core.views.LandingPageView.as_view(),
         name='index'
     ),
     url(
         r'^about/$',
-        profile.eig_apps.views.AboutView.as_view(),
+        core.views.AboutView.as_view(),
+        name='about'
+    ),
+    url(
+        r'^about/$',
+        core.views.AboutView.as_view(),
         name='about'
     ),
     url(
@@ -201,11 +205,20 @@ urlpatterns = [
         company_required(profile.fab.views.LogoFormView.as_view()),
         name='find-a-buyer-logo'
     ),
-
     url(
         r'^find-a-buyer/personal-details/$',
         login_required(profile.fab.views.PersonalDetailsFormView.as_view()),
         name='find-a-buyer-personal-details'
+    ),
+    url(
+        r'^find-a-buyer/personal-profile-edit/$',
+        login_required(profile.fab.views.PersonalProfileEditFormView.as_view()),
+        name='find-a-buyer-personal-profile-edit'
+    ),
+    url(
+        r'^find-a-buyer/personal-profile/$',
+        login_required(profile.fab.views.PersonalProfileView.as_view()),
+        name='find-a-buyer-personal-profile'
     ),
     url(
         r'^find-a-buyer/publish/$',

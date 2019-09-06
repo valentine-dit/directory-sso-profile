@@ -1,0 +1,40 @@
+{% extends '../apps-tabs.html' %}
+{% load static from staticfiles %}
+{% load success_box from directory_components %}
+{% block tab_content %}
+	<div class="grid-row" id="tab-content">
+	{% if messages %}
+        <div>
+        {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                {% success_box heading=message description='' box_class='width-full background-white margin-top-30' %}
+            {% endif %}
+        {% endfor %}
+        </div>
+    {% endif %}
+
+		<div class="column-two-thirds">
+			<section id="welcome-message">
+				<h2 class="heading-large">Personal Details</h2>
+				<p class="body-text">Email</p>
+				<p class="heading-small">{{ user.email }}</p>
+				<p class="body-text">First name</p>
+				<p class="heading-small">{{ user.first_name }}</p>
+				<p class="body-text">Last name</p>
+				<p class="heading-small">{{ user.last_name }}</p>
+				<p class="body-text">Job title</p>
+				<p class="heading-small">{{ user.job_title }}</p>
+				<p class="body-text">Telephone number</p>
+				<p class="heading-small">{{ user.mobile_phone_number }}</p>
+				<br>
+				<a class="button" href="{% url 'find-a-buyer-personal-profile-edit' %}">
+						<button class="button" >Edit</button>
+				</a>
+			</section>
+				{% block form_button %}
+
+	{% endblock %}
+		</div>
+	</div>
+{% endblock tab_content %}
+

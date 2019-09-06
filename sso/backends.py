@@ -8,5 +8,7 @@ class SSOUserBackend(backends.SSOUserBackend):
             'has_user_profile': bool(user_profile),
             'first_name': user_profile.get('first_name'),
             'last_name': user_profile.get('last_name'),
+            'job_title': user_profile.get('job_title'),
+            'mobile_phone_number': user_profile.get('mobile_phone_number'),
             **super().user_kwargs(session_id=session_id, parsed=parsed)
         }

@@ -80,3 +80,14 @@ def mock_create_user_profile():
     )
     yield patch.start()
     patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_update_user_profile():
+    response = create_response()
+    patch = mock.patch(
+        'directory_sso_api_client.sso_api_client.user.update_user_profile',
+        return_value=response
+    )
+    yield patch.start()
+    patch.stop()

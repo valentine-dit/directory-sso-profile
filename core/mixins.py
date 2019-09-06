@@ -45,3 +45,9 @@ class CreateUserProfileMixin:
             sso_session_id=self.request.user.session_id,
             data=self.serialize_user_profile(form),
         )
+
+    def update_user_profile(self, form):
+        helpers.update_user_profile(
+            sso_session_id=self.request.user.session_id,
+            data=self.serialize_user_profile(form),
+        )

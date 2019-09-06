@@ -1,0 +1,34 @@
+{% extends '../apps-tabs.html' %}
+{% load static from staticfiles %}
+{% block tab_content %}
+
+	<div class="grid-row" id="tab-content">
+		<div class="column-two-thirds">
+			<section id="welcome-message">
+				<h2 class="heading-large">Edit Personal Details</h2>
+
+			{% block form_contents %}
+		<div id="business-details-edit-form">
+			<form method="post" enctype="multipart/form-data">
+				{% block form %}{{ form }}{% endblock %}
+				{% block form_button %}
+					<button class="button">Save</button>
+				{% endblock %}
+				<div>
+					<br>
+					<br>
+					{% block back_link %}
+						<a class="link" href="{% url 'find-a-buyer-personal-profile' %}">Back</a>
+					{% endblock %}
+				</div>
+			 </form>
+		</div>
+			</section>
+	{% endblock %}
+		</div>
+	</div>
+
+{% endblock tab_content %}
+
+
+

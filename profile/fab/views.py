@@ -627,3 +627,40 @@ class IdentityVerificationRequestFormView(SuccessMessageMixin, FormView):
         response = api_client.company.verify_identity_request(self.request.user.session_id)
         response.raise_for_status()
         return super().form_valid(form)
+
+
+class PersonalProfileEditFormView(core.mixins.CreateUserProfileMixin, SuccessMessageMixin, FormView):
+    template_name = 'fab/personal-profile-edit-form.html'
+    form_class = forms.PersonalProfileEdit
+    success_url = reverse_lazy('find-a-buyer-personal-profile')
+    success_message = 'Personal details updated'
+
+    def get_initial(self):
+        return {
+            'email': self.request.user.email,
+            'given_name': self.request.user.first_name,
+            'family_name': self.request.user.last_name,
+            'job_title': self.request.user.job_title,
+            'phone_number': self.request.user.mobile_phone_number,
+        }
+
+    def form_valid(self, form):
+        self.update_user_profile(form)
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            personal_details_tab_classes='active',
+            **kwargs
+        )
+
+
+class PersonalProfileView(TemplateView):
+    template_name = 'fab/personal-profile.html'
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            personal_details_tab_classes='active',
+            user=self.request.user,
+            **kwargs
+        )
