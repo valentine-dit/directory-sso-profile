@@ -14,10 +14,20 @@ import profile.fab.views
 import profile.soo.views
 
 
+def no_company_required(function):
+    inner = user_passes_test(
+        lambda user: not bool(getattr(user, 'company', None)),
+        reverse_lazy('find-a-buyer'),
+        None
+    )
+    return inner(function)
+
+
 def company_required(function):
     inner = user_passes_test(
         lambda user: bool(user.company),
         reverse_lazy('find-a-buyer'),
+        None,
     )
     return login_required(inner(function))
 
@@ -26,6 +36,7 @@ def company_admin_required(function):
     inner = user_passes_test(
         lambda user: user.is_company_admin,
         reverse_lazy('find-a-buyer'),
+        None,
     )
     return login_required(inner(function))
 
@@ -65,9 +76,7 @@ urlpatterns = [
     ),
     url(
         r'^healthcheck/',
-        include(
-            healthcheck_urls, namespace='healthcheck', app_name='healthcheck'
-        )
+        include(healthcheck_urls, namespace='healthcheck', app_name='healthcheck')
     ),
     url(
         r'^$',
@@ -91,16 +100,12 @@ urlpatterns = [
     ),
     url(
         r'^export-opportunities/applications/$',
-        login_required(
-            profile.exops.views.ExportOpportunitiesApplicationsView.as_view()
-        ),
+        login_required(profile.exops.views.ExportOpportunitiesApplicationsView.as_view()),
         name='export-opportunities-applications'
     ),
     url(
         r'^export-opportunities/email-alerts/$',
-        login_required(
-            profile.exops.views.ExportOpportunitiesEmailAlertsView.as_view()
-        ),
+        login_required(profile.exops.views.ExportOpportunitiesEmailAlertsView.as_view()),
         name='export-opportunities-email-alerts'
     ),
     url(
@@ -149,20 +154,25 @@ urlpatterns = [
     ),
     url(
         r'^enrol/pre-verified/(?P<step>.+)/$',
-        enrolment.views.PreVerifiedEnrolmentView.as_view(
-            url_name='enrolment-pre-verified',
-            done_step_name='finished'
-        ),
+        enrolment.views.PreVerifiedEnrolmentView.as_view(url_name='enrolment-pre-verified', done_step_name='finished'),
         name='enrolment-pre-verified'
     ),
     url(
         r'^enrol/pre-verified/$',
         RedirectView.as_view(
-            url=reverse_lazy(
-                'enrolment-pre-verified', kwargs={'step': 'user-account'}
-            ),
+            url=reverse_lazy('enrolment-pre-verified', kwargs={'step': 'user-account'}),
             query_string=True,
         )
+    ),
+    url(
+        r'^enrol/collaborate/(?P<step>.+)/$',
+        no_company_required(
+            enrolment.views.CollaboratorEnrolmentView.as_view(
+                url_name='enrolment-collaboration',
+                done_step_name='finished'
+            )
+        ),
+        name='enrolment-collaboration'
     ),
     url(
         r'^enrol/resend-verification/(?P<step>.+)/$',
@@ -255,9 +265,7 @@ urlpatterns = [
     ),
     url(
         r'^find-a-buyer/add-expertise/regions/$',
-        company_required(
-            profile.fab.views.RegionalExpertiseFormView.as_view()
-        ),
+        company_required(profile.fab.views.RegionalExpertiseFormView.as_view()),
         name='find-a-buyer-expertise-regional'
     ),
     url(
@@ -267,46 +275,31 @@ urlpatterns = [
     ),
     url(
         r'^find-a-buyer/add-expertise/industries/$',
-        company_required(
-            profile.fab.views.IndustryExpertiseFormView.as_view()
-        ),
+        company_required(profile.fab.views.IndustryExpertiseFormView.as_view()),
         name='find-a-buyer-expertise-industries'
     ),
     url(
         r'^find-a-buyer/add-expertise/languages/$',
-        company_required(
-            profile.fab.views.LanguageExpertiseFormView.as_view()
-        ),
+        company_required(profile.fab.views.LanguageExpertiseFormView.as_view()),
         name='find-a-buyer-expertise-languages'
     ),
     url(
         r'^find-a-buyer/products-and-services/$',
-        RedirectView.as_view(
-            url=reverse_lazy(
-                'find-a-buyer-expertise-products-services-routing'
-            ),
-        ),
+        RedirectView.as_view(pattern_name='find-a-buyer-expertise-products-services-routing'),
         name='find-a-buyer-products-and-services'
     ),
     url(
         r'^find-a-buyer/add-expertise/products-and-services/$',
-        company_required(
-            profile.fab.views.ProductsServicesRoutingFormView.as_view()
-        ),
+        company_required(profile.fab.views.ProductsServicesRoutingFormView.as_view()),
         name='find-a-buyer-expertise-products-services-routing'
     ),
     url(
         r'^find-a-buyer/add-expertise/products-and-services/other/$',
-        company_required(
-            profile.fab.views.ProductsServicesOtherFormView.as_view()
-        ),
+        company_required(profile.fab.views.ProductsServicesOtherFormView.as_view()),
         name='find-a-buyer-expertise-products-services-other'
     ),
     url(
-        (
-            r'^find-a-buyer/add-expertise/products-and-services/'
-            r'(?P<category>.+)/$'
-        ),
+        r'^find-a-buyer/add-expertise/products-and-services/(?P<category>.+)/$',
         company_required(profile.fab.views.ProductsServicesFormView.as_view()),
         name='find-a-buyer-expertise-products-services'
     ),

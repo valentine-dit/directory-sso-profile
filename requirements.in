@@ -8,15 +8,14 @@ whitenoise==3.1
 sigauth==4.0.1
 directory-validators==5.1.0
 directory-healthcheck==1.0.1
-directory-components==27.12.0
-directory-constants==18.7.0
+directory-components==30.1.0
 urllib3>=1.24.2<2.0.0
 django-formtools==2.0
 django-recaptcha==1.2.0
 directory-ch-client==2.1.0
 directory-sso-api-client==6.1.0
 directory-forms-api-client==5.0.0
-directory-api-client==17.1.0
+directory-api-client==18.0.0
 django-redis==4.8.0
 django-storages==1.5.1
 boto3==1.7.30

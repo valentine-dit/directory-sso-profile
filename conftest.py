@@ -4,8 +4,14 @@ from unittest import mock
 import pytest
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 
 from core.tests.helpers import create_response
+
+
+@pytest.fixture(autouse=True)
+def clear_cache():
+    cache.clear()
 
 
 @pytest.fixture

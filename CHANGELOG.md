@@ -3,6 +3,8 @@
 ## Pre-release
 
 ### Implemented enhancements
+- TT-1725 - Send email to company admin when a new user is added to company profile
+- TT-1734 - Add second user to already registered company profile
 - TT-1733 - Add request for individual verification feature
 - TT-1723 - Add collaborator list admin view
 - TT-1716 - Support removing collaborators
@@ -11,6 +13,9 @@
 - TT-1714 - Allow single collaborator to invite other admin
 - TT-1727 - Allow inviting collaborator
 - TT-1673 - Handle backfill details after login
+- TT-1748 - Collaboration invitee journey
+- TT-1642 - Handle incomplete companies house details
+- no ticket - Add IDs to relevant elements on CH enrolement success page
 - TT-1760 - added user profile update
 
 ### Fixed bugs:

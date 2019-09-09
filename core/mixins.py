@@ -41,13 +41,18 @@ class CreateUserProfileMixin:
         }
 
     def create_user_profile(self, form):
+        data = self.serialize_user_profile(form)
         helpers.create_user_profile(
             sso_session_id=self.request.user.session_id,
-            data=self.serialize_user_profile(form),
+            data=data,
         )
+        
+        self.request.user.first_name = data['first_name']
+        self.request.user.last_name = data['last_name']
 
     def update_user_profile(self, form):
         helpers.update_user_profile(
             sso_session_id=self.request.user.session_id,
             data=self.serialize_user_profile(form),
         )
+

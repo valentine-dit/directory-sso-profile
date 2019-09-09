@@ -10,14 +10,10 @@
 
 **SSO Profile - the Department for International Trade (DIT) service for managing EIG profiles.**
 
-### See also:
-| [directory-api](https://github.com/uktrade/directory-api) | [directory-ui-buyer](https://github.com/uktrade/directory-ui-buyer) | [directory-ui-supplier](https://github.com/uktrade/directory-ui-supplier) | [directory-ui-export-readiness](https://github.com/uktrade/directory-ui-export-readiness) |
-| --- | --- | --- | --- |
-| **[directory-sso](https://github.com/uktrade/directory-sso)** | **[directory-sso-proxy](https://github.com/uktrade/directory-sso-proxy)** | **[directory-sso-profile](https://github.com/uktrade/directory-sso-profile)** |  |
-
-For more information on installation please check the [Developers Onboarding Checklist](https://uktrade.atlassian.net/wiki/spaces/ED/pages/32243946/Developers+onboarding+checklist)
 
 ## Development
+
+Read the [Developers Onboarding Checklist](https://uktrade.atlassian.net/wiki/spaces/ED/pages/32243946/Developers+onboarding+checklist)
 
 The back-end framework is Django 1.9. The front-end uses minimal Javascript. The motivation for this is for accessibility reasons, to reduce technical complexity, and reduce cross-browser compatibility issues. Therefore most front-end work will be HTML and SASS/CSS development.
 
@@ -35,7 +31,6 @@ We use SASS CSS pre-compiler. If you're doing front-end work your local machine 
 
 [SASS](http://sass-lang.com/)
 
-
 ## Running locally
 
 ### Installing
@@ -51,17 +46,8 @@ A recent update to OSX removed a particular method from python around SSL. This 
 
 ### Configuration
 
-Secrets such as API keys and environment specific configurations are placed in `conf/.env` - a file that is not added to version control. You will need to create that file locally in order for the project to run.
+Secrets such as API keys and environment specific configurations are placed in `conf/env/secrets-do-not-commit` - a file that is not added to version control. To create a template secrets file with dummy values run `make init_secrets`.
 
-Here is an example `conf/.env` with placeholder values to get you going:
-```
-EXPORTING_OPPORTUNITIES_API_BASE_URL=debug
-EXPORTING_OPPORTUNITIES_API_SECRET=debug
-EXPORTING_OPPORTUNITIES_SEARCH_URL=debug
-GET_ADDRESS_API_KEY=debug
-DIRECTORY_FORMS_API_API_KEY=debug
-DIRECTORY_FORMS_API_SENDER_ID=debug
-```
 
 ### Running the webserver
     $ source .venv/bin/activate
