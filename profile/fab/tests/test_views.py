@@ -231,29 +231,10 @@ def test_supplier_company_retrieve_found_business_profile_on(
     assert response.template_name == ['fab/profile.html']
 
 
-def test_company_owner(client, user):
+@pytest.mark.parametrize('param', ('owner-transferred', 'user-added', 'user-removed'))
+def test_success_message(mock_retrieve_supplier, client, param, user):
     client.force_login(user)
-    response = client.get(reverse('find-a-buyer'))
-
-    assert response.context_data['is_profile_owner'] is True
-
-
-def test_non_company_owner(mock_retrieve_supplier, client, user):
-    client.force_login(user)
-    mock_retrieve_supplier.return_value = create_response({'is_company_owner': False})
-    response = client.get(reverse('find-a-buyer'))
-
-    assert response.context_data['is_profile_owner'] is False
-
-
-@pytest.mark.parametrize('param', (
-    'owner-transferred', 'user-added', 'user-removed'
-))
-def test_success_message(
-    mock_retrieve_supplier, client, param, user
-):
-    client.force_login(user)
-    mock_retrieve_supplier.return_value = create_response({'is_company_owner': False})
+    mock_retrieve_supplier.return_value = create_response({'role': user_roles.EDITOR})
 
     url = reverse('find-a-buyer')
     response = client.get(url, {param: True})

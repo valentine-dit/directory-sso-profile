@@ -707,20 +707,20 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
     )
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
-        'sso_id': 1,
-        'company_email': 'jim@example.com',
-        'contact_email_address': 'jim@example.com',
-        'company_type': 'COMPANIES_HOUSE',
-        'company_name': 'Example corp',
-        'company_number': '12345678',
-        'date_of_creation': '2001-01-20',
-        'postal_code': 'EDG 4DF',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
-        'sectors': ['AEROSPACE'],
+        'company_email': 'jim@example.com',
+        'company_name': 'Example corp',
+        'company_number': '12345678',
+        'company_type': 'COMPANIES_HOUSE',
+        'contact_email_address': 'jim@example.com',
+        'date_of_creation': '2001-01-20',
         'job_title': 'Exampler',
+        'name': None,
         'phone_number': '1232342',
-        'name': user.full_name,
+        'postal_code': 'EDG 4DF',
+        'sectors': ['AEROSPACE'],
+        'sso_id': 1,
     })
 
 
@@ -729,6 +729,7 @@ def test_companies_house_enrolment_submit_end_to_end_no_address(
     mock_enrolment_send, steps_data, user, mock_get_company_profile
 ):
     client.force_login(user)
+
     mock_get_company_profile.return_value = {
         'company_number': 'IP345678',
         'company_name': 'Example corp',
@@ -777,14 +778,13 @@ def test_companies_house_enrolment_submit_end_to_end_no_address(
         data=steps_data[views.PERSONAL_INFO],
         step_name=views.PERSONAL_INFO,
     )
+
     assert response.status_code == 302
 
     response = client.get(response.url)
 
     assert response.status_code == 200
-    assert response.template_name == (
-        views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
-    )
+    assert response.template_name == views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
         'address_line_1': '555 fake street',
@@ -796,7 +796,7 @@ def test_companies_house_enrolment_submit_end_to_end_no_address(
         'contact_email_address': 'jim@example.com',
         'date_of_creation': '2001-01-20',
         'job_title': 'Exampler',
-        'name': None,  # fix this
+        'name': None,  # to good way in tests to populate this after login
         'phone_number': '1232342',
         'postal_code': 'EDG 4DF',
         'sectors': ['AEROSPACE'],

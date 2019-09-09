@@ -1,3 +1,5 @@
+import re
+
 from captcha.fields import ReCaptchaField
 from directory_components import forms
 from directory_constants import choices
@@ -13,6 +15,21 @@ from enrolment.widgets import PostcodeInput, RadioSelect
 INDUSTRY_CHOICES = (
     (('', 'Please select'),) + choices.INDUSTRIES + (('OTHER', 'Other'),)
 )
+
+
+class CleanAddressMixin:
+    def clean_address(self):
+        value = self.cleaned_data['address'].strip().replace(', ', '\n')
+        parts = value.split('\n')
+
+        postal_code = self.cleaned_data.get('postal_code', '')
+        if value.count('\n') == 0:
+            raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
+        if postal_code not in value:
+            value = f'{value}\n{postal_code}'
+        self.cleaned_data['address_line_1'] = parts[0].strip()
+        self.cleaned_data['address_line_2'] = parts[1].strip()
+        return value
 
 
 class BusinessType(forms.Form):
@@ -155,7 +172,7 @@ class CompaniesHouseCompanySearch(forms.Form):
             raise ValidationError({'company_name': mark_safe(self.MESSAGE_COMPANY_NOT_FOUND)})
 
 
-class CompaniesHouseAddressSearch(forms.Form):
+class CompaniesHouseAddressSearch(CleanAddressMixin, forms.Form):
 
     MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
 
@@ -170,19 +187,6 @@ class CompaniesHouseAddressSearch(forms.Form):
         widget=Textarea(attrs={'rows': 4, 'id': 'id_address'}),  # template js relies on this ID
         required=False,
     )
-
-    def clean_address(self):
-        value = self.cleaned_data['address'].strip().replace(', ', '\n')
-        parts = value.split('\n')
-
-        postal_code = self.cleaned_data.get('postal_code', '')
-        if value.count('\n') == 0:
-            raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
-        if postal_code not in value:
-            value = f'{value}\n{postal_code}'
-        self.cleaned_data['address_line_1'] = parts[0].strip()
-        self.cleaned_data['address_line_2'] = parts[1].strip()
-        return value
 
 
 class CompaniesHouseBusinessDetails(forms.Form):
@@ -262,7 +266,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
             return self.cleaned_data['date_of_creation'].isoformat()
 
     def clean_address(self):
-        address_parts = self.cleaned_data['address'].split(',')
+        address_parts = re.split('[\n,]', self.cleaned_data['address'])
         for i, address_part in enumerate(address_parts, start=1):
             field_name = f'address_line_{i}'
             self.cleaned_data[field_name] = address_part.strip()
@@ -286,7 +290,7 @@ class IndividualPersonalDetails(forms.Form):
     )
 
 
-class NonCompaniesHouseSearch(forms.Form):
+class NonCompaniesHouseSearch(CleanAddressMixin, forms.Form):
 
     MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
     COMPANY_TYPES = [('', 'Please select'), ] + [
@@ -322,19 +326,6 @@ class NonCompaniesHouseSearch(forms.Form):
 
     def clean_sectors(self):
         return [self.cleaned_data['sectors']]
-
-    def clean_address(self):
-        value = self.cleaned_data['address'].strip().replace(', ', '\n')
-        parts = value.split('\n')
-
-        postal_code = self.cleaned_data.get('postal_code', '')
-        if value.count('\n') == 0:
-            raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
-        if postal_code not in value:
-            value = f'{value}\n{postal_code}'
-        self.cleaned_data['address_line_1'] = parts[0].strip()
-        self.cleaned_data['address_line_2'] = parts[1].strip()
-        return value
 
 
 class ResendVerificationCode(forms.Form):
