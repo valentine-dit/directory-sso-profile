@@ -793,16 +793,14 @@ def test_personal_profile_edit(client, mock_update_user_profile, user):
         'phone_number': '1232342',
     }
 
-    response = client.get(reverse('find-a-buyer-personal-profile-edit'))
+    response = client.get(reverse('find-a-buyer-personal-profile:edit'))
 
     assert response.status_code == 200
-    assert response.context_data['email'] == user.email
-    assert response.context_data['personal_details_tab_classes'] == 'active'
 
-    response = client.post(reverse('find-a-buyer-personal-profile-edit'), data)
+    response = client.post(reverse('find-a-buyer-personal-profile:edit'), data)
 
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer-personal-profile')
+    assert response.url == reverse('find-a-buyer-personal-profile:display')
     assert mock_update_user_profile.call_count == 1
     assert mock_update_user_profile.call_args == mock.call(
         sso_session_id=user.session_id,
@@ -815,13 +813,11 @@ def test_personal_profile_edit(client, mock_update_user_profile, user):
     )
 
 
-def test_personal_profile_view(client, user):
+def test_personal_profile_display(client, user):
     client.force_login(user)
-    response = client.get(reverse('find-a-buyer-personal-profile'))
+    response = client.get(reverse('find-a-buyer-personal-profile:display'))
 
     assert response.status_code == 200
-    assert response.context_data['personal_details_tab_classes'] == 'active'
-    assert response.context_data['user'] == user
 
 
 @mock.patch.object(api_client.company, 'verify_identity_request')

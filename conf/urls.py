@@ -69,6 +69,20 @@ api_urls = [
 ]
 
 
+urls_personal_profile = [
+    url(
+        r'^$',
+        login_required(profile.fab.views.PersonalProfileView.as_view()),
+        name='display'
+    ),
+    url(
+        r'^edit/$',
+        login_required(profile.fab.views.PersonalProfileEditFormView.as_view()),
+        name='edit'
+    ),
+]
+
+
 urlpatterns = [
     url(
         r'^api/',
@@ -221,16 +235,6 @@ urlpatterns = [
         name='find-a-buyer-personal-details'
     ),
     url(
-        r'^find-a-buyer/personal-profile-edit/$',
-        login_required(profile.fab.views.PersonalProfileEditFormView.as_view()),
-        name='find-a-buyer-personal-profile-edit'
-    ),
-    url(
-        r'^find-a-buyer/personal-profile/$',
-        login_required(profile.fab.views.PersonalProfileView.as_view()),
-        name='find-a-buyer-personal-profile'
-    ),
-    url(
         r'^find-a-buyer/publish/$',
         company_required(profile.fab.views.PublishFormView.as_view()),
         name='find-a-buyer-publish'
@@ -308,6 +312,10 @@ urlpatterns = [
         company_required(profile.fab.views.IdentityVerificationRequestFormView.as_view()),
         name='find-a-buyer-request-to-verify'
     ),
+    url(
+        r'^find-a-buyer/personal-profile/',
+        include(urls_personal_profile, namespace='find-a-buyer-personal-profile')
+    )
 ]
 
 

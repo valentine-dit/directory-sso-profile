@@ -46,7 +46,6 @@ class CreateUserProfileMixin:
             sso_session_id=self.request.user.session_id,
             data=data,
         )
-        
         self.request.user.first_name = data['first_name']
         self.request.user.last_name = data['last_name']
 
@@ -55,4 +54,3 @@ class CreateUserProfileMixin:
             sso_session_id=self.request.user.session_id,
             data=self.serialize_user_profile(form),
         )
-

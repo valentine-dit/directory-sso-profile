@@ -622,7 +622,7 @@ class IdentityVerificationRequestFormView(SuccessMessageMixin, FormView):
 class PersonalProfileEditFormView(core.mixins.CreateUserProfileMixin, SuccessMessageMixin, FormView):
     template_name = 'fab/personal-profile-edit-form.html'
     form_class = forms.PersonalProfileEdit
-    success_url = reverse_lazy('find-a-buyer-personal-profile')
+    success_url = reverse_lazy('find-a-buyer-personal-profile:display')
     success_message = 'Personal details updated'
 
     def get_initial(self):
@@ -637,20 +637,6 @@ class PersonalProfileEditFormView(core.mixins.CreateUserProfileMixin, SuccessMes
         self.update_user_profile(form)
         return super().form_valid(form)
 
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            personal_details_tab_classes='active',
-            email=self.request.user.email,
-            **kwargs
-        )
-
 
 class PersonalProfileView(TemplateView):
     template_name = 'fab/personal-profile.html'
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            personal_details_tab_classes='active',
-            user=self.request.user,
-            **kwargs
-        )
