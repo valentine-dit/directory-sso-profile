@@ -615,7 +615,6 @@ class AdminInviteCollaboratorDeleteForm(forms.Form):
 
 
 class PersonalProfileEdit(forms.Form):
-    email = forms.CharField(label='Email', disabled=True)
     given_name = forms.CharField(label='First name')
     family_name = forms.CharField(label='Last name')
     job_title = forms.CharField(label='Job title')

@@ -637,7 +637,6 @@ class PersonalProfileEditFormView(core.mixins.CreateUserProfileMixin, SuccessMes
 
     def get_initial(self):
         return {
-            'email': self.request.user.email,
             'given_name': self.request.user.first_name,
             'family_name': self.request.user.last_name,
             'job_title': self.request.user.job_title,
@@ -651,6 +650,7 @@ class PersonalProfileEditFormView(core.mixins.CreateUserProfileMixin, SuccessMes
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             personal_details_tab_classes='active',
+            email=self.request.user.email,
             **kwargs
         )
 

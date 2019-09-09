@@ -803,7 +803,7 @@ def test_personal_details(client, mock_create_user_profile, user):
     )
 
 
-def test_personal_profile_edit_view(client, mock_update_user_profile, user):
+def test_personal_profile_edit(client, mock_update_user_profile, user):
     client.force_login(user)
     data = {
         'given_name': 'Foo',
@@ -811,6 +811,13 @@ def test_personal_profile_edit_view(client, mock_update_user_profile, user):
         'job_title': 'Exampler',
         'phone_number': '1232342',
     }
+
+    response = client.get(reverse('find-a-buyer-personal-profile-edit'))
+
+    assert response.status_code == 200
+    assert response.context_data['email'] == user.email
+    assert response.context_data['personal_details_tab_classes'] == 'active'
+
     response = client.post(reverse('find-a-buyer-personal-profile-edit'), data)
 
     assert response.status_code == 302
