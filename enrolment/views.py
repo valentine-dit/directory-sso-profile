@@ -301,6 +301,7 @@ class CreateBusinessProfileMixin:
         data = {}
         for form in form_list:
             data.update(form.cleaned_data)
+
         whitelist = [
             'address_line_1',
             'address_line_2',
@@ -313,7 +314,7 @@ class CreateBusinessProfileMixin:
             'phone_number',
             'postal_code',
             'sic',
-            'website',
+            'website'
         ]
         return {
             key: value for key, value in data.items()
@@ -578,13 +579,13 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
             form_initial['company_number'] = company.number
             form_initial['sic'] = company.nature_of_business
             form_initial['date_of_creation'] = company.date_of_creation
-            if company.address:
-                form_initial['address'] = company.address
-                form_initial['postal_code'] = company.postcode
-            else:
+            if self.address_search_condition():
                 address_step_data = self.get_cleaned_data_for_step(ADDRESS_SEARCH)
                 form_initial['address'] = address_step_data['address']
                 form_initial['postal_code'] = address_step_data['postal_code']
+            else:
+                form_initial['address'] = company.address
+                form_initial['postal_code'] = company.postcode
         return form_initial
 
     def serialize_form_list(self, form_list):
@@ -597,12 +598,26 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
         data = self.serialize_form_list(form_list)
         is_enrolled = helpers.get_is_enrolled(data['company_number'])
         if is_enrolled:
-            helpers.collaborator_request_create(
-                company_number=data['company_number'],
-                email=self.request.user.email,
-                name=self.request.user.full_name,
-                form_url=self.request.path,
-            )
+            helpers.create_company_member(data={
+                'company': data['company_number'],
+                'sso_id': self.request.user.id,
+                'company_email': self.request.user.email,
+                'name': self.request.user.full_name,
+                'mobile_number': data.get('phone_number', ''),
+            })
+
+            helpers.notify_company_admins_member_joined(
+                sso_session_id=self.request.user.session_id,
+                email_data={
+                    'company_name': data['company_name'],
+                    'name': self.request.user.full_name,
+                    'email': self.request.user.email,
+                    'profile_remove_member_url': self.request.build_absolute_uri(
+                        reverse('find-a-buyer-admin-tools')
+                    ),
+                    'report_abuse_url': urls.domestic.FEEDBACK
+                }, form_url=self.request.path)
+
             return TemplateResponse(self.request, self.templates[FINISHED])
         else:
             return super().done(form_list, form_dict=form_dict, **kwargs)

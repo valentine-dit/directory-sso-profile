@@ -211,6 +211,49 @@ def mock_collaborator_request_create(client):
 
 
 @pytest.fixture(autouse=True)
+def mock_add_collaborator(client):
+    response = create_response(status_code=201, json_body={
+        'sso_id': 300,
+        'name': 'Abc',
+        'company': 12345,
+        'company_email': 'xyz@xyzcorp.com',
+        'mobile_number': '9876543210',
+        'role': user_roles.MEMBER
+    })
+    patch = mock.patch.object(
+        helpers.api_client.company, 'collaborator_create',
+        return_value=response
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_get_company_admins(client):
+    response = [{
+        'company_email': 'admin@xyzcorp.com',
+        'company': '12345',
+        'sso_id': 1,
+        'name': 'Jim Abc',
+        'mobile_number': '123456789',
+        'role': user_roles.ADMIN
+    }, {
+        'company_email': 'admin2@xyzcorp.com',
+        'company': '12345',
+        'sso_id': 2,
+        'name': 'Pete Abc',
+        'mobile_number': '123436789',
+        'role': user_roles.ADMIN
+    }]
+    patch = mock.patch.object(
+        helpers, 'get_company_admins',
+        return_value=response
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
 def mock_enrolment_send(client):
     patch = mock.patch.object(
         helpers.api_client.enrolment, 'send_form',
@@ -453,6 +496,8 @@ def test_companies_house_enrolment_already_has_profile(
     client, submit_companies_house_step, steps_data, user
 ):
     user.has_user_profile = True
+    user.first_name = 'Foo'
+    user.last_name = 'Bar'
     client.force_login(user)
 
     response = submit_companies_house_step(
@@ -559,9 +604,11 @@ def test_companies_house_enrolment_redirect_to_start(client):
     assert response.url == reverse('enrolment-business-type')
 
 
+@mock.patch('enrolment.views.helpers.create_company_member')
 def test_companies_house_enrolment_submit_end_to_end(
-    client, submit_companies_house_step, mock_enrolment_send, steps_data,
-    session_client_referrer_factory, user
+    mock_add_collaborator, client, submit_companies_house_step,
+    mock_enrolment_send, steps_data, session_client_referrer_factory,
+    user,
 ):
     session_client_referrer_factory(urls.domestic.FIND_A_BUYER)
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
@@ -609,12 +656,15 @@ def test_companies_house_enrolment_submit_end_to_end(
         'job_title': 'Exampler',
         'phone_number': '1232342',
         'company_type': 'COMPANIES_HOUSE',
+
     })
 
 
+@mock.patch('enrolment.views.helpers.create_company_member')
 def test_companies_house_enrolment_submit_end_to_end_logged_in(
-    client, captcha_stub, submit_companies_house_step,
-    mock_enrolment_send, steps_data, user
+    mock_add_collaborator, client, captcha_stub,
+    submit_companies_house_step, mock_enrolment_send,
+    steps_data, user,
 ):
     client.force_login(user)
 
@@ -668,9 +718,9 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
         'sectors': ['AEROSPACE'],
-        'name': user.full_name,
         'job_title': 'Exampler',
-        'phone_number': '1232342'
+        'phone_number': '1232342',
+        'name': user.full_name,
     })
 
 
@@ -825,11 +875,12 @@ def test_companies_house_enrolment_has_company_error(
         client.get(url)
 
 
-@mock.patch('enrolment.views.helpers.collaborator_request_create')
+@mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
+@mock.patch('enrolment.views.helpers.create_company_member')
 def test_companies_house_enrolment_submit_end_to_end_company_has_account(
-    mock_collaborator_request_create, client, steps_data,
-    submit_companies_house_step, mock_enrolment_send,
-    mock_validate_company_number, user
+    mock_add_collaborator, mock_gov_notify, client,
+    steps_data, submit_companies_house_step, mock_get_company_admins,
+    mock_enrolment_send, mock_validate_company_number, user
 ):
     mock_validate_company_number.return_value = create_response(status_code=400)
 
@@ -857,26 +908,31 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
 
     assert response.status_code == 200
     assert response.template_name == views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
-    assert mock_enrolment_send.call_count == 0
-    assert mock_collaborator_request_create.call_count == 1
-    assert mock_collaborator_request_create.call_args == mock.call(
-        company_number='12345678',
-        email='jim@example.com',
-        name=user.full_name,
-        form_url=(
-            reverse('enrolment-companies-house', kwargs={'step': 'finished'})
-        )
-    )
+    assert mock_add_collaborator.call_count == 1
+    assert mock_add_collaborator.call_args == mock.call(data={
+        'sso_id': 1,
+        'name': user.full_name,
+        'company': '12345678',
+        'company_email': 'jim@example.com',
+        'mobile_number': '1232342',
+    })
+
+    assert mock_get_company_admins.call_count == 1
+    assert mock_gov_notify.call_count == 2
 
 
-@mock.patch('enrolment.views.helpers.collaborator_request_create')
+@mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
+@mock.patch('enrolment.views.helpers.create_company_member')
 def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
-    mock_collaborator_request_create, client, steps_data,
-    submit_companies_house_step, mock_enrolment_send,
+    mock_add_collaborator, mock_gov_notify, client, steps_data,
+    submit_companies_house_step, mock_enrolment_send, mock_get_company_admins,
     mock_validate_company_number, user
 ):
     mock_validate_company_number.return_value = create_response(status_code=400)
     user.has_user_profile = True
+    user.first_name = 'Foo'
+    user.last_name = 'Bar'
+
     client.force_login(user)
 
     response = submit_companies_house_step(
@@ -898,15 +954,17 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
         views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
     )
     assert mock_enrolment_send.call_count == 0
-    assert mock_collaborator_request_create.call_count == 1
-    assert mock_collaborator_request_create.call_args == mock.call(
-        company_number='12345678',
-        email='jim@example.com',
-        name=user.full_name,
-        form_url=(
-            reverse('enrolment-companies-house', kwargs={'step': 'finished'})
-        )
-    )
+    assert mock_add_collaborator.call_count == 1
+    assert mock_add_collaborator.call_args == mock.call(data={
+        'sso_id': 1,
+        'name': 'Foo Bar',
+        'company': '12345678',
+        'company_email': 'jim@example.com',
+        'mobile_number': '',
+    })
+
+    assert mock_get_company_admins.call_count == 1
+    assert mock_gov_notify.call_count == 2
 
 
 def test_verification_missing_url(
@@ -1458,9 +1516,9 @@ def test_non_companies_house_enrolment_submit_end_to_end_logged_in(
         'postal_code': 'EEA 3AD',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
-        'name': user.full_name,
         'job_title': 'Exampler',
         'phone_number': '1232342',
+        'name': user.full_name,
     })
 
 
