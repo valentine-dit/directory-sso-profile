@@ -17,7 +17,9 @@ import environ
 
 
 env = environ.Env()
-env.read_env()
+for env_file in env.list('ENV_FILES', default=[]):
+    env.read_env(f'conf/env/{env_file}')
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -138,7 +140,10 @@ MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 STATIC_HOST = env.str('STATIC_HOST', '')
 STATIC_URL = STATIC_HOST + '/static/'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = env.str(
+    'STATICFILES_STORAGE',
+    'whitenoise.storage.CompressedManifestStaticFilesStorage'
+)
 
 
 # Public storage for uploaded logos and case study images
@@ -402,6 +407,11 @@ GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID = env.str(
 GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID = env.str(
     'GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID',
     '02b0223f-2674-4b0b-bdcc-df21dabbc743'
+)
+
+GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID = env.str(
+    'GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID',
+    '439a8415-52d8-4975-b230-15cd34305bb5'
 )
 
 # directory api

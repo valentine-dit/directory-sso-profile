@@ -1,6 +1,7 @@
 import abc
 
 from directory_constants import urls
+from directory_sso_api_client import sso_api_client
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
 from urllib.parse import unquote
@@ -8,10 +9,11 @@ from urllib.parse import unquote
 from django.conf import settings
 from django.contrib import messages
 from django.http import QueryDict
-from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
-from django.views.generic import FormView, TemplateView
+from django.shortcuts import redirect, Http404
 from django.template.response import TemplateResponse
+from django.urls import reverse, reverse_lazy
+from django.utils.functional import cached_property
+from django.views.generic import FormView, TemplateView
 
 import core.forms
 import core.helpers
@@ -27,7 +29,7 @@ SESSION_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
 SESSION_KEY_REFERRER = 'REFERRER_URL'
 SESSION_KEY_BUSINESS_PROFILE_INTENT = 'BUSINESS_PROFILE_INTENT'
 SESSION_KEY_BACKFILL_DETAILS_INTENT = 'BACKFILL_DETAILS_INTENT'
-
+SESSION_KEY_INVITE_KEY = 'INVITE_KEY'
 
 PROGRESS_STEP_LABEL_USER_ACCOUNT = (
     'Enter your business email address and set a password'
@@ -174,6 +176,11 @@ class RestartOnStepSkipped:
         return super().render(*args, **kwargs)
 
 
+class RemotePasswordValidationError(ValueError):
+    def __init__(self, form):
+        self.form = form
+
+
 class CreateUserAccountMixin:
 
     def user_account_condition(self):
@@ -206,6 +213,15 @@ class CreateUserAccountMixin:
         PERSONAL_INFO: personal_info_condition
     }
 
+    def dispatch(self, *args, **kwargs):
+        try:
+            return super().dispatch(*args, **kwargs)
+        except RemotePasswordValidationError as error:
+            return self.render_revalidation_failure(
+                failed_step=USER_ACCOUNT,
+                form=error.form
+            )
+
     def get_form_initial(self, step):
         form_initial = super().get_form_initial(step)
         if step == VERIFICATION:
@@ -216,18 +232,26 @@ class CreateUserAccountMixin:
 
     def process_step(self, form):
         if form.prefix == USER_ACCOUNT:
-            # Check if we have a user, else the user is already registered
-            if form.cleaned_data['user_details']:
-                user_details = form.cleaned_data['user_details']
+            response = sso_api_client.user.create_user(
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password'],
+            )
+            if response.status_code == 400:
+                errors = response.json()
+                if 'password' in errors:
+                    self.storage.set_step_data(
+                        USER_ACCOUNT, {form.add_prefix('remote_password_error'): errors['password']}
+                    )
+                    raise RemotePasswordValidationError(form)
+                elif 'email' in errors:
+                    helpers.notify_already_registered(email=form.cleaned_data['email'], form_url=self.request.path)
+            else:
+                response.raise_for_status()
+                user_details = response.json()
                 helpers.send_verification_code_email(
                     email=user_details['email'],
                     verification_code=user_details['verification_code'],
                     form_url=self.request.path,
-                )
-            else:
-                helpers.notify_already_registered(
-                    email=form.cleaned_data['email'],
-                    form_url=self.request.path
                 )
         return super().process_step(form)
 
@@ -276,6 +300,7 @@ class CreateBusinessProfileMixin:
         data = {}
         for form in form_list:
             data.update(form.cleaned_data)
+
         whitelist = [
             'address_line_1',
             'address_line_2',
@@ -288,7 +313,7 @@ class CreateBusinessProfileMixin:
             'phone_number',
             'postal_code',
             'sic',
-            'website',
+            'website'
         ]
         return {
             key: value for key, value in data.items()
@@ -375,7 +400,7 @@ class WriteUserIntentMixin:
             # user was prompted to backfill their company or business
             # details after logging in
             self.request.session[SESSION_KEY_BACKFILL_DETAILS_INTENT] = True
-        elif self.has_intent_in_querystring('business-profile-intent'):
+        elif self.has_intent_in_querystring('business-profile-intent') or 'invite_key' in self.request.GET:
             # user has clicked a button to specifically create a business
             # profile. They are signing up because their end goal is to have
             # a business profile. The counter to this scenario is the user
@@ -546,13 +571,28 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
             company_number=data['company_number'],
             session=self.request.session,
         )
+
         if is_enrolled:
-            helpers.collaborator_request_create(
-                company_number=data['company_number'],
-                email=self.request.user.email,
-                name=self.request.user.full_name,
-                form_url=self.request.path,
-            )
+            helpers.create_company_member(data={
+                'company': data['company_number'],
+                'sso_id': self.request.user.id,
+                'company_email': self.request.user.email,
+                'name': self.request.user.full_name,
+                'mobile_number': data.get('phone_number', ''),
+            })
+
+            helpers.notify_company_admins_member_joined(
+                sso_session_id=self.request.user.session_id,
+                email_data={
+                    'company_name': data['company_name'],
+                    'name': self.request.user.full_name,
+                    'email': self.request.user.email,
+                    'profile_remove_member_url': self.request.build_absolute_uri(
+                        reverse('find-a-buyer-admin-tools')
+                    ),
+                    'report_abuse_url': urls.FEEDBACK
+                }, form_url=self.request.path)
+
             return TemplateResponse(self.request, self.templates[FINISHED])
         else:
             return super().done(form_list, form_dict=form_dict, **kwargs)
@@ -661,6 +701,78 @@ class IndividualUserEnrolmentView(BaseEnrolmentWizardView):
         return TemplateResponse(self.request, self.templates[FINISHED])
 
 
+class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
+
+    steps_list_labels = [
+        PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT,
+        PROGRESS_STEP_LABEL_VERIFICATION,
+        PROGRESS_STEP_LABEL_PERSONAL_INFO
+    ]
+
+    progress_conf = helpers.ProgressIndicatorConf(
+        step_counter_user={
+            PERSONAL_INFO: 2
+        },
+        step_counter_anon={
+            USER_ACCOUNT: 1,
+            VERIFICATION: 2,
+            PERSONAL_INFO: 3
+        },
+    )
+
+    form_list = (
+        (USER_ACCOUNT, forms.UserAccountCollaboration),
+        (VERIFICATION, forms.UserAccountVerification),
+        (PERSONAL_INFO, forms.IndividualPersonalDetails),
+    )
+
+    templates = {
+        USER_ACCOUNT: 'enrolment/individual-user-account.html',
+        VERIFICATION: 'enrolment/user-account-verification.html',
+        PERSONAL_INFO: 'enrolment/individual-personal-details.html',
+        FINISHED: 'enrolment/individual-success.html',
+    }
+
+    def get(self, *args, **kwargs):
+        if 'invite_key' in self.request.GET:
+            self.request.session[SESSION_KEY_INVITE_KEY] = self.request.GET['invite_key']
+            if not self.collaborator_invition:
+                raise Http404()
+        # at this point all the steps will be hidden as the user is logged
+        # in and has a user profile, so the normal `get` method fails with
+        # IndexError, meaning `done` will not be hit. Working around this:
+        if self.steps.count == 0:
+            return self.render_done(form=None, step=FINISHED)
+        return super().get(*args, **kwargs)
+
+    def get_template_names(self):
+        return [self.templates[self.steps.current]]
+
+    def create_company_profile(self):
+        helpers.collaborator_invite_accept(
+            sso_session_id=self.request.user.session_id,
+            invite_key=self.request.session[SESSION_KEY_INVITE_KEY],
+        )
+
+    @cached_property
+    def collaborator_invition(self):
+        return helpers.collaborator_invite_retrieve(self.request.session[SESSION_KEY_INVITE_KEY])
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(collaborator_invition=self.collaborator_invition, **kwargs,)
+
+    def get_form_initial(self, step):
+        form_initial = super().get_form_initial(step)
+        if step == USER_ACCOUNT:
+            form_initial['email'] = self.collaborator_invition['collaborator_email']
+        return form_initial
+
+    def done(self, *args, **kwargs):
+        self.create_company_profile()
+        messages.success(self.request, 'Account created')
+        return redirect('find-a-buyer')
+
+
 class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
     steps_list_labels = [
         PROGRESS_STEP_LABEL_USER_ACCOUNT,
@@ -708,9 +820,7 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         if self.steps.current == PERSONAL_INFO:
-            context['company'] = (
-                self.request.session[SESSION_KEY_COMPANY_DATA]
-            )
+            context['company'] = self.request.session[SESSION_KEY_COMPANY_DATA]
         return context
 
     def done(self, form_list, **kwargs):

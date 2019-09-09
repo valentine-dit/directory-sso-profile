@@ -11,9 +11,8 @@ def response_factory(status_code):
     return Mock(return_value=create_response(status_code=status_code))
 
 
-def test_export_opportunities_applications_exposes_context(
-    client, settings, user
-):
+@patch.object(exopps_client, 'get_opportunities', response_factory(200))
+def test_export_opportunities_applications_exposes_context(client, settings, user):
     client.force_login(user)
     settings.EXPORTING_OPPORTUNITIES_SEARCH_URL = 'http://find'
 
@@ -24,9 +23,8 @@ def test_export_opportunities_applications_exposes_context(
     assert context_data['EXPORTING_OPPORTUNITIES_SEARCH_URL'] == 'http://find'
 
 
-def test_export_opportunities_email_alerts_exposes_context(
-    client, settings, user
-):
+@patch.object(exopps_client, 'get_opportunities', response_factory(200))
+def test_export_opportunities_email_alerts_exposes_context(client, settings, user):
     client.force_login(user)
     settings.EXPORTING_OPPORTUNITIES_SEARCH_URL = 'http://find'
 

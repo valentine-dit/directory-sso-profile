@@ -13,7 +13,6 @@ node_modules/
 
 # Distribution / packaging
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -104,3 +103,4 @@ Temporary Items
 node_modules/
 
 .env
+conf/env/secrets-do-not-commit
