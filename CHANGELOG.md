@@ -14,6 +14,7 @@
 - TT-1727 - Allow inviting collaborator
 - TT-1673 - Handle backfill details after login
 - TT-1748 - Collaboration invitee journey
+- TT-1642 - Handle incomplete companies house details
 - no ticket - Add IDs to relevant elements on CH enrolement success page
 
 ### Fixed bugs:

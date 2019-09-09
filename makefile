@@ -14,7 +14,7 @@ pytest:
 	--cov-report=term \
 	--capture=no \
 	-Wignore::DeprecationWarning \
-	-vv \
+	-vv
 
 flake8:
 	flake8 . \

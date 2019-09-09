@@ -14,11 +14,11 @@ chardet==3.0.4
 codecov==2.0.15
 contextlib2==0.5.5
 coverage==4.5.4           # via codecov, pytest-cov
-directory-api-client==17.1.0
+directory-api-client==18.0.0
 directory-ch-client==2.1.0
 directory-client-core==6.1.0
-directory-components==27.12.0
-directory-constants==18.7.0
+directory-components==30.1.0
+directory-constants==19.1.0
 directory-forms-api-client==5.0.0
 directory-healthcheck==1.0.1
 directory-sso-api-client==6.0.1

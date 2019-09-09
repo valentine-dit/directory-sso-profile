@@ -1,8 +1,8 @@
+import re
+
 from captcha.fields import ReCaptchaField
 from directory_components import forms
 from directory_constants import choices
-from directory_validators.company import no_company_with_insufficient_companies_house_data as company_type_validator
-from directory_validators.enrolment import company_number as company_number_validator
 
 from django.forms import HiddenInput, PasswordInput, Textarea, ValidationError
 from django.utils.safestring import mark_safe
@@ -15,6 +15,21 @@ from enrolment.widgets import PostcodeInput, RadioSelect
 INDUSTRY_CHOICES = (
     (('', 'Please select'),) + choices.INDUSTRIES + (('OTHER', 'Other'),)
 )
+
+
+class CleanAddressMixin:
+    def clean_address(self):
+        value = self.cleaned_data['address'].strip().replace(', ', '\n')
+        parts = value.split('\n')
+
+        postal_code = self.cleaned_data.get('postal_code', '')
+        if value.count('\n') == 0:
+            raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
+        if postal_code not in value:
+            value = f'{value}\n{postal_code}'
+        self.cleaned_data['address_line_1'] = parts[0].strip()
+        self.cleaned_data['address_line_2'] = parts[1].strip()
+        return value
 
 
 class BusinessType(forms.Form):
@@ -138,50 +153,45 @@ class UserAccountVerification(forms.Form):
             )
 
 
-class CompaniesHouseSearch(forms.Form):
+class CompaniesHouseCompanySearch(forms.Form):
     MESSAGE_COMPANY_NOT_FOUND = (
         "<p>Your business name is not listed.</p>"
         "<p>Check that you've entered the right name.</p>"
     )
     MESSAGE_COMPANY_NOT_ACTIVE = 'Company not active.'
-    company_name = forms.CharField(
-        label='Registered company name',
-    )
-    company_number = forms.CharField(
-        validators=[company_number_validator],
-    )
-
-    def __init__(self, session, *args, **kwargs):
-        self.session = session
-        super().__init__(*args, **kwargs)
+    company_name = forms.CharField(label='Registered company name')
+    company_number = forms.CharField(container_css_classes='js-disabled-only')
 
     def clean(self):
         cleaned_data = super().clean()
         if 'company_number' in cleaned_data:
-            try:
-                company_type_validator(cleaned_data['company_number'])
-            except ValidationError as error:
-                raise ValidationError({
-                    'company_name': error
-                })
-            company_data = helpers.get_company_profile(
-                number=self.cleaned_data['company_number'],
-                session=self.session,
-            )
-            if company_data['company_status'] != 'active':
-                raise ValidationError(
-                    {'company_name': self.MESSAGE_COMPANY_NOT_ACTIVE}
-                )
+            data = helpers.get_companies_house_profile(cleaned_data['company_number'])
+            if data['company_status'] not in ['active', 'voluntary-arrangement']:
+                raise ValidationError({'company_name': self.MESSAGE_COMPANY_NOT_ACTIVE})
         elif 'company_name' in cleaned_data:
-            raise ValidationError(
-                {'company_name': mark_safe(self.MESSAGE_COMPANY_NOT_FOUND)}
-            )
+            raise ValidationError({'company_name': mark_safe(self.MESSAGE_COMPANY_NOT_FOUND)})
+
+
+class CompaniesHouseAddressSearch(CleanAddressMixin, forms.Form):
+
+    MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
+
+    company_name = forms.CharField(label='Registered company name', disabled=True)
+    postal_code = forms.CharField(
+        label='Business postcode',
+        widget=PostcodeInput(attrs={'id': 'id_postal_code'}),  # template js relies on this ID
+        required=False,
+    )
+    address = forms.CharField(
+        help_text='Type your business address',
+        widget=Textarea(attrs={'rows': 4, 'id': 'id_address'}),  # template js relies on this ID
+        required=False,
+    )
 
 
 class CompaniesHouseBusinessDetails(forms.Form):
-    company_name = forms.CharField(
-        label='Registered company name',
-    )
+
+    company_name = forms.CharField(label='Registered company name')
     company_number = forms.CharField(
         disabled=True,
         required=False,
@@ -191,14 +201,14 @@ class CompaniesHouseBusinessDetails(forms.Form):
         label='Nature of business',
         disabled=True,
         required=False,
-        container_css_classes='border-active-blue read-only-input-container'
+        container_css_classes='border-active-blue read-only-input-container',
     )
     date_of_creation = forms.DateField(
         label='Incorporated on',
         input_formats=['%d %B %Y'],
         disabled=True,
         required=False,
-        container_css_classes='border-active-blue read-only-input-container'
+        container_css_classes='border-active-blue read-only-input-container',
     )
     postal_code = forms.CharField(
         disabled=True,
@@ -210,10 +220,11 @@ class CompaniesHouseBusinessDetails(forms.Form):
         required=False,
         container_css_classes='border-active-blue read-only-input-container',
         widget=Textarea(attrs={'rows': 3}),
-        )
+    )
     sectors = forms.ChoiceField(
         label='What industry is your company in?',
         choices=INDUSTRY_CHOICES,
+        container_css_classes='margin-top-30 margin-bottom-30',
     )
     website = forms.URLField(
         label='What\'s your business web address (optional)',
@@ -222,11 +233,9 @@ class CompaniesHouseBusinessDetails(forms.Form):
     )
 
     def __init__(
-        self, initial, company_data=None, is_enrolled=False, *args, **kwargs
+        self, initial, is_enrolled=False, *args, **kwargs
     ):
         super().__init__(initial=initial, *args, **kwargs)
-        if company_data:
-            self.set_form_initial(company_data)
         if is_enrolled:
             self.delete_already_enrolled_fields()
         # force the form to use the initial value rather than the value
@@ -238,18 +247,13 @@ class CompaniesHouseBusinessDetails(forms.Form):
             if not self.data.get('postal_code'):
                 self.initial_to_data('postal_code')
 
+        for field_name in ['sic', 'date_of_creation']:
+            if not initial.get(field_name):
+                self.fields[field_name].widget = HiddenInput()
+
     def delete_already_enrolled_fields(self):
         del self.fields['sectors']
         del self.fields['website']
-
-    def set_form_initial(self, company_profile):
-        company = helpers.CompanyParser(company_profile)
-        self.initial['company_name'] = company.name
-        self.initial['company_number'] = company.number
-        self.initial['sic'] = company.nature_of_business
-        self.initial['date_of_creation'] = company.date_of_creation
-        self.initial['address'] = company.address
-        self.initial['postal_code'] = company.postcode
 
     def initial_to_data(self, field_name):
         self.data.setlist(
@@ -258,10 +262,11 @@ class CompaniesHouseBusinessDetails(forms.Form):
         )
 
     def clean_date_of_creation(self):
-        return self.cleaned_data['date_of_creation'].isoformat()
+        if self.cleaned_data['date_of_creation']:
+            return self.cleaned_data['date_of_creation'].isoformat()
 
     def clean_address(self):
-        address_parts = self.cleaned_data['address'].split(',')
+        address_parts = re.split('[\n,]', self.cleaned_data['address'])
         for i, address_part in enumerate(address_parts, start=1):
             field_name = f'address_line_{i}'
             self.cleaned_data[field_name] = address_part.strip()
@@ -285,7 +290,7 @@ class IndividualPersonalDetails(forms.Form):
     )
 
 
-class NonCompaniesHouseSearch(forms.Form):
+class NonCompaniesHouseSearch(CleanAddressMixin, forms.Form):
 
     MESSAGE_INVALID_ADDRESS = 'Address should be at least two lines.'
     COMPANY_TYPES = [('', 'Please select'), ] + [
@@ -301,12 +306,12 @@ class NonCompaniesHouseSearch(forms.Form):
     )
     postal_code = forms.CharField(
         label='Business postcode',
-        widget=PostcodeInput,
+        widget=PostcodeInput(attrs={'id': 'id_postal_code'}),  # template js relies on this ID
         required=False,
     )
     address = forms.CharField(
         help_text='Type your business address',
-        widget=Textarea(attrs={'rows': 4}),
+        widget=Textarea(attrs={'rows': 4, 'id': 'id_address'}),  # template js relies on this ID
         required=False,
     )
     sectors = forms.ChoiceField(
@@ -321,19 +326,6 @@ class NonCompaniesHouseSearch(forms.Form):
 
     def clean_sectors(self):
         return [self.cleaned_data['sectors']]
-
-    def clean_address(self):
-        value = self.cleaned_data['address'].strip().replace(', ', '\n')
-        parts = value.split('\n')
-
-        postal_code = self.cleaned_data.get('postal_code', '')
-        if value.count('\n') == 0:
-            raise ValidationError(self.MESSAGE_INVALID_ADDRESS)
-        if postal_code not in value:
-            value = f'{value}\n{postal_code}'
-        self.cleaned_data['address_line_1'] = parts[0].strip()
-        self.cleaned_data['address_line_2'] = parts[1].strip()
-        return value
 
 
 class ResendVerificationCode(forms.Form):

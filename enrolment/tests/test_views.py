@@ -1,22 +1,21 @@
 from unittest import mock
 
+from directory_constants import user_roles, urls
 from formtools.wizard.views import NamedUrlSessionWizardView
 from freezegun import freeze_time
-import pytest
 from requests.exceptions import HTTPError
+import pytest
 
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.sessions.backends import signed_cookies
 from django.urls import resolve, reverse
 from django.views.generic import TemplateView
 
 from core.tests.helpers import create_response, submit_step_factory
-
 from enrolment import constants, forms, helpers, views
-from directory_constants import user_roles, urls as constants_url
-from django.contrib.sessions.backends import signed_cookies
 
 
-urls = (
+enrolment_urls = (
     reverse('enrolment-business-type'),
     reverse('enrolment-start'),
     reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}),
@@ -29,6 +28,7 @@ company_types = (
 )
 BUSINESS_INFO_NON_COMPANIES_HOUSE = 'business-info-non-companies-house'
 BUSINESS_INFO_COMPANIES_HOUSE = 'business-info-companies-house'
+ADDRESS_SEARCH_COMPANIES_HOUSE = 'address-search-companies-house'
 
 
 @pytest.fixture
@@ -151,7 +151,7 @@ def mock_collaborator_invite_retrieve():
 
 @pytest.fixture(autouse=True)
 def mock_get_company_profile():
-    patch = mock.patch.object(helpers, 'get_company_profile', return_value={
+    patch = mock.patch.object(helpers, 'get_companies_house_profile', return_value={
         'company_number': '12345678',
         'company_name': 'Example corp',
         'sic_codes': ['1234'],
@@ -381,12 +381,16 @@ def steps_data(captcha_stub):
         BUSINESS_INFO_COMPANIES_HOUSE: {
             'company_name': 'Example corp',
             'sectors': 'AEROSPACE',
-        }
+        },
+        ADDRESS_SEARCH_COMPANIES_HOUSE: {
+            'company_name': 'Example corp',
+            'postal_code': 'EEA 3AD',
+        },
     }
     return data
 
 
-@pytest.mark.parametrize('url', urls)
+@pytest.mark.parametrize('url', enrolment_urls)
 def test_200_feature_on(url, client):
     response = client.get(url)
 
@@ -476,11 +480,15 @@ def test_companies_house_enrolment(
     assert response.status_code == 302
 
     response = submit_companies_house_step(
-        steps_data[BUSINESS_INFO_COMPANIES_HOUSE]
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=views.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
-    response = submit_companies_house_step(steps_data[views.PERSONAL_INFO])
+    response = submit_companies_house_step(
+        data=steps_data[views.PERSONAL_INFO],
+        step_name=views.PERSONAL_INFO,
+    )
     assert response.status_code == 302
 
 
@@ -528,7 +536,8 @@ def test_companies_house_enrolment_change_company_name(
 
     # given the user has submitted their company details
     response = submit_companies_house_step(
-        steps_data[BUSINESS_INFO_COMPANIES_HOUSE]
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=views.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
@@ -563,7 +572,8 @@ def test_companies_house_enrolment_expose_company(
     assert response.status_code == 302
 
     response = submit_companies_house_step(
-        steps_data[BUSINESS_INFO_COMPANIES_HOUSE]
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=views.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
@@ -600,7 +610,7 @@ def test_companies_house_enrolment_submit_end_to_end(
     mock_enrolment_send, steps_data, session_client_referrer_factory,
     user,
 ):
-    session_client_referrer_factory(constants_url.SERVICES_FAB)
+    session_client_referrer_factory(urls.domestic.FIND_A_BUYER)
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
 
@@ -613,11 +623,15 @@ def test_companies_house_enrolment_submit_end_to_end(
     assert response.status_code == 302
 
     response = submit_companies_house_step(
-        steps_data[BUSINESS_INFO_COMPANIES_HOUSE]
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=views.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
-    response = submit_companies_house_step(steps_data[views.PERSONAL_INFO])
+    response = submit_companies_house_step(
+        data=steps_data[views.PERSONAL_INFO],
+        step_name=views.PERSONAL_INFO,
+    )
     assert response.status_code == 302
 
     response = client.get(response.url)
@@ -693,20 +707,100 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
     )
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
-        'sso_id': 1,
-        'company_email': 'jim@example.com',
-        'contact_email_address': 'jim@example.com',
-        'company_type': 'COMPANIES_HOUSE',
-        'company_name': 'Example corp',
-        'company_number': '12345678',
-        'date_of_creation': '2001-01-20',
-        'postal_code': 'EDG 4DF',
         'address_line_1': '555 fake street',
         'address_line_2': 'London',
-        'sectors': ['AEROSPACE'],
+        'company_email': 'jim@example.com',
+        'company_name': 'Example corp',
+        'company_number': '12345678',
+        'company_type': 'COMPANIES_HOUSE',
+        'contact_email_address': 'jim@example.com',
+        'date_of_creation': '2001-01-20',
         'job_title': 'Exampler',
+        'name': None,
         'phone_number': '1232342',
-        'name': user.full_name,
+        'postal_code': 'EDG 4DF',
+        'sectors': ['AEROSPACE'],
+        'sso_id': 1,
+    })
+
+
+def test_companies_house_enrolment_submit_end_to_end_no_address(
+    client, captcha_stub, submit_companies_house_step,
+    mock_enrolment_send, steps_data, user, mock_get_company_profile
+):
+    client.force_login(user)
+
+    mock_get_company_profile.return_value = {
+        'company_number': 'IP345678',
+        'company_name': 'Example corp',
+        'sic_codes': ['1234'],
+        'date_of_creation': '2001-01-20',
+        'registered_office_address': {
+            'address_line_1': '555 fake street, London',
+            'postal_code': 'EDG 4DF'
+        },
+        'company_status': 'active',
+    }
+
+    url = reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT})
+    response = client.get(url)
+
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(
+        data={
+            'company_name': 'Example corp',
+            'company_number': 'IP12345678',
+        },
+        step_name=views.COMPANY_SEARCH,
+    )
+
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(
+        data={
+            'company_name': 'Example corp',
+            'postal_code': 'EDG 4DF',
+            'address': '555 fake street, London',
+        },
+        step_name=views.ADDRESS_SEARCH,
+    )
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=views.BUSINESS_INFO
+    )
+
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(
+        data=steps_data[views.PERSONAL_INFO],
+        step_name=views.PERSONAL_INFO,
+    )
+
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.status_code == 200
+    assert response.template_name == views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
+    assert mock_enrolment_send.call_count == 1
+    assert mock_enrolment_send.call_args == mock.call({
+        'address_line_1': '555 fake street',
+        'address_line_2': 'London',
+        'company_email': 'jim@example.com',
+        'company_name': 'Example corp',
+        'company_number': 'IP345678',
+        'company_type': 'COMPANIES_HOUSE',
+        'contact_email_address': 'jim@example.com',
+        'date_of_creation': '2001-01-20',
+        'job_title': 'Exampler',
+        'name': None,  # to good way in tests to populate this after login
+        'phone_number': '1232342',
+        'postal_code': 'EDG 4DF',
+        'sectors': ['AEROSPACE'],
+        'sso_id': 1,
     })
 
 
@@ -731,11 +825,15 @@ def test_companies_house_enrolment_suppress_success_page(
     assert response.status_code == 302
 
     response = submit_companies_house_step(
-        steps_data[BUSINESS_INFO_COMPANIES_HOUSE]
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=views.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
-    response = submit_companies_house_step(steps_data[views.PERSONAL_INFO])
+    response = submit_companies_house_step(
+        data=steps_data[views.PERSONAL_INFO],
+        step_name=views.PERSONAL_INFO,
+    )
     assert response.status_code == 302
 
     response = client.get(response.url)
@@ -798,20 +896,18 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
     assert response.status_code == 302
 
     response = submit_companies_house_step(
-        steps_data[BUSINESS_INFO_COMPANIES_HOUSE]
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=views.BUSINESS_INFO
     )
     assert response.status_code == 302
 
-    response = submit_companies_house_step(steps_data[views.PERSONAL_INFO])
+    response = submit_companies_house_step(data=steps_data[views.PERSONAL_INFO], step_name=views.PERSONAL_INFO)
     assert response.status_code == 302
 
     response = client.get(response.url)
 
     assert response.status_code == 200
-    assert response.template_name == (
-        views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
-    )
-
+    assert response.template_name == views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
     assert mock_add_collaborator.call_count == 1
     assert mock_add_collaborator.call_args == mock.call(data={
         'sso_id': 1,
@@ -877,9 +973,7 @@ def test_verification_missing_url(
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     response = client.get(response.url)
 
-    verification_missing_url = constants_url.build_great_url(
-        'contact/triage/great-account/verification-missing/'
-    )
+    verification_missing_url = urls.domestic.CONTACT_US / 'triage/great-account/verification-missing/'
 
     assert response.context_data[
                'verification_missing_url'
@@ -1334,12 +1428,8 @@ def test_confirm_user_resend_verification_context_urls(client):
 
     response = client.get(url)
 
-    missing_url = constants_url.build_great_url(
-        'contact/triage/great-account/verification-missing/'
-    )
-    contact_url = constants_url.build_great_url(
-        'contact/domestic/'
-    )
+    missing_url = urls.domestic.CONTACT_US / 'triage/great-account/verification-missing/'
+    contact_url = urls.domestic.CONTACT_US / 'domestic/'
 
     assert response.status_code == 200
     assert response.context_data['verification_missing_url'] == missing_url
@@ -1378,7 +1468,7 @@ def test_non_companies_house_enrolment_expose_company(
 
 def test_non_companies_house_enrolment_redirect_to_start(client):
     url = reverse(
-        'enrolment-sole-trader', kwargs={'step': views.COMPANY_SEARCH}
+        'enrolment-sole-trader', kwargs={'step': views.ADDRESS_SEARCH}
     )
     response = client.get(url)
 
@@ -1782,7 +1872,7 @@ def test_individual_enrolment_submit_end_to_end(
     client, submit_individual_step, user,
     mock_create_user_profile, steps_data, session_client_referrer_factory,
 ):
-    session_client_referrer_factory(constants_url.SERVICES_FAB)
+    session_client_referrer_factory(urls.domestic.FIND_A_BUYER)
     response = submit_individual_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
 

@@ -47,23 +47,13 @@ class FindABuyerView(TemplateView):
             template_name = self.template_name_not_fab_user
         return [template_name]
 
-    def is_company_profile_owner(self):
-        if not self.request.user.company:
-            return False
-        response = api_client.supplier.retrieve_profile(self.request.user.session_id)
-        response.raise_for_status()
-        parsed = response.json()
-        return parsed['is_company_owner']
-
     def get_context_data(self):
         if self.request.user.is_authenticated and self.request.user.company:
             company = self.request.user.company.serialize_for_template()
         else:
             company = None
-
         return {
             'fab_tab_classes': 'active',
-            'is_profile_owner': self.is_company_profile_owner(),
             'company': company,
             'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
             'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,

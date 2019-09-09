@@ -3,6 +3,7 @@ jobs:
   test:
     docker:
       - image: circleci/python:3.6.6
+      - image: circleci/redis:3.2-alpine
     steps:
       - checkout
       - setup_remote_docker:
