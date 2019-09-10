@@ -1,7 +1,8 @@
+from directory_constants import user_roles
 from directory_api_client.client import api_client
 from formtools.wizard.views import NamedUrlSessionWizardView
 from raven.contrib.django.raven_compat.models import client as sentry_client
-from requests.exceptions import RequestException
+from requests.exceptions import HTTPError, RequestException
 
 from django.conf import settings
 from django.contrib import messages
@@ -9,6 +10,7 @@ from django.urls import reverse, reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.files.storage import DefaultStorage
 from django.shortcuts import redirect, Http404
+from django.utils.functional import cached_property
 from django.views.generic import TemplateView, FormView
 
 import core.mixins
@@ -45,25 +47,13 @@ class FindABuyerView(TemplateView):
             template_name = self.template_name_not_fab_user
         return [template_name]
 
-    def is_company_profile_owner(self):
-        if not self.request.user.company:
-            return False
-        response = api_client.supplier.retrieve_profile(
-            sso_session_id=self.request.user.session_id,
-        )
-        response.raise_for_status()
-        parsed = response.json()
-        return parsed['is_company_owner']
-
     def get_context_data(self):
         if self.request.user.is_authenticated and self.request.user.company:
             company = self.request.user.company.serialize_for_template()
         else:
             company = None
-
         return {
             'fab_tab_classes': 'active',
-            'is_profile_owner': self.is_company_profile_owner(),
             'company': company,
             'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
             'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
@@ -84,7 +74,7 @@ class BaseFormView(FormView):
 
     def form_valid(self, form):
         try:
-            response = api_client.company.update_profile(
+            response = api_client.company.profile_update(
                 sso_session_id=self.request.user.session_id,
                 data=self.serialize_form(form)
             )
@@ -273,7 +263,7 @@ class BaseCaseStudyWizardView(NamedUrlSessionWizardView):
 class CaseStudyWizardEditView(BaseCaseStudyWizardView):
 
     def get_form_initial(self, step):
-        response = api_client.company.retrieve_private_case_study(
+        response = api_client.company.case_study_retrieve(
             sso_session_id=self.request.user.session_id,
             case_study_id=self.kwargs['id'],
         )
@@ -283,7 +273,7 @@ class CaseStudyWizardEditView(BaseCaseStudyWizardView):
         return response.json()
 
     def done(self, form_list, *args, **kwags):
-        response = api_client.company.update_case_study(
+        response = api_client.company.case_study_update(
             data=self.serialize_form_list(form_list),
             case_study_id=self.kwargs['id'],
             sso_session_id=self.request.user.session_id,
@@ -299,7 +289,7 @@ class CaseStudyWizardEditView(BaseCaseStudyWizardView):
 
 class CaseStudyWizardCreateView(BaseCaseStudyWizardView):
     def done(self, form_list, *args, **kwags):
-        response = api_client.company.create_case_study(
+        response = api_client.company.case_study_create(
             sso_session_id=self.request.user.session_id,
             data=self.serialize_form_list(form_list),
         )
@@ -317,11 +307,198 @@ class AdminToolsView(TemplateView):
             FAB_REMOVE_USER_URL=settings.FAB_REMOVE_USER_URL,
             FAB_TRANSFER_ACCOUNT_URL=settings.FAB_TRANSFER_ACCOUNT_URL,
             company=self.request.user.company.serialize_for_template(),
-            has_collaborators=helpers.has_collaborators(
-                self.request.user.session_id
-            ),
+            has_collaborators=len(helpers.collaborator_list(self.request.user.session_id)) > 1,
             **kwargs,
         )
+
+
+class AdminCollaboratorsListView(TemplateView):
+
+    template_name = 'fab/admin-collaborator-list.html'
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            collaborators=helpers.collaborator_list(self.request.user.session_id),
+            **kwargs,
+        )
+
+
+class AdminCollaboratorEditFormView(SuccessMessageMixin, FormView):
+    template_name = 'fab/admin-collaborator-edit.html'
+    form_class = forms.AdminCollaboratorEditForm
+    success_url = reverse_lazy('find-a-buyer-admin-tools')
+    success_messages = {
+        forms.REMOVE_COLLABORATOR: 'Collaborator removed',
+        forms.CHANGE_COLLABORATOR_TO_EDITOR: 'Collaborator role changed to Editor',
+        forms.CHANGE_COLLABORATOR_TO_MEMBER: 'Collaborator role changed to Member',
+        forms.CHANGE_COLLABORATOR_TO_ADMIN: 'Collaborator role changed to Admin',
+    }
+
+    def dispatch(self, *args, **kwargs):
+        if not self.collaborator:
+            raise Http404()
+        if self.collaborator['sso_id'] == self.request.user.id:
+            return redirect(self.success_url)
+        return super().dispatch(*args, **kwargs)
+
+    @cached_property
+    def collaborator(self):
+        return helpers.retrieve_collaborator(
+            sso_session_id=self.request.user.session_id,
+            collaborator_sso_id=int(self.kwargs['sso_id'])
+        )
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(collaborator=self.collaborator, **kwargs)
+
+    def get_form_kwargs(self, *args, **kwargs):
+        kwargs = super().get_form_kwargs(*args, **kwargs)
+        return {**kwargs, 'current_role': self.collaborator['role']}
+
+    def form_valid(self, form):
+        action = form.cleaned_data['action']
+        if action == forms.REMOVE_COLLABORATOR:
+            helpers.remove_collaborator(
+                sso_session_id=self.request.user.session_id,
+                sso_id=self.collaborator['sso_id'],
+            )
+        else:
+            role = {
+                forms.CHANGE_COLLABORATOR_TO_EDITOR: user_roles.EDITOR,
+                forms.CHANGE_COLLABORATOR_TO_MEMBER: user_roles.MEMBER,
+                forms.CHANGE_COLLABORATOR_TO_ADMIN: user_roles.ADMIN,
+            }[action]
+            helpers.collaborator_role_update(
+                sso_session_id=self.request.user.session_id,
+                sso_id=self.collaborator['sso_id'],
+                role=role,
+            )
+        return super().form_valid(form)
+
+    def get_success_message(self, cleaned_data):
+        return self.success_messages[cleaned_data['action']]
+
+
+class AdminDisconnectFormView(SuccessMessageMixin, FormView):
+    template_name = 'fab/admin-disconnect.html'
+    form_class = forms.NoOperationForm
+    success_message = 'Business profile removed from account.'
+    success_url = reverse_lazy('find-a-buyer')
+
+    def form_valid(self, form):
+        try:
+            helpers.disconnect_from_company(self.request.user.session_id)
+        except HTTPError as error:
+            if error.response.status_code == 400:
+                form.add_error(field=None, error=error.response.json())
+                return self.form_invalid(form)
+            else:
+                raise
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        is_sole_admin = helpers.is_sole_admin(self.request.user.session_id)
+        return super().get_context_data(is_sole_admin=is_sole_admin, **kwargs)
+
+
+class AdminInviteNewAdminFormView(SuccessMessageMixin, FormView):
+    template_name = 'fab/admin-invite-admin.html'
+    form_class = forms.AdminInviteNewAdminForm
+    success_url = reverse_lazy('find-a-buyer-admin-tools')
+
+    def get_success_message(self, cleaned_data):
+        if cleaned_data['collaborator_email']:
+            message = (
+                'We have sent an invite to %(collaborator_email)s to become the new administrator for the business '
+                'profile. You will be notified when this happens.'
+            )
+        else:
+            message = 'Collaborator role changed to Admin'
+        return message
+
+    @cached_property
+    def collaborators(self):
+        return helpers.collaborator_list(self.request.user.session_id)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['collaborator_choices'] = [
+            (item['sso_id'], item['name'] or item['company_email'])
+            for item in self.collaborators if item['role'] != user_roles.ADMIN
+        ]
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        has_collaborators = len(self.collaborators) > 1
+        return super().get_context_data(has_collaborators=has_collaborators, **kwargs)
+
+    def form_valid(self, form):
+        try:
+            if form.cleaned_data['collaborator_email']:
+                helpers.collaborator_invite_create(
+                    sso_session_id=self.request.user.session_id,
+                    collaborator_email=form.cleaned_data['collaborator_email'],
+                    role=user_roles.ADMIN
+                )
+            else:
+                helpers.collaborator_role_update(
+                    sso_session_id=self.request.user.session_id,
+                    sso_id=form.cleaned_data['sso_id'],
+                    role=user_roles.ADMIN
+                )
+        except HTTPError as error:
+            if error.response.status_code == 400:
+                parsed = error.response.json()
+                if 'collaborator_email' in parsed:
+                    parsed = parsed['collaborator_email']
+                form.add_error(field=None, error=parsed)
+                return self.form_invalid(form)
+            else:
+                raise
+        return super().form_valid(form)
+
+
+class AdminInviteCollaboratorFormView(SuccessMessageMixin, FormView):
+    template_name = 'fab/admin-invite-collaborator.html'
+    form_class = forms.AdminInviteCollaboratorForm
+    success_message = (
+        'We have sent a confirmation to %(collaborator_email)s with an invitation to become a collaborator'
+    )
+    success_url = reverse_lazy('find-a-buyer-admin-invite-collaborator')
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            collaborator_invites=helpers.collaborator_invite_list(self.request.user.session_id),
+            **kwargs,
+        )
+
+    def form_valid(self, form):
+        try:
+            helpers.collaborator_invite_create(
+                sso_session_id=self.request.user.session_id,
+                collaborator_email=form.cleaned_data['collaborator_email'],
+                role=form.cleaned_data['role'],
+            )
+        except HTTPError as error:
+            if error.response.status_code == 400:
+                form.add_error(field=None, error=error.response.json())
+                return self.form_invalid(form)
+            else:
+                raise
+        return super().form_valid(form)
+
+
+class AdminInviteCollaboratorDeleteFormView(SuccessMessageMixin, FormView):
+    form_class = forms.AdminInviteCollaboratorDeleteForm
+    success_message = ('Invitation successfully deleted')
+    success_url = reverse_lazy('find-a-buyer-admin-invite-collaborator')
+
+    def form_valid(self, form):
+        helpers.collaborator_invite_delete(
+            sso_session_id=self.request.user.session_id,
+            invite_key=form.cleaned_data['invite_key'],
+        )
+        return super().form_valid(form)
 
 
 class ProductsServicesRoutingFormView(FormView):
@@ -424,7 +601,7 @@ class PersonalDetailsFormView(
 
 class IdentityVerificationRequestFormView(SuccessMessageMixin, FormView):
     template_name = 'fab/request-verify.html'
-    form_class = forms.IdentityVerificationRequestForm
+    form_class = forms.NoOperationForm
     success_url = reverse_lazy('find-a-buyer')
     success_message = 'Request to verify sent'
 
@@ -437,6 +614,6 @@ class IdentityVerificationRequestFormView(SuccessMessageMixin, FormView):
         return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):
-        response = api_client.company.verify_identity_request(sso_session_id=self.request.user.session_id)
+        response = api_client.company.verify_identity_request(self.request.user.session_id)
         response.raise_for_status()
         return super().form_valid(form)

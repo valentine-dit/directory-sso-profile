@@ -1,10 +1,14 @@
+from importlib import import_module, reload
+import sys
+
+from formtools.wizard.views import normalize_name
 import requests
 
-from django.urls import reverse
-from formtools.wizard.views import normalize_name
+from django.conf import settings
+from django.urls import clear_url_caches, reverse
 
 
-def create_response(status_code=200, json_body={}, content=None):
+def create_response(json_body={}, status_code=200, content=None):
     response = requests.Response()
     response.status_code = status_code
     response.json = lambda: json_body
@@ -26,3 +30,13 @@ def submit_step_factory(client, url_name, view_class):
             },
         )
     return submit_step
+
+
+def reload_urlconf(urlconf=None):
+    clear_url_caches()
+    if urlconf is None:
+        urlconf = settings.ROOT_URLCONF
+    if urlconf in sys.modules:
+        reload(sys.modules[urlconf])
+    else:
+        import_module(urlconf)

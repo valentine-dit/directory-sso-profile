@@ -3,12 +3,26 @@
 ## Pre-release
 
 ### Implemented enhancements
+- TT-1725 - Send email to company admin when a new user is added to company profile
+- TT-1734 - Add second user to already registered company profile
 - TT-1733 - Add request for individual verification feature
+- TT-1723 - Add collaborator list admin view
+- TT-1716 - Support removing collaborators
+- TT-1732 - Added context to incomplete business profile banner
+- TT-1713 - Allow user to remove themselves from the business profile
+- TT-1714 - Allow single collaborator to invite other admin
+- TT-1727 - Allow inviting collaborator
+- TT-1673 - Handle backfill details after login
+- TT-1748 - Collaboration invitee journey
+- TT-1642 - Handle incomplete companies house details
+- no ticket - Add IDs to relevant elements on CH enrolement success page
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
 - No ticket - Remove obsolete settings
 - TT-1731 - Fix address error persistence issue when a valid postcode is entered on UI
+- TT-1709 - Account creation content change
+- No ticket - Handle user has no supplier on profile page
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)

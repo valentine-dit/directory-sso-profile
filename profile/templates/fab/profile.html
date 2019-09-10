@@ -8,9 +8,10 @@
     <link href="{% static 'css/company-profile.css' %}" media="all" rel="stylesheet" />
 {% endblock %}
 
+
 {% block tab_content %}
 
-    {% if is_profile_owner %}
+    {% if request.user.is_company_admin %}
     <div id="user-mode-container">
         <div class="grid-row" >
             <div class="column-one-half">
@@ -41,7 +42,7 @@
         <div>
         {% for message in messages %}
             {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                {% success_box heading="Completed" description=message box_class='width-full background-white margin-top-30' %}
+                {% success_box heading=message description='' box_class='width-full background-white margin-top-30' %}
             {% endif %}
         {% endfor %}
         </div>

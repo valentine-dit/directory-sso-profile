@@ -2,6 +2,7 @@ from io import BytesIO
 import http
 from unittest import mock
 
+from directory_constants import user_roles
 from directory_api_client.client import api_client
 from formtools.wizard.views import normalize_name
 import pytest
@@ -10,8 +11,9 @@ from requests.exceptions import HTTPError
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
+from django.forms.forms import NON_FIELD_ERRORS
 
-from core.tests.helpers import create_response, submit_step_factory
+from core.tests.helpers import create_response, reload_urlconf, submit_step_factory
 from profile.fab import constants, forms, helpers, views
 
 
@@ -26,7 +28,7 @@ def create_test_image(extension):
 
 
 @pytest.fixture
-def default_company_profile():
+def company_profile_data():
     return {
         'name': 'Cool Company',
         'is_publishable': True,
@@ -47,51 +49,40 @@ def default_private_case_study(case_study_data):
 
 
 @pytest.fixture(autouse=True)
-def mock_retrieve_private_case_study(default_private_case_study):
+def mock_case_study_retrieve(default_private_case_study):
     patch = mock.patch.object(
-        api_client.company, 'retrieve_private_case_study',
-        return_value=create_response(200, default_private_case_study)
+        api_client.company, 'case_study_retrieve',
+        return_value=create_response(default_private_case_study)
     )
     yield patch.start()
     patch.stop()
 
 
 @pytest.fixture(autouse=True)
-def mock_update_case_study():
-    patch = mock.patch.object(
-        api_client.company, 'update_case_study',
-        return_value=create_response(200)
-    )
+def mock_case_study_update():
+    patch = mock.patch.object(api_client.company, 'case_study_update', return_value=create_response())
     yield patch.start()
     patch.stop()
 
 
 @pytest.fixture(autouse=True)
-def mock_create_case_study():
-    patch = mock.patch.object(
-        api_client.company, 'create_case_study',
-        return_value=create_response(201)
-    )
+def mock_case_study_create():
+    patch = mock.patch.object(api_client.company, 'case_study_create', return_value=create_response(201))
     yield patch.start()
     patch.stop()
 
 
 @pytest.fixture(autouse=True)
-def mock_retrieve_company(default_company_profile):
-    patch = mock.patch.object(
-        api_client.company, 'retrieve_private_profile',
-        return_value=create_response(200, default_company_profile)
-    )
+def mock_retrieve_company(company_profile_data):
+    response = create_response(company_profile_data)
+    patch = mock.patch.object(api_client.company, 'profile_retrieve', return_value=response)
     yield patch.start()
     patch.stop()
 
 
 @pytest.fixture(autouse=True)
-def mock_update_company(default_company_profile):
-    patch = mock.patch.object(
-        api_client.company, 'update_profile',
-        return_value=create_response(200)
-    )
+def mock_update_company():
+    patch = mock.patch.object(api_client.company, 'profile_update', return_value=create_response())
     yield patch.start()
     patch.stop()
 
@@ -100,18 +91,43 @@ def mock_update_company(default_company_profile):
 def mock_retrieve_supplier():
     patch = mock.patch.object(
         api_client.supplier, 'retrieve_profile',
-        return_value=create_response(200, {'is_company_owner': True})
+        return_value=create_response({'is_company_owner': True, 'role': user_roles.ADMIN})
     )
     yield patch.start()
     patch.stop()
 
 
 @pytest.fixture(autouse=True)
-def mock_retrieve_collaborators():
-    patch = mock.patch.object(
-        api_client.company, 'retrieve_collaborators',
-        return_value=create_response(200, {'ssoID': '12345'})
-    )
+def mock_collaborator_role_update():
+    patch = mock.patch.object(api_client.company, 'collaborator_role_update', return_value=create_response())
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_collaborator_list(user):
+    response = create_response([
+        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email, 'name': 'jim example'},
+        {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com', 'name': 'bob example'}
+    ])
+    patch = mock.patch.object(api_client.company, 'collaborator_list', return_value=response)
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_collaborator_invite_list(user):
+    response = create_response([
+        {
+            'uuid': '7b4f5c1d-a299-4cb7-aa8e-261101c643de',
+            'collaborator_email': 'jim@example.com',
+            'company': 1,
+            'requestor': 2,
+            'accepted': False,
+            'role': user_roles.EDITOR,
+        }
+    ])
+    patch = mock.patch.object(api_client.company, 'collaborator_invite_list', return_value=response)
     yield patch.start()
     patch.stop()
 
@@ -205,46 +221,20 @@ def test_find_a_buyer_unauthenticated_enrolment(client, settings):
 
 
 def test_supplier_company_retrieve_found_business_profile_on(
-    mock_retrieve_company, client, settings,
-    default_company_profile, user
+    mock_retrieve_company, client, company_profile_data, user
 ):
     client.force_login(user)
-    mock_retrieve_company.return_value = create_response(
-        200, default_company_profile
-    )
+    mock_retrieve_company.return_value = create_response(company_profile_data)
 
     response = client.get(reverse('find-a-buyer'))
 
     assert response.template_name == ['fab/profile.html']
 
 
-def test_company_owner(client, user):
+@pytest.mark.parametrize('param', ('owner-transferred', 'user-added', 'user-removed'))
+def test_success_message(mock_retrieve_supplier, client, param, user):
     client.force_login(user)
-    response = client.get(reverse('find-a-buyer'))
-
-    assert response.context_data['is_profile_owner'] is True
-
-
-def test_non_company_owner(mock_retrieve_supplier, client, user):
-    client.force_login(user)
-    mock_retrieve_supplier.return_value = create_response(
-        200, {'is_company_owner': False}
-    )
-    response = client.get(reverse('find-a-buyer'))
-
-    assert response.context_data['is_profile_owner'] is False
-
-
-@pytest.mark.parametrize('param', (
-    'owner-transferred', 'user-added', 'user-removed'
-))
-def test_success_message(
-    mock_retrieve_supplier, client, param, user
-):
-    client.force_login(user)
-    mock_retrieve_supplier.return_value = create_response(
-        200, {'is_company_owner': False}
-    )
+    mock_retrieve_supplier.return_value = create_response({'role': user_roles.EDITOR})
 
     url = reverse('find-a-buyer')
     response = client.get(url, {param: True})
@@ -280,11 +270,9 @@ edit_data = (
 
 
 @pytest.mark.parametrize('url', edit_urls)
-def test_edit_page_initial_data(
-    client, url, default_company_profile, user
-):
+def test_edit_page_initial_data(client, url, company_profile_data, user):
     client.force_login(user)
-    company = helpers.CompanyParser(default_company_profile)
+    company = helpers.CompanyParser(company_profile_data)
 
     response = client.get(url)
     assert response.context_data['form'].initial == (
@@ -322,15 +310,9 @@ def test_edit_page_submmit_success(
     )
 
 
-def test_publish_not_publishable(
-    client, user, mock_retrieve_company,
-    default_company_profile
-):
+def test_publish_not_publishable(client, user, mock_retrieve_company, company_profile_data):
     client.force_login(user)
-    mock_retrieve_company.return_value = create_response(
-        200,
-        {**default_company_profile, 'is_publishable': False}
-    )
+    mock_retrieve_company.return_value = create_response({**company_profile_data, 'is_publishable': False})
 
     url = reverse('find-a-buyer-publish')
 
@@ -367,11 +349,9 @@ def test_edit_page_submmit_publish_success(client, mock_update_company, user):
     )
 
 
-def test_edit_page_submmit_publish_context(
-    client, default_company_profile, user
-):
+def test_edit_page_submmit_publish_context(client, company_profile_data, user):
     client.force_login(user)
-    company = helpers.CompanyParser(default_company_profile)
+    company = helpers.CompanyParser(company_profile_data)
 
     url = reverse('find-a-buyer-publish')
     response = client.get(url)
@@ -407,14 +387,14 @@ def test_edit_page_submmit_error(
     client, mock_update_company, url, data, user
 ):
     client.force_login(user)
-    mock_update_company.return_value = create_response(400)
+    mock_update_company.return_value = create_response(status_code=400)
 
     with pytest.raises(HTTPError):
         client.post(url, data)
 
 
 def test_case_study_create(
-    submit_case_study_create_step, mock_create_case_study, case_study_data,
+    submit_case_study_create_step, mock_case_study_create, case_study_data,
     client, user
 ):
     client.force_login(user)
@@ -429,12 +409,12 @@ def test_case_study_create(
 
     assert response.url == reverse('find-a-buyer')
 
-    assert mock_create_case_study.call_count == 1
+    assert mock_case_study_create.call_count == 1
 
 
 def test_case_study_edit_foo(
-    submit_case_study_edit_step, mock_retrieve_private_case_study, client,
-    mock_update_case_study, case_study_data,
+    submit_case_study_edit_step, mock_case_study_retrieve, client,
+    mock_case_study_update, case_study_data,
     default_private_case_study, user, rf
 ):
     client.force_login(user)
@@ -448,7 +428,7 @@ def test_case_study_edit_foo(
     response = client.get(response.url)
 
     assert response.url == reverse('find-a-buyer')
-    assert mock_update_case_study.call_count == 1
+    assert mock_case_study_update.call_count == 1
     data = {
         **default_private_case_study,
         'image_one': mock.ANY,
@@ -456,7 +436,7 @@ def test_case_study_edit_foo(
     }
     del data['image_three']
 
-    assert mock_update_case_study.call_args == mock.call(
+    assert mock_case_study_update.call_args == mock.call(
         case_study_id='1',
         data=data,
         sso_session_id='123'
@@ -464,9 +444,9 @@ def test_case_study_edit_foo(
 
 
 def test_case_study_edit_not_found(
-    mock_retrieve_private_case_study, client, user
+    mock_case_study_retrieve, client, user
 ):
-    mock_retrieve_private_case_study.return_value = create_response(404)
+    mock_case_study_retrieve.return_value = create_response(status_code=404)
 
     client.force_login(user)
     url = reverse(
@@ -479,7 +459,7 @@ def test_case_study_edit_not_found(
 
 
 def test_case_study_edit_found(
-    mock_retrieve_private_case_study, client, user
+    mock_case_study_retrieve, client, user
 ):
     client.force_login(user)
     url = reverse(
@@ -491,10 +471,13 @@ def test_case_study_edit_found(
     assert response.status_code == 200
 
 
-def test_admin_tools(settings, client, default_company_profile, user):
+def test_admin_tools(settings, client, company_profile_data, user):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
+    reload_urlconf()
+
     client.force_login(user)
 
-    company = helpers.CompanyParser(default_company_profile)
+    company = helpers.CompanyParser(company_profile_data)
 
     url = reverse('find-a-buyer-admin-tools')
 
@@ -514,12 +497,13 @@ def test_admin_tools(settings, client, default_company_profile, user):
     assert response.context_data['company'] == company.serialize_for_template()
 
 
-def test_admin_tools_no_collaborators(
-    settings, client, mock_retrieve_collaborators, user
-):
+def test_admin_tools_no_collaborators(settings, client, mock_collaborator_list, user):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
+    reload_urlconf()
+
     client.force_login(user)
 
-    mock_retrieve_collaborators.return_value = create_response(200, {})
+    mock_collaborator_list.return_value = create_response([])
 
     url = reverse('find-a-buyer-admin-tools')
     response = client.get(url)
@@ -532,9 +516,7 @@ def test_business_details_sole_trader(
     settings, mock_retrieve_company, client, user
 ):
     client.force_login(user)
-    mock_retrieve_company.return_value = create_response(
-        200, {'company_type': 'SOLE_TRADER'}
-    )
+    mock_retrieve_company.return_value = create_response({'company_type': 'SOLE_TRADER'})
 
     url = reverse('find-a-buyer-business-details')
 
@@ -551,9 +533,7 @@ def test_business_details_companies_house(
     settings, client, mock_retrieve_company, user
 ):
     client.force_login(user)
-    mock_retrieve_company.return_value = create_response(
-        200, {'company_type': 'COMPANIES_HOUSE'}
-    )
+    mock_retrieve_company.return_value = create_response({'company_type': 'COMPANIES_HOUSE'})
 
     url = reverse('find-a-buyer-business-details')
 
@@ -605,12 +585,10 @@ def test_expertise_routing_form(client, settings, user):
     assert response.context_data['company']
 
 
-def test_expertise_products_services_routing_form_context(
-    client, settings, default_company_profile, user
-):
+def test_expertise_products_services_routing_form_context(client, settings, company_profile_data, user):
     client.force_login(user)
 
-    company = helpers.CompanyParser(default_company_profile)
+    company = helpers.CompanyParser(company_profile_data)
 
     url = reverse('find-a-buyer-expertise-products-services-routing')
 
@@ -623,9 +601,7 @@ def test_expertise_products_services_routing_form_context(
 @pytest.mark.parametrize('choice', (
     item for item, _ in forms.ExpertiseProductsServicesRoutingForm.CHOICES if item
 ))
-def test_expertise_products_services_routing_form(
-    choice, client, settings, user
-):
+def test_expertise_products_services_routing_form(choice, client, settings, user):
     client.force_login(user)
 
     url = reverse('find-a-buyer-expertise-products-services-routing')
@@ -638,26 +614,21 @@ def test_expertise_products_services_routing_form(
     )
 
 
-def test_products_services_form_prepopulate(
-    mock_retrieve_company, default_company_profile, client, user
-):
+def test_products_services_form_prepopulate(mock_retrieve_company, company_profile_data, client, user):
     client.force_login(user)
-    mock_retrieve_company.return_value = create_response(
-        200,
-        {
-            **default_company_profile,
-            'expertise_products_services': {
-                constants.LEGAL: [
-                    'Company incorporation',
-                    'Employment',
-                ],
-                constants.PUBLICITY: [
-                    'Public Relations',
-                    'Branding',
-                ]
-            }
+    mock_retrieve_company.return_value = create_response({
+        **company_profile_data,
+        'expertise_products_services': {
+            constants.LEGAL: [
+                'Company incorporation',
+                'Employment',
+            ],
+            constants.PUBLICITY: [
+                'Public Relations',
+                'Branding',
+            ]
         }
-    )
+    })
 
     url = reverse(
         'find-a-buyer-expertise-products-services',
@@ -670,26 +641,21 @@ def test_products_services_form_prepopulate(
     }
 
 
-def test_products_services_other_form(
-    mock_retrieve_company, default_company_profile, client, user
-):
+def test_products_services_other_form(mock_retrieve_company, company_profile_data, client, user):
     client.force_login(user)
-    mock_retrieve_company.return_value = create_response(
-        200,
-        {
-            **default_company_profile,
-            'expertise_products_services': {
-                constants.LEGAL: [
-                    'Company incorporation',
-                    'Employment',
-                ],
-                constants.OTHER: [
-                    'Foo',
-                    'Bar',
-                ]
-            }
+    mock_retrieve_company.return_value = create_response({
+        **company_profile_data,
+        'expertise_products_services': {
+            constants.LEGAL: [
+                'Company incorporation',
+                'Employment',
+            ],
+            constants.OTHER: [
+                'Foo',
+                'Bar',
+            ]
         }
-    )
+    })
 
     url = reverse('find-a-buyer-expertise-products-services-other')
     response = client.get(url)
@@ -700,26 +666,22 @@ def test_products_services_other_form(
 
 
 def test_products_services_other_form_update(
-    client, mock_retrieve_company, mock_update_company, user,
-    default_company_profile
+    client, mock_retrieve_company, mock_update_company, user, company_profile_data
 ):
     client.force_login(user)
-    mock_retrieve_company.return_value = create_response(
-        200,
-        {
-            **default_company_profile,
-            'expertise_products_services': {
-                constants.LEGAL: [
-                    'Company incorporation',
-                    'Employment',
-                ],
-                constants.OTHER: [
-                    'Foo',
-                    'Bar',
-                ]
-            }
+    mock_retrieve_company.return_value = create_response({
+        **company_profile_data,
+        'expertise_products_services': {
+            constants.LEGAL: [
+                'Company incorporation',
+                'Employment',
+            ],
+            constants.OTHER: [
+                'Foo',
+                'Bar',
+            ]
         }
-    )
+    })
 
     url = reverse('find-a-buyer-expertise-products-services-other')
 
@@ -743,27 +705,21 @@ def test_products_services_other_form_update(
     )
 
 
-def test_products_services_form_update(
-    client, mock_retrieve_company, mock_update_company, user,
-    default_company_profile
-):
+def test_products_services_form_update(client, mock_retrieve_company, mock_update_company, user, company_profile_data):
     client.force_login(user)
-    mock_retrieve_company.return_value = create_response(
-        200,
-        {
-            **default_company_profile,
-            'expertise_products_services': {
-                constants.LEGAL: [
-                    'Company incorporation',
-                    'Employment',
-                ],
-                constants.PUBLICITY: [
-                    'Public Relations',
-                    'Branding',
-                ]
-            }
+    mock_retrieve_company.return_value = create_response({
+        **company_profile_data,
+        'expertise_products_services': {
+            constants.LEGAL: [
+                'Company incorporation',
+                'Employment',
+            ],
+            constants.PUBLICITY: [
+                'Public Relations',
+                'Branding',
+            ]
         }
-    )
+    })
 
     url = reverse(
         'find-a-buyer-expertise-products-services',
@@ -840,7 +796,7 @@ def test_request_identity_verification(mock_verify_identity_request, client, use
     assert response.status_code == 302
     assert response.url == reverse('find-a-buyer')
     assert mock_verify_identity_request.call_count == 1
-    assert mock_verify_identity_request.call_args == mock.call(sso_session_id=user.session_id)
+    assert mock_verify_identity_request.call_args == mock.call(user.session_id)
 
     response = client.get(response.url)
     assert response.status_code == 200
@@ -873,3 +829,438 @@ def test_request_identity_verification_feature_off(mock_verify_identity_request,
     assert response.status_code == 302
     assert response.url == reverse('find-a-buyer')
     assert mock_verify_identity_request.call_count == 0
+
+
+def test_collaborator_list(mock_collaborator_list, client, user, settings):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+    mock_collaborator_list.return_value = create_response([])
+
+    url = reverse('find-a-buyer-admin-tools')
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['collaborators'] == []
+
+
+def test_edit_collaborator_feature_off(client, settings):
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': '1234'})
+
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
+    reload_urlconf()
+
+    response = client.get(url)
+    assert response.status_code == 404
+
+
+@pytest.mark.parametrize('role', (user_roles.EDITOR, user_roles.MEMBER))
+def test_edit_collaborator_not_admin(
+    mock_retrieve_supplier, mock_collaborator_list, client, user, settings, role
+):
+    mock_retrieve_supplier.return_value = create_response({'is_company_owner': False, 'role': role})
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url.startswith(reverse('find-a-buyer'))
+    assert mock_collaborator_list.call_count == 0
+
+
+def test_edit_collaborator_edit_not_found(client, user, settings):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 43})
+    response = client.get(url)
+
+    assert response.status_code == 404
+
+
+def test_edit_collaborator_edit_self(client, user, settings):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': user.id})
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-tools')
+
+
+def test_edit_collaborator_retrieve(client, user, settings):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
+    response = client.get(url)
+
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_MEMBER, forms.CHANGE_COLLABORATOR_TO_ADMIN))
+def test_edit_collaborator_change_editor_to_other(mock_collaborator_list, client, user, settings, action):
+    mock_collaborator_list.return_value = create_response([
+        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
+        {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com'}
+    ])
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
+    response = client.post(url, data={'action': action})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-tools')
+
+
+@pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_EDITOR, forms.CHANGE_COLLABORATOR_TO_ADMIN))
+def test_edit_collaborator_change_member_to_other(mock_collaborator_list, client, user, settings, action):
+    mock_collaborator_list.return_value = create_response([
+        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
+        {'sso_id': 1234, 'role': user_roles.MEMBER, 'company_email': 'jim@example.com'}
+    ])
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
+    response = client.post(url, data={'action': action})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-tools')
+
+
+@pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_MEMBER, forms.CHANGE_COLLABORATOR_TO_EDITOR))
+def test_edit_collaborator_change_admin_to_other(mock_collaborator_list, client, user, settings, action):
+    mock_collaborator_list.return_value = create_response([
+        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
+        {'sso_id': 1234, 'role': user_roles.ADMIN, 'company_email': 'jim@example.com'}
+    ])
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
+    response = client.post(url, data={'action': action})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-tools')
+
+
+@mock.patch.object(api_client.company, 'collaborator_disconnect')
+def test_edit_collaborator_edit_remove_collaborator(mock_collaborator_disconnect, client, user, settings):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    mock_collaborator_disconnect.return_value = create_response()
+
+    url = reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': 1234})
+    response = client.post(url, data={'action': forms.REMOVE_COLLABORATOR})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-tools')
+    assert mock_collaborator_disconnect.call_count == 1
+    assert mock_collaborator_disconnect.call_args == mock.call(sso_session_id=user.session_id, sso_id=1234)
+
+
+@mock.patch.object(api_client.supplier, 'disconnect_from_company')
+def test_admin_disconnect_remote_validation_error(mock_disconnect_from_company, client, user, settings):
+    errors = ['Something went wrong']
+    mock_disconnect_from_company.return_value = create_response(errors, status_code=400)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-disconnect')
+    response = client.post(url)
+
+    assert response.status_code == 200
+    assert response.context_data['form'].is_valid() is False
+    assert response.context_data['form'].errors == {NON_FIELD_ERRORS: errors}
+
+
+@mock.patch.object(api_client.supplier, 'disconnect_from_company')
+def test_admin_disconnect_remote_error(mock_disconnect_from_company, client, user, settings):
+    mock_disconnect_from_company.return_value = create_response(status_code=500)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-disconnect')
+    with pytest.raises(HTTPError):
+        client.post(url)
+
+
+@mock.patch.object(api_client.supplier, 'disconnect_from_company')
+def test_admin_disconnect(mock_disconnect_from_company, client, user, settings):
+    mock_disconnect_from_company.return_value = create_response()
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-disconnect')
+    response = client.post(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer')
+    assert mock_disconnect_from_company.call_count == 1
+    assert mock_disconnect_from_company.call_args == mock.call(user.session_id)
+
+
+@pytest.mark.parametrize('count,expected', ((1, True), (2, False),))
+def test_admin_disconnect_is_sole_collaborator(mock_collaborator_list, count, expected, client, user, settings):
+    collaborators = [
+        {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
+        {'sso_id': 1234, 'role': user_roles.ADMIN, 'company_email': 'jim@example.com'}
+    ]
+    mock_collaborator_list.return_value = create_response(collaborators[:count])
+
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-disconnect')
+    response = client.get(url)
+
+    assert response.status_code == 200
+    assert response.context_data['is_sole_admin'] is expected
+
+
+def test_products_services_form_incorrect_value(client, user):
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-expertise-products-services', kwargs={'category': 'foo'})
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-expertise-products-services-routing')
+
+
+@mock.patch.object(api_client.company, 'collaborator_invite_create')
+def test_admin_invite_administrator_remote_validation_error(mock_collaborator_invite_create, client, user, settings):
+    errors = ['Something went wrong']
+    mock_collaborator_invite_create.return_value = create_response({'collaborator_email': errors}, status_code=400)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-invite-administrator')
+    response = client.post(url, {'collaborator_email': 'jim@example.com'})
+
+    assert response.status_code == 200
+    assert response.context_data['form'].is_valid() is False
+    assert response.context_data['form'].errors == {NON_FIELD_ERRORS: errors}
+
+
+@mock.patch.object(api_client.company, 'collaborator_invite_create')
+def test_admin_invite_administrator_remote_error(mock_collaborator_invite_create, client, user, settings):
+    mock_collaborator_invite_create.return_value = create_response(status_code=500)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-invite-administrator')
+    with pytest.raises(HTTPError):
+        client.post(url, {'collaborator_email': 'jim@example.com'})
+
+
+@mock.patch.object(api_client.company, 'collaborator_invite_create')
+def test_admin_invite_administrator_new_collaborator(mock_collaborator_invite_create, client, user, settings):
+    mock_collaborator_invite_create.return_value = create_response(status_code=201)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-invite-administrator')
+    response = client.post(url, {'collaborator_email': 'jim@example.com'})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-tools')
+    assert mock_collaborator_invite_create.call_count == 1
+    assert mock_collaborator_invite_create.call_args == mock.call(
+        sso_session_id=user.session_id, data={'collaborator_email': 'jim@example.com', 'role': user_roles.ADMIN}
+    )
+
+
+def test_admin_invite_administrator_change_role(mock_collaborator_role_update, client, user, settings):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-invite-administrator')
+    response = client.post(url, {'sso_id': '1234'})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-tools')
+    assert mock_collaborator_role_update.call_count == 1
+    assert mock_collaborator_role_update.call_args == mock.call(
+        sso_session_id=user.session_id, sso_id='1234', role=user_roles.ADMIN
+    )
+
+
+@pytest.mark.parametrize('url', (
+    reverse('find-a-buyer-admin-invite-administrator'),
+    reverse('find-a-buyer-admin-invite-collaborator'),
+    reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': '123'})
+))
+def test_admin_not_admin_role(mock_retrieve_supplier, client, user, settings, url):
+    mock_retrieve_supplier.return_value = create_response({'is_company_owner': False, 'role': user_roles.EDITOR})
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+    client.force_login(user)
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url.startswith(reverse('find-a-buyer'))
+
+
+@pytest.mark.parametrize('url', (
+    reverse('find-a-buyer-admin-tools'),
+    reverse('find-a-buyer-admin-disconnect'),
+))
+def test_admin_no_company(mock_retrieve_company, client, user, settings, url):
+    mock_retrieve_company.return_value = create_response(status_code=404)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+    client.force_login(user)
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url.startswith(reverse('find-a-buyer'))
+
+
+@pytest.mark.parametrize('url', (
+    reverse('find-a-buyer-admin-invite-administrator'),
+    reverse('find-a-buyer-admin-invite-collaborator'),
+    reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': '123'}),
+    reverse('find-a-buyer-admin-disconnect'),
+))
+def test_admin_feature_off(client, settings, url):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
+    reload_urlconf()
+
+    response = client.get(url)
+    assert response.status_code == 404
+
+
+def test_admin_tools_feature_off(client, settings):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
+    reload_urlconf()
+
+    url = reverse('find-a-buyer-admin-tools')
+    response = client.get(url)
+    assert response.status_code == 302
+
+
+@pytest.mark.parametrize('url', (
+    reverse('find-a-buyer-admin-invite-administrator'),
+    reverse('find-a-buyer-admin-invite-collaborator'),
+    reverse('find-a-buyer-admin-collaborator-edit', kwargs={'sso_id': '123'}),
+    reverse('find-a-buyer-admin-tools'),
+    reverse('find-a-buyer-admin-disconnect'),
+))
+def test_admin_anon_user(client, settings, url):
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url.startswith(settings.LOGIN_URL)
+
+
+@mock.patch.object(api_client.company, 'collaborator_invite_create')
+def test_admin_invite_collaborator(mock_collaborator_invite_create, settings, client, user):
+    mock_collaborator_invite_create.return_value = create_response(status_code=201)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-invite-collaborator')
+    response = client.post(url, {'collaborator_email': 'jim@example.com', 'role': user_roles.ADMIN})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-invite-collaborator')
+
+    response = client.get(response.url)
+    expected = 'We have sent a confirmation to jim@example.com with an invitation to become a collaborator'
+    for message in response.context['messages']:
+        assert str(message) == expected
+
+
+@mock.patch.object(api_client.company, 'collaborator_invite_create')
+def test_admin_invite_collaborator_remote_validation_error(mock_collaborator_invite_create, settings, client, user):
+    errors = {'collaborator_email': ['woe']}
+    mock_collaborator_invite_create.return_value = create_response(errors, status_code=400)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-invite-collaborator')
+    response = client.post(url, {'collaborator_email': 'jim@example.com', 'role': user_roles.ADMIN})
+
+    assert response.status_code == 200
+    assert response.context_data['form'].is_valid() is False
+    assert response.context_data['form'].errors == errors
+
+
+@mock.patch.object(api_client.company, 'collaborator_invite_create')
+def test_admin_invite_collaborator_not_admin_remote_error(mock_collaborator_invite_create, settings, client, user):
+    mock_collaborator_invite_create.return_value = create_response(status_code=500)
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-admin-invite-collaborator')
+    with pytest.raises(HTTPError):
+        client.post(url, {'collaborator_email': 'jim@example.com', 'role': user_roles.ADMIN})
+
+
+@mock.patch.object(api_client.company, 'collaborator_invite_delete')
+def test_admin_collaborator_invite_delete(mock_collaborator_invite_delete, client, user, settings):
+    mock_collaborator_invite_delete.return_value = create_response()
+    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
+    reload_urlconf()
+
+    client.force_login(user)
+
+    url = reverse('find-a-buyer-collaboration-invite-delete')
+    response = client.post(url, {'invite_key': '1234'})
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-admin-invite-collaborator')
+    assert mock_collaborator_invite_delete.call_count == 1
+    assert mock_collaborator_invite_delete.call_args == mock.call(
+        sso_session_id=user.session_id, invite_key='1234'
+    )

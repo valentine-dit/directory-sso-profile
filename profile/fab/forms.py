@@ -1,11 +1,11 @@
-from directory_constants import choices, expertise
+from directory_constants import choices, expertise, user_roles
 from directory_components import forms
 from directory_components.helpers import tokenize_keywords
 import directory_validators.company
 import directory_validators.enrolment
 
 from django.conf import settings
-from django.forms import ImageField, SelectMultiple, Textarea
+from django.forms import ImageField, SelectMultiple, Textarea, ValidationError
 from django.utils.safestring import mark_safe
 
 from profile.fab import constants, validators
@@ -13,6 +13,11 @@ from profile.fab import constants, validators
 
 INDUSTRY_CHOICES = [('', 'Select an industry')] + list(choices.INDUSTRIES)
 EMPLOYEES_CHOICES = [('', 'Select employees')] + list(choices.EMPLOYEES)
+USER_ROLE_CHOICES = [('', 'Select role')] + list(choices.USER_ROLES)
+REMOVE_COLLABORATOR = 'REMOVE'
+CHANGE_COLLABORATOR_TO_EDITOR = 'CHANGE_TO_EDITOR'
+CHANGE_COLLABORATOR_TO_MEMBER = 'CHANGE_TO_MEMBER'
+CHANGE_COLLABORATOR_TO_ADMIN = 'CHANGE_TO_ADMIN'
 
 
 class SocialLinksForm(forms.Form):
@@ -48,9 +53,7 @@ class SocialLinksForm(forms.Form):
 
 
 class EmailAddressForm(forms.Form):
-    email_address = forms.EmailField(
-        label='Email address'
-    )
+    email_address = forms.EmailField(label='Email address')
 
 
 class DescriptionForm(forms.Form):
@@ -319,15 +322,6 @@ class PublishForm(forms.Form):
     LABEL_ISD = 'Ready to publish on UK Investment Support Directory'
     LABEL_FAS = 'Publish profile on great.gov.uk/trade/'
 
-    def __init__(self, company, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if company.get('is_published_investment_support_directory'):
-            field = self.fields['is_published_investment_support_directory']
-            field.widget.label = self.LABEL_UNPUBLISH_ISD
-        if company.get('is_published_find_a_supplier'):
-            field = self.fields['is_published_find_a_supplier']
-            field.widget.label = self.LABEL_UNPUBLISH_FAS
-
     is_published_investment_support_directory = forms.BooleanField(
         label=LABEL_ISD,
         required=False
@@ -336,6 +330,15 @@ class PublishForm(forms.Form):
         label=LABEL_FAS,
         required=False
     )
+
+    def __init__(self, company, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if company.get('is_published_investment_support_directory'):
+            field = self.fields['is_published_investment_support_directory']
+            field.widget.label = self.LABEL_UNPUBLISH_ISD
+        if company.get('is_published_find_a_supplier'):
+            field = self.fields['is_published_find_a_supplier']
+            field.widget.label = self.LABEL_UNPUBLISH_FAS
 
 
 class CompaniesHouseBusinessDetailsForm(forms.Form):
@@ -538,5 +541,74 @@ class ExpertiseProductsServicesOtherForm(forms.Form):
         )
 
 
-class IdentityVerificationRequestForm(forms.Form):
+class NoOperationForm(forms.Form):
     pass
+
+
+class AdminCollaboratorEditForm(forms.Form):
+
+    CHOICES = {
+        user_roles.MEMBER: [
+            ('', 'Please select'),
+            (CHANGE_COLLABORATOR_TO_ADMIN, 'Upgrade to Admin'),
+            (CHANGE_COLLABORATOR_TO_EDITOR, 'Upgrade to Editor'),
+            (REMOVE_COLLABORATOR, 'Remove'),
+        ],
+        user_roles.EDITOR: [
+            ('', 'Please select'),
+            (CHANGE_COLLABORATOR_TO_ADMIN, 'Upgrade to Admin'),
+            (CHANGE_COLLABORATOR_TO_MEMBER, 'Downgrade to Member'),
+            (REMOVE_COLLABORATOR, 'Remove'),
+        ],
+        user_roles.ADMIN: [
+            ('', 'Please select'),
+            (CHANGE_COLLABORATOR_TO_EDITOR, 'Downgrade to Editor'),
+            (CHANGE_COLLABORATOR_TO_MEMBER, 'Downgrade to Member'),
+            (REMOVE_COLLABORATOR, 'Remove'),
+        ]
+    }
+
+    def __init__(self, current_role, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['action'].choices = self.CHOICES[current_role]
+
+    action = forms.ChoiceField(
+        label='',
+        choices=[]  # set in __init__
+    )
+
+
+class AdminInviteNewAdminForm(forms.Form):
+    MESSAGE_EMAIL_REQUIRED = 'Please select an existing collaborator or specify an email address'
+
+    sso_id = forms.ChoiceField(
+        label='',
+        widget=forms.RadioSelect(use_nice_ids=True,),
+        choices=[],  # set in __init__
+        required=False,
+    )
+    collaborator_email = forms.EmailField(
+        label='Enter the email address of the new profile administrator',
+        required=False,
+    )
+
+    def __init__(self, collaborator_choices, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['sso_id'].choices = collaborator_choices
+
+    def clean(self):
+        super().clean()
+        if not self.cleaned_data.get('collaborator_email') and not self.cleaned_data.get('sso_id'):
+            raise ValidationError(self.MESSAGE_EMAIL_REQUIRED)
+
+
+class AdminInviteCollaboratorForm(forms.Form):
+    collaborator_email = forms.EmailField(label='Email address of collaborator', required=False,)
+    role = forms.ChoiceField(
+        choices=USER_ROLE_CHOICES,
+        container_css_classes='width-half'
+    )
+
+
+class AdminInviteCollaboratorDeleteForm(forms.Form):
+    invite_key = forms.CharField()

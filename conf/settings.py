@@ -17,7 +17,9 @@ import environ
 
 
 env = environ.Env()
-env.read_env()
+for env_file in env.list('ENV_FILES', default=[]):
+    env.read_env(f'conf/env/{env_file}')
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -63,8 +65,8 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'core.middleware.PrefixUrlMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'directory_sso_api_client.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'directory_components.middleware.NoCacheMiddlware',
@@ -138,7 +140,10 @@ MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 STATIC_HOST = env.str('STATIC_HOST', '')
 STATIC_URL = STATIC_HOST + '/static/'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = env.str(
+    'STATICFILES_STORAGE',
+    'whitenoise.storage.CompressedManifestStaticFilesStorage'
+)
 
 
 # Public storage for uploaded logos and case study images
@@ -337,6 +342,7 @@ FAB_TRANSFER_ACCOUNT_URL = env.str('FAB_TRANSFER_ACCOUNT_URL')
 FEATURE_FLAGS = {
     'ENROLMENT_SELECT_BUSINESS_ON': env.bool('FEATURE_ENROLMENT_SELECT_BUSINESS_ENABLED', True),
     'REQUEST_VERIFICATION_ON': env.bool('FEATURE_REQUEST_VERIFICATION_ENABLED', False),
+    'NEW_PROFILE_ADMIN_ON': env.bool('FEATURE_NEW_PROFILE_ADMIN_ENABLED', False),
     'COUNTRY_SELECTOR_ON': False,
     'MAINTENANCE_MODE_ON': env.bool('FEATURE_MAINTENANCE_MODE_ENABLED', False),  # used by directory-components
 }
@@ -401,6 +407,11 @@ GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID = env.str(
 GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID = env.str(
     'GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID',
     '02b0223f-2674-4b0b-bdcc-df21dabbc743'
+)
+
+GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID = env.str(
+    'GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID',
+    '439a8415-52d8-4975-b230-15cd34305bb5'
 )
 
 # directory api
