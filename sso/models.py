@@ -24,6 +24,8 @@ class SSOUser(directory_sso_api_client.models.SSOUser):
 
     @property
     def is_company_admin(self):
+        if not self.supplier:
+            return False
         return self.supplier['role'] == user_roles.ADMIN
 
     @property

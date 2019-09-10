@@ -7,6 +7,8 @@ clean:
 pytest:
 	ENV_FILES='dev,test' \
 	pytest $(ARGUMENTS) \
+	--numprocesses auto \
+	--dist=loadfile \
 	--ignore=node_modules \
 	--cov=. \
 	--cov-config=.coveragerc \
