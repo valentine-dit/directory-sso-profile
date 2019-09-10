@@ -784,6 +784,42 @@ def test_personal_details(client, mock_create_user_profile, user):
     )
 
 
+def test_personal_profile_edit(client, mock_update_user_profile, user):
+    client.force_login(user)
+    data = {
+        'given_name': 'Foo',
+        'family_name': 'Example',
+        'job_title': 'Exampler',
+        'phone_number': '1232342',
+    }
+
+    response = client.get(reverse('find-a-buyer-personal-profile:edit'))
+
+    assert response.status_code == 200
+
+    response = client.post(reverse('find-a-buyer-personal-profile:edit'), data)
+
+    assert response.status_code == 302
+    assert response.url == reverse('find-a-buyer-personal-profile:display')
+    assert mock_update_user_profile.call_count == 1
+    assert mock_update_user_profile.call_args == mock.call(
+        sso_session_id=user.session_id,
+        data={
+            'first_name': 'Foo',
+            'last_name': 'Example',
+            'job_title': 'Exampler',
+            'mobile_phone_number': '1232342'
+        }
+    )
+
+
+def test_personal_profile_display(client, user):
+    client.force_login(user)
+    response = client.get(reverse('find-a-buyer-personal-profile:display'))
+
+    assert response.status_code == 200
+
+
 @mock.patch.object(api_client.company, 'verify_identity_request')
 def test_request_identity_verification(mock_verify_identity_request, client, user):
     mock_verify_identity_request.return_value = create_response()
