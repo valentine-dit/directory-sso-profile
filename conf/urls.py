@@ -9,7 +9,6 @@ from django.contrib.auth.decorators import login_required
 
 import core.views
 import enrolment.views
-import profile.eig_apps.views
 import profile.exops.views
 import profile.fab.views
 import profile.soo.views
@@ -70,6 +69,20 @@ api_urls = [
 ]
 
 
+urls_personal_profile = [
+    url(
+        r'^$',
+        login_required(profile.fab.views.PersonalProfileView.as_view()),
+        name='display'
+    ),
+    url(
+        r'^edit/$',
+        login_required(profile.fab.views.PersonalProfileEditFormView.as_view()),
+        name='edit'
+    ),
+]
+
+
 urlpatterns = [
     url(
         r'^api/',
@@ -81,12 +94,17 @@ urlpatterns = [
     ),
     url(
         r'^$',
-        profile.eig_apps.views.LandingPageView.as_view(),
+        core.views.LandingPageView.as_view(),
         name='index'
     ),
     url(
         r'^about/$',
-        profile.eig_apps.views.AboutView.as_view(),
+        core.views.AboutView.as_view(),
+        name='about'
+    ),
+    url(
+        r'^about/$',
+        core.views.AboutView.as_view(),
         name='about'
     ),
     url(
@@ -294,6 +312,10 @@ urlpatterns = [
         company_required(profile.fab.views.IdentityVerificationRequestFormView.as_view()),
         name='find-a-buyer-request-to-verify'
     ),
+    url(
+        r'^find-a-buyer/personal-profile/',
+        include(urls_personal_profile, namespace='find-a-buyer-personal-profile')
+    )
 ]
 
 

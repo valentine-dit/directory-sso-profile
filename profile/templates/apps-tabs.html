@@ -31,6 +31,7 @@
                 <ul>
                     <li class="{{ exops_tab_classes }}"><a href="{% url 'export-opportunities-applications' %}">Export opportunities</a></li>
                     <li class="{{ fab_tab_classes }}"><a href="{% url 'find-a-buyer' %}">Business profile</a></li>
+					<li{% if request.resolver_match.namespace == 'find-a-buyer-personal-profile' %} class="active"{% endif %}><a href="{% url 'find-a-buyer-personal-profile:display' %}">Personal Details</a></li>
                     <li class="{{ soo_tab_classes }}"><a href="{% url 'selling-online-overseas' %}">Selling online overseas</a></li>
                     <li class="{{ about_tab_classes }}"><a href="{% url 'about' %}">About</a></li>
                 </ul>
