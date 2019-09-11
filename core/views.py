@@ -4,6 +4,7 @@ from requests.auth import HTTPBasicAuth
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
+from django.views.generic import RedirectView, TemplateView
 from django.conf import settings
 
 from core import serializers
@@ -51,3 +52,16 @@ class AddressSearchAPIView(GenericAPIView):
         else:
             response.raise_for_status()
         return Response(data)
+
+
+class LandingPageView(RedirectView):
+    pattern_name = 'about'
+
+
+class AboutView(TemplateView):
+    template_name = 'about.html'
+
+    def get_context_data(self):
+        return {
+            'about_tab_classes': 'active'
+        }

@@ -7,6 +7,8 @@ clean:
 pytest:
 	ENV_FILES='dev,test' \
 	pytest $(ARGUMENTS) \
+	--numprocesses auto \
+	--dist=loadfile \
 	--ignore=node_modules \
 	--cov=. \
 	--cov-config=.coveragerc \
@@ -14,7 +16,7 @@ pytest:
 	--cov-report=term \
 	--capture=no \
 	-Wignore::DeprecationWarning \
-	-vv \
+	-vv
 
 flake8:
 	flake8 . \

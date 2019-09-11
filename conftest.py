@@ -4,8 +4,14 @@ from unittest import mock
 import pytest
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 
 from core.tests.helpers import create_response
+
+
+@pytest.fixture(autouse=True)
+def clear_cache():
+    cache.clear()
 
 
 @pytest.fixture
@@ -76,6 +82,17 @@ def mock_create_user_profile():
     })
     patch = mock.patch(
         'directory_sso_api_client.sso_api_client.user.create_user_profile',
+        return_value=response
+    )
+    yield patch.start()
+    patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def mock_update_user_profile():
+    response = create_response()
+    patch = mock.patch(
+        'directory_sso_api_client.sso_api_client.user.update_user_profile',
         return_value=response
     )
     yield patch.start()

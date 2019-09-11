@@ -19,6 +19,12 @@ def test_full_name():
     assert user.full_name == 'Jim Example'
 
 
+@mock.patch.object(models.SSOUser, 'supplier', new_callable=mock.PropertyMock)
+def test_is_company_admin_no_supplier(mock_supplier):
+    mock_supplier.return_value = None
+    assert models.SSOUser().is_company_admin is False
+
+
 @pytest.mark.parametrize('role,expected', (
     (user_roles.ADMIN, True),
     (user_roles.EDITOR, False),
