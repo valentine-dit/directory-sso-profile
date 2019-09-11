@@ -618,4 +618,3 @@ class IdentityVerificationRequestFormView(SuccessMessageMixin, FormView):
         response = api_client.company.verify_identity_request(self.request.user.session_id)
         response.raise_for_status()
         return super().form_valid(form)
-

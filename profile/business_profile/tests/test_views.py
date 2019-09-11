@@ -783,6 +783,7 @@ def test_personal_details(client, mock_create_user_profile, user):
         }
     )
 
+
 @mock.patch.object(api_client.company, 'verify_identity_request')
 def test_request_identity_verification(mock_verify_identity_request, client, user):
     mock_verify_identity_request.return_value = create_response()

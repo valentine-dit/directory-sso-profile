@@ -4,7 +4,7 @@ import directory_sso_api_client.models
 from django.db import models
 from django.utils.functional import cached_property
 
-from profile.fab import helpers
+from profile.business_profile import helpers
 
 
 class SSOUser(directory_sso_api_client.models.SSOUser):
