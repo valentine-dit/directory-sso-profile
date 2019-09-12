@@ -16,8 +16,7 @@
         <div class="grid-row" >
             <div class="column-one-half">
                 <a href="{% url 'find-a-buyer-admin-tools' %}">Admin tools</a>
-                <span class="divider margin-left-15 margin-right-15 background-mid-grey"></span>
-                <span class="background-denim-blue font-xsmall pill">Admin view</span>
+                
             </div>
             <div class="column-one-half right-column">
                 {% if company.is_published %}
@@ -52,7 +51,7 @@
     <div class="width-half">
         <h3 class="heading-medium">Next steps</h3>
         {% if features.REQUEST_VERIFICATION_ON and company.is_identity_check_message_sent %}
-            <p>We will be in contact within the next XX days and have sent you a confirmation email to {{ request.user.email }}</p>
+            <p>We will be in contact shortly and have sent you a confirmation email to {{ request.user.email }}</p>
         {% else %}
             <p>Your business profile hasn't been published yet. Fill in the last few details to complete and publish.</p>
         {% endif %}
