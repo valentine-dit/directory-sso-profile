@@ -46,7 +46,7 @@ A recent update to OSX removed a particular method from python around SSL. This 
 
 ### Configuration
 
-Secrets such as API keys and environment specific configurations are placed in `conf/env/secrets-do-not-commit` - a file that is not added to version control. To create a template secrets file with dummy values run `make init_secrets`.
+Secrets such as API keys and environment specific configurations are placed in `conf/env/secrets-do-not-commit` - a file that is not added to version control. To create a template secrets file with dummy values run `make secrets`.
 
 ### Commands
 
@@ -64,7 +64,7 @@ Secrets such as API keys and environment specific configurations are placed in `
 | make requirements             | Compile the requirements file |
 | make install_requirements     | Installed the compile requirements file |
 | make css                      | Compile scss to css |
-| make init_secrets             | Create your secret env var file |
+| make secrets                  | Create your secret env var file |
 
 ## CSS development
 
