@@ -5,15 +5,11 @@ clean:
 	-find . -type d -name "__pycache__" -delete
 
 pytest:
-	ENV_FILES='dev,test' \
+	ENV_FILES='test,dev' \
 	pytest $(ARGUMENTS) \
 	--numprocesses auto \
 	--dist=loadfile \
 	--ignore=node_modules \
-	--cov=. \
-	--cov-config=.coveragerc \
-	--cov-report=html \
-	--cov-report=term \
 	--capture=no \
 	-Wignore::DeprecationWarning \
 	-vv
@@ -24,10 +20,10 @@ flake8:
 	--max-line-length=120
 
 manage:
-	ENV_FILES='dev,secrets-do-not-commit' ./manage.py $(ARGUMENTS)
+	ENV_FILES='secrets-do-not-commit,dev' ./manage.py $(ARGUMENTS)
 
 webserver:
-	ENV_FILES='dev,secrets-do-not-commit' python manage.py runserver 0.0.0.0:8006 $(ARGUMENTS)
+	ENV_FILES='secrets-do-not-commit,dev' python manage.py runserver 0.0.0.0:8006 $(ARGUMENTS)
 
 requirements:
 	pip-compile requirements.in

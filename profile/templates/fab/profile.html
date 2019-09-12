@@ -68,14 +68,6 @@
             <div class="column-one-third alerts-button-container">
                 <a class="button button-ghost-white" href="{% url 'find-a-buyer-email' %}">Add a business email address</a>
             </div>
-        {% elif features.REQUEST_VERIFICATION_ON and company.company_type != 'COMPANIES_HOUSE' and not company.is_identity_check_message_sent %}
-            <div class="column-two-thirds flag-red-text">
-                <h2 class="heading-medium margin-0">Profile ready to be verified</h2>
-                <p>Your business profile is ready to be verified</p>
-            </div>
-            <div class="column-one-third alerts-button-container">
-                <a class="button button-ghost-white" href="{% url 'find-a-buyer-request-to-verify' %}">Request to verify</a>
-            </div>
         {% elif not company.description %}
             <div class="column-two-thirds flag-red-text">
                 <h2 class="heading-medium margin-0">Add a business description</h2>
@@ -85,13 +77,23 @@
                 <a class="button button-ghost-white" href="{% url 'find-a-buyer-description' %}">Add a business description</a>
             </div>
         {% elif not company.is_verified %}
-            <div class="column-two-thirds flag-red-text">
-                <h2 class="heading-medium margin-0">Confirm your identity</h2>
-                <p>For security reasons, we need to check you're who you say you are.</p>
-            </div>
-            <div class="column-one-third alerts-button-container">
-                <a class="button button-ghost-white" href="{{ services_urls.fab }}verify/">Confirm your identity</a>
-            </div>
+            {% if company.company_type == 'COMPANIES_HOUSE' %}
+                <div class="column-two-thirds flag-red-text">
+                    <h2 class="heading-medium margin-0">Confirm your identity</h2>
+                    <p>For security reasons, we need to check you're who you say you are.</p>
+                </div>
+                <div class="column-one-third alerts-button-container">
+                    <a class="button button-ghost-white" href="{{ services_urls.fab }}verify/">Confirm your identity</a>
+                </div>
+            {% elif features.REQUEST_VERIFICATION_ON and not company.is_identity_check_message_sent %}
+                <div class="column-two-thirds flag-red-text">
+                    <h2 class="heading-medium margin-0">Profile ready to be verified</h2>
+                    <p>Your business profile is ready to be verified</p>
+                </div>
+                <div class="column-one-third alerts-button-container">
+                    <a class="button button-ghost-white" href="{% url 'find-a-buyer-request-to-verify' %}">Request to verify</a>
+                </div>
+            {% endif %}
         {% elif not company.is_published %}
             {% if company.is_uk_isd_company %}
                 <div class="column-two-thirds flag-red-text">

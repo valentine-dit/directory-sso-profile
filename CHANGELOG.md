@@ -25,6 +25,7 @@
 - TT-1731 - Fix address error persistence issue when a valid postcode is entered on UI
 - TT-1709 - Account creation content change
 - No ticket - Handle user has no supplier on profile page
+- TT-1806 - do not prompt non companies house users to verify via companies house
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)
