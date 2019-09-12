@@ -3,6 +3,7 @@
 ## Pre-release
 
 ### Implemented enhancements
+- GTRANSFORM-364 - add descriptive page titles to profile journey templates
 - TT-1725 - Send email to company admin when a new user is added to company profile
 - TT-1734 - Add second user to already registered company profile
 - TT-1733 - Add request for individual verification feature
@@ -25,6 +26,7 @@
 - TT-1731 - Fix address error persistence issue when a valid postcode is entered on UI
 - TT-1709 - Account creation content change
 - No ticket - Handle user has no supplier on profile page
+- TT-1806 - do not prompt non companies house users to verify via companies house
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)
@@ -75,7 +77,7 @@
     + FEATURE_EXPERTISE_FIELDS_ENABLED
     + FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED
 - no ticket - Fall over if redis is not available
-- TT-1501 update isd-url view profile url 
+- TT-1501 update isd-url view profile url
 - TT-1321-industry-rewording
 
 ### Fixed bugs:
