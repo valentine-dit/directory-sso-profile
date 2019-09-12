@@ -38,7 +38,7 @@ We use SASS CSS pre-compiler. If you're doing front-end work your local machine 
     $ cd directory-sso-profile
     $ virtualenv .venv -p python3.6
     $ source .venv/bin/activate
-    $ pip install -r requirements_test.txt
+    $ make install_requirements
 
 ### Additional step on OSX
 
@@ -46,16 +46,25 @@ A recent update to OSX removed a particular method from python around SSL. This 
 
 ### Configuration
 
-Secrets such as API keys and environment specific configurations are placed in `conf/env/secrets-do-not-commit` - a file that is not added to version control. To create a template secrets file with dummy values run `make init_secrets`.
+Secrets such as API keys and environment specific configurations are placed in `conf/env/secrets-do-not-commit` - a file that is not added to version control. To create a template secrets file with dummy values run `make secrets`.
 
+### Commands
 
-### Running the webserver
-    $ source .venv/bin/activate
-    $ make debug_webserver
-
-### Running the tests
-
-    $ make debug_test
+| Command                       | Description |
+| ----------------------------- | ------------|
+| make clean                    | Delete pyc files |
+| make pytest                   | Run all tests |
+| make pytest test_foo.py       | Run all tests in file called test_foo.py |
+| make pytest -- --last-failed` | Run the last tests to fail |
+| make pytest -- -k foo         | Run the test called foo |
+| make pytest -- <foo>          | Run arbitrary pytest command |
+| make flake8                   | Run linting |
+| make manage <foo>             | Run arbitrary management command |
+| make webserver                | Run the development web server |
+| make requirements             | Compile the requirements file |
+| make install_requirements     | Installed the compile requirements file |
+| make css                      | Compile scss to css |
+| make secrets                  | Create your secret env var file |
 
 ## CSS development
 
@@ -68,18 +77,9 @@ We add compiled CSS files to version control. This will sometimes result in conf
 
 You should not edit CSS files directly, instead edit their SCSS counterparts.
 
-### Update CSS under version control
-
-    $ make compile_css
-
-### Rebuild the CSS files when the scss file changes
-
-    $ make watch_css
-
 ## Session
 
 Signed cookies are used as the session backend to avoid using a database. We therefore must avoid storing non-trivial data in the session, because the browser will be exposed to the data.
-
 
 ## SSO
 To make sso work locally add the following to your machine's `/etc/hosts`:
