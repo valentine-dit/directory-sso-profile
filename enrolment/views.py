@@ -344,7 +344,7 @@ class CreateBusinessProfileMixin:
         if self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT):
             messages.success(self.request, 'Account created')
             del self.request.session[SESSION_KEY_BUSINESS_PROFILE_INTENT]
-            return redirect('find-a-buyer')
+            return redirect('business-profile')
         else:
             return TemplateResponse(self.request, self.templates[FINISHED])
 
@@ -352,8 +352,8 @@ class CreateBusinessProfileMixin:
 class ReadUserIntentMixin:
     """Expose whether the user's intent is to create a business profile"""
     LABEL_BUSINESS = 'create a business profile'
-    LABEL_ACCOUNT = 'create an great.gov.uk account'
-    LABEL_BACKFILL_DETAILS = 'Update your details'
+    LABEL_ACCOUNT = 'create an account'
+    LABEL_BACKFILL_DETAILS = 'update your details'
 
     def has_business_profile_intent_in_session(self):
         return self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT)
@@ -468,7 +468,7 @@ class EnrolmentStartView(
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             if helpers.user_has_company(request.user.session_id):
-                return redirect('find-a-buyer')
+                return redirect('business-profile')
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -613,7 +613,7 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
                     'name': self.request.user.full_name,
                     'email': self.request.user.email,
                     'profile_remove_member_url': self.request.build_absolute_uri(
-                        reverse('find-a-buyer-admin-tools')
+                        reverse('business-profile-admin-tools')
                     ),
                     'report_abuse_url': urls.domestic.FEEDBACK
                 }, form_url=self.request.path)
@@ -795,7 +795,7 @@ class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
     def done(self, *args, **kwargs):
         self.create_company_profile()
         messages.success(self.request, 'Account created')
-        return redirect('find-a-buyer')
+        return redirect('business-profile')
 
 
 class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
@@ -855,7 +855,7 @@ class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
             return TemplateResponse(self.request, self.templates[FAILURE])
         else:
             messages.success(self.request, 'Business profile created')
-            return redirect('find-a-buyer')
+            return redirect('business-profile')
 
     def claim_company(self, data):
         helpers.claim_company(

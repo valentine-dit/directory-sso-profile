@@ -839,7 +839,7 @@ def test_companies_house_enrolment_suppress_success_page(
     response = client.get(response.url)
 
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer')
+    assert response.url == reverse('business-profile')
 
 
 @pytest.mark.parametrize(
@@ -1005,7 +1005,7 @@ def test_user_has_company_redirect_on_start(
     response = client.get(url)
 
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer')
+    assert response.url == reverse('business-profile')
 
 
 def test_user_has_no_company_redirect_on_start(
@@ -1575,7 +1575,7 @@ def test_non_companies_house_enrolment_suppress_success(
     response = client.get(response.url)
 
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer')
+    assert response.url == reverse('business-profile')
 
 
 NON_COMPANIES_HOUSE_STEPS = [
@@ -1691,7 +1691,7 @@ def test_claim_preverified_success(
     response = client.get(response.url)
 
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer')
+    assert response.url == reverse('business-profile')
     assert mock_claim_company.call_count == 1
     assert mock_claim_company.call_args == mock.call(
         data={'name': 'Foo Example'},
@@ -2105,7 +2105,7 @@ def test_collaborator_enrolment_submit_end_to_end_logged_in(
 
     response = client.get(response.url)
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer')
+    assert response.url == reverse('business-profile')
 
     assert mock_create_user_profile.call_count == 1
     assert mock_create_user_profile.call_args == mock.call(
@@ -2131,7 +2131,7 @@ def test_collaborator_enrolment_submit_end_to_end_already_has_profile(
     response = client.get(f'{url}?invite_key=abc')
 
     assert response.status_code == 302
-    assert response.url == reverse('find-a-buyer')
+    assert response.url == reverse('business-profile')
     assert mock_create_user_profile.call_count == 0
     assert mock_collaborator_invite_accept.call_count == 1
     assert mock_collaborator_invite_accept.call_args == mock.call(invite_key='abc', sso_session_id='123')
