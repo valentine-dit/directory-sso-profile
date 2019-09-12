@@ -320,12 +320,12 @@ urlpatterns = [
     ),
     url(
         r'^find-a-buyer/(?P<path>[\w\-/]*)/$',
-        RedirectView.as_view(url=urls.domestic.HOME + 'profile/business-profile/%(path)s', query_string=True),
+        RedirectView.as_view(url=urls.domestic.SINGLE_SIGN_ON_PROFILE + 'profile/business-profile/%(path)s', query_string=True),
     ),
     url(
         r'^find-a-buyer/',
         RedirectView.as_view(
-            url=urls.domestic.HOME + 'profile/business-profile/',
+            url=urls.domestic.SINGLE_SIGN_ON_PROFILE + 'profile/business-profile/',
             query_string=True),
     ),
 ]
