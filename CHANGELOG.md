@@ -19,6 +19,7 @@
 - no ticket - Add IDs to relevant elements on CH enrolement success page
 - TT-1760 - added user profile update
 - TT-1808: Update directory components to add "no-validate" no cache middleware
+- TT-1783-Remove-FAB-Urls-and-Refactor
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile

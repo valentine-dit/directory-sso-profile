@@ -4,7 +4,7 @@ from directory_constants import user_roles
 import pytest
 
 from sso import models
-from profile.fab import helpers
+from profile.business_profile import helpers
 
 
 def test_full_name_empty():
