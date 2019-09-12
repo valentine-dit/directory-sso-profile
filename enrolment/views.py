@@ -352,8 +352,8 @@ class CreateBusinessProfileMixin:
 class ReadUserIntentMixin:
     """Expose whether the user's intent is to create a business profile"""
     LABEL_BUSINESS = 'create a business profile'
-    LABEL_ACCOUNT = 'create an great.gov.uk account'
-    LABEL_BACKFILL_DETAILS = 'Update your details'
+    LABEL_ACCOUNT = 'create an account'
+    LABEL_BACKFILL_DETAILS = 'update your details'
 
     def has_business_profile_intent_in_session(self):
         return self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT)

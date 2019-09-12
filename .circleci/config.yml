@@ -24,7 +24,7 @@ jobs:
           name: Run tests
           command: |
             . venv/bin/activate
-            make pytest
+            make pytest -- --cov=. --cov-config=.coveragerc --cov-report=html
             codecov
 
   flake8:
