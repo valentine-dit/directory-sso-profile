@@ -10,14 +10,16 @@ from django.contrib.auth.decorators import login_required
 import core.views
 import enrolment.views
 import profile.exops.views
-import profile.fab.views
+import profile.business_profile.views
+import profile.personal_profile.views
 import profile.soo.views
+from directory_constants import urls
 
 
 def no_company_required(function):
     inner = user_passes_test(
         lambda user: not bool(getattr(user, 'company', None)),
-        reverse_lazy('find-a-buyer'),
+        reverse_lazy('business-profile'),
         None
     )
     return inner(function)
@@ -26,7 +28,7 @@ def no_company_required(function):
 def company_required(function):
     inner = user_passes_test(
         lambda user: bool(user.company),
-        reverse_lazy('find-a-buyer'),
+        reverse_lazy('business-profile'),
         None,
     )
     return login_required(inner(function))
@@ -35,7 +37,7 @@ def company_required(function):
 def company_admin_required(function):
     inner = user_passes_test(
         lambda user: user.is_company_admin,
-        reverse_lazy('find-a-buyer'),
+        reverse_lazy('business-profile'),
         None,
     )
     return login_required(inner(function))
@@ -72,12 +74,12 @@ api_urls = [
 urls_personal_profile = [
     url(
         r'^$',
-        login_required(profile.fab.views.PersonalProfileView.as_view()),
+        login_required(profile.personal_profile.views.PersonalProfileView.as_view()),
         name='display'
     ),
     url(
         r'^edit/$',
-        login_required(profile.fab.views.PersonalProfileEditFormView.as_view()),
+        login_required(profile.personal_profile.views.PersonalProfileEditFormView.as_view()),
         name='edit'
     ),
 ]
@@ -197,167 +199,179 @@ urlpatterns = [
         name='resend-verification'
     ),
     url(
-        r'^find-a-buyer/$',
+        r'^business-profile/$',
         login_required(
-            profile.fab.views.FindABuyerView.as_view(),
+            profile.business_profile.views.BusinessProfileView.as_view(),
             login_url=reverse_lazy('enrolment-start'),
         ),
-        name='find-a-buyer'
+        name='business-profile'
     ),
     url(
-        r'^find-a-buyer/social-links/$',
-        company_required(profile.fab.views.SocialLinksFormView.as_view()),
-        name='find-a-buyer-social'
+        r'^business-profile/social-links/$',
+        company_required(profile.business_profile.views.SocialLinksFormView.as_view()),
+        name='business-profile-social'
     ),
     url(
-        r'^find-a-buyer/email/$',
-        company_required(profile.fab.views.EmailAddressFormView.as_view()),
-        name='find-a-buyer-email'
+        r'^business-profile/email/$',
+        company_required(profile.business_profile.views.EmailAddressFormView.as_view()),
+        name='business-profile-email'
     ),
     url(
-        r'^find-a-buyer/description/$',
-        company_required(profile.fab.views.DescriptionFormView.as_view()),
-        name='find-a-buyer-description'
+        r'^business-profile/description/$',
+        company_required(profile.business_profile.views.DescriptionFormView.as_view()),
+        name='business-profile-description'
     ),
     url(
-        r'^find-a-buyer/website/$',
-        company_required(profile.fab.views.WebsiteFormView.as_view()),
-        name='find-a-buyer-website'
+        r'^business-profile/website/$',
+        company_required(profile.business_profile.views.WebsiteFormView.as_view()),
+        name='business-profile-website'
     ),
     url(
-        r'^find-a-buyer/logo/$',
-        company_required(profile.fab.views.LogoFormView.as_view()),
-        name='find-a-buyer-logo'
+        r'^business-profile/logo/$',
+        company_required(profile.business_profile.views.LogoFormView.as_view()),
+        name='business-profile-logo'
     ),
     url(
-        r'^find-a-buyer/personal-details/$',
-        login_required(profile.fab.views.PersonalDetailsFormView.as_view()),
-        name='find-a-buyer-personal-details'
+        r'^business-profile/personal-details/$',
+        login_required(profile.business_profile.views.PersonalDetailsFormView.as_view()),
+        name='business-profile-personal-details'
     ),
     url(
-        r'^find-a-buyer/publish/$',
-        company_required(profile.fab.views.PublishFormView.as_view()),
-        name='find-a-buyer-publish'
+        r'^business-profile/publish/$',
+        company_required(profile.business_profile.views.PublishFormView.as_view()),
+        name='business-profile-publish'
     ),
     url(
-        r'^find-a-buyer/business-details/$',
-        company_required(profile.fab.views.BusinessDetailsFormView.as_view()),
-        name='find-a-buyer-business-details'
+        r'^business-profile/business-details/$',
+        company_required(profile.business_profile.views.BusinessDetailsFormView.as_view()),
+        name='business-profile-business-details'
     ),
     url(
-        r'^find-a-buyer/case-study/(?P<id>[0-9]+)/(?P<step>.+)/$',
+        r'^business-profile/case-study/(?P<id>[0-9]+)/(?P<step>.+)/$',
         company_required(
-            profile.fab.views.CaseStudyWizardEditView.as_view(
-                url_name='find-a-buyer-case-study-edit'
+            profile.business_profile.views.CaseStudyWizardEditView.as_view(
+                url_name='business-profile-case-study-edit'
             )
         ),
-        name='find-a-buyer-case-study-edit'
+        name='business-profile-case-study-edit'
     ),
     url(
-        r'^find-a-buyer/case-study/(?P<step>.+)/$',
+        r'^business-profile/case-study/(?P<step>.+)/$',
         company_required(
-            profile.fab.views.CaseStudyWizardCreateView.as_view(
-                url_name='find-a-buyer-case-study'
+            profile.business_profile.views.CaseStudyWizardCreateView.as_view(
+                url_name='business-profile-case-study'
             )
         ),
-        name='find-a-buyer-case-study'
+        name='business-profile-case-study'
     ),
     url(
-        r'^find-a-buyer/add-expertise/$',
-        company_required(profile.fab.views.ExpertiseRoutingFormView.as_view()),
-        name='find-a-buyer-expertise-routing'
+        r'^business-profile/add-expertise/$',
+        company_required(profile.business_profile.views.ExpertiseRoutingFormView.as_view()),
+        name='business-profile-expertise-routing'
     ),
     url(
-        r'^find-a-buyer/add-expertise/regions/$',
-        company_required(profile.fab.views.RegionalExpertiseFormView.as_view()),
-        name='find-a-buyer-expertise-regional'
+        r'^business-profile/add-expertise/regions/$',
+        company_required(profile.business_profile.views.RegionalExpertiseFormView.as_view()),
+        name='business-profile-expertise-regional'
     ),
     url(
-        r'^find-a-buyer/add-expertise/countries/$',
-        company_required(profile.fab.views.CountryExpertiseFormView.as_view()),
-        name='find-a-buyer-expertise-countries'
+        r'^business-profile/add-expertise/countries/$',
+        company_required(profile.business_profile.views.CountryExpertiseFormView.as_view()),
+        name='business-profile-expertise-countries'
     ),
     url(
-        r'^find-a-buyer/add-expertise/industries/$',
-        company_required(profile.fab.views.IndustryExpertiseFormView.as_view()),
-        name='find-a-buyer-expertise-industries'
+        r'^business-profile/add-expertise/industries/$',
+        company_required(profile.business_profile.views.IndustryExpertiseFormView.as_view()),
+        name='business-profile-expertise-industries'
     ),
     url(
-        r'^find-a-buyer/add-expertise/languages/$',
-        company_required(profile.fab.views.LanguageExpertiseFormView.as_view()),
-        name='find-a-buyer-expertise-languages'
+        r'^business-profile/add-expertise/languages/$',
+        company_required(profile.business_profile.views.LanguageExpertiseFormView.as_view()),
+        name='business-profile-expertise-languages'
     ),
     url(
-        r'^find-a-buyer/products-and-services/$',
-        RedirectView.as_view(pattern_name='find-a-buyer-expertise-products-services-routing'),
-        name='find-a-buyer-products-and-services'
+        r'^business-profile/products-and-services/$',
+        RedirectView.as_view(pattern_name='business-profile-expertise-products-services-routing'),
+        name='business-profile-products-and-services'
     ),
     url(
-        r'^find-a-buyer/add-expertise/products-and-services/$',
-        company_required(profile.fab.views.ProductsServicesRoutingFormView.as_view()),
-        name='find-a-buyer-expertise-products-services-routing'
+        r'^business-profile/add-expertise/products-and-services/$',
+        company_required(profile.business_profile.views.ProductsServicesRoutingFormView.as_view()),
+        name='business-profile-expertise-products-services-routing'
     ),
     url(
-        r'^find-a-buyer/add-expertise/products-and-services/other/$',
-        company_required(profile.fab.views.ProductsServicesOtherFormView.as_view()),
-        name='find-a-buyer-expertise-products-services-other'
+        r'^business-profile/add-expertise/products-and-services/other/$',
+        company_required(profile.business_profile.views.ProductsServicesOtherFormView.as_view()),
+        name='business-profile-expertise-products-services-other'
     ),
     url(
-        r'^find-a-buyer/add-expertise/products-and-services/(?P<category>.+)/$',
-        company_required(profile.fab.views.ProductsServicesFormView.as_view()),
-        name='find-a-buyer-expertise-products-services'
+        r'^business-profile/add-expertise/products-and-services/(?P<category>.+)/$',
+        company_required(profile.business_profile.views.ProductsServicesFormView.as_view()),
+        name='business-profile-expertise-products-services'
     ),
     url(
-        r'^find-a-buyer/verify/request/$',
-        company_required(profile.fab.views.IdentityVerificationRequestFormView.as_view()),
-        name='find-a-buyer-request-to-verify'
+        r'^business-profile/verify/request/$',
+        company_required(profile.business_profile.views.IdentityVerificationRequestFormView.as_view()),
+        name='business-profile-request-to-verify'
     ),
     url(
-        r'^find-a-buyer/personal-profile/',
-        include(urls_personal_profile, namespace='find-a-buyer-personal-profile')
-    )
+        r'^personal-profile/',
+        include(urls_personal_profile, namespace='personal-profile')
+    ),
+    url(
+        r'^find-a-buyer/(?P<path>[\w\-/]*)/$',
+        RedirectView.as_view(
+            url=urls.domestic.SINGLE_SIGN_ON_PROFILE / 'profile/business-profile/%(path)s', query_string=True
+        ),
+    ),
+    url(
+        r'^find-a-buyer/',
+        RedirectView.as_view(
+            url=urls.domestic.SINGLE_SIGN_ON_PROFILE / 'profile/business-profile/',
+            query_string=True),
+    ),
 ]
 
 
 if settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON']:
     urlpatterns += [
         url(
-            r'^find-a-buyer/admin/$',
-            company_required(profile.fab.views.AdminCollaboratorsListView.as_view()),
-            name='find-a-buyer-admin-tools'
+            r'^business-profile/admin/$',
+            company_required(profile.business_profile.views.AdminCollaboratorsListView.as_view()),
+            name='business-profile-admin-tools'
         ),
         url(
-            r'^find-a-buyer/admin/collaborator/(?P<sso_id>[0-9]+)/$',
-            company_admin_required(profile.fab.views.AdminCollaboratorEditFormView.as_view()),
-            name='find-a-buyer-admin-collaborator-edit'
+            r'^business-profile/admin/collaborator/(?P<sso_id>[0-9]+)/$',
+            company_admin_required(profile.business_profile.views.AdminCollaboratorEditFormView.as_view()),
+            name='business-profile-admin-collaborator-edit'
         ),
         url(
-            r'^find-a-buyer/admin/disconnect/$',
-            company_required(profile.fab.views.AdminDisconnectFormView.as_view()),
-            name='find-a-buyer-admin-disconnect'
+            r'^business-profile/admin/disconnect/$',
+            company_required(profile.business_profile.views.AdminDisconnectFormView.as_view()),
+            name='business-profile-admin-disconnect'
         ),
         url(
-            r'^find-a-buyer/admin/transfer/$',
-            company_admin_required(profile.fab.views.AdminInviteNewAdminFormView.as_view()),
-            name='find-a-buyer-admin-invite-administrator'
+            r'^business-profile/admin/transfer/$',
+            company_admin_required(profile.business_profile.views.AdminInviteNewAdminFormView.as_view()),
+            name='business-profile-admin-invite-administrator'
         ),
         url(
-            r'^find-a-buyer/admin/invite/$',
-            company_admin_required(profile.fab.views.AdminInviteCollaboratorFormView.as_view()),
-            name='find-a-buyer-admin-invite-collaborator'
+            r'^business-profile/admin/invite/$',
+            company_admin_required(profile.business_profile.views.AdminInviteCollaboratorFormView.as_view()),
+            name='business-profile-admin-invite-collaborator'
         ),
         url(
-            r'^find-a-buyer/admin/invite/delete/$',
-            company_admin_required(profile.fab.views.AdminInviteCollaboratorDeleteFormView.as_view()),
-            name='find-a-buyer-collaboration-invite-delete'
+            r'^business-profile/admin/invite/delete/$',
+            company_admin_required(profile.business_profile.views.AdminInviteCollaboratorDeleteFormView.as_view()),
+            name='business-profile-collaboration-invite-delete'
         ),
     ]
 else:
     urlpatterns += [
         url(
-            r'^find-a-buyer/admin/$',
-            company_required(profile.fab.views.AdminToolsView.as_view()),
-            name='find-a-buyer-admin-tools'
+            r'^business-profile/admin/$',
+            company_required(profile.business_profile.views.AdminToolsView.as_view()),
+            name='business-profile-admin-tools'
         ),
     ]
 
