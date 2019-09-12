@@ -2,6 +2,7 @@
 
 {% load static from staticfiles %}
 {% load success_box from directory_components %}
+{% block head_title %}Business profile - Account - great.gov.uk{% endblock %}
 
 {% block head_css %}
     {{ block.super }}
@@ -27,7 +28,7 @@
                         </div>
                     {% endif %}
                     {% if company.is_published_investment_support_directory %}
-                        <div> 
+                        <div>
                             <a href="{{ services_urls.isd }}{{ company.number }}/">View UK Investment Support Directory profile</a>
                         </div>
                     {% endif %}
@@ -182,7 +183,7 @@
 
                     <ul>
                         <li>
-                            
+
                             {% if company.facebook_url %}
                                 <a class="link" href="{{ company.facebook_url }}">
                                     <img alt="with Facebook" height="36px" src="{% static 'images/facebook.png' %}" width="36px" />
