@@ -15,6 +15,7 @@ from django.forms.forms import NON_FIELD_ERRORS
 
 from core.tests.helpers import create_response, reload_urlconf, submit_step_factory
 from profile.business_profile import constants, forms, helpers, views
+from directory_constants import urls
 
 
 def create_test_image(extension):
@@ -786,6 +787,7 @@ def test_personal_details(client, mock_create_user_profile, user):
 
 @mock.patch.object(api_client.company, 'verify_identity_request')
 def test_request_identity_verification(mock_verify_identity_request, client, user):
+
     mock_verify_identity_request.return_value = create_response()
 
     client.force_login(user)
@@ -1264,3 +1266,23 @@ def test_admin_collaborator_invite_delete(mock_collaborator_invite_delete, clien
     assert mock_collaborator_invite_delete.call_args == mock.call(
         sso_session_id=user.session_id, invite_key='1234'
     )
+
+
+def test_fab_redirect(client, user):
+    client.force_login(user)
+
+    url = '/profile/find-a-buyer/description/'
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == urls.domestic.HOME + 'profile/business-profile/description'
+
+
+def test_fab_redirect_landing(client, user):
+    client.force_login(user)
+
+    url = '/profile/find-a-buyer/'
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == urls.domestic.HOME + 'profile/business-profile/'

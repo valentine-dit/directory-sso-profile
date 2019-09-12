@@ -13,6 +13,7 @@ import profile.exops.views
 import profile.business_profile.views
 import profile.personal_profile.views
 import profile.soo.views
+from directory_constants import urls
 
 
 def no_company_required(function):
@@ -316,7 +317,17 @@ urlpatterns = [
     url(
         r'^personal-profile/',
         include(urls_personal_profile, namespace='personal-profile')
-    )
+    ),
+    url(
+        r'^find-a-buyer/(?P<path>[\w\-/]*)/$',
+        RedirectView.as_view(url=urls.domestic.HOME + 'profile/business-profile/%(path)s', query_string=True),
+    ),
+    url(
+        r'^find-a-buyer/',
+        RedirectView.as_view(
+            url=urls.domestic.HOME + 'profile/business-profile/',
+            query_string=True),
+    ),
 ]
 
 
