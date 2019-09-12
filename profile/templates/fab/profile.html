@@ -54,7 +54,7 @@
         {% if features.REQUEST_VERIFICATION_ON and company.is_identity_check_message_sent %}
             <p>We will be in contact within the next XX days and have sent you a confirmation email to {{ request.user.email }}</p>
         {% else %}
-            <p>Your business profile has not been published. Complete the steps below to promote your business to overseas buyers</p>
+            <p>Your business profile hasn't been published yet. Fill in the last few details to complete and publish.</p>
         {% endif %}
     </div>
     <div id="alerts-top" class="grid-row alerts-container margin-bottom-15 margin-top-30">
@@ -70,7 +70,7 @@
         {% elif not company.description %}
             <div class="column-two-thirds flag-red-text">
                 <h2 class="heading-medium margin-0">Add a business description</h2>
-                <p>Enter a description of your business for overseas buyers to see.</p>
+                <p>Tell buyers more about your business.</p>
             </div>
             <div class="column-one-third alerts-button-container">
                 <a class="button button-ghost-white" href="{% url 'find-a-buyer-description' %}">Add a business description</a>
@@ -119,7 +119,7 @@
 
             <div id="logo-container" class="border-thin border-light-grey padding-15">
                 {% if not company.logo %}
-                    <a id="add-image" href="{% url 'find-a-buyer-logo' %}" class="link">Add a logo</a>
+                    <a id="add-image" href="{% url 'find-a-buyer-logo' %}" class="link">Add a business logo</a>
                 {% else %}
                     <img alt="{{ company.name }}" src="{{ company.logo }}" />
                     <a id="edit-image" href="{% url 'find-a-buyer-logo' %}" class="link pencil-link">Edit</a>
@@ -232,12 +232,12 @@
             </div>
             <div class="{% if not company.email_address %}primary-action-required{% endif %} message-box border-medium border-stone background-white">
               <div class="grid-row">
-                <h3 class="box-heading heading-medium black-text column-one-half">Profile email</h3>
+                <h3 class="box-heading heading-medium black-text column-one-half">Profile email address</h3>
                 <div class="column-one-half right-column">
                     {% if company.email_address %}<a href="{% url 'find-a-buyer-email' %}" class="link pencil-link">Edit</a>{% endif %}
                 </div>
               </div>
-              <p class="mid-grey-text font-xsmall">This is the email address overseas buyers will use to contact you.</p>
+              <p class="mid-grey-text font-xsmall">Add an email address for buyers to contact you.</p>
               {% if company.email_address %}
                 <span>{{ company.email_address }}</span>
               {% else %}
@@ -253,7 +253,7 @@
                 </div>
               </div>
 
-              <p class="mid-grey-text font-xsmall">Tell overseas companies more about your business.</p>
+              <p class="mid-grey-text font-xsmall">Add a description for your business.</p>
               {% if company.description %}
                 <span>{{ company.description }}</span>
               {% else %}
@@ -270,7 +270,7 @@
                     {% endif %}
                 </div>
               </div>
-              <p class="mid-grey-text font-xsmall">Add search words to describe specialist knowledge or skills your business offers.</p>
+              <p class="mid-grey-text font-xsmall">Add some words and phrases that buyers might use when searching for your products and services.</p>
               {% if company.expertise_products_services %}
                 <dl>
                   {% for key, values in company.expertise_products_services.items %}
@@ -295,7 +295,7 @@
                 </div>
               </div>
               <div class="grid-row">
-                  <p class="mid-grey-text font-xsmall">Tell overseas buyers about your specialist knowledge or skills.</p>
+                  <p class="mid-grey-text font-xsmall">Add some words and phrases associated with your particular expertise.</p>
                   {% if company.has_expertise %}
                       <dl>
                         {% if company.expertise_industries %}
