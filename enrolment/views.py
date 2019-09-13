@@ -476,7 +476,7 @@ class BaseEnrolmentWizardView(
     RedirectAlreadyEnrolledMixin,
     RestartOnStepSkipped,
     core.mixins.PreventCaptchaRevalidationMixin,
-    core.mixins.CreateUserProfileMixin,
+    core.mixins.CreateUpdateUserProfileMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
     ReadUserIntentMixin,
@@ -499,7 +499,7 @@ class BaseEnrolmentWizardView(
 
     def process_step(self, form):
         if form.prefix == PERSONAL_INFO:
-            self.create_user_profile(form)
+            self.create_update_user_profile(form)
         return super().process_step(form)
 
 
