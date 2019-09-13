@@ -220,7 +220,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
         widget=Textarea(attrs={'rows': 3}),
     )
     sectors = forms.ChoiceField(
-        label='What industry is your company in?',
+        label='Which industry is your company in?',
         choices=INDUSTRY_CHOICES,
         container_css_classes='margin-top-30 margin-bottom-30',
     )
@@ -313,7 +313,7 @@ class NonCompaniesHouseSearch(CleanAddressMixin, forms.Form):
         required=False,
     )
     sectors = forms.ChoiceField(
-        label='What industry is your business in?',
+        label='Which industry is your business in?',
         choices=INDUSTRY_CHOICES,
     )
     website = forms.URLField(

@@ -6,7 +6,7 @@ from profile.personal_profile import forms
 import core.mixins
 
 
-class PersonalProfileEditFormView(core.mixins.CreateUserProfileMixin, SuccessMessageMixin, FormView):
+class PersonalProfileEditFormView(core.mixins.CreateUpdateUserProfileMixin, SuccessMessageMixin, FormView):
     template_name = 'personal_profile/personal-profile-edit-form.html'
     form_class = forms.PersonalProfileEdit
     success_url = reverse_lazy('personal-profile:display')
@@ -21,7 +21,7 @@ class PersonalProfileEditFormView(core.mixins.CreateUserProfileMixin, SuccessMes
         }
 
     def form_valid(self, form):
-        self.update_user_profile(form)
+        self.create_update_user_profile(form)
         return super().form_valid(form)
 
 

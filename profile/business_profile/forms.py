@@ -408,7 +408,7 @@ class NonCompaniesHouseBusinessDetailsForm(forms.Form):
         label='How many employees are in your business?',
     )
     sectors = forms.ChoiceField(
-        label='What industry is your business in?',
+        label='Which industry is your business in?',
         choices=INDUSTRY_CHOICES,
     )
 

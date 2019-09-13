@@ -26,6 +26,19 @@ def user():
     )
 
 
+@pytest.fixture
+def user_with_profile():
+    SSOUser = get_user_model()
+    return SSOUser(
+        id=1,
+        pk=1,
+        email='jim2@example.com',
+        session_id='123',
+        has_user_profile=True,
+        first_name='No Name'
+    )
+
+
 @pytest.fixture(autouse=True)
 def feature_flags(settings):
     # solves this issue: https://github.com/pytest-dev/pytest-django/issues/601

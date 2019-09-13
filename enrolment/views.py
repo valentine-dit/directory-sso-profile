@@ -39,7 +39,7 @@ PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT = (
 )
 PROGRESS_STEP_LABEL_VERIFICATION = 'Enter your confirmation code'
 PROGRESS_STEP_LABEL_RESEND_VERIFICATION = 'Resend verification'
-PROGRESS_STEP_LABEL_PERSONAL_INFO = 'Enter your details'
+PROGRESS_STEP_LABEL_PERSONAL_INFO = 'Enter your personal details'
 PROGRESS_STEP_LABEL_BUSINESS_TYPE = 'Select your business type'
 PROGRESS_STEP_LABEL_BUSINESS_DETAILS = 'Enter your business details'
 
@@ -476,7 +476,7 @@ class BaseEnrolmentWizardView(
     RedirectAlreadyEnrolledMixin,
     RestartOnStepSkipped,
     core.mixins.PreventCaptchaRevalidationMixin,
-    core.mixins.CreateUserProfileMixin,
+    core.mixins.CreateUpdateUserProfileMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
     ReadUserIntentMixin,
@@ -499,7 +499,7 @@ class BaseEnrolmentWizardView(
 
     def process_step(self, form):
         if form.prefix == PERSONAL_INFO:
-            self.create_user_profile(form)
+            self.create_update_user_profile(form)
         return super().process_step(form)
 
 
