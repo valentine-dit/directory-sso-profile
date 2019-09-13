@@ -24,7 +24,7 @@
 - TT-1812? - Fix error when saving with no profile
 - TT-1813 - Fix Telephone display in personal details
 - TT-1822 - Personal details 500 error
-- TT-1827 - fix Broken Fab Template
+- TT-1827 - fix Broken Fab Template - 500 error
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
