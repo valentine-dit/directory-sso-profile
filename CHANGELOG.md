@@ -3,7 +3,6 @@
 ## Pre-release
 
 ### Implemented enhancements
-- TT-1795 - Fixing second user registration journey
 - GTRANSFORM-364 - text changes on page titles
 - GTRANSFORM-364 - add descriptive page titles to profile journey templates
 - TT-1725 - Send email to company admin when a new user is added to company profile
@@ -34,6 +33,7 @@
 - TT-1709 - Account creation content change
 - No ticket - Handle user has no supplier on profile page
 - TT-1806 - do not prompt non companies house users to verify via companies house
+- TT-1795 - Fixing second user registration journey
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)
