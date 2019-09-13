@@ -3,6 +3,7 @@
 ## Pre-release
 
 ### Implemented enhancements
+- TT-1795 - Fixing second user registration journey
 - TT-1725 - Send email to company admin when a new user is added to company profile
 - TT-1734 - Add second user to already registered company profile
 - TT-1733 - Add request for individual verification feature
