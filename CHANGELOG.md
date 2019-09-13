@@ -4,6 +4,8 @@
 
 ### Implemented enhancements
 - TT-1795 - Fixing second user registration journey
+- GTRANSFORM-364 - text changes on page titles
+- GTRANSFORM-364 - add descriptive page titles to profile journey templates
 - TT-1725 - Send email to company admin when a new user is added to company profile
 - TT-1734 - Add second user to already registered company profile
 - TT-1733 - Add request for individual verification feature
@@ -18,6 +20,12 @@
 - TT-1642 - Handle incomplete companies house details
 - no ticket - Add IDs to relevant elements on CH enrolement success page
 - TT-1760 - added user profile update
+- TT-1808 - Update directory components to add "no-validate" no cache middleware
+- TT-1783 - Remove FAB Urls and Refactor
+- TT-1812? - Fix error when saving with no profile
+- TT-1813 - Fix Telephone display in personal details
+- TT-1822 - Personal details 500 error
+- TT-1827 - fix Broken Fab Template - 500 error
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
@@ -76,7 +84,7 @@
     + FEATURE_EXPERTISE_FIELDS_ENABLED
     + FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED
 - no ticket - Fall over if redis is not available
-- TT-1501 update isd-url view profile url 
+- TT-1501 update isd-url view profile url
 - TT-1321-industry-rewording
 
 ### Fixed bugs:
