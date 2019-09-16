@@ -1,10 +1,11 @@
 import abc
+from urllib.parse import unquote
 
 from directory_constants import urls
 from directory_sso_api_client import sso_api_client
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
-from urllib.parse import unquote
+import directory_components.mixins
 
 from django.conf import settings
 from django.contrib import messages
@@ -65,6 +66,22 @@ URL_INDIVIDUAL_ENROLMENT = reverse_lazy(
 URL_OVERSEAS_BUSINESS_ENROLMNET = reverse_lazy(
     'enrolment-overseas-business'
 )
+
+
+class GA360Mixin(directory_components.mixins.GA360Mixin, abc.ABC):
+
+    @property
+    @abc.abstractmethod
+    def google_analytics_page_id():
+        return ''
+
+    def dispatch(self, *args, **kwargs):
+        self.set_ga360_payload(
+            page_id=self.google_analytics_page_id,
+            business_unit=settings.GA360_BUSINESS_UNIT,
+            site_section='Enrolment',
+        )
+        return super().dispatch(*args, **kwargs)
 
 
 class RedirectLoggedInMixin:
@@ -415,8 +432,9 @@ class WriteUserIntentMixin:
 
 class BusinessTypeRoutingView(
     RedirectAlreadyEnrolledMixin, StepsListMixin, WriteUserIntentMixin,
-    ReadUserIntentMixin, FormView
+    ReadUserIntentMixin, GA360Mixin, FormView
 ):
+    google_analytics_page_id = 'EnrolmentBusinessTypeChooser'
     form_class = forms.BusinessType
     template_name = 'enrolment/business-type.html'
     steps_list_labels = [
@@ -453,10 +471,10 @@ class BusinessTypeRoutingView(
 
 class EnrolmentStartView(
     RedirectAlreadyEnrolledMixin, StepsListMixin, WriteUserIntentMixin,
-    ReadUserIntentMixin, TemplateView
+    ReadUserIntentMixin, GA360Mixin, TemplateView
 ):
+    google_analytics_page_id = 'EnrolmentStartPage'
     template_name = 'enrolment/start.html'
-
     steps_list_labels = [
         PROGRESS_STEP_LABEL_BUSINESS_TYPE,
         PROGRESS_STEP_LABEL_USER_ACCOUNT,
@@ -481,6 +499,7 @@ class BaseEnrolmentWizardView(
     StepsListMixin,
     ReadUserIntentMixin,
     CreateUserAccountMixin,
+    GA360Mixin,
     NamedUrlSessionWizardView
 ):
 
@@ -504,6 +523,7 @@ class BaseEnrolmentWizardView(
 
 
 class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizardView):
+    google_analytics_page_id = 'CompaniesHouseEnrolment'
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
             COMPANY_SEARCH: 2,
@@ -626,6 +646,7 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
 
 
 class NonCompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizardView):
+    google_analytics_page_id = 'NonCompaniesHouseEnrolment'
     steps_list_labels = [
         PROGRESS_STEP_LABEL_BUSINESS_TYPE,
         PROGRESS_STEP_LABEL_USER_ACCOUNT,
@@ -669,7 +690,8 @@ class NonCompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWi
         return context
 
 
-class IndividualUserEnrolmentInterstitial(ReadUserIntentMixin, TemplateView):
+class IndividualUserEnrolmentInterstitialView(ReadUserIntentMixin, GA360Mixin, TemplateView):
+    google_analytics_page_id = 'IndividualEnrolmentInterstitial'
     template_name = 'enrolment/individual-interstitial.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -682,6 +704,7 @@ class IndividualUserEnrolmentInterstitial(ReadUserIntentMixin, TemplateView):
 
 
 class IndividualUserEnrolmentView(BaseEnrolmentWizardView):
+    google_analytics_page_id = 'IndividualEnrolment'
     steps_list_labels = [
         PROGRESS_STEP_LABEL_BUSINESS_TYPE,
         PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT,
@@ -729,7 +752,7 @@ class IndividualUserEnrolmentView(BaseEnrolmentWizardView):
 
 
 class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
-
+    google_analytics_page_id = 'CollaboratorEnrolment'
     steps_list_labels = [
         PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT,
         PROGRESS_STEP_LABEL_VERIFICATION,
@@ -801,6 +824,7 @@ class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
 
 
 class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
+    google_analytics_page_id = 'PreVerifiedEnrolment'
     steps_list_labels = [
         PROGRESS_STEP_LABEL_USER_ACCOUNT,
         PROGRESS_STEP_LABEL_VERIFICATION,
@@ -879,9 +903,10 @@ class ResendVerificationCodeView(
     ProgressIndicatorMixin,
     StepsListMixin,
     CreateUserAccountMixin,
+    GA360Mixin,
     NamedUrlSessionWizardView
 ):
-
+    google_analytics_page_id = 'ResendVerificationCode'
     form_list = (
         (RESEND_VERIFICATION, forms.ResendVerificationCode),
         (VERIFICATION, forms.UserAccountVerification),
@@ -951,5 +976,6 @@ class ResendVerificationCodeView(
         return form_initial
 
 
-class EnrolmentOverseasBusinessView(ReadUserIntentMixin, TemplateView):
+class EnrolmentOverseasBusinessView(ReadUserIntentMixin, GA360Mixin, TemplateView):
+    google_analytics_page_id = 'OverseasBusinessEnrolment'
     template_name = 'enrolment/overseas-business.html'

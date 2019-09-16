@@ -21,7 +21,6 @@ COMPANIES_HOUSE_DATE_FORMAT = '%Y-%m-%d'
 CACHE_KEY_COMPANY_PROFILE = 'COMPANY_PROFILE'
 CACHE_KEY_IS_ENROLLED = 'IS_ENROLLED'
 
-
 ProgressIndicatorConf = collections.namedtuple(
     'ProgressIndicatorConf',
     ['step_counter_user', 'step_counter_anon']
