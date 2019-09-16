@@ -169,8 +169,11 @@ def get_company_admins(sso_session_id):
     return [collaborator for collaborator in collaborators if collaborator['role'] == user_roles.ADMIN]
 
 
-def create_company_member(data):
-    response = api_client.company.collaborator_create(data={**data, 'role': user_roles.MEMBER})
+def create_company_member(sso_session_id, data):
+    response = api_client.company.collaborator_create(
+        sso_session_id=sso_session_id,
+        data={**data, 'role': user_roles.MEMBER}
+    )
     response.raise_for_status()
 
 

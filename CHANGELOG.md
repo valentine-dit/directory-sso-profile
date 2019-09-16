@@ -35,6 +35,8 @@
 - TT-1806 - do not prompt non companies house users to verify via companies house
 - TT-1830 - No longer prompt users with profiles to create a profile
 - TT-1824 - Links no longer empty on 500 and 404 page
+- TT-1795 - Fixing second user registration journey
+- No Ticket - Amend retrieve_profile to send sso_id instead of sso_session_id
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)
