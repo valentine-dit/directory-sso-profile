@@ -39,7 +39,8 @@ def test_is_company_admin(mock_supplier, role, expected):
 @mock.patch.object(helpers, 'get_supplier_profile')
 def test_supplier(mock_get_supplier_profile):
     user = models.SSOUser(session_id='1234')
+    user.id=100
 
     assert user.supplier
     assert mock_get_supplier_profile.call_count == 1
-    assert mock_get_supplier_profile.call_args == mock.call('1234')
+    assert mock_get_supplier_profile.call_args == mock.call(100)
