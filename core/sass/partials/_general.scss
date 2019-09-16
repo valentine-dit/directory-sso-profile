@@ -13,29 +13,18 @@
 }
 
 .sso-profile-tab-container {
-  margin-top: 30px;
-  background-color: $stone-90;
 
-  .grid-row {
-    margin: 0;
+  ul {
+    display: flex;
+    flex-flow: wrap;
+    li {
+      a {
+        font-weight: bold;
+        color: #363636;
+        text-decoration: none;
+      }
+    }
   }
-}
-
-.sso-profile-tab-container ul {
-  padding-left: 0;
-}
-
-.sso-profile-tab-container li.active {
-  background-color: white;
-  border-top: 5px solid $flag-red;
-}
-
-.sso-profile-tab-container li a {
-  display: block;
-  font-weight: bold;
-  color: #363636;
-  padding: 20px;
-  text-decoration: none;
 }
 
 .sso-profile-toolbar-labels-container {
