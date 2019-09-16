@@ -381,3 +381,8 @@ urlpatterns = [
         include(urlpatterns)
     )
 ]
+
+
+handler404 = 'directory_components.views.handler404'
+
+handler500 = 'directory_components.views.handler500'
