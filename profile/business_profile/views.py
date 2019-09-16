@@ -23,7 +23,7 @@ MEDIA = 'images'
 
 class BusinessProfileView(TemplateView):
     template_name_fab_user = 'business_profile/profile.html'
-    template_name_not_fab_user = 'business_profile/is-not-business_profile-user.html'
+    template_name_not_fab_user = 'business_profile/is-not-business-profile-user.html'
 
     SUCCESS_MESSAGES = {
         'owner-transferred': (
