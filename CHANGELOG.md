@@ -3,6 +3,7 @@
 ## Pre-release
 
 ### Implemented enhancements
+- GTRANSFORM-364 - text changes on page titles
 - GTRANSFORM-364 - add descriptive page titles to profile journey templates
 - TT-1725 - Send email to company admin when a new user is added to company profile
 - TT-1734 - Add second user to already registered company profile
@@ -18,8 +19,12 @@
 - TT-1642 - Handle incomplete companies house details
 - no ticket - Add IDs to relevant elements on CH enrolement success page
 - TT-1760 - added user profile update
-- TT-1808: Update directory components to add "no-validate" no cache middleware
-- TT-1783-Remove-FAB-Urls-and-Refactor
+- TT-1808 - Update directory components to add "no-validate" no cache middleware
+- TT-1783 - Remove FAB Urls and Refactor
+- TT-1812? - Fix error when saving with no profile
+- TT-1813 - Fix Telephone display in personal details
+- TT-1822 - Personal details 500 error
+- TT-1827 - fix Broken Fab Template - 500 error
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
@@ -28,6 +33,10 @@
 - TT-1709 - Account creation content change
 - No ticket - Handle user has no supplier on profile page
 - TT-1806 - do not prompt non companies house users to verify via companies house
+- TT-1830 - No longer prompt users with profiles to create a profile
+- TT-1824 - Links no longer empty on 500 and 404 page
+- TT-1795 - Fixing second user registration journey
+- No Ticket - Amend retrieve_profile to send sso_id instead of sso_session_id
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)

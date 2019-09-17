@@ -23,7 +23,7 @@ MEDIA = 'images'
 
 class BusinessProfileView(TemplateView):
     template_name_fab_user = 'business_profile/profile.html'
-    template_name_not_fab_user = 'business_profile/is-not-business_profile-user.html'
+    template_name_not_fab_user = 'business_profile/is-not-business-profile-user.html'
 
     SUCCESS_MESSAGES = {
         'owner-transferred': (
@@ -588,7 +588,7 @@ class ProductsServicesOtherFormView(BaseFormView):
 
 
 class PersonalDetailsFormView(
-    core.mixins.CreateUserProfileMixin, SuccessMessageMixin, FormView
+    core.mixins.CreateUpdateUserProfileMixin, SuccessMessageMixin, FormView
 ):
     template_name = 'business_profile/personal-details-form.html'
     form_class = core.forms.PersonalDetails
@@ -596,7 +596,7 @@ class PersonalDetailsFormView(
     success_message = 'Details updated'
 
     def form_valid(self, form):
-        self.create_user_profile(form)
+        self.create_update_user_profile(form)
         return super().form_valid(form)
 
 

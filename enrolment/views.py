@@ -476,7 +476,7 @@ class BaseEnrolmentWizardView(
     RedirectAlreadyEnrolledMixin,
     RestartOnStepSkipped,
     core.mixins.PreventCaptchaRevalidationMixin,
-    core.mixins.CreateUserProfileMixin,
+    core.mixins.CreateUpdateUserProfileMixin,
     ProgressIndicatorMixin,
     StepsListMixin,
     ReadUserIntentMixin,
@@ -499,7 +499,7 @@ class BaseEnrolmentWizardView(
 
     def process_step(self, form):
         if form.prefix == PERSONAL_INFO:
-            self.create_user_profile(form)
+            self.create_update_user_profile(form)
         return super().process_step(form)
 
 
@@ -598,13 +598,15 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
         data = self.serialize_form_list(form_list)
         is_enrolled = helpers.get_is_enrolled(data['company_number'])
         if is_enrolled:
-            helpers.create_company_member(data={
-                'company': data['company_number'],
-                'sso_id': self.request.user.id,
-                'company_email': self.request.user.email,
-                'name': self.request.user.full_name,
-                'mobile_number': data.get('phone_number', ''),
-            })
+            helpers.create_company_member(
+                sso_session_id=self.request.user.session_id,
+                data={
+                    'company': data['company_number'],
+                    'sso_id': self.request.user.id,
+                    'company_email': self.request.user.email,
+                    'name': self.request.user.full_name,
+                    'mobile_number': data.get('phone_number', ''),
+                })
 
             helpers.notify_company_admins_member_joined(
                 sso_session_id=self.request.user.session_id,
