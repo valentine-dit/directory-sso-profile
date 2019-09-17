@@ -152,7 +152,7 @@ urlpatterns = [
     ),
     url(
         r'^enrol/business-type/individual/start/$',
-        enrolment.views.IndividualUserEnrolmentInterstitial.as_view(),
+        enrolment.views.IndividualUserEnrolmentInterstitialView.as_view(),
         name='enrolment-individual-interstitial'
     ),
     url(
