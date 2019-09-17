@@ -8,7 +8,7 @@ whitenoise==3.1
 sigauth==4.0.1
 directory-validators==5.1.0
 directory-healthcheck==1.0.1
-directory-components==32.3.0
+directory-components==33.1.1
 urllib3>=1.24.2<2.0.0
 django-formtools==2.0
 django-recaptcha==1.2.0
