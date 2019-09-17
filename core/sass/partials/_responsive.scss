@@ -14,7 +14,6 @@
     margin: 0;
     li {
       display: inline-block;
-      list-style-type: none;
       &.active {
         background-color: white;
         border-top: 5px solid $flag-red;
