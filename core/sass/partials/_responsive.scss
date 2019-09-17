@@ -9,12 +9,20 @@
   .sso-profile-fab-logo-container img {
     max-width: 200px;
   }
-  .sso-profile-tab-container li {
-    display: inline-block;
-    list-style-type: none;
-  }
+
   .sso-profile-tab-container ul {
     margin: 0;
+    li {
+      display: inline-block;
+      &.active {
+        background-color: white;
+        border-top: 5px solid $flag-red;
+      }
+      a {
+        display: block;
+        padding: 20px;
+      }
+    }
   }
 }
 
@@ -38,38 +46,29 @@
 
   .sso-profile-tab-container {
     background: none;
-  }
-
-  .sso-profile-tab-container li {
-    border-bottom: #ffffff solid 5px;
-    border-left: #ffffff solid 5px;
-    float: left;
-    margin: 0;
-    width: 49.2%;
-  }
-
-  .sso-profile-tab-container li a {
-    background-color: #F0F3F2;
-    border-bottom: 5px solid #F0F3F2;
-    display: block;
-    letter-spacing: -0.3px;
-    min-height: 60px;
-    padding: 10px 0 0 0;
-    text-align: center;
-  }
-
-  .sso-profile-tab-container li:nth-child(odd) {
-    border-right: none;
-    clear: left;
-  }
-
-  .sso-profile-tab-container li.active {
-    background-color: transparent;
-    border-top: none;
-  }
-
-  .sso-profile-tab-container li.active a {
-    border-bottom: 5px solid #E41F13;
+    li {
+      width: 50%;
+      &.active {
+        border-top: none;
+        a {
+          border-bottom: 5px solid #E41F13;
+        }
+      }
+      &:nth-child(odd) a {
+        margin-right: 5px;
+      }
+      a {
+        background-color: #F0F3F2;
+        border-bottom: 5px solid #F0F3F2;
+        text-align: center;
+        min-height: 60px;
+        margin-bottom: 5px;
+        padding-top: 5px;
+        display: flex;
+        justify-content: center; /* align horizontal */
+        align-items: center;
+      }
+    }
   }
 
   .sso-profile-toolbar-buttons-container {

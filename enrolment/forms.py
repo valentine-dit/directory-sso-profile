@@ -147,9 +147,7 @@ class UserAccountVerification(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.initial.get('email') is None:
-            self.fields['email'] = forms.EmailField(
-                label='Your email address'
-            )
+            self.fields['email'] = forms.EmailField(label='Your email address')
 
 
 class CompaniesHouseCompanySearch(forms.Form):

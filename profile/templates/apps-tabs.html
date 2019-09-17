@@ -25,10 +25,10 @@
             </div>
         </div>
     </div>
-    <div class="sso-profile-tab-container">
+    <div class="sso-profile-tab-container margin-top-30 background-stone-90">
         <div class="container">
-            <div class="grid-row">
-                <ul>
+            <div class="grid-row margin-0">
+                <ul class="padding-0">
                     <li class="{{ exops_tab_classes }}"><a href="{% url 'export-opportunities-applications' %}">Export opportunities</a></li>
                     <li class="{{ fab_tab_classes }}"><a href="{% url 'business-profile' %}">Business profile</a></li>
 					<li{% if request.resolver_match.namespace == 'personal-profile' %} class="active"{% endif %}><a href="{% url 'personal-profile:display' %}">Personal Details</a></li>
