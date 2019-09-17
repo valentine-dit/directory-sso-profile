@@ -37,8 +37,7 @@ class BusinessType(forms.Form):
         (
             constants.COMPANIES_HOUSE_COMPANY,
             (
-                'My business is registered with Companies House.  '
-                'For example, a limited company (Ltd), a public limited  '
+                'I represent a limited company (Ltd), a public limited  '
                 'company (PLC) or a Royal Charter company'
             )
         ),
@@ -52,7 +51,7 @@ class BusinessType(forms.Form):
         (
             constants.NOT_COMPANY,
             (
-                'I\'m a UK taxpayer but do not represent a business'
+                'I pay taxes in the UK but do not represent a business'
             )
         ),
         (
