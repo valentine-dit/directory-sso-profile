@@ -20,7 +20,7 @@ class SSOUser(directory_sso_api_client.models.SSOUser):
 
     @cached_property
     def supplier(self):
-        return helpers.get_supplier_profile(self.session_id)
+        return helpers.get_supplier_profile(self.id)
 
     @property
     def is_company_admin(self):

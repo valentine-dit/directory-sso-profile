@@ -277,18 +277,16 @@ def test_notify_company_admins_member_joined_not_ok(mock_get_company_admins):
 @mock.patch.object(helpers.api_client.company, 'collaborator_create')
 def test_add_collaborator(mock_add_collaborator):
 
-    helpers.create_company_member(data={
+    helpers.create_company_member(sso_session_id=300, data={
         'company': 1234,
-        'sso_id': 300,
         'company_email': 'xyz@xyzcorp.com',
         'name': 'Abc',
         'mobile_number': '9876543210',
     })
 
     assert mock_add_collaborator.call_count == 1
-    assert mock_add_collaborator.call_args == mock.call(data={
+    assert mock_add_collaborator.call_args == mock.call(sso_session_id=300, data={
         'company': 1234,
-        'sso_id': 300,
         'company_email': 'xyz@xyzcorp.com',
         'name': 'Abc',
         'mobile_number': '9876543210',
