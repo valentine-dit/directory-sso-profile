@@ -27,6 +27,7 @@
 - TT-1827 - fix Broken Fab Template - 500 error
 - No Ticket - Amend retrieve_profile to send sso_id instead of sso_session_id
 - TT-1702 - Add Google Analytics 360 settings for enrolment journey
+- TT-1845 - Show message for expired links
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
