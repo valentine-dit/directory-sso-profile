@@ -27,6 +27,8 @@
 - TT-1827 - fix Broken Fab Template - 500 error
 - No Ticket - Amend retrieve_profile to send sso_id instead of sso_session_id
 - TT-1702 - Add Google Analytics 360 settings for enrolment journey
+- TT-1845 - Show message for expired links
+- TT-1795 - Display error message to second user in registation journey
 - TT-1841 - Email not displayed on invite new admin
 
 ### Fixed bugs:

@@ -2048,7 +2048,8 @@ def test_collaborator_enrolment_wrong_invite_key(client, mock_collaborator_invit
     url = reverse('enrolment-collaboration', kwargs={'step': views.USER_ACCOUNT})
     response = client.get(f'{url}?invite_key=abc')
 
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.template_name == views.CollaboratorEnrolmentView.templates[views.INVITE_EXPIRED]
 
 
 def test_collaborator_enrolment_submit_end_to_end(
