@@ -10,7 +10,7 @@ import directory_components.mixins
 from django.conf import settings
 from django.contrib import messages
 from django.http import QueryDict
-from django.shortcuts import redirect, Http404
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.functional import cached_property
@@ -53,6 +53,7 @@ BUSINESS_INFO = 'business-details'
 PERSONAL_INFO = 'personal-details'
 FINISHED = 'finished'
 FAILURE = 'failure'
+INVITE_EXPIRED = 'invite-expired'
 
 URL_NON_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
     'enrolment-sole-trader', kwargs={'step': USER_ACCOUNT}
@@ -626,7 +627,8 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
                     'company_email': self.request.user.email,
                     'name': self.request.user.full_name,
                     'mobile_number': data.get('phone_number', ''),
-                })
+                }
+            )
 
             helpers.notify_company_admins_member_joined(
                 sso_session_id=self.request.user.session_id,
@@ -781,13 +783,26 @@ class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
         VERIFICATION: 'enrolment/user-account-verification.html',
         PERSONAL_INFO: 'enrolment/individual-personal-details.html',
         FINISHED: 'enrolment/individual-success.html',
+        INVITE_EXPIRED: 'enrolment/individual-collaborator-invite-expired.html'
     }
 
     def get(self, *args, **kwargs):
         if 'invite_key' in self.request.GET:
             self.request.session[SESSION_KEY_INVITE_KEY] = self.request.GET['invite_key']
             if not self.collaborator_invition:
-                raise Http404()
+                contact_url = urls.domestic.CONTACT_US / 'domestic/enquiries/'
+                context = {
+                    'contact_url': contact_url,
+                    'description': (
+                        'This invitation has expired, please contact your business profile administrator to request a '
+                        f'new invitation or <a href="{contact_url}"">contact us.</a>'
+                    )
+                }
+                return TemplateResponse(
+                    request=self.request,
+                    template=self.templates[INVITE_EXPIRED],
+                    context=context,
+                )
         # at this point all the steps will be hidden as the user is logged
         # in and has a user profile, so the normal `get` method fails with
         # IndexError, meaning `done` will not be hit. Working around this:
