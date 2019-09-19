@@ -409,13 +409,13 @@ class AdminInviteNewAdminFormView(SuccessMessageMixin, FormView):
 
     def get_success_message(self, cleaned_data):
         if cleaned_data['collaborator_email']:
-            message = (
+            success_message = (
                 'We have sent an invite to %(collaborator_email)s to become the new administrator for the business '
                 'profile. You will be notified when this happens.'
             )
         else:
-            message = 'Collaborator role changed to Admin'
-        return message
+            success_message = 'Collaborator role changed to Admin'
+        return success_message % cleaned_data
 
     @cached_property
     def collaborators(self):

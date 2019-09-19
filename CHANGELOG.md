@@ -29,6 +29,7 @@
 - TT-1702 - Add Google Analytics 360 settings for enrolment journey
 - TT-1845 - Show message for expired links
 - TT-1795 - Display error message to second user in registation journey
+- TT-1841 - Email not displayed on invite new admin
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
