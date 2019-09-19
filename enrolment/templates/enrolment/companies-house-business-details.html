@@ -11,6 +11,18 @@
     </div>
 {% endblock %}
 
+{% if is_enrolled %}
+	{% block below_form %}
+		<h2 class="heading-medium">Good news, this company already has a business profile</h2>
+		{% url 'enrolment-companies-house' step='company-search' as company_search_url %}
+		<p>Selected the wrong company? <a href="{{ company_search_url }}">Change company</a> </p>
+		<p>Save and continue to create a new user account for your business profile.</p>
+		<p>You can create multiple accounts for different people in your business and assign them different permissions.</p>
+		<p>Already have a user account? <a href="{{ sign_in_url }}">Sign in.</a></p>
+		<p>If you think your business should not yet have a profile, <a href="{{ contact_us_url }}">contact us.</a></p>
+	{% endblock %}
+{% endif %}
+
 
 {% block body_js %}
     {{ block.super }}
