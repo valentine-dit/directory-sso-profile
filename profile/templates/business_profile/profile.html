@@ -75,7 +75,7 @@
                 <a class="button button-ghost-white" href="{% url 'business-profile-description' %}">Add a business description</a>
             </div>
         {% elif not company.is_verified %}
-            {% if company.company_type == 'COMPANIES_HOUSE' %}
+            {% if company.is_in_companies_house %}
                 <div class="column-two-thirds flag-red-text">
                     <h2 class="heading-medium margin-0">Confirm your identity</h2>
                     <p>For security reasons, we need to check you're who you say you are.</p>
@@ -147,7 +147,7 @@
                         </dd>
                     {% endif %}
                     <dt>Business type</dt>
-                    {% if company.company_type == 'COMPANIES_HOUSE' %}
+                    {% if company.is_in_companies_house %}
                         <dd>UK business registered in Companies House</dd>
                     {% else %}
                         <dd>UK business not registered in Companies House</dd>

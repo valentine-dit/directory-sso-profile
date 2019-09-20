@@ -1,6 +1,7 @@
 from unittest import mock
 
 from directory_api_client import api_client
+from directory_constants import company_types
 import pytest
 
 from core.tests.helpers import create_response
@@ -8,13 +9,15 @@ from profile.business_profile import helpers
 
 
 @pytest.mark.parametrize('value,expected', (
-    ('COMPANIES_HOUSE', False),
-    ('SOLE_TRADER', True),
+    (company_types.COMPANIES_HOUSE, True),
+    (company_types.SOLE_TRADER, False),
+    (company_types.CHARITY, False),
+    (company_types.PARTNERSHIP, False),
 ))
-def test_profile_parser_is_sole_trader(value, expected):
+def test_profile_parser_is_in_companies_house(value, expected):
     parser = helpers.CompanyParser({'company_type': value})
 
-    assert parser.is_sole_trader is expected
+    assert parser.is_in_companies_house is expected
 
 
 def test_profile_parser_no_data_serialize_for_form():

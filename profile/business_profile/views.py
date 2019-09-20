@@ -198,9 +198,9 @@ class BusinessDetailsFormView(BaseFormView):
     template_name = 'business_profile/business-details-form.html'
 
     def get_form_class(self):
-        if self.request.user.company.is_sole_trader:
-            return forms.NonCompaniesHouseBusinessDetailsForm
-        return forms.CompaniesHouseBusinessDetailsForm
+        if self.request.user.company.is_in_companies_house:
+            return forms.CompaniesHouseBusinessDetailsForm
+        return forms.NonCompaniesHouseBusinessDetailsForm
 
     success_message = 'Business details updated'
 
