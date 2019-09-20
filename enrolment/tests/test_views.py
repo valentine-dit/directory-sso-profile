@@ -560,7 +560,7 @@ def test_companies_house_enrolment_change_company_name(
 
     assert response.context_data['form']['company_name'].data == 'Example corp'
     assert response.context_data['is_enrolled']
-    assert response.context_data['contact_us_url'] == (urls.domestic.CONTACT_US / 'domestic')
+    assert response.context_data['contact_us_url'] == urls.domestic.CONTACT_US / 'domestic'
 
 
 def test_companies_house_enrolment_expose_company(
