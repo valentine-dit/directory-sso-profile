@@ -2,7 +2,7 @@ import http
 
 from directory_api_client.client import api_client
 
-from directory_constants import user_roles
+from directory_constants import company_types, user_roles
 import directory_components.helpers
 
 
@@ -25,8 +25,8 @@ def get_supplier_profile(sso_id):
 class CompanyParser(directory_components.helpers.CompanyParser):
 
     @property
-    def is_sole_trader(self):
-        return self.data['company_type'] == 'SOLE_TRADER'
+    def is_in_companies_house(self):
+        return self.data['company_type'] == company_types.COMPANIES_HOUSE
 
     @property
     def is_identity_check_message_sent(self):
