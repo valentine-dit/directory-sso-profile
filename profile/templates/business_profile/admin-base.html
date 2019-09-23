@@ -42,19 +42,19 @@
                         {% endwith %}
                     </ul>
                 </section>
-				{% if company.is_publishable %}
-					<section class="margin-bottom-60">
-						<h6 class="bold-small margin-bottom-15">Business profile management</h6>
-						<ul>
-							{% with name='business-profile-publish' %}
-								<li class="{% if request.resolver_match.url_name == name %}bold-small{% endif %} margin-bottom-15">
-									<a href="{% url name %}" class="link">Publish settings</a>
-								</li>
-							{% endwith %}
-							<li>Delete business profile</li>
-						</ul>
-					</section>
-				{% endif %}
+		{% if company.is_publishable %}
+		    <section class="margin-bottom-60">
+		        <h6 class="bold-small margin-bottom-15">Business profile management</h6>
+			<ul>
+			    {% with name='business-profile-publish' %}
+			        <li class="{% if request.resolver_match.url_name == name %}bold-small{% endif %} margin-bottom-15">
+				    <a href="{% url name %}" class="link">Publish settings</a>
+				</li>
+			    {% endwith %}
+			    <li>Delete business profile</li>
+			</ul>
+		    </section>
+		{% endif %}
                 <a href="{% url 'business-profile-admin-tools' %}">Back</a>
             </div>
             <div class="column-three-quarters">
