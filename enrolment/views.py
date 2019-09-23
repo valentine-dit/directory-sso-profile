@@ -527,6 +527,13 @@ class BaseEnrolmentWizardView(
             self.create_update_user_profile(form)
         return super().process_step(form)
 
+    def get_form_kwargs(self, step=None):
+        form_kwargs = super().get_form_kwargs(step=step)
+        if step == PERSONAL_INFO:
+            # only show if not creating user account. create user account step also shows terms agreed
+            form_kwargs['ask_terms_agreed'] = not bool(self.get_cleaned_data_for_step(VERIFICATION))
+        return form_kwargs
+
 
 class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizardView):
     google_analytics_page_id = 'CompaniesHouseEnrolment'
