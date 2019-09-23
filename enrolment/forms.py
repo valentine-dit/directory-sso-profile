@@ -199,6 +199,7 @@ class CompaniesHouseBusinessDetails(forms.Form):
         disabled=True,
         required=False,
         container_css_classes='border-active-blue read-only-input-container',
+        widget=Textarea(attrs={'rows': 3})
     )
     date_of_creation = forms.DateField(
         label='Incorporated on',

@@ -105,10 +105,10 @@ Therefore to make cookie sharing work in development we need the apps to be runn
 [code-climate-image]: https://codeclimate.com/github/uktrade/directory-sso-profile/badges/issue_count.svg
 [code-climate]: https://codeclimate.com/github/uktrade/directory-sso-profile
 
-[circle-ci-image]: https://circleci.com/gh/uktrade/directory-sso-profile/tree/master.svg?style=svg
-[circle-ci]: https://circleci.com/gh/uktrade/directory-sso-profile/tree/master
+[circle-ci-image]: https://circleci.com/gh/uktrade/directory-sso-profile/tree/develop.svg?style=shield
+[circle-ci]: https://circleci.com/gh/uktrade/directory-sso-profile/tree/develop
 
-[codecov-image]: https://codecov.io/gh/uktrade/directory-sso-profile/branch/master/graph/badge.svg
+[codecov-image]: https://codecov.io/gh/uktrade/directory-sso-profile/branch/develop/graph/badge.svg
 [codecov]: https://codecov.io/gh/uktrade/directory-sso-profile
 
 [gitflow-image]: https://img.shields.io/badge/Branching%20strategy-gitflow-5FBB1C.svg

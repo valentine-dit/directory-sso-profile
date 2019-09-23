@@ -1,15 +1,16 @@
 import abc
+from urllib.parse import unquote
 
 from directory_constants import urls
 from directory_sso_api_client import sso_api_client
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
-from urllib.parse import unquote
+import directory_components.mixins
 
 from django.conf import settings
 from django.contrib import messages
 from django.http import QueryDict
-from django.shortcuts import redirect, Http404
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.functional import cached_property
@@ -52,6 +53,7 @@ BUSINESS_INFO = 'business-details'
 PERSONAL_INFO = 'personal-details'
 FINISHED = 'finished'
 FAILURE = 'failure'
+INVITE_EXPIRED = 'invite-expired'
 
 URL_NON_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
     'enrolment-sole-trader', kwargs={'step': USER_ACCOUNT}
@@ -65,6 +67,22 @@ URL_INDIVIDUAL_ENROLMENT = reverse_lazy(
 URL_OVERSEAS_BUSINESS_ENROLMNET = reverse_lazy(
     'enrolment-overseas-business'
 )
+
+
+class GA360Mixin(directory_components.mixins.GA360Mixin, abc.ABC):
+
+    @property
+    @abc.abstractmethod
+    def google_analytics_page_id():
+        return ''
+
+    def dispatch(self, *args, **kwargs):
+        self.set_ga360_payload(
+            page_id=self.google_analytics_page_id,
+            business_unit=settings.GA360_BUSINESS_UNIT,
+            site_section='Enrolment',
+        )
+        return super().dispatch(*args, **kwargs)
 
 
 class RedirectLoggedInMixin:
@@ -415,8 +433,9 @@ class WriteUserIntentMixin:
 
 class BusinessTypeRoutingView(
     RedirectAlreadyEnrolledMixin, StepsListMixin, WriteUserIntentMixin,
-    ReadUserIntentMixin, FormView
+    ReadUserIntentMixin, GA360Mixin, FormView
 ):
+    google_analytics_page_id = 'EnrolmentBusinessTypeChooser'
     form_class = forms.BusinessType
     template_name = 'enrolment/business-type.html'
     steps_list_labels = [
@@ -453,10 +472,10 @@ class BusinessTypeRoutingView(
 
 class EnrolmentStartView(
     RedirectAlreadyEnrolledMixin, StepsListMixin, WriteUserIntentMixin,
-    ReadUserIntentMixin, TemplateView
+    ReadUserIntentMixin, GA360Mixin, TemplateView
 ):
+    google_analytics_page_id = 'EnrolmentStartPage'
     template_name = 'enrolment/start.html'
-
     steps_list_labels = [
         PROGRESS_STEP_LABEL_BUSINESS_TYPE,
         PROGRESS_STEP_LABEL_USER_ACCOUNT,
@@ -481,11 +500,17 @@ class BaseEnrolmentWizardView(
     StepsListMixin,
     ReadUserIntentMixin,
     CreateUserAccountMixin,
+    GA360Mixin,
     NamedUrlSessionWizardView
 ):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        if self.steps.current == BUSINESS_INFO:
+            previous_data = self.get_cleaned_data_for_step(COMPANY_SEARCH)
+            if previous_data:
+                context['is_enrolled'] = helpers.get_is_enrolled(previous_data['company_number'])
+                context['contact_us_url'] = (urls.domestic.CONTACT_US / 'domestic')
         if self.steps.current == PERSONAL_INFO:
             context['company'] = self.get_cleaned_data_for_step(BUSINESS_INFO)
         elif self.steps.current == VERIFICATION:
@@ -504,6 +529,7 @@ class BaseEnrolmentWizardView(
 
 
 class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizardView):
+    google_analytics_page_id = 'CompaniesHouseEnrolment'
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
             COMPANY_SEARCH: 2,
@@ -606,7 +632,8 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
                     'company_email': self.request.user.email,
                     'name': self.request.user.full_name,
                     'mobile_number': data.get('phone_number', ''),
-                })
+                }
+            )
 
             helpers.notify_company_admins_member_joined(
                 sso_session_id=self.request.user.session_id,
@@ -626,6 +653,7 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
 
 
 class NonCompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizardView):
+    google_analytics_page_id = 'NonCompaniesHouseEnrolment'
     steps_list_labels = [
         PROGRESS_STEP_LABEL_BUSINESS_TYPE,
         PROGRESS_STEP_LABEL_USER_ACCOUNT,
@@ -669,7 +697,8 @@ class NonCompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWi
         return context
 
 
-class IndividualUserEnrolmentInterstitial(ReadUserIntentMixin, TemplateView):
+class IndividualUserEnrolmentInterstitialView(ReadUserIntentMixin, GA360Mixin, TemplateView):
+    google_analytics_page_id = 'IndividualEnrolmentInterstitial'
     template_name = 'enrolment/individual-interstitial.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -682,6 +711,7 @@ class IndividualUserEnrolmentInterstitial(ReadUserIntentMixin, TemplateView):
 
 
 class IndividualUserEnrolmentView(BaseEnrolmentWizardView):
+    google_analytics_page_id = 'IndividualEnrolment'
     steps_list_labels = [
         PROGRESS_STEP_LABEL_BUSINESS_TYPE,
         PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT,
@@ -729,7 +759,7 @@ class IndividualUserEnrolmentView(BaseEnrolmentWizardView):
 
 
 class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
-
+    google_analytics_page_id = 'CollaboratorEnrolment'
     steps_list_labels = [
         PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT,
         PROGRESS_STEP_LABEL_VERIFICATION,
@@ -758,13 +788,26 @@ class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
         VERIFICATION: 'enrolment/user-account-verification.html',
         PERSONAL_INFO: 'enrolment/individual-personal-details.html',
         FINISHED: 'enrolment/individual-success.html',
+        INVITE_EXPIRED: 'enrolment/individual-collaborator-invite-expired.html'
     }
 
     def get(self, *args, **kwargs):
         if 'invite_key' in self.request.GET:
             self.request.session[SESSION_KEY_INVITE_KEY] = self.request.GET['invite_key']
             if not self.collaborator_invition:
-                raise Http404()
+                contact_url = urls.domestic.CONTACT_US / 'domestic/enquiries/'
+                context = {
+                    'contact_url': contact_url,
+                    'description': (
+                        'This invitation has expired, please contact your business profile administrator to request a '
+                        f'new invitation or <a href="{contact_url}"">contact us.</a>'
+                    )
+                }
+                return TemplateResponse(
+                    request=self.request,
+                    template=self.templates[INVITE_EXPIRED],
+                    context=context,
+                )
         # at this point all the steps will be hidden as the user is logged
         # in and has a user profile, so the normal `get` method fails with
         # IndexError, meaning `done` will not be hit. Working around this:
@@ -801,6 +844,7 @@ class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
 
 
 class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
+    google_analytics_page_id = 'PreVerifiedEnrolment'
     steps_list_labels = [
         PROGRESS_STEP_LABEL_USER_ACCOUNT,
         PROGRESS_STEP_LABEL_VERIFICATION,
@@ -879,9 +923,10 @@ class ResendVerificationCodeView(
     ProgressIndicatorMixin,
     StepsListMixin,
     CreateUserAccountMixin,
+    GA360Mixin,
     NamedUrlSessionWizardView
 ):
-
+    google_analytics_page_id = 'ResendVerificationCode'
     form_list = (
         (RESEND_VERIFICATION, forms.ResendVerificationCode),
         (VERIFICATION, forms.UserAccountVerification),
@@ -951,5 +996,6 @@ class ResendVerificationCodeView(
         return form_initial
 
 
-class EnrolmentOverseasBusinessView(ReadUserIntentMixin, TemplateView):
+class EnrolmentOverseasBusinessView(ReadUserIntentMixin, GA360Mixin, TemplateView):
+    google_analytics_page_id = 'OverseasBusinessEnrolment'
     template_name = 'enrolment/overseas-business.html'
