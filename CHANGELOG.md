@@ -49,6 +49,7 @@
 - TT-1840 - Remove errant red line from case study wizard
 - TT-1852 - Allow non-companies house company to edit their business details
 - TT-1807 - Hide Publish button on admin
+- TT-1857   - Companies House fix request manual verification
 - TT-1819 - Fixing missing background image on tooltip on profile about page
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
