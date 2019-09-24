@@ -1,6 +1,8 @@
 # Changelog
 
 ## Pre-release
+## Hotfix
+- TT-1853 - 404-guidence-page
 
 ### Implemented enhancements
 - TT-990  - Update registration journey of individual user
