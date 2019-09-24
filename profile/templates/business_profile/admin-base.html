@@ -42,7 +42,7 @@
                         {% endwith %}
                     </ul>
                 </section>
-		{% if company.is_publishable %}
+		{% if request.user.company.is_publishable %}
 		    <section class="margin-bottom-60">
 		        <h6 class="bold-small margin-bottom-15">Business profile management</h6>
 			<ul>
