@@ -14,7 +14,7 @@
 
 {% block below_form %}
     {% if is_enrolled %}
-        <h2 class="heading-medium">Good news, this company already has a business profile {{is_enrolled}}</h2>
+        <h2 class="heading-medium">Good news, this company already has a business profile</h2>
         {% url 'enrolment-companies-house' step='company-search' as company_search_url %}
         <p>Selected the wrong company? <a href="{{ company_search_url }}">Change company</a> </p>
         <p>Save and continue to create a new user account for your business profile. You can create
