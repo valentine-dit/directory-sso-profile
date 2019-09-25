@@ -32,7 +32,7 @@
 - TT-1845 - Show message for expired links
 - TT-1795 - Display error message to second user in registation journey
 - TT-1841 - Email not displayed on invite new admin
-- TT-1786 - Change 'start now' text on wizard
+- TT-1786 - Change 'start now' text on wizardTT-1853
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
