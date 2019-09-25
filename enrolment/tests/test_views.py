@@ -521,9 +521,12 @@ def test_companies_house_enrolment_already_has_profile(
     )
 
 
+@mock.patch('enrolment.helpers.get_is_enrolled')
 def test_companies_house_enrolment_change_company_name(
-    client, submit_companies_house_step, steps_data, user
+    mock_get_is_enrolled, client, submit_companies_house_step, steps_data, user
 ):
+    mock_get_is_enrolled.return_value = True
+
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
 
@@ -556,6 +559,8 @@ def test_companies_house_enrolment_change_company_name(
     response = client.get(response.url)
 
     assert response.context_data['form']['company_name'].data == 'Example corp'
+    assert response.context_data['is_enrolled']
+    assert response.context_data['contact_us_url'] == urls.domestic.CONTACT_US / 'domestic'
 
 
 def test_companies_house_enrolment_expose_company(
