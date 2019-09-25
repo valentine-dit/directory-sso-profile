@@ -49,6 +49,8 @@
 - TT-1816 - Upgrade directory components to fix js in non-chrome
 - TT-1840 - Remove errant red line from case study wizard
 - TT-1852 - Allow non-companies house company to edit their business details
+- TT-1807 - Hide Publish button on admin
+TT-1857   - Companies House fix request manual verification
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)
