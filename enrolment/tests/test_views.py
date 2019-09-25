@@ -538,6 +538,9 @@ def test_companies_house_enrolment_change_company_name(
     response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
     assert response.status_code == 302
 
+    response = client.get(response.url)
+    assert response.context_data['contact_us_url'] == urls.domestic.CONTACT_US / 'domestic'
+
     # given the user has submitted their company details
     response = submit_companies_house_step(
         data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
