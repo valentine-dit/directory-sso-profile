@@ -1,6 +1,8 @@
 # Changelog
 
 ## Pre-release
+## Hotfix
+- TT-1853 - 404-guidence-page
 
 ### Implemented enhancements
 - GTRANSFORM-364 - text changes on page titles
