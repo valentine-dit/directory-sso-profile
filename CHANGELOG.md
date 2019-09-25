@@ -53,6 +53,7 @@
 - TT-1807 - Hide Publish button on admin
 - TT-1857 - Companies House fix request manual verification
 - TT-1856 - fix persistent is_enroled msg
+- TT-1797 - correct page titles
 
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
