@@ -220,7 +220,7 @@ class CreateUserAccountMixin:
         return bool(self.request.user.is_anonymous)
 
     def new_enrollment_condition(self):
-        return 'is_new_enrollment' in self.storage.extra_data['step_data']
+        return 'is_new_enrollment' in self.storage.extra_data
 
     def verification_condition(self):
         return self.request.user.is_anonymous
@@ -316,7 +316,7 @@ class CreateUserAccountMixin:
                 upstream_response.headers['set-cookie']
             )
             response.cookies.update(cookies)
-            self.storage.data['step_data']['is_new_enrollment'] = True
+            self.storage.extra_data['is_new_enrollment'] = True
             return response
 
 
