@@ -32,6 +32,7 @@
 - TT-1845 - Show message for expired links
 - TT-1795 - Display error message to second user in registation journey
 - TT-1841 - Email not displayed on invite new admin
+- TT-1821 - Change `I can't find my business` link on company's house registration.
 - TT-1786 - Change 'start now' text on wizard
 
 ### Fixed bugs:
@@ -53,10 +54,11 @@
 - TT-1807 - Hide Publish button on admin
 - TT-1857 - Companies House fix request manual verification
 - TT-1856 - fix persistent is_enroled msg
+- TT-1857   - Companies House fix request manual verification
 - TT-1797 - correct page titles
+- TT-1819 - Fixing missing background image on tooltip on profile about page
 - TT-1899 - fix telephone display and correct case on personal details
 - TT-1789 - Wizard drops steps on changing business-type
-
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)

@@ -12,7 +12,13 @@
 {% endblock %}
 
 {% block below_form %}
-  <p><a class="link" href="{{ services_urls.great_domestic }}/contact/triage/great-account/company-not-found/" id="cannot-find-company-name">I cannot find my business name</a></p>
+	<details closed>
+		<summary>I cannot find my business name</summary>
+		<p class="border-light-grey" id="cannot-find-business-text">
+			Double check your business type and company name above.
+			If you still need help, <a href="{{ contact_us_url }}">contact us.</a>
+		</p>
+	</details>
 {% endblock %}
 
 
