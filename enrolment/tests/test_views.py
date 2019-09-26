@@ -466,6 +466,22 @@ def test_enrolment_routing_individual_business_profile_intent(client, user):
     assert response.url == reverse('enrolment-individual-interstitial')
 
 
+def test_enrolment_is_new_enrollement( client, submit_companies_house_step, steps_data, user):
+    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+    client.force_login(user)
+    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    assert response.status_code == 302
+    response = client.get(
+        reverse('enrolment-business-type'),
+        {'new_enrollment': True}
+    )
+    assert response.status_code == 200
+
+
 def test_companies_house_enrolment(
     client, submit_companies_house_step, steps_data, user
 ):
