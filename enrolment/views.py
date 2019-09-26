@@ -113,11 +113,16 @@ class StepsListMixin(abc.ABC):
         pass  # pragma: no cover
 
     def should_show_anon_progress_indicator(self):
-        return self.request.user.is_anonymous
+
+        if self.request.GET.get('new_enrollment'):
+            return True
+        else:
+            return self.request.user.is_anonymous
 
     @property
     def step_labels(self):
         labels = self.steps_list_labels[:]
+        print(labels)
         if not self.should_show_anon_progress_indicator():
             self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_USER_ACCOUNT)
             self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_VERIFICATION)
@@ -126,7 +131,6 @@ class StepsListMixin(abc.ABC):
 
         if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
             self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_BUSINESS_TYPE)
-
         return labels
 
     def remove_label(self, labels, label):
@@ -216,7 +220,7 @@ class CreateUserAccountMixin:
         if skipped_first_step:
             return False
 
-        return self.request.user.is_anonymous
+        return bool(self.request.user.is_anonymous)
 
     def verification_condition(self):
         return self.request.user.is_anonymous
@@ -279,6 +283,12 @@ class CreateUserAccountMixin:
         if form.prefix == VERIFICATION:
             response = self.validate_code(form=form, response=response)
         return response
+
+    def get_context_data(self,**kwargs):
+        return super().get_context_data(
+            user_account_condition=not self.user_account_condition(),
+            **kwargs
+        )
 
     def validate_code(self, form, response):
         try:

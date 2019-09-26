@@ -32,7 +32,7 @@
 - TT-1845 - Show message for expired links
 - TT-1795 - Display error message to second user in registation journey
 - TT-1841 - Email not displayed on invite new admin
-- TT-1786 - Change 'start now' text on wizardTT-1853
+- TT-1786 - Change 'start now' text on wizard
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
@@ -54,6 +54,8 @@
 - TT-1857 - Companies House fix request manual verification
 - TT-1856 - fix persistent is_enroled msg
 - TT-1797 - correct page titles
+- TT-1899 - fix telephone display and correct case on personal details
+- TT-179 - Wizard drops steps on changing business-type
 
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
