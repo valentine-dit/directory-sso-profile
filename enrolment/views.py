@@ -121,7 +121,6 @@ class StepsListMixin(abc.ABC):
     @property
     def step_labels(self):
         labels = self.steps_list_labels[:]
-        print(labels)
         if not self.should_show_anon_progress_indicator():
             self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_USER_ACCOUNT)
             self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_VERIFICATION)
@@ -221,7 +220,7 @@ class CreateUserAccountMixin:
         return bool(self.request.user.is_anonymous)
 
     def new_enrollment_condition(self):
-        return 'is_new_enrollment' in self.storage.data['step_data']
+        return 'is_new_enrollment' in self.storage.extra_data['step_data']
 
     def verification_condition(self):
         return self.request.user.is_anonymous
