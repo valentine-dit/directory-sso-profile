@@ -34,6 +34,7 @@
 - TT-1841 - Email not displayed on invite new admin
 - TT-1786 - Change 'start now' text on wizardTT-1853
 - TT-1821 - Change `I can't find my business` link on company's house registration.
+- no ticket - Replace `DIRECTORY_CONSTANTS_URL_GREAT_INTERNATIONAL` with `DIRECTORY_CONSTANTS_URL_INTERNATIONAL`
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
