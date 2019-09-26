@@ -466,7 +466,7 @@ def test_enrolment_routing_individual_business_profile_intent(client, user):
     assert response.url == reverse('enrolment-individual-interstitial')
 
 
-def test_enrolment_is_new_enrollement( client, submit_companies_house_step, steps_data, user):
+def test_enrolment_is_new_enrollement(client, submit_companies_house_step, steps_data, user):
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
 

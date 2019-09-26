@@ -212,8 +212,6 @@ class CreateUserAccountMixin:
         # the email from another browser session
         # - user submitted the first step then followed the email from another
         # device
-        import pdb
-        #pdb.set_trace()
         skipped_first_step = (
             self.kwargs['step'] == VERIFICATION and
             USER_ACCOUNT not in self.storage.data['step_data']
