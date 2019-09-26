@@ -515,7 +515,9 @@ class BaseEnrolmentWizardView(
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        if self.steps.current == BUSINESS_INFO:
+        if self.steps.current == COMPANY_SEARCH:
+            context['contact_us_url'] = (urls.domestic.CONTACT_US / 'domestic')
+        elif self.steps.current == BUSINESS_INFO:
             previous_data = self.get_cleaned_data_for_step(COMPANY_SEARCH)
             if previous_data:
                 context['is_enrolled'] = helpers.get_is_enrolled(previous_data['company_number'])
