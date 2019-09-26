@@ -113,7 +113,6 @@ class StepsListMixin(abc.ABC):
         pass  # pragma: no cover
 
     def should_show_anon_progress_indicator(self):
-
         if self.request.GET.get('new_enrollment'):
             return True
         else:
@@ -284,7 +283,7 @@ class CreateUserAccountMixin:
             response = self.validate_code(form=form, response=response)
         return response
 
-    def get_context_data(self,**kwargs):
+    def get_context_data(self, **kwargs):
         return super().get_context_data(
             user_account_condition=not self.user_account_condition(),
             **kwargs
