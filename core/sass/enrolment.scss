@@ -151,3 +151,12 @@ body.js-enabled {
     }
   }
 }
+
+@media (min-width: 769px) {
+    #cannot-find-business-text {
+        border-left-width: 5px;
+        border-style: solid;
+        margin: 5px 5px 5px 0px;
+        padding: 5px 5px 5px 20px;
+    }
+}
