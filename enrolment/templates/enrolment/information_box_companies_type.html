@@ -11,6 +11,6 @@
 	    I'm a sole trader or represent another type of UK business not registered with Companies House
         {% endif %}
         <br>
-        <a href="{{ link_url|default:default_link_url }}?new_enrollment={{user_account_condition}}" class="link" id="change-business-type">{{ link_text|default:'Change business type' }}</a>
+        <a href="{{ link_url|default:default_link_url }}?new_enrollment={{new_enrollment_condition}}" class="link" id="change-business-type">{{ link_text|default:'Change business type' }}</a>
     </p>
 </div>

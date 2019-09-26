@@ -113,7 +113,7 @@ class StepsListMixin(abc.ABC):
         pass  # pragma: no cover
 
     def should_show_anon_progress_indicator(self):
-        if self.request.GET.get('new_enrollment'):
+        if self.request.GET.get('new_enrollment') == 'True':
             return True
         else:
             return self.request.user.is_anonymous
@@ -212,14 +212,18 @@ class CreateUserAccountMixin:
         # the email from another browser session
         # - user submitted the first step then followed the email from another
         # device
+        import pdb
+        #pdb.set_trace()
         skipped_first_step = (
             self.kwargs['step'] == VERIFICATION and
             USER_ACCOUNT not in self.storage.data['step_data']
         )
         if skipped_first_step:
             return False
-
         return bool(self.request.user.is_anonymous)
+
+    def new_enrollment_condition(self):
+        return 'is_new_enrollment' in self.storage.data['step_data']
 
     def verification_condition(self):
         return self.request.user.is_anonymous
@@ -285,7 +289,7 @@ class CreateUserAccountMixin:
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            user_account_condition=not self.user_account_condition(),
+            new_enrollment_condition=self.new_enrollment_condition(),
             **kwargs
         )
 
@@ -315,6 +319,7 @@ class CreateUserAccountMixin:
                 upstream_response.headers['set-cookie']
             )
             response.cookies.update(cookies)
+            self.storage.data['step_data']['is_new_enrollment'] = True
             return response
 
 
