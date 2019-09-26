@@ -55,7 +55,7 @@
 - TT-1856 - fix persistent is_enroled msg
 - TT-1797 - correct page titles
 - TT-1899 - fix telephone display and correct case on personal details
-- TT-179 - Wizard drops steps on changing business-type
+- TT-1789 - Wizard drops steps on changing business-type
 
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
