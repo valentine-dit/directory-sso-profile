@@ -14,12 +14,10 @@
 
 {% block below_form %}
     {% if is_enrolled %}
-        <h2 class="heading-medium">Good news, this company already has a business profile</h2>
+        <h2 class="heading-medium">Good news, a Business Profile already exists for this company</h2>
         {% url 'enrolment-companies-house' step='company-search' as company_search_url %}
-        <p>Selected the wrong company? <a href="{{ company_search_url }}">Change company</a> </p>
-        <p>Save and continue to create a new user account for your business profile. You can create
-			multiple accounts for different people in your business and assign them different permissions.</p>
-        <p>If you think your business should not yet have a profile, <a href="{{ contact_us_url }}">contact us.</a></p>
+  	<p>Save and continue to become a member of the profile. When you do, we'll notify the administrators.</p>
+        <p>Something wrong? <a href="{{ contact_us_url }}">Contact us.</a></p>
     {% endif %}
 {% endblock %}
 
