@@ -17,8 +17,14 @@
         <p>Invite collaborators and select the role.</p>
         <form method="post" enctype="multipart/form-data">
             {{ form }}
+			<details closed>
+			    <summary>Help with roles</summary>
+			    <p class="border-light-grey" id="help-with-roles-text">
+				    Admins can do everything members can, plus edit, publish and delete the business profile invite, remove and change permissions of colloborators.
+			    </p>
+		    </details>
             <button class="button padding-left-60 padding-right-60">Send invite</button>
-        </form>
+		</form>
     </section>
  	<section class="width-full">
         <h2 class="heading-large margin-top-0 margin-bottom-15">Collaborators invited</h2>
@@ -54,7 +60,6 @@
 			{% endif %}
             </tbody>
           </table>
-		<p>Admins can do everything members can, plus edit, publish and delete the business profile invite, remove and change permissions of colloborators.</p>
-      </section>
+	  </section>
 </section>
 {% endblock %}
