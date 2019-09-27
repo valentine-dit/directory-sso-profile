@@ -13,7 +13,9 @@ from profile.business_profile import constants, validators
 
 INDUSTRY_CHOICES = [('', 'Select an industry')] + list(choices.INDUSTRIES)
 EMPLOYEES_CHOICES = [('', 'Select employees')] + list(choices.EMPLOYEES)
-USER_ROLE_CHOICES = [('', 'Select role')] + list(choices.USER_ROLES)
+USER_ROLE_CHOICES = [('', 'Select role')] + \
+                    list(filter(lambda choice: choice[0] != user_roles.EDITOR,
+                           choices.USER_ROLES))
 REMOVE_COLLABORATOR = 'REMOVE'
 CHANGE_COLLABORATOR_TO_EDITOR = 'CHANGE_TO_EDITOR'
 CHANGE_COLLABORATOR_TO_MEMBER = 'CHANGE_TO_MEMBER'

@@ -34,6 +34,7 @@
 - TT-1841 - Email not displayed on invite new admin
 - TT-1786 - Change 'start now' text on wizardTT-1853
 - TT-1821 - Change `I can't find my business` link on company's house registration.
+- TT-1903 - Removed Editor from change role in admin panel
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
