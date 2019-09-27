@@ -26,7 +26,7 @@ class CompanyParser(directory_components.helpers.CompanyParser):
 
     @property
     def is_in_companies_house(self):
-        return self.data['company_type'] == company_types.COMPANIES_HOUSE
+        return self.data.get('company_type') == company_types.COMPANIES_HOUSE
 
     @property
     def is_identity_check_message_sent(self):
@@ -48,6 +48,7 @@ class CompanyParser(directory_components.helpers.CompanyParser):
             'expertise_languages': self.expertise_languages_label,
             'has_expertise': self.has_expertise,
             'expertise_products_services': self.expertise_products_services_label,
+            'is_in_companies_house': self.is_in_companies_house,
         }
 
     def serialize_for_form(self):

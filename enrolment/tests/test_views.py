@@ -465,6 +465,22 @@ def test_enrolment_routing_individual_business_profile_intent(client, user):
     assert response.url == reverse('enrolment-individual-interstitial')
 
 
+def test_enrolment_is_new_enrollement(client, submit_companies_house_step, steps_data, user):
+    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+    client.force_login(user)
+    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    assert response.status_code == 302
+    response = client.get(
+        reverse('enrolment-business-type'),
+        {'new_enrollment': True}
+    )
+    assert response.status_code == 200
+
+
 def test_companies_house_enrolment(
     client, submit_companies_house_step, steps_data, user
 ):
@@ -520,9 +536,12 @@ def test_companies_house_enrolment_already_has_profile(
     )
 
 
+@mock.patch('enrolment.helpers.get_is_enrolled')
 def test_companies_house_enrolment_change_company_name(
-    client, submit_companies_house_step, steps_data, user
+    mock_get_is_enrolled, client, submit_companies_house_step, steps_data, user
 ):
+    mock_get_is_enrolled.return_value = True
+
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
 
@@ -533,6 +552,9 @@ def test_companies_house_enrolment_change_company_name(
 
     response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
     assert response.status_code == 302
+
+    response = client.get(response.url)
+    assert response.context_data['contact_us_url'] == urls.domestic.CONTACT_US / 'domestic'
 
     # given the user has submitted their company details
     response = submit_companies_house_step(
@@ -555,6 +577,8 @@ def test_companies_house_enrolment_change_company_name(
     response = client.get(response.url)
 
     assert response.context_data['form']['company_name'].data == 'Example corp'
+    assert response.context_data['is_enrolled']
+    assert response.context_data['contact_us_url'] == urls.domestic.CONTACT_US / 'domestic'
 
 
 def test_companies_house_enrolment_expose_company(
