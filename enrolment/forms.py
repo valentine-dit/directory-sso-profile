@@ -104,8 +104,6 @@ class UserAccount(forms.Form):
         label='',
         label_suffix='',
     )
-    terms_agreed = forms.BooleanField(label=TERMS_LABEL)
-
     remote_password_error = forms.CharField(
         label='',
         required=False,
@@ -286,6 +284,11 @@ class IndividualPersonalDetails(forms.Form):
         label='Phone number (optional)',
         required=False
     )
+
+    def __init__(self, ask_terms_agreed=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if ask_terms_agreed:
+            self.fields['terms_agreed'] = forms.BooleanField(label=TERMS_LABEL)
 
 
 class NonCompaniesHouseSearch(CleanAddressMixin, forms.Form):
