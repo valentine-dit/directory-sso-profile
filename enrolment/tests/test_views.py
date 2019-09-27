@@ -688,7 +688,7 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
 
     step = resolve(response.url).kwargs['step']
     response = submit_companies_house_step(
-        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},  # not agreed during user account creation 
+        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},  # not agreed during user account creation
         step_name=step
     )
     assert response.status_code == 302
