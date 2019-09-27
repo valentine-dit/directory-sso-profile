@@ -60,6 +60,8 @@
 - TT-1819 - Fixing missing background image on tooltip on profile about page
 - TT-1899 - fix telephone display and correct case on personal details
 - TT-1789 - Wizard drops steps on changing business-type
+- TT-1904 - admin defaults to invite collaborators 
+- TT-1901 - show name in collaborators list 
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)
