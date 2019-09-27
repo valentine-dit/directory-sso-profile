@@ -113,7 +113,10 @@ class StepsListMixin(abc.ABC):
         pass  # pragma: no cover
 
     def should_show_anon_progress_indicator(self):
-        return self.request.user.is_anonymous
+        if self.request.GET.get('new_enrollment') == 'True':
+            return True
+        else:
+            return self.request.user.is_anonymous
 
     @property
     def step_labels(self):
@@ -126,7 +129,6 @@ class StepsListMixin(abc.ABC):
 
         if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
             self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_BUSINESS_TYPE)
-
         return labels
 
     def remove_label(self, labels, label):
@@ -215,8 +217,10 @@ class CreateUserAccountMixin:
         )
         if skipped_first_step:
             return False
+        return bool(self.request.user.is_anonymous)
 
-        return self.request.user.is_anonymous
+    def new_enrollment_condition(self):
+        return 'is_new_enrollment' in self.storage.extra_data
 
     def verification_condition(self):
         return self.request.user.is_anonymous
@@ -280,6 +284,12 @@ class CreateUserAccountMixin:
             response = self.validate_code(form=form, response=response)
         return response
 
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            new_enrollment_condition=self.new_enrollment_condition(),
+            **kwargs
+        )
+
     def validate_code(self, form, response):
         try:
             upstream_response = helpers.confirm_verification_code(
@@ -306,6 +316,7 @@ class CreateUserAccountMixin:
                 upstream_response.headers['set-cookie']
             )
             response.cookies.update(cookies)
+            self.storage.extra_data['is_new_enrollment'] = True
             return response
 
 
