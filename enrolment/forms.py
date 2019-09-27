@@ -104,6 +104,7 @@ class UserAccount(forms.Form):
         label='',
         label_suffix='',
     )
+    terms_agreed = forms.BooleanField(label=TERMS_LABEL)
     remote_password_error = forms.CharField(
         label='',
         required=False,
