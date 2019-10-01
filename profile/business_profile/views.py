@@ -16,6 +16,7 @@ from django.views.generic import TemplateView, FormView
 import core.mixins
 import core.forms
 from profile.business_profile import forms, helpers
+from directory_constants import urls
 
 BASIC = 'details'
 MEDIA = 'images'
@@ -24,6 +25,7 @@ MEDIA = 'images'
 class BusinessProfileView(TemplateView):
     template_name_fab_user = 'business_profile/profile.html'
     template_name_not_fab_user = 'business_profile/is-not-business-profile-user.html'
+    template_business_profile_member = 'business_profile/business-profile-member.html'
 
     SUCCESS_MESSAGES = {
         'owner-transferred': (
@@ -33,6 +35,7 @@ class BusinessProfileView(TemplateView):
             'We’ve emailed the person you want to add to this account.'
         ),
         'user-removed': 'User successfully removed from your profile.',
+        'member_user_linked': 'You are now linked to the profile.'
     }
 
     def get(self, *args, **kwargs):
@@ -43,7 +46,12 @@ class BusinessProfileView(TemplateView):
 
     def get_template_names(self, *args, **kwargs):
         if self.request.user.company:
-            template_name = self.template_name_fab_user
+            supplier = helpers.get_supplier_profile(self.request.user.id)
+            print(supplier)
+            if supplier and supplier['role'] == user_roles.MEMBER:
+                template_name = self.template_business_profile_member
+            else:
+                template_name = self.template_name_fab_user
         else:
             template_name = self.template_name_not_fab_user
         return [template_name]
@@ -53,6 +61,8 @@ class BusinessProfileView(TemplateView):
             company = self.request.user.company.serialize_for_template()
         else:
             company = None
+
+        print(company)
         return {
             'fab_tab_classes': 'active',
             'company': company,
@@ -63,6 +73,9 @@ class BusinessProfileView(TemplateView):
             'FAB_ADD_USER_URL': settings.FAB_ADD_USER_URL,
             'FAB_REMOVE_USER_URL': settings.FAB_REMOVE_USER_URL,
             'FAB_TRANSFER_ACCOUNT_URL': settings.FAB_TRANSFER_ACCOUNT_URL,
+            'contact_us_url': (urls.domestic.CONTACT_US / 'domestic'),
+            'change_company_type_url': reverse('enrolment-business-type'),
+            'export_opportunities_apply_url': reverse('export-opportunities-applications')
         }
 
 
