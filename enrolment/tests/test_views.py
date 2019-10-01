@@ -365,7 +365,6 @@ def steps_data(captcha_stub):
             'job_title': 'Exampler',
             'phone_number': '1232342',
             'confirmed_is_company_representative': True,
-            'terms_agreed': True,
         },
         views.VERIFICATION: {
             'code': '12345',
@@ -465,6 +464,22 @@ def test_enrolment_routing_individual_business_profile_intent(client, user):
 
     assert response.status_code == 302
     assert response.url == reverse('enrolment-individual-interstitial')
+
+
+def test_enrolment_is_new_enrollement(client, submit_companies_house_step, steps_data, user):
+    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+    client.force_login(user)
+    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    assert response.status_code == 302
+    response = client.get(
+        reverse('enrolment-business-type'),
+        {'new_enrollment': True}
+    )
+    assert response.status_code == 200
 
 
 def test_companies_house_enrolment(
@@ -678,19 +693,13 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
 ):
     client.force_login(user)
 
-    url = reverse(
-        'enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}
-    )
+    url = reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT})
     response = client.get(url)
     assert response.status_code == 302
 
-    step = resolve(response.url).kwargs['step']
-
-    assert step == views.COMPANY_SEARCH
-
     response = submit_companies_house_step(
         steps_data[views.COMPANY_SEARCH],
-        step_name=step,
+        step_name=views.COMPANY_SEARCH,
     )
 
     assert response.status_code == 302
@@ -704,7 +713,7 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
 
     step = resolve(response.url).kwargs['step']
     response = submit_companies_house_step(
-        steps_data[views.PERSONAL_INFO],
+        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},  # not agreed during user account creation
         step_name=step
     )
     assert response.status_code == 302
@@ -785,7 +794,7 @@ def test_companies_house_enrolment_submit_end_to_end_no_address(
     assert response.status_code == 302
 
     response = submit_companies_house_step(
-        data=steps_data[views.PERSONAL_INFO],
+        data={**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},
         step_name=views.PERSONAL_INFO,
     )
 
@@ -1571,7 +1580,7 @@ def test_non_companies_house_enrolment_submit_end_to_end_logged_in(
     assert response.status_code == 302
 
     response = submit_non_companies_house_step(
-        steps_data[views.PERSONAL_INFO],
+        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},
         step_name=resolve(response.url).kwargs['step']
     )
     assert response.status_code == 302
@@ -1646,7 +1655,9 @@ def test_non_companies_house_enrolment_suppress_success(
     )
     assert response.status_code == 302
 
-    response = submit_non_companies_house_step(steps_data[views.PERSONAL_INFO])
+    response = submit_non_companies_house_step(
+        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True}
+    )
     assert response.status_code == 302
 
     response = client.get(response.url)
@@ -1992,7 +2003,7 @@ def test_individual_enrolment_submit_end_to_end_logged_in(
     assert step == views.PERSONAL_INFO
 
     response = submit_individual_step(
-        steps_data[views.PERSONAL_INFO],
+        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},
         step_name=step
     )
     assert response.status_code == 302
@@ -2176,7 +2187,7 @@ def test_collaborator_enrolment_submit_end_to_end_logged_in(
     assert step == views.PERSONAL_INFO
 
     response = submit_collaborator_enrolment_step(
-        steps_data[views.PERSONAL_INFO],
+        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},
         step_name=step
     )
     assert response.status_code == 302

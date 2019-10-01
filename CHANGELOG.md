@@ -1,8 +1,6 @@
 # Changelog
 
 ## Pre-release
-## Hotfix
-- TT-1853 - 404-guidence-page
 
 ### Implemented enhancements
 - GTRANSFORM-364 - text changes on page titles
@@ -32,9 +30,12 @@
 - TT-1845 - Show message for expired links
 - TT-1795 - Display error message to second user in registation journey
 - TT-1841 - Email not displayed on invite new admin
-- TT-1786 - Change 'start now' text on wizardTT-1853
 - TT-1821 - Change `I can't find my business` link on company's house registration.
 - XOT-1120 - Take user back to the ingress url when registering
+- TT-1786 - Change 'start now' text on wizard
+- no ticket - Replace `DIRECTORY_CONSTANTS_URL_GREAT_INTERNATIONAL` with `DIRECTORY_CONSTANTS_URL_INTERNATIONAL`
+- TT-1903 - Removed Editor from change role in admin panel
+- TT-1910 - only display collaborators who haven't accepted in the list 
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
@@ -58,6 +59,18 @@
 - TT-1857   - Companies House fix request manual verification
 - TT-1797 - correct page titles
 - TT-1819 - Fixing missing background image on tooltip on profile about page
+- TT-1899 - fix telephone display and correct case on personal details
+- TT-1789 - Wizard drops steps on changing business-type
+- TT-1904 - admin defaults to invite collaborators 
+- TT-1901 - show name in collaborators list 
+- TT-1914 - Reinstate missing terms tickbox
+- TT-1915 - Fix update profile error if user has no supplier
+
+## [2019.08.14_1](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14_1)
+[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.08.14...2019.08.14_1)
+
+## Hotfix
+- TT-1853 - 404-guidence-page
 
 ## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)

@@ -31,4 +31,8 @@ class PersonalDetails(forms.Form):
             'confirm I can create an account.'
         )
     )
-    terms_agreed = forms.BooleanField(label=TERMS_LABEL)
+
+    def __init__(self, ask_terms_agreed=False, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if ask_terms_agreed:
+            self.fields['terms_agreed'] = forms.BooleanField(label=TERMS_LABEL)
