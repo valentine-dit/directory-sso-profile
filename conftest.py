@@ -110,3 +110,14 @@ def mock_update_user_profile():
     )
     yield patch.start()
     patch.stop()
+
+
+@pytest.fixture(autouse=True)
+def update_supplier_profile_name():
+    response = create_response()
+    patch = mock.patch(
+        'directory_api_client.api_client.supplier.profile_update',
+        return_value=response
+    )
+    yield patch.start()
+    patch.stop()
