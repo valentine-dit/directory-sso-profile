@@ -64,6 +64,7 @@
 - TT-1901 - show name in collaborators list 
 - TT-1914 - Reinstate missing terms tickbox
 - TT-1915 - Fix update profile error if user has no supplier
+- TT-1902 - Collaborator Invite UI bug fixes
 
 ## [2019.08.14_1](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14_1)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.08.14...2019.08.14_1)
