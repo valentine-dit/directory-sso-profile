@@ -2083,7 +2083,6 @@ def test_collaborator_enrolment_submit_end_to_end(
 
     response = submit_collaborator_enrolment_step(steps_data[views.VERIFICATION])
     assert response.status_code == 302
-
     client.force_login(user)
 
     response = submit_collaborator_enrolment_step(steps_data[views.PERSONAL_INFO])
@@ -2102,7 +2101,7 @@ def test_collaborator_enrolment_submit_end_to_end(
         sso_session_id='123'
     )
     assert mock_collaborator_invite_accept.call_count == 1
-    assert mock_collaborator_invite_accept.call_args == mock.call(invite_key='abc', sso_session_id='123')
+    assert mock_collaborator_invite_accept.call_args == mock.call(invite_key='abc', sso_session_id='123', name='jim who')
 
 
 def test_collaborator_enrolment_submit_end_to_end_logged_in(

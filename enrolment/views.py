@@ -842,6 +842,7 @@ class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
         helpers.collaborator_invite_accept(
             sso_session_id=self.request.user.session_id,
             invite_key=self.request.session[SESSION_KEY_INVITE_KEY],
+            name=self.request.user.full_name
         )
 
     @cached_property

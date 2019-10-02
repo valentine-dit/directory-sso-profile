@@ -238,8 +238,12 @@ def collaborator_invite_retrieve(invite_key):
         return response.json()
 
 
-def collaborator_invite_accept(sso_session_id, invite_key):
-    response = api_client.company.collaborator_invite_accept(sso_session_id=sso_session_id, invite_key=invite_key)
+def collaborator_invite_accept(sso_session_id, invite_key, name):
+    response = api_client.company.collaborator_invite_accept(
+        sso_session_id=sso_session_id,
+        invite_key=invite_key,
+        name=name,
+        )
     response.raise_for_status()
 
 
