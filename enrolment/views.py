@@ -179,9 +179,7 @@ class BaseEnrolmentWizardView(
 
     def redirect_to_ingress_or_finish(self):
         if self.form_session.ingress_url:
-            ingress_url = self.form_session.ingress_url
-            # self.form_session.clear()
-            return redirect(ingress_url)
+            return redirect(self.form_session.ingress_url)
         else:
             return TemplateResponse(self.request, self.templates[FINISHED])
 
