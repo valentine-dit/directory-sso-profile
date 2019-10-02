@@ -481,8 +481,10 @@ class AdminInviteCollaboratorFormView(SuccessMessageMixin, FormView):
     success_url = reverse_lazy('business-profile-admin-invite-collaborator')
 
     def get_context_data(self, **kwargs):
+        collaborator_invites = helpers.collaborator_invite_list(self.request.user.session_id)
+        collaborator_invites_not_accepted = [c for c in collaborator_invites if not c['accepted']]
         return super().get_context_data(
-            collaborator_invites=helpers.collaborator_invite_list(self.request.user.session_id),
+            collaborator_invites=collaborator_invites_not_accepted,
             **kwargs,
         )
 
