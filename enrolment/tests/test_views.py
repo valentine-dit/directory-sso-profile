@@ -2075,6 +2075,9 @@ def test_collaborator_enrolment_submit_end_to_end(
     client, submit_collaborator_enrolment_step, user,
     mock_create_user_profile, steps_data, mock_collaborator_invite_accept,
 ):
+    user.first_name = 'jim'
+    user.last_name = 'who'
+
     url = reverse('enrolment-collaboration', kwargs={'step': views.USER_ACCOUNT})
     client.get(f'{url}?invite_key=abc')
 
@@ -2083,6 +2086,8 @@ def test_collaborator_enrolment_submit_end_to_end(
 
     response = submit_collaborator_enrolment_step(steps_data[views.VERIFICATION])
     assert response.status_code == 302
+
+
     client.force_login(user)
 
     response = submit_collaborator_enrolment_step(steps_data[views.PERSONAL_INFO])
