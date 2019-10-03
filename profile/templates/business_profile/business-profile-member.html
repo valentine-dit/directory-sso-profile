@@ -12,6 +12,23 @@
 
 
 {% block tab_content %}
+	{% if messages %}
+        <div>
+        {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+				<div class="message-box-with-icon border-medium border-teal width-full background-white margin-top-30">
+				  <div class="message-box-icon font-large white-text background-teal" aria-hidden="true">✓</div>
+				  <div class="message-box-content padding-15-m">
+					{% if message %}
+					  <h3 class="box-heading heading-small teal-text margin-bottom-0">{{ message }}</h3>
+					{% endif %}
+				  </div>
+				</div>
+            {% endif %}
+        {% endfor %}
+        </div>
+    {% endif %}
+
 	<div class="margin-top-30 margin-bottom-30">
 		<h1 class="heading-large">{{ company.name }} business profile already exists</h1>
 
@@ -19,9 +36,12 @@
 			A profile for this business was created on {{ company.created|parse_date:"%Y-%m-%dT%H:%M:%S.%fZ"|date:"M d, Y" }} at {{ company.created|parse_date:"%Y-%m-%dT%H:%M:%S.%fZ"|time:"g:i A" }}.
 			It was last updated on {{ company.modified|parse_date:"%Y-%m-%dT%H:%M:%S.%fZ"|date:"M d, Y" }} at {{ company.modified|parse_date:"%Y-%m-%dT%H:%M:%S.%fZ"|time:"g:i A" }}.
 		</p>
-
 		<p>
-			You can now view your business profile and <a href="{{ export_opportunities_apply_url }}">find export opportunities</a>.
+			{% if is_profile_published %}
+			You can now view your <a href="{{ FAB_BUSINESS_PROFILE_URL }}">business profile</a> and <a href="{{ export_opportunities_apply_url }}">find export opportunities</a>.
+			{% else %}
+			Your business profile has not been published yet, but you can now <a href="{{ export_opportunities_apply_url }}">find export opportunities</a> and apply on <a href="{{ selling_online_overseas_url }}">Selling online overseas</a>.
+			{% endif %}
 		</p>
 
 		<p>

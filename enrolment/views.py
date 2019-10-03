@@ -667,7 +667,7 @@ class CompaniesHouseEnrolmentView(CreateBusinessProfileMixin, BaseEnrolmentWizar
                     'report_abuse_url': urls.domestic.FEEDBACK
                 }, form_url=self.request.path)
 
-            return TemplateResponse(self.request, self.templates[FINISHED])
+            return redirect(reverse('business-profile') + '?member_user_linked=true')
         else:
             return super().done(form_list, form_dict=form_dict, **kwargs)
 

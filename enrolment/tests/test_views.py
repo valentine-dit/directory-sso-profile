@@ -924,8 +924,9 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
 
     response = client.get(response.url)
 
-    assert response.status_code == 200
-    assert response.template_name == views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
+    # Redirects to business profile for 2nd company `member` user
+    assert response.status_code == 302
+
     assert mock_add_collaborator.call_count == 1
     assert mock_add_collaborator.call_args == mock.call(
         sso_session_id='123',
@@ -969,10 +970,7 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
 
     response = client.get(response.url)
 
-    assert response.status_code == 200
-    assert response.template_name == (
-        views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
-    )
+    assert response.status_code == 302
     assert mock_enrolment_send.call_count == 0
     assert mock_add_collaborator.call_count == 1
     assert mock_add_collaborator.call_args == mock.call(

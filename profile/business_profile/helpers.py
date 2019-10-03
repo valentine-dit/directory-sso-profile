@@ -15,7 +15,6 @@ def get_company_profile(sso_session_id):
 
 
 def get_supplier_profile(sso_id):
-    print(sso_id)
     response = api_client.supplier.retrieve_profile(sso_id)
     if response.status_code == http.client.NOT_FOUND:
         return None

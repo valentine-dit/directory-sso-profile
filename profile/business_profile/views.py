@@ -47,7 +47,6 @@ class BusinessProfileView(TemplateView):
     def get_template_names(self, *args, **kwargs):
         if self.request.user.company:
             supplier = helpers.get_supplier_profile(self.request.user.id)
-            print(supplier)
             if supplier and supplier['role'] == user_roles.MEMBER:
                 template_name = self.template_business_profile_member
             else:
@@ -62,7 +61,6 @@ class BusinessProfileView(TemplateView):
         else:
             company = None
 
-        print(company)
         return {
             'fab_tab_classes': 'active',
             'company': company,
@@ -75,7 +73,11 @@ class BusinessProfileView(TemplateView):
             'FAB_TRANSFER_ACCOUNT_URL': settings.FAB_TRANSFER_ACCOUNT_URL,
             'contact_us_url': (urls.domestic.CONTACT_US / 'domestic'),
             'change_company_type_url': reverse('enrolment-business-type'),
-            'export_opportunities_apply_url': reverse('export-opportunities-applications')
+            'export_opportunities_apply_url': urls.domestic.EXPORT_OPPORTUNITIES,
+            'is_profile_published': company['is_published'] if company else False,
+            'FAB_BUSINESS_PROFILE_URL': (urls.international.TRADE_FAS / 'suppliers' /
+                                         company['number'] / company['slug']) if company else '',
+            'selling_online_overseas_url': reverse('selling-online-overseas')
         }
 
 

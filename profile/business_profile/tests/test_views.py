@@ -16,6 +16,7 @@ from django.forms.forms import NON_FIELD_ERRORS
 from core.tests.helpers import create_response, reload_urlconf, submit_step_factory
 from profile.business_profile import constants, forms, helpers, views
 from directory_constants import urls
+from datetime import datetime
 
 
 def create_test_image(extension):
@@ -35,6 +36,11 @@ def company_profile_data():
         'is_publishable': True,
         'expertise_products_services': {},
         'is_identity_check_message_sent': False,
+        'is_published': False,
+        'number': '1234567',
+        'slug': 'cool-company',
+        'created': '2012-06-15T13:45:30.00000Z',
+        'modified': '2019-04-05T06:43:23.00000Z'
     }
 
 
@@ -1268,6 +1274,26 @@ def test_admin_collaborator_invite_delete(mock_collaborator_invite_delete, clien
     assert mock_collaborator_invite_delete.call_args == mock.call(
         sso_session_id=user.session_id, invite_key='1234'
     )
+
+
+def test_business_profile_member_redirect(client, user, mock_retrieve_supplier, company_profile_data):
+    client.force_login(user)
+    mock_retrieve_supplier.return_value = create_response({'role': user_roles.MEMBER})
+
+    url = reverse('business-profile')
+    response = client.get(url, {'member_user_linked': True})
+    for message in response.context['messages']:
+        assert str(message) == views.BusinessProfileView.SUCCESS_MESSAGES['member_user_linked']
+
+    context = response.context_data
+
+    assert context['contact_us_url'] == (urls.domestic.CONTACT_US / 'domestic')
+    assert context['change_company_type_url'] == reverse('enrolment-business-type')
+    assert context['export_opportunities_apply_url'] == urls.domestic.EXPORT_OPPORTUNITIES
+    assert context['is_profile_published'] == company_profile_data['is_published']
+    assert context['FAB_BUSINESS_PROFILE_URL'] == (urls.international.TRADE_FAS / 'suppliers' /
+                                                   company_profile_data['number'] / company_profile_data['slug'])
+    assert context['selling_online_overseas_url'] == reverse('selling-online-overseas')
 
 
 def test_fab_redirect(client, user):
