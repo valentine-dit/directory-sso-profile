@@ -16,7 +16,6 @@ from django.forms.forms import NON_FIELD_ERRORS
 from core.tests.helpers import create_response, reload_urlconf, submit_step_factory
 from profile.business_profile import constants, forms, helpers, views
 from directory_constants import urls
-from datetime import datetime
 
 
 def create_test_image(extension):
