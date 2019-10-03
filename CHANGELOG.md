@@ -31,6 +31,7 @@
 - TT-1795 - Display error message to second user in registation journey
 - TT-1841 - Email not displayed on invite new admin
 - TT-1821 - Change `I can't find my business` link on company's house registration.
+- XOT-1120 - Take user back to the ingress url when registering
 - TT-1786 - Change 'start now' text on wizard
 - no ticket - Replace `DIRECTORY_CONSTANTS_URL_GREAT_INTERNATIONAL` with `DIRECTORY_CONSTANTS_URL_INTERNATIONAL`
 - TT-1903 - Removed Editor from change role in admin panel

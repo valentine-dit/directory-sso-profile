@@ -13,7 +13,8 @@ from django.urls import resolve, reverse
 from django.views.generic import TemplateView
 
 from core.tests.helpers import create_response, submit_step_factory
-from enrolment import constants, forms, helpers, views
+from enrolment import constants, forms, helpers, views, mixins
+from directory_forms_api_client.helpers import FormSession
 
 
 enrolment_urls = (
@@ -1030,6 +1031,69 @@ def test_user_has_company_redirect_on_start(
     assert response.url == reverse('business-profile')
 
 
+def test_start_saves_ingress_url(client, settings):
+    url = "%s?next=www.example.com" % reverse('enrolment-start')
+    client.get(url)
+    assert client.session[FormSession.KEY_INGRESS_URL] == 'www.example.com'
+
+
+def test_companies_house_enrolment_with_ingress(
+    client, submit_companies_house_step, steps_data, user
+):
+    url = "%s?next=www.example.com" % reverse('enrolment-start')
+    client.get(url)
+
+    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    client.force_login(user)
+    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    response = submit_companies_house_step(
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=views.BUSINESS_INFO,
+    )
+    response = submit_companies_house_step(
+        data=steps_data[views.PERSONAL_INFO],
+        step_name=views.PERSONAL_INFO,
+    )
+    response = client.get(response.url)
+    assert response.url == 'www.example.com'
+
+
+def test_non_companies_house_enrolment_with_ingress(
+    client, submit_non_companies_house_step, steps_data, user
+):
+    url = "%s?next=www.example.com" % reverse('enrolment-start')
+    client.get(url)
+
+    response = submit_non_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = submit_non_companies_house_step(steps_data[views.VERIFICATION])
+    client.force_login(user)
+    response = submit_non_companies_house_step(
+        steps_data[BUSINESS_INFO_NON_COMPANIES_HOUSE]
+    )
+    response = submit_non_companies_house_step(
+        steps_data[views.PERSONAL_INFO],
+        step_name=resolve(response.url).kwargs['step']
+    )
+    response = client.get(response.url)
+    assert response.url == 'www.example.com'
+
+
+def test_individual_enrolment_with_ingress(
+    client, submit_individual_step, user,
+    steps_data, session_client_referrer_factory,
+):
+    url = "%s?next=www.example.com" % reverse('enrolment-start')
+    client.get(url)
+
+    response = submit_individual_step(steps_data[views.USER_ACCOUNT])
+    response = submit_individual_step(steps_data[views.VERIFICATION])
+    client.force_login(user)
+    response = submit_individual_step(steps_data[views.PERSONAL_INFO])
+    response = client.get(response.url)
+    assert response.url == 'www.example.com'
+
+
 def test_user_has_no_company_redirect_on_start(
     client, mock_user_has_company, user
 ):
@@ -1793,7 +1857,7 @@ def test_steps_list_mixin(
 ):
     settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = is_feature_enabled
 
-    class TestView(views.StepsListMixin, TemplateView):
+    class TestView(mixins.StepsListMixin, TemplateView):
         template_name = 'directory_components/base.html'
 
         steps_list_labels = [
@@ -1814,7 +1878,7 @@ def test_steps_list_mixin(
 def test_steps_list_mixin_no_business_type(rf, settings):
     settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = False
 
-    class TestView(views.StepsListMixin, TemplateView):
+    class TestView(mixins.StepsListMixin, TemplateView):
         template_name = 'directory_components/base.html'
 
         steps_list_labels = [
@@ -1840,7 +1904,7 @@ def test_wizard_progress_indicator_mixin(
 ):
     settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = is_enabled
 
-    class TestView(views.ProgressIndicatorMixin, NamedUrlSessionWizardView):
+    class TestView(mixins.ProgressIndicatorMixin, NamedUrlSessionWizardView):
         def get_template_names(self):
             return ['enrolment/user-account-resend-verification.html']
 
@@ -2011,17 +2075,17 @@ expose_user_jourey_urls = (
 
 @pytest.mark.parametrize('intent_write_url', (reverse('enrolment-business-type'), reverse('enrolment-start')))
 @pytest.mark.parametrize('params,verb', (
-    ({'backfill-details-intent': True}, views.ReadUserIntentMixin.LABEL_BACKFILL_DETAILS),
-    ({'business-profile-intent': True}, views.ReadUserIntentMixin.LABEL_BUSINESS),
+    ({'backfill-details-intent': True}, mixins.ReadUserIntentMixin.LABEL_BACKFILL_DETAILS),
+    ({'business-profile-intent': True}, mixins.ReadUserIntentMixin.LABEL_BUSINESS),
     (
         {'next': 'http%3A%2F%2Fprofile.trade.great%3A8006%2Fprofile%2Fenrol%2F%3Fbusiness-profile-intent%3Dtrue'},
-        views.ReadUserIntentMixin.LABEL_BUSINESS
+        mixins.ReadUserIntentMixin.LABEL_BUSINESS
     ),
     (
         {'next': 'http%3A%2F%2Fprofile.trade.great%3A8006%2Fprofile%2Fenrol%2F'},
-        views.ReadUserIntentMixin.LABEL_ACCOUNT
+        mixins.ReadUserIntentMixin.LABEL_ACCOUNT
     ),
-    ({}, views.ReadUserIntentMixin.LABEL_ACCOUNT),
+    ({}, mixins.ReadUserIntentMixin.LABEL_ACCOUNT),
 ))
 @pytest.mark.parametrize('intent_read_url', expose_user_jourey_urls)
 def test_expose_user_journey_intent(intent_write_url, intent_read_url, params, client, verb):
@@ -2048,7 +2112,7 @@ def test_expose_user_journey_mixin_logged_in(url, client, user):
 
     assert response.status_code == 200
     assert response.context_data['user_journey_verb'] == (
-        views.ReadUserIntentMixin.LABEL_BUSINESS
+        mixins.ReadUserIntentMixin.LABEL_BUSINESS
     )
 
 
@@ -2057,7 +2121,7 @@ def test_expose_user_journey_mixin_account_intent(url, client):
     response = client.get(url)
     assert response.status_code == 200
     assert response.context_data['user_journey_verb'] == (
-        views.ReadUserIntentMixin.LABEL_ACCOUNT
+        mixins.ReadUserIntentMixin.LABEL_ACCOUNT
     )
 
 
