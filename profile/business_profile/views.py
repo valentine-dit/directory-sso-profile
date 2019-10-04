@@ -330,7 +330,6 @@ class AdminCollaboratorEditFormView(SuccessMessageMixin, FormView):
     success_url = reverse_lazy('business-profile-admin-tools')
     success_messages = {
         forms.REMOVE_COLLABORATOR: 'Collaborator removed',
-        forms.CHANGE_COLLABORATOR_TO_EDITOR: 'Collaborator role changed to Editor',
         forms.CHANGE_COLLABORATOR_TO_MEMBER: 'Collaborator role changed to Member',
         forms.CHANGE_COLLABORATOR_TO_ADMIN: 'Collaborator role changed to Admin',
     }
@@ -365,7 +364,6 @@ class AdminCollaboratorEditFormView(SuccessMessageMixin, FormView):
             )
         else:
             role = {
-                forms.CHANGE_COLLABORATOR_TO_EDITOR: user_roles.EDITOR,
                 forms.CHANGE_COLLABORATOR_TO_MEMBER: user_roles.MEMBER,
                 forms.CHANGE_COLLABORATOR_TO_ADMIN: user_roles.ADMIN,
             }[action]
