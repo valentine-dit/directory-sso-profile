@@ -35,27 +35,18 @@ class BusinessProfileView(TemplateView):
             'We’ve emailed the person you want to add to this account.'
         ),
         'user-removed': 'User successfully removed from your profile.',
-        'member_user_linked': 'You are now linked to the profile.'
     }
-
-    def get_user_role(self):
-        supplier = self.request.user.supplier
-        if supplier:
-            return supplier['role']
 
     def get(self, *args, **kwargs):
         for key, message in self.SUCCESS_MESSAGES.items():
             if key in self.request.GET:
                 messages.add_message(self.request, messages.SUCCESS, message)
 
-        if self.get_user_role() == user_roles.MEMBER:
-            messages.add_message(self.request, messages.SUCCESS, self.SUCCESS_MESSAGES['member_user_linked'])
-
         return super().get(*args, **kwargs)
 
     def get_template_names(self, *args, **kwargs):
         if self.request.user.company:
-            if self.get_user_role() == user_roles.MEMBER:
+            if self.request.user.role == user_roles.MEMBER:
                 template_name = self.template_business_profile_member
             else:
                 template_name = self.template_name_fab_user
@@ -69,7 +60,7 @@ class BusinessProfileView(TemplateView):
         else:
             company = None
 
-        if self.get_user_role() == user_roles.MEMBER:
+        if self.request.user.role == user_roles.MEMBER:
             return {
                 'fab_tab_classes': 'active',
                 'company': company,

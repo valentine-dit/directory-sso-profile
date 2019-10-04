@@ -1,4 +1,4 @@
-from directory_constants import urls
+from directory_constants import urls, user_roles
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
 from directory_forms_api_client.helpers import FormSessionMixin
@@ -311,6 +311,9 @@ class CompaniesHouseEnrolmentView(
                     ),
                     'report_abuse_url': urls.domestic.FEEDBACK
                 }, form_url=self.request.path)
+
+            if self.request.user.role == user_roles.MEMBER:
+                messages.add_message(self.request, messages.SUCCESS, 'You are now linked to the profile.')
 
             if self.form_session.ingress_url:
                 return redirect(self.form_session.ingress_url)

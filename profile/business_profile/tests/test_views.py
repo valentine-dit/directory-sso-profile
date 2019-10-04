@@ -1281,8 +1281,6 @@ def test_business_profile_member_redirect(client, user, mock_retrieve_supplier, 
 
     url = reverse('business-profile')
     response = client.get(url)
-    for message in response.context['messages']:
-        assert str(message) == views.BusinessProfileView.SUCCESS_MESSAGES['member_user_linked']
 
     context = response.context_data
 
