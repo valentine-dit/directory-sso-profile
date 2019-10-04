@@ -312,7 +312,10 @@ class CompaniesHouseEnrolmentView(
                     'report_abuse_url': urls.domestic.FEEDBACK
                 }, form_url=self.request.path)
 
-            return redirect(reverse('business-profile') + '?member_user_linked=true')
+            if self.form_session.ingress_url:
+                return redirect(self.form_session.ingress_url)
+            else:
+                return redirect('business-profile')
         else:
             return super().done(form_list, form_dict=form_dict, **kwargs)
 

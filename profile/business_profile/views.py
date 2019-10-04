@@ -38,16 +38,24 @@ class BusinessProfileView(TemplateView):
         'member_user_linked': 'You are now linked to the profile.'
     }
 
+    def get_user_role(self):
+        supplier = self.request.user.supplier
+        if supplier:
+            return supplier['role']
+
     def get(self, *args, **kwargs):
         for key, message in self.SUCCESS_MESSAGES.items():
             if key in self.request.GET:
                 messages.add_message(self.request, messages.SUCCESS, message)
+
+        if self.get_user_role() == user_roles.MEMBER:
+            messages.add_message(self.request, messages.SUCCESS, self.SUCCESS_MESSAGES['member_user_linked'])
+
         return super().get(*args, **kwargs)
 
     def get_template_names(self, *args, **kwargs):
         if self.request.user.company:
-            supplier = helpers.get_supplier_profile(self.request.user.id)
-            if supplier and supplier['role'] == user_roles.MEMBER:
+            if self.get_user_role() == user_roles.MEMBER:
                 template_name = self.template_business_profile_member
             else:
                 template_name = self.template_name_fab_user
@@ -61,24 +69,28 @@ class BusinessProfileView(TemplateView):
         else:
             company = None
 
-        return {
-            'fab_tab_classes': 'active',
-            'company': company,
-            'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
-            'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
-            'FAB_ADD_CASE_STUDY_URL': settings.FAB_ADD_CASE_STUDY_URL,
-            'FAB_REGISTER_URL': settings.FAB_REGISTER_URL,
-            'FAB_ADD_USER_URL': settings.FAB_ADD_USER_URL,
-            'FAB_REMOVE_USER_URL': settings.FAB_REMOVE_USER_URL,
-            'FAB_TRANSFER_ACCOUNT_URL': settings.FAB_TRANSFER_ACCOUNT_URL,
-            'contact_us_url': (urls.domestic.CONTACT_US / 'domestic'),
-            'change_company_type_url': reverse('enrolment-business-type'),
-            'export_opportunities_apply_url': urls.domestic.EXPORT_OPPORTUNITIES,
-            'is_profile_published': company['is_published'] if company else False,
-            'FAB_BUSINESS_PROFILE_URL': (urls.international.TRADE_FAS / 'suppliers' /
-                                         company['number'] / company['slug']) if company else '',
-            'selling_online_overseas_url': reverse('selling-online-overseas')
-        }
+        if self.get_user_role() == user_roles.MEMBER:
+            return {
+                'fab_tab_classes': 'active',
+                'company': company,
+                'contact_us_url': (urls.domestic.CONTACT_US / 'domestic'),
+                'export_opportunities_apply_url': urls.domestic.EXPORT_OPPORTUNITIES,
+                'is_profile_published': company['is_published_find_a_supplier'] if company else False,
+                'FAB_BUSINESS_PROFILE_URL': (urls.international.TRADE_FAS / 'suppliers' /
+                                             company['number'] / company['slug']) if company else ''
+            }
+        else:
+            return {
+                'fab_tab_classes': 'active',
+                'company': company,
+                'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
+                'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
+                'FAB_ADD_CASE_STUDY_URL': settings.FAB_ADD_CASE_STUDY_URL,
+                'FAB_REGISTER_URL': settings.FAB_REGISTER_URL,
+                'FAB_ADD_USER_URL': settings.FAB_ADD_USER_URL,
+                'FAB_REMOVE_USER_URL': settings.FAB_REMOVE_USER_URL,
+                'FAB_TRANSFER_ACCOUNT_URL': settings.FAB_TRANSFER_ACCOUNT_URL,
+            }
 
 
 class BaseFormView(FormView):
