@@ -66,6 +66,7 @@ class DescriptionForm(forms.Form):
             directory_validators.company.no_html,
         ],
     )
+    
     description = forms.CharField(
         label='Add more detailed information about your business.',
         help_text='Maximum 2,000 characters.',

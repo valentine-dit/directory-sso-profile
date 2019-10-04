@@ -599,6 +599,7 @@ class ResendVerificationCodeView(
     mixins.GA360Mixin,
     NamedUrlSessionWizardView
 ):
+
     google_analytics_page_id = 'ResendVerificationCode'
     form_list = (
         (RESEND_VERIFICATION, forms.ResendVerificationCode),

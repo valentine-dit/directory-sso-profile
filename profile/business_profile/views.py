@@ -328,6 +328,7 @@ class AdminCollaboratorEditFormView(SuccessMessageMixin, FormView):
     template_name = 'business_profile/admin-collaborator-edit.html'
     form_class = forms.AdminCollaboratorEditForm
     success_url = reverse_lazy('business-profile-admin-tools')
+
     success_messages = {
         forms.REMOVE_COLLABORATOR: 'Collaborator removed',
         forms.CHANGE_COLLABORATOR_TO_MEMBER: 'Collaborator role changed to Member',
