@@ -896,12 +896,15 @@ def test_companies_house_enrolment_has_company_error(
 
 @mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
 @mock.patch('enrolment.views.helpers.create_company_member')
+@mock.patch('sso.models.SSOUser.role')
 def test_companies_house_enrolment_submit_end_to_end_company_has_account(
-    mock_add_collaborator, mock_gov_notify, client,
+    mock_user_role, mock_add_collaborator, mock_gov_notify, client,
     steps_data, submit_companies_house_step, mock_get_company_admins,
     mock_enrolment_send, mock_validate_company_number, user
 ):
     mock_validate_company_number.return_value = create_response(status_code=400)
+
+    mock_user_role.return_value = user_roles.MEMBER
 
     response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
     assert response.status_code == 302
@@ -945,8 +948,9 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
 
 @mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
 @mock.patch('enrolment.views.helpers.create_company_member')
+@mock.patch('sso.models.SSOUser.role')
 def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
-    mock_add_collaborator, mock_gov_notify, client, steps_data,
+    mock_user_role, mock_add_collaborator, mock_gov_notify, client, steps_data,
     submit_companies_house_step, mock_enrolment_send, mock_get_company_admins,
     mock_validate_company_number, user
 ):
@@ -954,6 +958,8 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
     user.has_user_profile = True
     user.first_name = 'Foo'
     user.last_name = 'Bar'
+
+    mock_user_role.return_value = user_roles.ADMIN
 
     client.force_login(user)
 
