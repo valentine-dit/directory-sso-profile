@@ -15,7 +15,6 @@ INDUSTRY_CHOICES = [('', 'Select an industry')] + list(choices.INDUSTRIES)
 EMPLOYEES_CHOICES = [('', 'Select employees')] + list(choices.EMPLOYEES)
 USER_ROLE_CHOICES = [('', 'Select role')] + [choice for choice in choices.USER_ROLES if choice[0] != user_roles.EDITOR]
 REMOVE_COLLABORATOR = 'REMOVE'
-CHANGE_COLLABORATOR_TO_EDITOR = 'CHANGE_TO_EDITOR'
 CHANGE_COLLABORATOR_TO_MEMBER = 'CHANGE_TO_MEMBER'
 CHANGE_COLLABORATOR_TO_ADMIN = 'CHANGE_TO_ADMIN'
 
@@ -551,7 +550,6 @@ class AdminCollaboratorEditForm(forms.Form):
         user_roles.MEMBER: [
             ('', 'Please select'),
             (CHANGE_COLLABORATOR_TO_ADMIN, 'Upgrade to Admin'),
-            (CHANGE_COLLABORATOR_TO_EDITOR, 'Upgrade to Editor'),
             (REMOVE_COLLABORATOR, 'Remove'),
         ],
         user_roles.EDITOR: [
@@ -562,7 +560,6 @@ class AdminCollaboratorEditForm(forms.Form):
         ],
         user_roles.ADMIN: [
             ('', 'Please select'),
-            (CHANGE_COLLABORATOR_TO_EDITOR, 'Downgrade to Editor'),
             (CHANGE_COLLABORATOR_TO_MEMBER, 'Downgrade to Member'),
             (REMOVE_COLLABORATOR, 'Remove'),
         ]

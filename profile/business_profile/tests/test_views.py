@@ -931,7 +931,7 @@ def test_edit_collaborator_change_editor_to_other(mock_collaborator_list, client
     assert response.url == reverse('business-profile-admin-tools')
 
 
-@pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_EDITOR, forms.CHANGE_COLLABORATOR_TO_ADMIN))
+@pytest.mark.parametrize('action', [forms.CHANGE_COLLABORATOR_TO_ADMIN])
 def test_edit_collaborator_change_member_to_other(mock_collaborator_list, client, user, settings, action):
     mock_collaborator_list.return_value = create_response([
         {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
@@ -949,7 +949,7 @@ def test_edit_collaborator_change_member_to_other(mock_collaborator_list, client
     assert response.url == reverse('business-profile-admin-tools')
 
 
-@pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_MEMBER, forms.CHANGE_COLLABORATOR_TO_EDITOR))
+@pytest.mark.parametrize('action', [forms.CHANGE_COLLABORATOR_TO_MEMBER])
 def test_edit_collaborator_change_admin_to_other(mock_collaborator_list, client, user, settings, action):
     mock_collaborator_list.return_value = create_response([
         {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},

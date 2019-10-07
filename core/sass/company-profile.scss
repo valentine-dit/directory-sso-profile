@@ -443,3 +443,10 @@
 .background-denim-blue {
   background-color: $denim;
 }
+
+.selected-link {
+    border-left: 5px solid $active-blue;
+    margin-left: -15px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+}
