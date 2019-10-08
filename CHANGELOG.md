@@ -35,7 +35,8 @@
 - TT-1786 - Change 'start now' text on wizard
 - no ticket - Replace `DIRECTORY_CONSTANTS_URL_GREAT_INTERNATIONAL` with `DIRECTORY_CONSTANTS_URL_INTERNATIONAL`
 - TT-1903 - Removed Editor from change role in admin panel
-- TT-1910 - only display collaborators who haven't accepted in the list 
+- TT-1910 - only display collaborators who haven't accepted in the list
+- TT-1911 - Remove access to edit business profile for member user
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile

@@ -22,6 +22,10 @@ class SSOUser(directory_sso_api_client.models.SSOUser):
     def supplier(self):
         return helpers.get_supplier_profile(self.id)
 
+    @cached_property
+    def role(self):
+        return self.supplier['role'] if self.supplier else None
+
     @property
     def is_company_admin(self):
         if not self.supplier:
