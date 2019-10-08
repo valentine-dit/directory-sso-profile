@@ -948,6 +948,64 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
 
 @mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
 @mock.patch('enrolment.views.helpers.create_company_member')
+@mock.patch('enrolment.views.helpers.get_is_enrolled')
+@mock.patch('sso.models.SSOUser.role')
+def test_companies_house_enrolment_submit_end_to_end_company_second_user(
+    mock_user_role, mock_get_is_enrolled, mock_add_collaborator,
+    mock_gov_notify, client, steps_data, submit_companies_house_step,
+    mock_get_company_admins, mock_enrolment_send,
+    mock_validate_company_number, user
+):
+    mock_validate_company_number.return_value = create_response(status_code=400)
+
+    mock_get_is_enrolled.return_value = True
+    mock_user_role.return_value = user_roles.MEMBER
+
+    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    assert response.status_code == 302
+
+    client.force_login(user)
+
+    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=views.BUSINESS_INFO
+    )
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(data=steps_data[views.PERSONAL_INFO], step_name=views.PERSONAL_INFO)
+    assert response.status_code == 302
+
+    response = client.get(response.url, follow=True)
+
+    # Redirects to business profile for 2nd company `member` user
+    assert response.status_code == 200
+
+    for message in response.context['messages']:
+        assert str(message) == 'You are now linked to the profile.'
+
+    assert mock_add_collaborator.call_count == 1
+    assert mock_add_collaborator.call_args == mock.call(
+        sso_session_id='123',
+        data={
+            'sso_id': 1,
+            'name': user.full_name,
+            'company': '12345678',
+            'company_email': 'jim@example.com',
+            'mobile_number': '1232342',
+        })
+
+    assert mock_get_company_admins.call_count == 1
+    assert mock_gov_notify.call_count == 2
+
+
+@mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
+@mock.patch('enrolment.views.helpers.create_company_member')
 @mock.patch('sso.models.SSOUser.role')
 def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
     mock_user_role, mock_add_collaborator, mock_gov_notify, client, steps_data,
