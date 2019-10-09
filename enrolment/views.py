@@ -1,4 +1,4 @@
-from directory_constants import urls
+from directory_constants import urls, user_roles
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
 from directory_forms_api_client.helpers import FormSessionMixin
@@ -12,7 +12,6 @@ from django.utils.functional import cached_property
 from django.views.generic import FormView, TemplateView
 
 import core.forms
-import core.helpers
 import core.mixins
 from enrolment import constants, forms, helpers, mixins
 
@@ -313,7 +312,13 @@ class CompaniesHouseEnrolmentView(
                     'report_abuse_url': urls.domestic.FEEDBACK
                 }, form_url=self.request.path)
 
-            return self.redirect_to_ingress_or_finish()
+            if self.request.user.role == user_roles.MEMBER:
+                messages.add_message(self.request, messages.SUCCESS, 'You are now linked to the profile.')
+
+            if self.form_session.ingress_url:
+                return redirect(self.form_session.ingress_url)
+            else:
+                return redirect('business-profile')
         else:
             return super().done(form_list, form_dict=form_dict, **kwargs)
 

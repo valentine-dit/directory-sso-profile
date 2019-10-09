@@ -37,7 +37,7 @@
 - TT-1903 - Removed Editor from change role in admin panel
 - TT-1910 - only display collaborators who haven't accepted in the list
 - No ticket - upgrade directory-sso-api-client to 6.2.0
-
+- TT-1911 - Remove access to edit business profile for member user
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
