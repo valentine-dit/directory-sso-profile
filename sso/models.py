@@ -1,16 +1,12 @@
 from directory_constants import user_roles
 import directory_sso_api_client.models
 
-from django.db import models
 from django.utils.functional import cached_property
 
 from profile.business_profile import helpers
 
 
 class SSOUser(directory_sso_api_client.models.SSOUser):
-    has_user_profile = models.BooleanField()
-    job_title = models.CharField(max_length=123)
-    mobile_phone_number = models.CharField(max_length=128)
 
     @cached_property
     def company(self):
