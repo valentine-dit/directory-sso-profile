@@ -1,7 +1,6 @@
 from directory_constants import user_roles
 import directory_sso_api_client.models
 
-from django.db import models
 from django.utils.functional import cached_property
 
 from profile.business_profile import helpers
