@@ -64,18 +64,21 @@ def test_send_verification_code_email(mock_submit):
         'expiration_date': '2019-02-10T13:19:51.167097Z'
     }
     form_url = 'test'
+    verification_link = 'test/url/'
 
     mock_submit.return_value = create_response(status_code=201)
     helpers.send_verification_code_email(
         email=email,
         verification_code=verification_code,
         form_url=form_url,
+        verification_link=verification_link
     )
 
     expected = {
         'data': {
             'code': 12345,
-            'expiry_date': '10 Feb 2019, 1:19 p.m.'
+            'expiry_date': '10 Feb 2019, 1:19 p.m.',
+            'verification_link': verification_link
         },
         'meta': {
             'action_name': 'gov-notify-email',
