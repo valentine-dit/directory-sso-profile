@@ -196,10 +196,6 @@ class ProgressIndicatorMixin:
 
 class CreateUserAccountMixin:
 
-    @property
-    def verification_link_url(self):
-        return ''
-
     def user_account_condition(self):
         # user has gone straight to verification code entry step, skipping the
         # step where they enter their email. This can happen if:

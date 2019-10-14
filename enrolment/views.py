@@ -240,8 +240,8 @@ class CompaniesHouseEnrolmentView(
 
     @property
     def verification_link_url(self):
-        return self.request.build_absolute_uri(reverse('enrolment-companies-house',
-                                                       kwargs={'step': VERIFICATION}))
+        url = reverse('enrolment-companies-house', kwargs={'step': VERIFICATION})
+        return self.request.build_absolute_uri(url)
 
     def address_search_condition(self):
         company = self.get_cleaned_data_for_step(COMPANY_SEARCH)
@@ -371,8 +371,8 @@ class NonCompaniesHouseEnrolmentView(
 
     @property
     def verification_link_url(self):
-        return self.request.build_absolute_uri(reverse('enrolment-sole-trader',
-                                                       kwargs={'step': VERIFICATION}))
+        url = reverse('enrolment-sole-trader', kwargs={'step': VERIFICATION})
+        return self.request.build_absolute_uri(url)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -433,8 +433,8 @@ class IndividualUserEnrolmentView(BaseEnrolmentWizardView):
 
     @property
     def verification_link_url(self):
-        return self.request.build_absolute_uri(reverse('enrolment-individual',
-                                                       kwargs={'step': VERIFICATION}))
+        url = reverse('enrolment-individual', kwargs={'step': VERIFICATION})
+        return self.request.build_absolute_uri(url)
 
     def get(self, *args, **kwargs):
         # at this point all the steps will be hidden as the user is logged
