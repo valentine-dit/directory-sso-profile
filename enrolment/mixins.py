@@ -1,64 +1,18 @@
 import abc
 from urllib.parse import unquote
-
-from directory_sso_api_client import sso_api_client
 from requests.exceptions import HTTPError
-import directory_components.mixins
 
 from django.conf import settings
 from django.contrib import messages
 from django.http import QueryDict
 from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
+from django.template.response import TemplateResponse
 
-from enrolment import helpers
-
-
-SESSION_KEY_ENROL_KEY = 'ENROL_KEY'
-SESSION_KEY_ENROL_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
-SESSION_KEY_INGRESS_ANON = 'ANON_INGRESS'
-SESSION_KEY_COMPANY_CHOICE = 'COMPANY_CHOICE'
-SESSION_KEY_COMPANY_DATA = 'ENROL_KEY_COMPANY_DATA'
-SESSION_KEY_REFERRER = 'REFERRER_URL'
-SESSION_KEY_BUSINESS_PROFILE_INTENT = 'BUSINESS_PROFILE_INTENT'
-SESSION_KEY_BACKFILL_DETAILS_INTENT = 'BACKFILL_DETAILS_INTENT'
-SESSION_KEY_INVITE_KEY = 'INVITE_KEY'
-
-PROGRESS_STEP_LABEL_USER_ACCOUNT = (
-    'Enter your business email address and set a password'
-)
-PROGRESS_STEP_LABEL_INDIVIDUAL_USER_ACCOUNT = (
-    'Enter your email address and set a password'
-)
-PROGRESS_STEP_LABEL_VERIFICATION = 'Enter your confirmation code'
-PROGRESS_STEP_LABEL_RESEND_VERIFICATION = 'Resend verification'
-PROGRESS_STEP_LABEL_PERSONAL_INFO = 'Enter your personal details'
-PROGRESS_STEP_LABEL_BUSINESS_TYPE = 'Select your business type'
-PROGRESS_STEP_LABEL_BUSINESS_DETAILS = 'Enter your business details'
-
-RESEND_VERIFICATION = 'resend'
-USER_ACCOUNT = 'user-account'
-VERIFICATION = 'verification'
-COMPANY_SEARCH = 'company-search'
-ADDRESS_SEARCH = 'address-search'
-BUSINESS_INFO = 'business-details'
-PERSONAL_INFO = 'personal-details'
-FINISHED = 'finished'
-FAILURE = 'failure'
-INVITE_EXPIRED = 'invite-expired'
-
-URL_NON_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
-    'enrolment-sole-trader', kwargs={'step': USER_ACCOUNT}
-)
-URL_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
-    'enrolment-companies-house', kwargs={'step': USER_ACCOUNT}
-)
-URL_INDIVIDUAL_ENROLMENT = reverse_lazy(
-    'enrolment-individual', kwargs={'step': USER_ACCOUNT}
-)
-URL_OVERSEAS_BUSINESS_ENROLMNET = reverse_lazy(
-    'enrolment-overseas-business'
-)
+from enrolment import helpers, constants
+from directory_sso_api_client import sso_api_client
+from directory_constants import urls
+import directory_components.mixins
 
 
 class RestartOnStepSkipped:
@@ -127,13 +81,13 @@ class StepsListMixin(abc.ABC):
     def step_labels(self):
         labels = self.steps_list_labels[:]
         if not self.should_show_anon_progress_indicator():
-            self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_USER_ACCOUNT)
-            self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_VERIFICATION)
+            self.remove_label(labels=labels, label=constants.PROGRESS_STEP_LABEL_USER_ACCOUNT)
+            self.remove_label(labels=labels, label=constants.PROGRESS_STEP_LABEL_VERIFICATION)
             if self.request.user.has_user_profile:
-                self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_PERSONAL_INFO)
+                self.remove_label(labels=labels, label=constants.PROGRESS_STEP_LABEL_PERSONAL_INFO)
 
         if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
-            self.remove_label(labels=labels, label=PROGRESS_STEP_LABEL_BUSINESS_TYPE)
+            self.remove_label(labels=labels, label=constants.PROGRESS_STEP_LABEL_BUSINESS_TYPE)
         return labels
 
     def remove_label(self, labels, label):
@@ -163,16 +117,16 @@ class ProgressIndicatorMixin:
 
     def get(self, *args, **kwargs):
         if (
-            SESSION_KEY_INGRESS_ANON not in self.storage.extra_data and
+            constants.SESSION_KEY_INGRESS_ANON not in self.storage.extra_data and
             self.kwargs['step'] == self.steps.first
         ):
-            self.storage.extra_data[SESSION_KEY_INGRESS_ANON] = bool(
+            self.storage.extra_data[constants.SESSION_KEY_INGRESS_ANON] = bool(
                 self.request.user.is_anonymous
             )
         return super().get(*args, **kwargs)
 
     def should_show_anon_progress_indicator(self):
-        if self.storage.extra_data.get(SESSION_KEY_INGRESS_ANON):
+        if self.storage.extra_data.get(constants.SESSION_KEY_INGRESS_ANON):
             return True
         return self.request.user.is_anonymous
 
@@ -204,8 +158,8 @@ class CreateUserAccountMixin:
         # - user submitted the first step then followed the email from another
         # device
         skipped_first_step = (
-            self.kwargs['step'] == VERIFICATION and
-            USER_ACCOUNT not in self.storage.data['step_data']
+            self.kwargs['step'] == constants.VERIFICATION and
+            constants.USER_ACCOUNT not in self.storage.data['step_data']
         )
         if skipped_first_step:
             return False
@@ -223,9 +177,9 @@ class CreateUserAccountMixin:
         return not self.request.user.has_user_profile
 
     condition_dict = {
-        USER_ACCOUNT: user_account_condition,
-        VERIFICATION: verification_condition,
-        PERSONAL_INFO: personal_info_condition
+        constants.USER_ACCOUNT: user_account_condition,
+        constants.VERIFICATION: verification_condition,
+        constants.PERSONAL_INFO: personal_info_condition
     }
 
     def dispatch(self, *args, **kwargs):
@@ -233,20 +187,20 @@ class CreateUserAccountMixin:
             return super().dispatch(*args, **kwargs)
         except RemotePasswordValidationError as error:
             return self.render_revalidation_failure(
-                failed_step=USER_ACCOUNT,
+                failed_step=constants.USER_ACCOUNT,
                 form=error.form
             )
 
     def get_form_initial(self, step):
         form_initial = super().get_form_initial(step)
-        if step == VERIFICATION:
-            data = self.get_cleaned_data_for_step(USER_ACCOUNT)
+        if step == constants.VERIFICATION:
+            data = self.get_cleaned_data_for_step(constants.USER_ACCOUNT)
             if data:
                 form_initial['email'] = data['email']
         return form_initial
 
     def process_step(self, form):
-        if form.prefix == USER_ACCOUNT:
+        if form.prefix == constants.USER_ACCOUNT:
             response = sso_api_client.user.create_user(
                 email=form.cleaned_data['email'],
                 password=form.cleaned_data['password'],
@@ -255,7 +209,7 @@ class CreateUserAccountMixin:
                 errors = response.json()
                 if 'password' in errors:
                     self.storage.set_step_data(
-                        USER_ACCOUNT, {form.add_prefix('remote_password_error'): errors['password']}
+                        constants.USER_ACCOUNT, {form.add_prefix('remote_password_error'): errors['password']}
                     )
                     raise RemotePasswordValidationError(form)
                 elif 'email' in errors:
@@ -272,7 +226,7 @@ class CreateUserAccountMixin:
 
     def render_next_step(self, form, **kwargs):
         response = super().render_next_step(form=form, **kwargs)
-        if form.prefix == VERIFICATION:
+        if form.prefix == constants.VERIFICATION:
             response = self.validate_code(form=form, response=response)
         return response
 
@@ -291,14 +245,14 @@ class CreateUserAccountMixin:
         except HTTPError as error:
             if error.response.status_code in [400, 404]:
                 self.storage.set_step_data(
-                    VERIFICATION,
+                    constants.VERIFICATION,
                     {
                         form.add_prefix('email'): [form.cleaned_data['email']],
                         form.add_prefix('code'): [None]
                     }
                 )
                 return self.render_revalidation_failure(
-                    failed_step=VERIFICATION,
+                    failed_step=constants.VERIFICATION,
                     form=form
                 )
             else:
@@ -315,7 +269,7 @@ class CreateUserAccountMixin:
 class CreateBusinessProfileMixin:
 
     def __new__(cls, *args, **kwargs):
-        assert FINISHED in cls.templates
+        assert constants.FINISHED in cls.templates
         return super().__new__(cls)
 
     def serialize_form_list(self, form_list):
@@ -362,12 +316,15 @@ class CreateBusinessProfileMixin:
     def done(self, form_list, *args, **kwargs):
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
-        if self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT):
+        if self.request.session.get(constants.SESSION_KEY_BUSINESS_PROFILE_INTENT):
             messages.success(self.request, 'Account created')
-            del self.request.session[SESSION_KEY_BUSINESS_PROFILE_INTENT]
+            del self.request.session[constants.SESSION_KEY_BUSINESS_PROFILE_INTENT]
             return redirect('business-profile')
+        elif self.request.session.get(constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT):
+            del self.request.session[constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT]
+            return redirect(urls.domestic.EXPORT_OPPORTUNITIES)
         else:
-            return self.redirect_to_ingress_or_finish()
+            return TemplateResponse(self.request, self.templates[constants.FINISHED])
 
 
 class ReadUserIntentMixin:
@@ -377,10 +334,10 @@ class ReadUserIntentMixin:
     LABEL_BACKFILL_DETAILS = 'update your details'
 
     def has_business_profile_intent_in_session(self):
-        return self.request.session.get(SESSION_KEY_BUSINESS_PROFILE_INTENT)
+        return self.request.session.get(constants.SESSION_KEY_BUSINESS_PROFILE_INTENT)
 
     def has_backfill_details_intent_in_session(self):
-        return self.request.session.get(SESSION_KEY_BACKFILL_DETAILS_INTENT)
+        return self.request.session.get(constants.SESSION_KEY_BACKFILL_DETAILS_INTENT)
 
     def get_user_journey_verb(self):
         if self.has_backfill_details_intent_in_session():
@@ -400,7 +357,7 @@ class ReadUserIntentMixin:
 
 
 class WriteUserIntentMixin:
-    """Save weather the user's intent is to create a business profile"""
+    """Save weather the user's has an intent i.e create a business profile"""
 
     def has_intent_in_querystring(self, intent_name):
         params = self.request.GET
@@ -421,7 +378,7 @@ class WriteUserIntentMixin:
         if self.has_intent_in_querystring('backfill-details-intent'):
             # user was prompted to backfill their company or business
             # details after logging in
-            self.request.session[SESSION_KEY_BACKFILL_DETAILS_INTENT] = True
+            self.request.session[constants.SESSION_KEY_BACKFILL_DETAILS_INTENT] = True
         elif self.has_intent_in_querystring('business-profile-intent') or 'invite_key' in self.request.GET:
             # user has clicked a button to specifically create a business
             # profile. They are signing up because their end goal is to have
@@ -430,5 +387,9 @@ class WriteUserIntentMixin:
             # intent is to gain access use other services, and creating a
             # business profile is a step towards that goal. The business
             # profile is a means to and end, not the desired end.
-            self.request.session[SESSION_KEY_BUSINESS_PROFILE_INTENT] = True
+            self.request.session[constants.SESSION_KEY_BUSINESS_PROFILE_INTENT] = True
+        elif self.has_intent_in_querystring('export-opportunity-intent'):
+            # user has clicked a button to apply for export opportunity
+            # after they have create an account they will be directed back
+            self.request.session[constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT] = True
         return super().dispatch(*args, **kwargs)
