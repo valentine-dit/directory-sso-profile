@@ -497,6 +497,7 @@ def test_enrolment_is_new_enrollement_has_profile(client, submit_companies_house
     )
     assert response.status_code == 200
 
+
 def test_companies_house_enrolment(
     client, submit_companies_house_step, steps_data, user
 ):
