@@ -481,7 +481,7 @@ def test_enrolment_is_new_enrollement(client, submit_companies_house_step, steps
     assert response.status_code == 200
 
 
-def test_enrolment_is_new_enrollement_has_profile(client, submit_companies_house_step, steps_data, user):
+def test_enrolment_is_not_new_enrollement_has_profile(client, submit_companies_house_step, steps_data, user):
     user.has_user_profile = True
     response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
@@ -493,7 +493,7 @@ def test_enrolment_is_new_enrollement_has_profile(client, submit_companies_house
     assert response.status_code == 302
     response = client.get(
         reverse('enrolment-business-type'),
-        {'new_enrollment': True}
+        {'new_enrollment': False}
     )
     assert response.status_code == 200
 
