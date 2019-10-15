@@ -152,7 +152,7 @@ class CreateUserAccountMixin:
 
     @property
     def verification_link_url(self):
-        return ''
+        raise NotImplementedError
 
     def user_account_condition(self):
         # user has gone straight to verification code entry step, skipping the
