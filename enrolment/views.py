@@ -190,6 +190,11 @@ class CompaniesHouseEnrolmentView(
         constants.FINISHED: 'enrolment/companies-house-success.html',
     }
 
+    @property
+    def verification_link_url(self):
+        url = reverse('enrolment-companies-house', kwargs={'step': constants.VERIFICATION})
+        return self.request.build_absolute_uri(url)
+
     def address_search_condition(self):
         company = self.get_cleaned_data_for_step(constants.COMPANY_SEARCH)
         if not company:
@@ -314,6 +319,11 @@ class NonCompaniesHouseEnrolmentView(
         constants.FINISHED: 'enrolment/non-companies-house-success.html',
     }
 
+    @property
+    def verification_link_url(self):
+        url = reverse('enrolment-sole-trader', kwargs={'step': constants.VERIFICATION})
+        return self.request.build_absolute_uri(url)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.steps.current == constants.PERSONAL_INFO:
@@ -371,6 +381,11 @@ class IndividualUserEnrolmentView(BaseEnrolmentWizardView):
         constants.FINISHED: 'enrolment/individual-success.html',
     }
 
+    @property
+    def verification_link_url(self):
+        url = reverse('enrolment-individual', kwargs={'step': constants.VERIFICATION})
+        return self.request.build_absolute_uri(url)
+
     def get(self, *args, **kwargs):
         # at this point all the steps will be hidden as the user is logged
         # in and has a user profile, so the normal `get` method fails with
@@ -418,6 +433,11 @@ class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
         constants.FINISHED: 'enrolment/individual-success.html',
         constants.INVITE_EXPIRED: 'enrolment/individual-collaborator-invite-expired.html'
     }
+
+    @property
+    def verification_link_url(self):
+        url = reverse('enrolment-collaboration', kwargs={'step': constants.VERIFICATION})
+        return self.request.build_absolute_uri(url)
 
     def get(self, *args, **kwargs):
         if 'invite_key' in self.request.GET:
@@ -473,6 +493,10 @@ class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
 
 class PreVerifiedEnrolmentView(BaseEnrolmentWizardView):
     google_analytics_page_id = 'PreVerifiedEnrolment'
+
+    # Needed by CreateUserAccountMixin, not applicable here
+    verification_link_url = ''
+
     steps_list_labels = [
         constants.PROGRESS_STEP_LABEL_USER_ACCOUNT,
         constants.PROGRESS_STEP_LABEL_VERIFICATION,
@@ -577,6 +601,11 @@ class ResendVerificationCodeView(
         constants.PROGRESS_STEP_LABEL_VERIFICATION,
     ]
 
+    @property
+    def verification_link_url(self):
+        url = reverse('resend-verification', kwargs={'step': constants.VERIFICATION})
+        return self.request.build_absolute_uri(url)
+
     def get_template_names(self):
         return [self.templates[self.steps.current]]
 
@@ -605,6 +634,7 @@ class ResendVerificationCodeView(
                     email=email,
                     verification_code=verification_code,
                     form_url=self.request.path,
+                    verification_link=self.verification_link_url,
                 )
         return super().process_step(form)
 
