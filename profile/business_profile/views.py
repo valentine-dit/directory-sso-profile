@@ -16,6 +16,7 @@ from django.views.generic import TemplateView, FormView
 import core.mixins
 import core.forms
 from profile.business_profile import forms, helpers
+from directory_constants import urls
 
 BASIC = 'details'
 MEDIA = 'images'
@@ -24,6 +25,7 @@ MEDIA = 'images'
 class BusinessProfileView(TemplateView):
     template_name_fab_user = 'business_profile/profile.html'
     template_name_not_fab_user = 'business_profile/is-not-business-profile-user.html'
+    template_business_profile_member = 'business_profile/business-profile-member.html'
 
     SUCCESS_MESSAGES = {
         'owner-transferred': (
@@ -39,11 +41,15 @@ class BusinessProfileView(TemplateView):
         for key, message in self.SUCCESS_MESSAGES.items():
             if key in self.request.GET:
                 messages.add_message(self.request, messages.SUCCESS, message)
+
         return super().get(*args, **kwargs)
 
     def get_template_names(self, *args, **kwargs):
         if self.request.user.company:
-            template_name = self.template_name_fab_user
+            if self.request.user.role == user_roles.MEMBER:
+                template_name = self.template_business_profile_member
+            else:
+                template_name = self.template_name_fab_user
         else:
             template_name = self.template_name_not_fab_user
         return [template_name]
@@ -53,17 +59,29 @@ class BusinessProfileView(TemplateView):
             company = self.request.user.company.serialize_for_template()
         else:
             company = None
-        return {
-            'fab_tab_classes': 'active',
-            'company': company,
-            'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
-            'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
-            'FAB_ADD_CASE_STUDY_URL': settings.FAB_ADD_CASE_STUDY_URL,
-            'FAB_REGISTER_URL': settings.FAB_REGISTER_URL,
-            'FAB_ADD_USER_URL': settings.FAB_ADD_USER_URL,
-            'FAB_REMOVE_USER_URL': settings.FAB_REMOVE_USER_URL,
-            'FAB_TRANSFER_ACCOUNT_URL': settings.FAB_TRANSFER_ACCOUNT_URL,
-        }
+
+        if self.request.user.role == user_roles.MEMBER:
+            return {
+                'fab_tab_classes': 'active',
+                'company': company,
+                'contact_us_url': (urls.domestic.CONTACT_US / 'domestic'),
+                'export_opportunities_apply_url': urls.domestic.EXPORT_OPPORTUNITIES,
+                'is_profile_published': company['is_published_find_a_supplier'] if company else False,
+                'FAB_BUSINESS_PROFILE_URL': (urls.international.TRADE_FAS / 'suppliers' /
+                                             company['number'] / company['slug']) if company else ''
+            }
+        else:
+            return {
+                'fab_tab_classes': 'active',
+                'company': company,
+                'FAB_EDIT_COMPANY_LOGO_URL': settings.FAB_EDIT_COMPANY_LOGO_URL,
+                'FAB_EDIT_PROFILE_URL': settings.FAB_EDIT_PROFILE_URL,
+                'FAB_ADD_CASE_STUDY_URL': settings.FAB_ADD_CASE_STUDY_URL,
+                'FAB_REGISTER_URL': settings.FAB_REGISTER_URL,
+                'FAB_ADD_USER_URL': settings.FAB_ADD_USER_URL,
+                'FAB_REMOVE_USER_URL': settings.FAB_REMOVE_USER_URL,
+                'FAB_TRANSFER_ACCOUNT_URL': settings.FAB_TRANSFER_ACCOUNT_URL,
+            }
 
 
 class BaseFormView(FormView):

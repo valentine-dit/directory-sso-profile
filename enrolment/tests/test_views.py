@@ -14,15 +14,14 @@ from django.views.generic import TemplateView
 
 from core.tests.helpers import create_response, submit_step_factory
 from enrolment import constants, forms, helpers, views, mixins
-from directory_forms_api_client.helpers import FormSession
 
 
 enrolment_urls = (
     reverse('enrolment-business-type'),
     reverse('enrolment-start'),
-    reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}),
-    reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}),
-    reverse('enrolment-individual', kwargs={'step': views.USER_ACCOUNT}),
+    reverse('enrolment-companies-house', kwargs={'step': constants.USER_ACCOUNT}),
+    reverse('enrolment-sole-trader', kwargs={'step': constants.USER_ACCOUNT}),
+    reverse('enrolment-individual', kwargs={'step': constants.USER_ACCOUNT}),
 )
 company_types = (
     constants.COMPANIES_HOUSE_COMPANY,
@@ -348,28 +347,28 @@ def mock_notify_already_registered():
 @pytest.fixture
 def steps_data(captcha_stub):
     data = {
-        views.USER_ACCOUNT: {
+        constants.USER_ACCOUNT: {
             'email': 'jim@example.com',
             'password': 'thing',
             'password_confirmed': 'thing',
             'captcha': captcha_stub,
             'terms_agreed': True
         },
-        views.COMPANY_SEARCH: {
+        constants.COMPANY_SEARCH: {
             'company_name': 'Example corp',
             'company_number': '12345678',
         },
-        views.PERSONAL_INFO: {
+        constants.PERSONAL_INFO: {
             'given_name': 'Foo',
             'family_name': 'Example',
             'job_title': 'Exampler',
             'phone_number': '1232342',
             'confirmed_is_company_representative': True,
         },
-        views.VERIFICATION: {
+        constants.VERIFICATION: {
             'code': '12345',
         },
-        views.RESEND_VERIFICATION: {
+        constants.RESEND_VERIFICATION: {
             'email': 'jim@example.com',
         },
         BUSINESS_INFO_NON_COMPANIES_HOUSE: {
@@ -404,7 +403,7 @@ def session_client_company_factory(client, settings):
     def session_client(company_choice):
         session = signed_cookies.SessionStore()
         session.save()
-        session[views.SESSION_KEY_COMPANY_CHOICE] = company_choice
+        session[constants.SESSION_KEY_COMPANY_CHOICE] = company_choice
         session.save()
         client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
         return client
@@ -417,7 +416,7 @@ def session_client_referrer_factory(client, settings):
     def session_client(referrer_url):
         session = signed_cookies.SessionStore()
         session.save()
-        session[views.SESSION_KEY_REFERRER] = referrer_url
+        session[constants.SESSION_KEY_REFERRER] = referrer_url
         session.save()
         client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
         return client
@@ -467,13 +466,13 @@ def test_enrolment_routing_individual_business_profile_intent(client, user):
 
 
 def test_enrolment_is_new_enrollement(client, submit_companies_house_step, steps_data, user):
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    response = submit_companies_house_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
     client.force_login(user)
-    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    response = submit_companies_house_step(steps_data[constants.COMPANY_SEARCH])
     assert response.status_code == 302
     response = client.get(
         reverse('enrolment-business-type'),
@@ -482,29 +481,46 @@ def test_enrolment_is_new_enrollement(client, submit_companies_house_step, steps
     assert response.status_code == 200
 
 
+def test_enrolment_is_not_new_enrollement_has_profile(client, submit_companies_house_step, steps_data, user):
+    user.has_user_profile = True
+    response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(steps_data[constants.VERIFICATION])
+    assert response.status_code == 302
+    client.force_login(user)
+    response = submit_companies_house_step(steps_data[constants.COMPANY_SEARCH])
+    assert response.status_code == 302
+    response = client.get(
+        reverse('enrolment-business-type'),
+        {'new_enrollment': False}
+    )
+    assert response.status_code == 200
+
+
 def test_companies_house_enrolment(
     client, submit_companies_house_step, steps_data, user
 ):
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    response = submit_companies_house_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
-    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    response = submit_companies_house_step(steps_data[constants.COMPANY_SEARCH])
     assert response.status_code == 302
 
     response = submit_companies_house_step(
         data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
-        step_name=views.BUSINESS_INFO,
+        step_name=constants.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
     response = submit_companies_house_step(
-        data=steps_data[views.PERSONAL_INFO],
-        step_name=views.PERSONAL_INFO,
+        data=steps_data[constants.PERSONAL_INFO],
+        step_name=constants.PERSONAL_INFO,
     )
     assert response.status_code == 302
 
@@ -518,22 +534,22 @@ def test_companies_house_enrolment_already_has_profile(
     client.force_login(user)
 
     response = submit_companies_house_step(
-        data=steps_data[views.COMPANY_SEARCH],
-        step_name=views.COMPANY_SEARCH,
+        data=steps_data[constants.COMPANY_SEARCH],
+        step_name=constants.COMPANY_SEARCH,
     )
 
     assert response.status_code == 302
 
     response = submit_companies_house_step(
         data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
-        step_name=views.BUSINESS_INFO,
+        step_name=constants.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
     response = client.get(response.url)
     assert response.status_code == 200
     assert response.template_name == (
-        views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
+        views.CompaniesHouseEnrolmentView.templates[constants.FINISHED]
     )
 
 
@@ -543,15 +559,15 @@ def test_companies_house_enrolment_change_company_name(
 ):
     mock_get_is_enrolled.return_value = True
 
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    response = submit_companies_house_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
-    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    response = submit_companies_house_step(steps_data[constants.COMPANY_SEARCH])
     assert response.status_code == 302
 
     response = client.get(response.url)
@@ -560,7 +576,7 @@ def test_companies_house_enrolment_change_company_name(
     # given the user has submitted their company details
     response = submit_companies_house_step(
         data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
-        step_name=views.BUSINESS_INFO,
+        step_name=constants.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
@@ -570,7 +586,7 @@ def test_companies_house_enrolment_change_company_name(
             'company_name': 'Bar corp',
             'company_number': '12345679',
         },
-        step_name=views.COMPANY_SEARCH
+        step_name=constants.COMPANY_SEARCH
     )
     assert response.status_code == 302
 
@@ -585,20 +601,20 @@ def test_companies_house_enrolment_change_company_name(
 def test_companies_house_enrolment_expose_company(
     client, submit_companies_house_step, steps_data, user
 ):
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    response = submit_companies_house_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
-    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    response = submit_companies_house_step(steps_data[constants.COMPANY_SEARCH])
     assert response.status_code == 302
 
     response = submit_companies_house_step(
         data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
-        step_name=views.BUSINESS_INFO,
+        step_name=constants.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
@@ -621,7 +637,7 @@ def test_companies_house_enrolment_expose_company(
 
 def test_companies_house_enrolment_redirect_to_start(client):
     url = reverse(
-        'enrolment-companies-house', kwargs={'step': views.COMPANY_SEARCH}
+        'enrolment-companies-house', kwargs={'step': constants.COMPANY_SEARCH}
     )
     response = client.get(url)
 
@@ -636,26 +652,26 @@ def test_companies_house_enrolment_submit_end_to_end(
     user,
 ):
     session_client_referrer_factory(urls.domestic.FIND_A_BUYER)
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    response = submit_companies_house_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
-    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    response = submit_companies_house_step(steps_data[constants.COMPANY_SEARCH])
     assert response.status_code == 302
 
     response = submit_companies_house_step(
         data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
-        step_name=views.BUSINESS_INFO,
+        step_name=constants.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
     response = submit_companies_house_step(
-        data=steps_data[views.PERSONAL_INFO],
-        step_name=views.PERSONAL_INFO,
+        data=steps_data[constants.PERSONAL_INFO],
+        step_name=constants.PERSONAL_INFO,
     )
     assert response.status_code == 302
 
@@ -663,7 +679,7 @@ def test_companies_house_enrolment_submit_end_to_end(
 
     assert response.status_code == 200
     assert response.template_name == (
-        views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
+        views.CompaniesHouseEnrolmentView.templates[constants.FINISHED]
     )
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
@@ -693,13 +709,13 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
 ):
     client.force_login(user)
 
-    url = reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT})
+    url = reverse('enrolment-companies-house', kwargs={'step': constants.USER_ACCOUNT})
     response = client.get(url)
     assert response.status_code == 302
 
     response = submit_companies_house_step(
-        steps_data[views.COMPANY_SEARCH],
-        step_name=views.COMPANY_SEARCH,
+        steps_data[constants.COMPANY_SEARCH],
+        step_name=constants.COMPANY_SEARCH,
     )
 
     assert response.status_code == 302
@@ -713,7 +729,7 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
 
     step = resolve(response.url).kwargs['step']
     response = submit_companies_house_step(
-        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},  # not agreed during user account creation
+        {**steps_data[constants.PERSONAL_INFO], 'terms_agreed': True},  # not agreed during user account creation
         step_name=step
     )
     assert response.status_code == 302
@@ -722,7 +738,7 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
 
     assert response.status_code == 200
     assert response.template_name == (
-        views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
+        views.CompaniesHouseEnrolmentView.templates[constants.FINISHED]
     )
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
@@ -761,7 +777,7 @@ def test_companies_house_enrolment_submit_end_to_end_no_address(
         'company_status': 'active',
     }
 
-    url = reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT})
+    url = reverse('enrolment-companies-house', kwargs={'step': constants.USER_ACCOUNT})
     response = client.get(url)
 
     assert response.status_code == 302
@@ -771,7 +787,7 @@ def test_companies_house_enrolment_submit_end_to_end_no_address(
             'company_name': 'Example corp',
             'company_number': 'IP12345678',
         },
-        step_name=views.COMPANY_SEARCH,
+        step_name=constants.COMPANY_SEARCH,
     )
 
     assert response.status_code == 302
@@ -782,20 +798,20 @@ def test_companies_house_enrolment_submit_end_to_end_no_address(
             'postal_code': 'EDG 4DF',
             'address': '555 fake street, London',
         },
-        step_name=views.ADDRESS_SEARCH,
+        step_name=constants.ADDRESS_SEARCH,
     )
     assert response.status_code == 302
 
     response = submit_companies_house_step(
         data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
-        step_name=views.BUSINESS_INFO
+        step_name=constants.BUSINESS_INFO
     )
 
     assert response.status_code == 302
 
     response = submit_companies_house_step(
-        data={**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},
-        step_name=views.PERSONAL_INFO,
+        data={**steps_data[constants.PERSONAL_INFO], 'terms_agreed': True},
+        step_name=constants.PERSONAL_INFO,
     )
 
     assert response.status_code == 302
@@ -803,7 +819,7 @@ def test_companies_house_enrolment_submit_end_to_end_no_address(
     response = client.get(response.url)
 
     assert response.status_code == 200
-    assert response.template_name == views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
+    assert response.template_name == views.CompaniesHouseEnrolmentView.templates[constants.FINISHED]
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
         'address_line_1': '555 fake street',
@@ -832,26 +848,26 @@ def test_companies_house_enrolment_suppress_success_page(
     )
     assert response.status_code == 200
 
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    response = submit_companies_house_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
-    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    response = submit_companies_house_step(steps_data[constants.COMPANY_SEARCH])
     assert response.status_code == 302
 
     response = submit_companies_house_step(
         data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
-        step_name=views.BUSINESS_INFO,
+        step_name=constants.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
     response = submit_companies_house_step(
-        data=steps_data[views.PERSONAL_INFO],
-        step_name=views.PERSONAL_INFO,
+        data=steps_data[constants.PERSONAL_INFO],
+        step_name=constants.PERSONAL_INFO,
     )
     assert response.status_code == 302
 
@@ -896,37 +912,41 @@ def test_companies_house_enrolment_has_company_error(
 
 @mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
 @mock.patch('enrolment.views.helpers.create_company_member')
+@mock.patch('sso.models.SSOUser.role')
 def test_companies_house_enrolment_submit_end_to_end_company_has_account(
-    mock_add_collaborator, mock_gov_notify, client,
+    mock_user_role, mock_add_collaborator, mock_gov_notify, client,
     steps_data, submit_companies_house_step, mock_get_company_admins,
     mock_enrolment_send, mock_validate_company_number, user
 ):
     mock_validate_company_number.return_value = create_response(status_code=400)
 
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    mock_user_role.return_value = user_roles.MEMBER
+
+    response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
+    response = submit_companies_house_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
-    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
+    response = submit_companies_house_step(steps_data[constants.COMPANY_SEARCH])
     assert response.status_code == 302
 
     response = submit_companies_house_step(
         data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
-        step_name=views.BUSINESS_INFO
+        step_name=constants.BUSINESS_INFO
     )
     assert response.status_code == 302
 
-    response = submit_companies_house_step(data=steps_data[views.PERSONAL_INFO], step_name=views.PERSONAL_INFO)
+    response = submit_companies_house_step(data=steps_data[constants.PERSONAL_INFO], step_name=constants.PERSONAL_INFO)
     assert response.status_code == 302
 
     response = client.get(response.url)
 
-    assert response.status_code == 200
-    assert response.template_name == views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
+    # Redirects to business profile for 2nd company `member` user
+    assert response.status_code == 302
+
     assert mock_add_collaborator.call_count == 1
     assert mock_add_collaborator.call_args == mock.call(
         sso_session_id='123',
@@ -944,8 +964,67 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
 
 @mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
 @mock.patch('enrolment.views.helpers.create_company_member')
+@mock.patch('enrolment.views.helpers.get_is_enrolled')
+@mock.patch('sso.models.SSOUser.role')
+def test_companies_house_enrolment_submit_end_to_end_company_second_user(
+    mock_user_role, mock_get_is_enrolled, mock_add_collaborator,
+    mock_gov_notify, client, steps_data, submit_companies_house_step,
+    mock_get_company_admins, mock_enrolment_send,
+    mock_validate_company_number, user
+):
+    mock_validate_company_number.return_value = create_response(status_code=400)
+
+    mock_get_is_enrolled.return_value = True
+    mock_user_role.return_value = user_roles.MEMBER
+
+    response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(steps_data[constants.VERIFICATION])
+    assert response.status_code == 302
+
+    client.force_login(user)
+
+    response = submit_companies_house_step(steps_data[constants.COMPANY_SEARCH])
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(
+        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
+        step_name=constants.BUSINESS_INFO
+    )
+    assert response.status_code == 302
+
+    response = submit_companies_house_step(data=steps_data[constants.PERSONAL_INFO], step_name=constants.PERSONAL_INFO)
+    assert response.status_code == 302
+
+    response = client.get(response.url, follow=True)
+
+    # Redirects to business profile for 2nd company `member` user
+    assert response.status_code == 200
+
+    for message in response.context['messages']:
+        assert str(message) == 'You are now linked to the profile.'
+
+    assert mock_add_collaborator.call_count == 1
+    assert mock_add_collaborator.call_args == mock.call(
+        sso_session_id='123',
+        data={
+            'sso_id': 1,
+            'name': user.full_name,
+            'company': '12345678',
+            'company_email': 'jim@example.com',
+            'mobile_number': '1232342',
+        })
+
+    assert mock_get_company_admins.call_count == 1
+    assert mock_gov_notify.call_count == 2
+
+
+@mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
+@mock.patch('enrolment.views.helpers.create_company_member')
+@mock.patch('sso.models.SSOUser.role')
 def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
-    mock_add_collaborator, mock_gov_notify, client, steps_data,
+    mock_user_role, mock_add_collaborator, mock_gov_notify, client, steps_data,
     submit_companies_house_step, mock_enrolment_send, mock_get_company_admins,
     mock_validate_company_number, user
 ):
@@ -954,26 +1033,25 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
     user.first_name = 'Foo'
     user.last_name = 'Bar'
 
+    mock_user_role.return_value = user_roles.ADMIN
+
     client.force_login(user)
 
     response = submit_companies_house_step(
-        data=steps_data[views.COMPANY_SEARCH],
-        step_name=views.COMPANY_SEARCH,
+        data=steps_data[constants.COMPANY_SEARCH],
+        step_name=constants.COMPANY_SEARCH,
     )
     assert response.status_code == 302
 
     response = submit_companies_house_step(
         data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
-        step_name=views.BUSINESS_INFO,
+        step_name=constants.BUSINESS_INFO,
     )
     assert response.status_code == 302
 
     response = client.get(response.url)
 
-    assert response.status_code == 200
-    assert response.template_name == (
-        views.CompaniesHouseEnrolmentView.templates[views.FINISHED]
-    )
+    assert response.status_code == 302
     assert mock_enrolment_send.call_count == 0
     assert mock_add_collaborator.call_count == 1
     assert mock_add_collaborator.call_args == mock.call(
@@ -993,7 +1071,7 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_user_profile(
 def test_verification_missing_url(
     submit_companies_house_step, client, steps_data
 ):
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
     response = client.get(response.url)
 
     verification_missing_url = urls.domestic.CONTACT_US / 'triage/great-account/verification-missing/'
@@ -1031,69 +1109,6 @@ def test_user_has_company_redirect_on_start(
     assert response.url == reverse('business-profile')
 
 
-def test_start_saves_ingress_url(client, settings):
-    url = "%s?next=www.example.com" % reverse('enrolment-start')
-    client.get(url)
-    assert client.session[FormSession.KEY_INGRESS_URL] == 'www.example.com'
-
-
-def test_companies_house_enrolment_with_ingress(
-    client, submit_companies_house_step, steps_data, user
-):
-    url = "%s?next=www.example.com" % reverse('enrolment-start')
-    client.get(url)
-
-    response = submit_companies_house_step(steps_data[views.USER_ACCOUNT])
-    response = submit_companies_house_step(steps_data[views.VERIFICATION])
-    client.force_login(user)
-    response = submit_companies_house_step(steps_data[views.COMPANY_SEARCH])
-    response = submit_companies_house_step(
-        data=steps_data[BUSINESS_INFO_COMPANIES_HOUSE],
-        step_name=views.BUSINESS_INFO,
-    )
-    response = submit_companies_house_step(
-        data=steps_data[views.PERSONAL_INFO],
-        step_name=views.PERSONAL_INFO,
-    )
-    response = client.get(response.url)
-    assert response.url == 'www.example.com'
-
-
-def test_non_companies_house_enrolment_with_ingress(
-    client, submit_non_companies_house_step, steps_data, user
-):
-    url = "%s?next=www.example.com" % reverse('enrolment-start')
-    client.get(url)
-
-    response = submit_non_companies_house_step(steps_data[views.USER_ACCOUNT])
-    response = submit_non_companies_house_step(steps_data[views.VERIFICATION])
-    client.force_login(user)
-    response = submit_non_companies_house_step(
-        steps_data[BUSINESS_INFO_NON_COMPANIES_HOUSE]
-    )
-    response = submit_non_companies_house_step(
-        steps_data[views.PERSONAL_INFO],
-        step_name=resolve(response.url).kwargs['step']
-    )
-    response = client.get(response.url)
-    assert response.url == 'www.example.com'
-
-
-def test_individual_enrolment_with_ingress(
-    client, submit_individual_step, user,
-    steps_data, session_client_referrer_factory,
-):
-    url = "%s?next=www.example.com" % reverse('enrolment-start')
-    client.get(url)
-
-    response = submit_individual_step(steps_data[views.USER_ACCOUNT])
-    response = submit_individual_step(steps_data[views.VERIFICATION])
-    client.force_login(user)
-    response = submit_individual_step(steps_data[views.PERSONAL_INFO])
-    response = client.get(response.url)
-    assert response.url == 'www.example.com'
-
-
 def test_user_has_no_company_redirect_on_start(
     client, mock_user_has_company, user
 ):
@@ -1111,7 +1126,7 @@ def test_create_user_enrolment(
     client, steps_data, submit_step_builder, company_type
 ):
     submit_step = submit_step_builder(company_type)
-    response = submit_step(steps_data[views.USER_ACCOUNT])
+    response = submit_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
 
@@ -1127,12 +1142,12 @@ def test_create_user_enrolment_already_exists(
 
     submit_step = submit_step_builder(company_type)
 
-    response = submit_step(steps_data[views.USER_ACCOUNT])
+    response = submit_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
     assert mock_notify_already_registered.call_count == 1
     assert mock_notify_already_registered.call_args == mock.call(
         email='jim@example.com',
-        form_url=reverse(form_url_name, kwargs={'step': views.USER_ACCOUNT})
+        form_url=reverse(form_url_name, kwargs={'step': constants.USER_ACCOUNT})
     )
 
 
@@ -1147,7 +1162,7 @@ def test_create_user_enrolment_bad_password(
 
     submit_step = submit_step_builder(company_type)
 
-    response = submit_step(steps_data[views.USER_ACCOUNT])
+    response = submit_step(steps_data[constants.USER_ACCOUNT])
 
     assert response.status_code == 302
 
@@ -1162,10 +1177,10 @@ def test_user_verification_passes_cookies(
 ):
     submit_step = submit_step_builder(company_type)
 
-    response = submit_step(steps_data[views.USER_ACCOUNT])
+    response = submit_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_step(steps_data[views.VERIFICATION])
+    response = submit_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     assert str(response.cookies['debug_sso_session_cookie']) == (
@@ -1188,7 +1203,7 @@ def test_user_verification_manual_passes_cookies(
 
     response = submit_step(
         data={'email': 'test@test.com', 'code': '12345'},
-        step_name=views.VERIFICATION,
+        step_name=constants.VERIFICATION,
     )
     assert response.status_code == 302
 
@@ -1212,10 +1227,10 @@ def test_confirm_user_verify_code_incorrect_code(
 
     mock_confirm_verification_code.return_value = create_response(status_code=400)
 
-    response = submit_step(steps_data[views.USER_ACCOUNT])
+    response = submit_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_step(steps_data[views.VERIFICATION])
+    response = submit_step(steps_data[constants.VERIFICATION])
 
     assert response.status_code == 302
 
@@ -1233,7 +1248,7 @@ def test_confirm_user_verify_code_manual_email(
 
     response = submit_step(
         data={'email': 'test@test.com', 'code': '12345'},
-        step_name=views.VERIFICATION,
+        step_name=constants.VERIFICATION,
     )
 
     assert response.status_code == 302
@@ -1253,11 +1268,11 @@ def test_confirm_user_verify_code_remote_error(
 
     mock_confirm_verification_code.return_value = create_response(status_code=500)
 
-    response = submit_step(steps_data[views.USER_ACCOUNT])
+    response = submit_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
     with pytest.raises(HTTPError):
-        submit_step(steps_data[views.VERIFICATION])
+        submit_step(steps_data[constants.VERIFICATION])
 
 
 @pytest.mark.parametrize('company_type', company_types)
@@ -1267,10 +1282,10 @@ def test_confirm_user_verify_code(
 ):
     submit_step = submit_step_builder(company_type)
 
-    response = submit_step(steps_data[views.USER_ACCOUNT])
+    response = submit_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_step(steps_data[views.VERIFICATION])
+    response = submit_step(steps_data[constants.VERIFICATION])
 
     client.force_login(user)
 
@@ -1288,7 +1303,7 @@ def test_confirm_user_resend_verification_code(
         steps_data,
 ):
     response = submit_resend_verification_house_step(
-        steps_data[views.RESEND_VERIFICATION]
+        steps_data[constants.RESEND_VERIFICATION]
     )
     assert response.status_code == 302
 
@@ -1317,7 +1332,7 @@ def test_confirm_user_resend_verification_code_user_verified(
     mock_regenerate_verification_code.return_value = create_response(status_code=404)
 
     response = submit_resend_verification_house_step(
-        steps_data[views.RESEND_VERIFICATION]
+        steps_data[constants.RESEND_VERIFICATION]
     )
 
     assert response.status_code == 302
@@ -1340,7 +1355,7 @@ def test_confirm_user_resend_verification_code_no_user(
     mock_regenerate_verification_code.return_value = create_response(status_code=404)
 
     response = submit_resend_verification_house_step(
-        steps_data[views.RESEND_VERIFICATION]
+        steps_data[constants.RESEND_VERIFICATION]
     )
 
     assert response.status_code == 302
@@ -1361,13 +1376,13 @@ def test_confirm_user_resend_verification_code_complete(
 ):
 
     response = submit_resend_verification_house_step(
-        steps_data[views.RESEND_VERIFICATION]
+        steps_data[constants.RESEND_VERIFICATION]
     )
 
     assert response.status_code == 302
 
     response = submit_resend_verification_house_step(
-        steps_data[views.VERIFICATION],
+        steps_data[constants.VERIFICATION],
         step_name=resolve(response.url).kwargs['step']
     )
     assert response.status_code == 302
@@ -1393,20 +1408,20 @@ def test_confirm_user_resend_verification_code_choice_companies_house(
     session_client_company_factory(constants.COMPANIES_HOUSE_COMPANY)
 
     response = submit_resend_verification_house_step(
-        steps_data[views.RESEND_VERIFICATION]
+        steps_data[constants.RESEND_VERIFICATION]
     )
 
     assert response.status_code == 302
 
     response = submit_resend_verification_house_step(
-        steps_data[views.VERIFICATION],
+        steps_data[constants.VERIFICATION],
         step_name=resolve(response.url).kwargs['step'],
     )
 
     assert response.status_code == 302
 
     assert response.url == reverse(
-        'enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}
+        'enrolment-companies-house', kwargs={'step': constants.USER_ACCOUNT}
     )
 
     assert str(response.cookies['debug_sso_session_cookie']) == (
@@ -1429,20 +1444,20 @@ def test_confirm_user_resend_verification_code_choice_non_companies_house(
     session_client_company_factory(constants.NON_COMPANIES_HOUSE_COMPANY)
 
     response = submit_resend_verification_house_step(
-        steps_data[views.RESEND_VERIFICATION]
+        steps_data[constants.RESEND_VERIFICATION]
     )
 
     assert response.status_code == 302
 
     response = submit_resend_verification_house_step(
-        steps_data[views.VERIFICATION],
+        steps_data[constants.VERIFICATION],
         step_name=resolve(response.url).kwargs['step'],
     )
 
     assert response.status_code == 302
 
     assert response.url == reverse(
-        'enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}
+        'enrolment-sole-trader', kwargs={'step': constants.USER_ACCOUNT}
     )
 
     assert str(response.cookies['debug_sso_session_cookie']) == (
@@ -1465,20 +1480,20 @@ def test_confirm_user_resend_verification_code_choice_individual(
     session_client_company_factory(constants.NOT_COMPANY)
 
     response = submit_resend_verification_house_step(
-        steps_data[views.RESEND_VERIFICATION]
+        steps_data[constants.RESEND_VERIFICATION]
     )
 
     assert response.status_code == 302
 
     response = submit_resend_verification_house_step(
-        steps_data[views.VERIFICATION],
+        steps_data[constants.VERIFICATION],
         step_name=resolve(response.url).kwargs['step'],
     )
 
     assert response.status_code == 302
 
     assert response.url == reverse(
-        'enrolment-individual', kwargs={'step': views.USER_ACCOUNT}
+        'enrolment-individual', kwargs={'step': constants.USER_ACCOUNT}
     )
 
     assert str(response.cookies['debug_sso_session_cookie']) == (
@@ -1498,7 +1513,7 @@ def test_confirm_user_resend_verification_logged_in(
     client.force_login(user)
 
     url = reverse(
-        'resend-verification', kwargs={'step': views.RESEND_VERIFICATION}
+        'resend-verification', kwargs={'step': constants.RESEND_VERIFICATION}
     )
 
     response = client.get(url)
@@ -1509,7 +1524,7 @@ def test_confirm_user_resend_verification_logged_in(
 
 def test_confirm_user_resend_verification_context_urls(client):
     url = reverse(
-        'resend-verification', kwargs={'step': views.RESEND_VERIFICATION}
+        'resend-verification', kwargs={'step': constants.RESEND_VERIFICATION}
     )
 
     response = client.get(url)
@@ -1525,10 +1540,10 @@ def test_confirm_user_resend_verification_context_urls(client):
 def test_non_companies_house_enrolment_expose_company(
     client, submit_non_companies_house_step, steps_data, user
 ):
-    response = submit_non_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = submit_non_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_non_companies_house_step(steps_data[views.VERIFICATION])
+    response = submit_non_companies_house_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
@@ -1554,7 +1569,7 @@ def test_non_companies_house_enrolment_expose_company(
 
 def test_non_companies_house_enrolment_redirect_to_start(client):
     url = reverse(
-        'enrolment-sole-trader', kwargs={'step': views.ADDRESS_SEARCH}
+        'enrolment-sole-trader', kwargs={'step': constants.ADDRESS_SEARCH}
     )
     response = client.get(url)
 
@@ -1567,7 +1582,7 @@ def test_non_companies_house_enrolment_submit_end_to_end_logged_in(
     mock_enrolment_send, user
 ):
     client.force_login(user)
-    url = reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT})
+    url = reverse('enrolment-sole-trader', kwargs={'step': constants.USER_ACCOUNT})
     response = client.get(url)
 
     assert response.status_code == 302
@@ -1580,7 +1595,7 @@ def test_non_companies_house_enrolment_submit_end_to_end_logged_in(
     assert response.status_code == 302
 
     response = submit_non_companies_house_step(
-        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},
+        {**steps_data[constants.PERSONAL_INFO], 'terms_agreed': True},
         step_name=resolve(response.url).kwargs['step']
     )
     assert response.status_code == 302
@@ -1589,7 +1604,7 @@ def test_non_companies_house_enrolment_submit_end_to_end_logged_in(
 
     assert response.status_code == 200
     assert response.template_name == (
-        views.NonCompaniesHouseEnrolmentView.templates[views.FINISHED]
+        views.NonCompaniesHouseEnrolmentView.templates[constants.FINISHED]
     )
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
@@ -1614,7 +1629,7 @@ def test_non_companies_house_enrolment_has_user_profile(
     user.has_user_profile = True
     client.force_login(user)
 
-    url = reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT})
+    url = reverse('enrolment-sole-trader', kwargs={'step': constants.USER_ACCOUNT})
     response = client.get(url)
 
     assert response.status_code == 302
@@ -1629,7 +1644,7 @@ def test_non_companies_house_enrolment_has_user_profile(
     response = client.get(response.url)
     assert response.status_code == 200
     assert response.template_name == (
-        views.NonCompaniesHouseEnrolmentView.templates[views.FINISHED]
+        views.NonCompaniesHouseEnrolmentView.templates[constants.FINISHED]
     )
 
 
@@ -1642,10 +1657,10 @@ def test_non_companies_house_enrolment_suppress_success(
     )
     assert response.status_code == 200
 
-    response = submit_non_companies_house_step(steps_data[views.USER_ACCOUNT])
+    response = submit_non_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_non_companies_house_step(steps_data[views.VERIFICATION])
+    response = submit_non_companies_house_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
@@ -1656,7 +1671,7 @@ def test_non_companies_house_enrolment_suppress_success(
     assert response.status_code == 302
 
     response = submit_non_companies_house_step(
-        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True}
+        {**steps_data[constants.PERSONAL_INFO], 'terms_agreed': True}
     )
     assert response.status_code == 302
 
@@ -1669,6 +1684,39 @@ def test_non_companies_house_enrolment_suppress_success(
 NON_COMPANIES_HOUSE_STEPS = [
     name for name, _ in views.NonCompaniesHouseEnrolmentView.form_list
 ]
+
+
+def test_non_companies_house_enrolment_exopps_intent(
+    client, submit_non_companies_house_step, steps_data, user
+):
+    response = client.get(
+        reverse('enrolment-business-type'),
+        {'export-opportunity-intent': True}
+    )
+    assert response.status_code == 200
+
+    response = submit_non_companies_house_step(steps_data[constants.USER_ACCOUNT])
+    assert response.status_code == 302
+
+    response = submit_non_companies_house_step(steps_data[constants.VERIFICATION])
+    assert response.status_code == 302
+
+    client.force_login(user)
+
+    response = submit_non_companies_house_step(
+        steps_data[BUSINESS_INFO_NON_COMPANIES_HOUSE]
+    )
+    assert response.status_code == 302
+
+    response = submit_non_companies_house_step(
+        {**steps_data[constants.PERSONAL_INFO], 'terms_agreed': True}
+    )
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+
+    assert response.status_code == 302
+    assert response.url == urls.domestic.EXPORT_OPPORTUNITIES
 
 
 @pytest.mark.parametrize('step', NON_COMPANIES_HOUSE_STEPS)
@@ -1703,16 +1751,16 @@ def test_non_companies_house_enrolment_has_company_error(
 def test_claim_preverified_no_key(
     client, submit_pre_verified_step, steps_data, user
 ):
-    response = submit_pre_verified_step(steps_data[views.USER_ACCOUNT])
+    response = submit_pre_verified_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_pre_verified_step(steps_data[views.VERIFICATION])
+    response = submit_pre_verified_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
     url = reverse(
-        'enrolment-pre-verified', kwargs={'step': views.PERSONAL_INFO}
+        'enrolment-pre-verified', kwargs={'step': constants.PERSONAL_INFO}
     )
     response = client.get(url)
 
@@ -1739,16 +1787,16 @@ def test_claim_preverified_exposes_company(
 
     assert response.status_code == 200
 
-    response = submit_pre_verified_step(steps_data[views.USER_ACCOUNT])
+    response = submit_pre_verified_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_pre_verified_step(steps_data[views.VERIFICATION])
+    response = submit_pre_verified_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
     url = reverse(
-        'enrolment-pre-verified', kwargs={'step': views.PERSONAL_INFO}
+        'enrolment-pre-verified', kwargs={'step': constants.PERSONAL_INFO}
     )
     response = client.get(url)
 
@@ -1765,15 +1813,15 @@ def test_claim_preverified_success(
 
     assert response.status_code == 200
 
-    response = submit_pre_verified_step(steps_data[views.USER_ACCOUNT])
+    response = submit_pre_verified_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_pre_verified_step(steps_data[views.VERIFICATION])
+    response = submit_pre_verified_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
-    response = submit_pre_verified_step(steps_data[views.PERSONAL_INFO])
+    response = submit_pre_verified_step(steps_data[constants.PERSONAL_INFO])
     assert response.status_code == 302
 
     response = client.get(response.url)
@@ -1799,15 +1847,15 @@ def test_claim_preverified_failure(
 
     assert response.status_code == 200
 
-    response = submit_pre_verified_step(steps_data[views.USER_ACCOUNT])
+    response = submit_pre_verified_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_pre_verified_step(steps_data[views.VERIFICATION])
+    response = submit_pre_verified_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
-    response = submit_pre_verified_step(steps_data[views.PERSONAL_INFO])
+    response = submit_pre_verified_step(steps_data[constants.PERSONAL_INFO])
     assert response.status_code == 302
 
     response = client.get(response.url)
@@ -1821,34 +1869,34 @@ def test_claim_preverified_failure(
         True,
         True,
         [
-            views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
-            views.PROGRESS_STEP_LABEL_VERIFICATION,
-            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+            constants.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            constants.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+            constants.PROGRESS_STEP_LABEL_VERIFICATION,
+            constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
         ]
     ),
     (
         True,
         False,
         [
-            views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
-            views.PROGRESS_STEP_LABEL_VERIFICATION,
-            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+            constants.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+            constants.PROGRESS_STEP_LABEL_VERIFICATION,
+            constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
         ]
     ),
     (
         False,
         True,
         [
-            views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+            constants.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
         ],
     ),
     (
         False,
         False,
         [
-            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+            constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
         ]
     ),
 ))
@@ -1861,10 +1909,10 @@ def test_steps_list_mixin(
         template_name = 'directory_components/base.html'
 
         steps_list_labels = [
-            views.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
-            views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
-            views.PROGRESS_STEP_LABEL_VERIFICATION,
-            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+            constants.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
+            constants.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+            constants.PROGRESS_STEP_LABEL_VERIFICATION,
+            constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
         ]
 
     request = rf.get('/')
@@ -1882,8 +1930,8 @@ def test_steps_list_mixin_no_business_type(rf, settings):
         template_name = 'directory_components/base.html'
 
         steps_list_labels = [
-            views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
-            views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+            constants.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+            constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
         ]
 
     request = rf.get('/')
@@ -1892,8 +1940,8 @@ def test_steps_list_mixin_no_business_type(rf, settings):
 
     response = view(request)
     assert response.context_data['step_labels'] == [
-        views.PROGRESS_STEP_LABEL_USER_ACCOUNT,
-        views.PROGRESS_STEP_LABEL_PERSONAL_INFO,
+        constants.PROGRESS_STEP_LABEL_USER_ACCOUNT,
+        constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
     ]
 
 
@@ -1909,13 +1957,13 @@ def test_wizard_progress_indicator_mixin(
             return ['enrolment/user-account-resend-verification.html']
 
         form_list = (
-            (views.USER_ACCOUNT, forms.UserAccount),
-            (views.COMPANY_SEARCH, forms.UserAccount),
+            (constants.USER_ACCOUNT, forms.UserAccount),
+            (constants.COMPANY_SEARCH, forms.UserAccount),
         )
 
         progress_conf = helpers.ProgressIndicatorConf(
-            step_counter_user={views.USER_ACCOUNT: 2},
-            step_counter_anon={views.USER_ACCOUNT: 2},
+            step_counter_user={constants.USER_ACCOUNT: 2},
+            step_counter_anon={constants.USER_ACCOUNT: 2},
         )
 
     request = rf.get('/')
@@ -1924,7 +1972,7 @@ def test_wizard_progress_indicator_mixin(
     view = TestView.as_view(
         url_name='enrolment-companies-house'
     )
-    response = view(request, step=views.USER_ACCOUNT)
+    response = view(request, step=constants.USER_ACCOUNT)
 
     assert response.context_data['step_number'] == expected
 
@@ -1933,21 +1981,21 @@ def test_individual_enrolment_steps(
     client, submit_individual_step, steps_data, user
 ):
 
-    response = submit_individual_step(steps_data[views.USER_ACCOUNT])
+    response = submit_individual_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_individual_step(steps_data[views.VERIFICATION])
+    response = submit_individual_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
-    response = submit_individual_step(steps_data[views.PERSONAL_INFO])
+    response = submit_individual_step(steps_data[constants.PERSONAL_INFO])
     assert response.status_code == 302
 
 
 def test_individual_enrolment_redirect_to_start(client):
     url = reverse(
-        'enrolment-individual', kwargs={'step': views.PERSONAL_INFO}
+        'enrolment-individual', kwargs={'step': constants.PERSONAL_INFO}
     )
 
     response = client.get(url)
@@ -1961,15 +2009,15 @@ def test_individual_enrolment_submit_end_to_end(
     mock_create_user_profile, steps_data, session_client_referrer_factory,
 ):
     session_client_referrer_factory(urls.domestic.FIND_A_BUYER)
-    response = submit_individual_step(steps_data[views.USER_ACCOUNT])
+    response = submit_individual_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_individual_step(steps_data[views.VERIFICATION])
+    response = submit_individual_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
-    response = submit_individual_step(steps_data[views.PERSONAL_INFO])
+    response = submit_individual_step(steps_data[constants.PERSONAL_INFO])
     assert response.status_code == 302
 
     client.get(response.url)
@@ -1993,17 +2041,17 @@ def test_individual_enrolment_submit_end_to_end_logged_in(
     client.force_login(user)
 
     url = reverse(
-        'enrolment-individual', kwargs={'step': views.USER_ACCOUNT}
+        'enrolment-individual', kwargs={'step': constants.USER_ACCOUNT}
     )
     response = client.get(url)
     assert response.status_code == 302
 
     step = resolve(response.url).kwargs['step']
 
-    assert step == views.PERSONAL_INFO
+    assert step == constants.PERSONAL_INFO
 
     response = submit_individual_step(
-        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},
+        {**steps_data[constants.PERSONAL_INFO], 'terms_agreed': True},
         step_name=step
     )
     assert response.status_code == 302
@@ -2033,7 +2081,7 @@ def test_overseas_business_enrolmnet(client):
 
 def test_enrolment_individual_interstitial_anonymous_user(client):
     expected = reverse(
-        'enrolment-individual', kwargs={'step': views.PERSONAL_INFO}
+        'enrolment-individual', kwargs={'step': constants.PERSONAL_INFO}
     )
     url = reverse('enrolment-individual-interstitial')
 
@@ -2052,7 +2100,7 @@ def test_enrolment_individual_interstitial_create_business_profile_intent(
     assert response.status_code == 200
 
     expected = reverse(
-        'enrolment-individual', kwargs={'step': views.USER_ACCOUNT}
+        'enrolment-individual', kwargs={'step': constants.USER_ACCOUNT}
     )
     url = reverse('enrolment-individual-interstitial')
 
@@ -2063,10 +2111,10 @@ def test_enrolment_individual_interstitial_create_business_profile_intent(
 
 
 expose_user_jourey_urls = (
-    reverse('enrolment-individual', kwargs={'step': views.USER_ACCOUNT}),
-    reverse('enrolment-pre-verified', kwargs={'step': views.USER_ACCOUNT}) + '?key=some-key',
-    reverse('enrolment-companies-house', kwargs={'step': views.USER_ACCOUNT}),
-    reverse('enrolment-sole-trader', kwargs={'step': views.USER_ACCOUNT}),
+    reverse('enrolment-individual', kwargs={'step': constants.USER_ACCOUNT}),
+    reverse('enrolment-pre-verified', kwargs={'step': constants.USER_ACCOUNT}) + '?key=some-key',
+    reverse('enrolment-companies-house', kwargs={'step': constants.USER_ACCOUNT}),
+    reverse('enrolment-sole-trader', kwargs={'step': constants.USER_ACCOUNT}),
     reverse('enrolment-overseas-business'),
     reverse('enrolment-business-type'),
     reverse('enrolment-start'),
@@ -2128,29 +2176,29 @@ def test_expose_user_journey_mixin_account_intent(url, client):
 def test_collaborator_enrolment_wrong_invite_key(client, mock_collaborator_invite_retrieve):
     mock_collaborator_invite_retrieve.return_value = create_response(status_code=404)
 
-    url = reverse('enrolment-collaboration', kwargs={'step': views.USER_ACCOUNT})
+    url = reverse('enrolment-collaboration', kwargs={'step': constants.USER_ACCOUNT})
     response = client.get(f'{url}?invite_key=abc')
 
     assert response.status_code == 200
-    assert response.template_name == views.CollaboratorEnrolmentView.templates[views.INVITE_EXPIRED]
+    assert response.template_name == views.CollaboratorEnrolmentView.templates[constants.INVITE_EXPIRED]
 
 
 def test_collaborator_enrolment_submit_end_to_end(
     client, submit_collaborator_enrolment_step, user,
     mock_create_user_profile, steps_data, mock_collaborator_invite_accept,
 ):
-    url = reverse('enrolment-collaboration', kwargs={'step': views.USER_ACCOUNT})
+    url = reverse('enrolment-collaboration', kwargs={'step': constants.USER_ACCOUNT})
     client.get(f'{url}?invite_key=abc')
 
-    response = submit_collaborator_enrolment_step(steps_data[views.USER_ACCOUNT])
+    response = submit_collaborator_enrolment_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
-    response = submit_collaborator_enrolment_step(steps_data[views.VERIFICATION])
+    response = submit_collaborator_enrolment_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
     client.force_login(user)
 
-    response = submit_collaborator_enrolment_step(steps_data[views.PERSONAL_INFO])
+    response = submit_collaborator_enrolment_step(steps_data[constants.PERSONAL_INFO])
     assert response.status_code == 302
 
     client.get(response.url)
@@ -2175,19 +2223,19 @@ def test_collaborator_enrolment_submit_end_to_end_logged_in(
 ):
     client.force_login(user)
 
-    url = reverse('enrolment-collaboration', kwargs={'step': views.USER_ACCOUNT})
+    url = reverse('enrolment-collaboration', kwargs={'step': constants.USER_ACCOUNT})
     client.get(f'{url}?invite_key=abc')
 
-    url = reverse('enrolment-individual', kwargs={'step': views.USER_ACCOUNT})
+    url = reverse('enrolment-individual', kwargs={'step': constants.USER_ACCOUNT})
     response = client.get(url)
     assert response.status_code == 302
 
     step = resolve(response.url).kwargs['step']
 
-    assert step == views.PERSONAL_INFO
+    assert step == constants.PERSONAL_INFO
 
     response = submit_collaborator_enrolment_step(
-        {**steps_data[views.PERSONAL_INFO], 'terms_agreed': True},
+        {**steps_data[constants.PERSONAL_INFO], 'terms_agreed': True},
         step_name=step
     )
     assert response.status_code == 302
@@ -2216,7 +2264,7 @@ def test_collaborator_enrolment_submit_end_to_end_already_has_profile(
     user.has_user_profile = True
     client.force_login(user)
 
-    url = reverse('enrolment-collaboration', kwargs={'step': views.USER_ACCOUNT})
+    url = reverse('enrolment-collaboration', kwargs={'step': constants.USER_ACCOUNT})
     response = client.get(f'{url}?invite_key=abc')
 
     assert response.status_code == 302
@@ -2229,10 +2277,10 @@ def test_collaborator_enrolment_submit_end_to_end_already_has_profile(
 @pytest.mark.parametrize('url,expected_page_id', (
     (reverse('enrolment-business-type'), 'EnrolmentBusinessTypeChooser'),
     (reverse('enrolment-start'), 'EnrolmentStartPage'),
-    (reverse('enrolment-companies-house', kwargs={'step': views.COMPANY_SEARCH}), 'CompaniesHouseEnrolment'),
-    (reverse('enrolment-sole-trader', kwargs={'step': views.ADDRESS_SEARCH}), 'NonCompaniesHouseEnrolment'),
-    (reverse('enrolment-individual', kwargs={'step': views.PERSONAL_INFO}), 'IndividualEnrolment'),
-    (reverse('enrolment-pre-verified', kwargs={'step': views.PERSONAL_INFO}) + '?key=key', 'PreVerifiedEnrolment'),
+    (reverse('enrolment-companies-house', kwargs={'step': constants.COMPANY_SEARCH}), 'CompaniesHouseEnrolment'),
+    (reverse('enrolment-sole-trader', kwargs={'step': constants.ADDRESS_SEARCH}), 'NonCompaniesHouseEnrolment'),
+    (reverse('enrolment-individual', kwargs={'step': constants.PERSONAL_INFO}), 'IndividualEnrolment'),
+    (reverse('enrolment-pre-verified', kwargs={'step': constants.PERSONAL_INFO}) + '?key=key', 'PreVerifiedEnrolment'),
     (reverse('enrolment-overseas-business'), 'OverseasBusinessEnrolment'),
 ))
 def test_google_analytics_settings(client, user, url, expected_page_id, settings):
@@ -2252,9 +2300,9 @@ def test_google_analytics_settings(client, user, url, expected_page_id, settings
 
 
 @pytest.mark.parametrize('url,expected_page_id', (
-    (reverse('resend-verification', kwargs={'step': views.RESEND_VERIFICATION}), 'ResendVerificationCode'),
+    (reverse('resend-verification', kwargs={'step': constants.RESEND_VERIFICATION}), 'ResendVerificationCode'),
     (
-        reverse('enrolment-collaboration', kwargs={'step': views.USER_ACCOUNT}) + '?invite_key=k',
+        reverse('enrolment-collaboration', kwargs={'step': constants.USER_ACCOUNT}) + '?invite_key=k',
         'CollaboratorEnrolment'
     ),
 ))

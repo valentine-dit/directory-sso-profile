@@ -446,7 +446,7 @@ VALIDATOR_MAX_CASE_STUDY_VIDEO_SIZE_BYTES = env.int(
 
 AUTH_USER_MODEL = 'sso.SSOUser'
 
-AUTHENTICATION_BACKENDS = ['sso.backends.SSOUserBackend']
+AUTHENTICATION_BACKENDS = ['directory_sso_api_client.backends.SSOUserBackend']
 
 
 # Directory Components

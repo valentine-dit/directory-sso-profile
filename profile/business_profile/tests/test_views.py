@@ -35,6 +35,11 @@ def company_profile_data():
         'is_publishable': True,
         'expertise_products_services': {},
         'is_identity_check_message_sent': False,
+        'is_published_find_a_supplier': False,
+        'number': '1234567',
+        'slug': 'cool-company',
+        'created': '2012-06-15T13:45:30.00000Z',
+        'modified': '2019-04-05T06:43:23.00000Z'
     }
 
 
@@ -1268,6 +1273,23 @@ def test_admin_collaborator_invite_delete(mock_collaborator_invite_delete, clien
     assert mock_collaborator_invite_delete.call_args == mock.call(
         sso_session_id=user.session_id, invite_key='1234'
     )
+
+
+def test_business_profile_member_redirect(client, user, mock_retrieve_supplier, company_profile_data):
+    client.force_login(user)
+    mock_retrieve_supplier.return_value = create_response({'role': user_roles.MEMBER})
+
+    url = reverse('business-profile')
+    response = client.get(url)
+
+    context = response.context_data
+
+    assert context['fab_tab_classes'] == 'active'
+    assert context['contact_us_url'] == (urls.domestic.CONTACT_US / 'domestic')
+    assert context['export_opportunities_apply_url'] == urls.domestic.EXPORT_OPPORTUNITIES
+    assert context['is_profile_published'] == company_profile_data['is_published_find_a_supplier']
+    assert context['FAB_BUSINESS_PROFILE_URL'] == (urls.international.TRADE_FAS / 'suppliers' /
+                                                   company_profile_data['number'] / company_profile_data['slug'])
 
 
 def test_fab_redirect(client, user):
