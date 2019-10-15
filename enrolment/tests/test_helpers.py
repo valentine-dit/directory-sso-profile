@@ -85,7 +85,7 @@ def test_send_verification_code_email(mock_submit):
             'form_url': form_url,
             'sender': {},
             'spam_control': {},
-            'template_id': 'aa4bb8dc-0e54-43d1-bcc7-a8b29d2ecba6',
+            'template_id': 'a1eb4b0c-9bab-44d3-ac2f-7585bf7da24c',
             'email_address': email
         }
     }
