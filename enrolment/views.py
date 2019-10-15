@@ -192,7 +192,7 @@ class CompaniesHouseEnrolmentView(
 
     @property
     def verification_link_url(self):
-        url = reverse('enrolment-companies-house', kwargs={'step': VERIFICATION})
+        url = reverse('enrolment-companies-house', kwargs={'step': constants.VERIFICATION})
         return self.request.build_absolute_uri(url)
 
     def address_search_condition(self):
@@ -321,7 +321,7 @@ class NonCompaniesHouseEnrolmentView(
 
     @property
     def verification_link_url(self):
-        url = reverse('enrolment-sole-trader', kwargs={'step': VERIFICATION})
+        url = reverse('enrolment-sole-trader', kwargs={'step': constants.VERIFICATION})
         return self.request.build_absolute_uri(url)
 
     def get_context_data(self, **kwargs):
@@ -383,7 +383,7 @@ class IndividualUserEnrolmentView(BaseEnrolmentWizardView):
 
     @property
     def verification_link_url(self):
-        url = reverse('enrolment-individual', kwargs={'step': VERIFICATION})
+        url = reverse('enrolment-individual', kwargs={'step': constants.VERIFICATION})
         return self.request.build_absolute_uri(url)
 
     def get(self, *args, **kwargs):
