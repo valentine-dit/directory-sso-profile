@@ -1317,8 +1317,10 @@ def test_confirm_user_resend_verification_code(
         email='jim@example.com',
         form_url='/profile/enrol/resend-verification/resend/',
         verification_code={
-            'code': '12345', 'expiration_date': '2018-01-17T12:00:01Z'
+            'code': '12345',
+            'expiration_date': '2018-01-17T12:00:01Z',
         },
+        verification_link='http://testserver/profile/enrol/resend-verification/verification/'
     )
 
 
