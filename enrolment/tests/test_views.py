@@ -1691,10 +1691,12 @@ NON_COMPANIES_HOUSE_STEPS = [
 def test_non_companies_house_enrolment_exopps_intent(
     client, submit_non_companies_house_step, steps_data, user
 ):
+    client.defaults['HTTP_REFERER'] = 'http://testserver.com/foo/'
     response = client.get(
         reverse('enrolment-business-type'),
-        {'export-opportunity-intent': True}
+        {'export-opportunity-intent': True},
     )
+
     assert response.status_code == 200
 
     response = submit_non_companies_house_step(steps_data[constants.USER_ACCOUNT])
@@ -1713,12 +1715,13 @@ def test_non_companies_house_enrolment_exopps_intent(
     response = submit_non_companies_house_step(
         {**steps_data[constants.PERSONAL_INFO], 'terms_agreed': True}
     )
+
     assert response.status_code == 302
 
     response = client.get(response.url)
 
     assert response.status_code == 302
-    assert response.url == urls.domestic.EXPORT_OPPORTUNITIES
+    assert response.url == 'http://testserver.com/foo/'
 
 
 @pytest.mark.parametrize('step', NON_COMPANIES_HOUSE_STEPS)

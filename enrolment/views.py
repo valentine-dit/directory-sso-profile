@@ -13,7 +13,7 @@ from django.views.generic import FormView, TemplateView
 import core.forms
 import core.mixins
 from enrolment import constants, forms, helpers, mixins
-
+from directory_forms_api_client.helpers import FormSessionMixin
 
 URL_NON_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
     'enrolment-sole-trader', kwargs={'step': constants.USER_ACCOUNT}
@@ -31,6 +31,7 @@ URL_OVERSEAS_BUSINESS_ENROLMNET = reverse_lazy(
 
 class EnrolmentStartView(
     mixins.RedirectAlreadyEnrolledMixin,
+    FormSessionMixin,
     mixins.StepsListMixin,
     mixins.WriteUserIntentMixin,
     mixins.ReadUserIntentMixin,
@@ -98,6 +99,7 @@ class BusinessTypeRoutingView(
 
 class BaseEnrolmentWizardView(
     mixins.RedirectAlreadyEnrolledMixin,
+    FormSessionMixin,
     mixins.RestartOnStepSkipped,
     core.mixins.PreventCaptchaRevalidationMixin,
     core.mixins.CreateUpdateUserProfileMixin,

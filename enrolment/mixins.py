@@ -11,7 +11,6 @@ from django.template.response import TemplateResponse
 
 from enrolment import helpers, constants
 from directory_sso_api_client import sso_api_client
-from directory_constants import urls
 import directory_components.mixins
 
 
@@ -327,7 +326,7 @@ class CreateBusinessProfileMixin:
             return redirect('business-profile')
         elif self.request.session.get(constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT):
             del self.request.session[constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT]
-            return redirect(urls.domestic.EXPORT_OPPORTUNITIES)
+            return redirect(self.form_session.ingress_url)
         else:
             return TemplateResponse(self.request, self.templates[constants.FINISHED])
 
