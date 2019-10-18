@@ -5,8 +5,9 @@
 
 {% block breadcrumbs %}
     {% breadcrumbs 'Collaborators' %}
-        <a href="{% url 'about' %}">Home</a>
+        <a href="{{ services_urls.great_domestic }}">great.gov.uk</a>
         <a href="{% url 'business-profile' %}">Business profile</a>
+		<a href="{% url 'business-profile-admin-invite-collaborator' %}">Profile settings</a>
     {% endbreadcrumbs %}
 {% endblock %}
 
