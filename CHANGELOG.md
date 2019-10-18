@@ -39,6 +39,7 @@
 - No ticket - upgrade directory-sso-api-client to 6.2.0
 - TT-1911 - Remove access to edit business profile for member user
 
+
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
 - No ticket - Remove obsolete settings
@@ -71,6 +72,7 @@
 - TT-1946 - Remove 'downgrade\upgrade to editor' options in admin tools
 - TT-1962 - Fixing verification links in user journeys
 - TT-1942 - redirect to form_session.ingress_url for exops intent
+- TT-2038 - fix admin breadcrumbs
 
 ## [2019.08.14_1](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14_1)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.08.14...2019.08.14_1)
