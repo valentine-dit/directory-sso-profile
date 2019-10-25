@@ -18,7 +18,7 @@ coverage==4.5.4           # via codecov, pytest-cov
 directory-api-client==20.0.0
 directory-ch-client==2.1.0
 directory-client-core==6.1.0
-directory-components==35.0.1
+directory-components==35.3.1
 directory-constants==20.6.0
 directory-forms-api-client==5.0.0
 directory-healthcheck==1.0.1
@@ -78,3 +78,6 @@ w3lib==1.21.0
 wcwidth==0.1.7            # via pytest
 whitenoise==3.1
 zipp==0.6.0               # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools==41.4.0        # via jsonschema

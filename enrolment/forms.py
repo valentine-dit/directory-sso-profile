@@ -184,7 +184,7 @@ class CompaniesHouseAddressSearch(CleanAddressMixin, forms.Form):
     )
     address = forms.CharField(
         help_text='Type your business address',
-        widget=Textarea(attrs={'rows': 4, 'id': 'id_address'}),  # template js relies on this ID
+        widget=Textarea(attrs={'rows': 6, 'id': 'id_address'}),  # template js relies on this ID
         required=False,
     )
 
@@ -318,7 +318,7 @@ class NonCompaniesHouseSearch(CleanAddressMixin, forms.Form):
     )
     address = forms.CharField(
         help_text='Type your business address',
-        widget=Textarea(attrs={'rows': 4, 'id': 'id_address'}),  # template js relies on this ID
+        widget=Textarea(attrs={'rows': 6, 'id': 'id_address'}),  # template js relies on this ID
         required=False,
     )
     sectors = forms.ChoiceField(
