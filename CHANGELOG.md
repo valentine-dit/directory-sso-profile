@@ -75,6 +75,7 @@
 - TT-1942 - redirect to form_session.ingress_url for exops intent
 - TT-2038 - fix admin breadcrumbs
 - TT-1817 - Use correct input types for number fields
+- TT-1819 - Fix padding on success box
 
 ## [2019.08.14_1](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14_1)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.08.14...2019.08.14_1)

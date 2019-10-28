@@ -8,7 +8,7 @@
         {% if messages %}
             {% for message in messages %}
                 {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                    {% success_box heading=message description='' box_class='width-full background-white margin-top-30' %}
+                    {% success_box heading=message description='' box_class='width-full background-white margin-top-30 padding-left-0' %}
                 {% endif %}
             {% endfor %}
         {% endif %}
