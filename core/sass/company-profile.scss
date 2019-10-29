@@ -69,10 +69,14 @@
     background: $active-blue;
     padding: 10px;
     &:before {
-      content: '✏';
-      transform: rotate(135deg);
+      content: ' ';
+      background-image: url(/static/images/edit.svg);
       display: inline-block;
-      margin-right: 10px;
+      vertical-align: middle;
+      margin: 10px;
+      height: 17px;
+      width: 17px;
+      background-repeat: no-repeat;
     }
   }
 }
@@ -110,11 +114,16 @@
 #main-content {
   .pencil-link {
     display: inline-block;
+    padding-right: 10px;
     &:before {
-      content: '✏';
-      transform: rotate(135deg);
+      content: ' ';
+      background-image: url(/static/images/edit.svg);
       display: inline-block;
-      margin-right: 10px;
+      margin: 10px;
+      vertical-align: middle;
+      height: 17px;
+      width: 17px;
+      background-repeat: no-repeat;
     }
   }
   .message-box {
