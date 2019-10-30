@@ -1,8 +1,87 @@
 # Changelog
 
 ## Pre-release
+
+### Implemented enhancements
+- GTRANSFORM-364 - text changes on page titles
+- GTRANSFORM-364 - add descriptive page titles to profile journey templates
+- TT-1725 - Send email to company admin when a new user is added to company profile
+- TT-1734 - Add second user to already registered company profile
+- TT-1733 - Add request for individual verification feature
+- TT-1723 - Add collaborator list admin view
+- TT-1716 - Support removing collaborators
+- TT-1732 - Added context to incomplete business profile banner
+- TT-1713 - Allow user to remove themselves from the business profile
+- TT-1714 - Allow single collaborator to invite other admin
+- TT-1727 - Allow inviting collaborator
+- TT-1673 - Handle backfill details after login
+- TT-1748 - Collaboration invitee journey
+- TT-1642 - Handle incomplete companies house details
+- no ticket - Add IDs to relevant elements on CH enrolement success page
+- TT-1760 - added user profile update
+- TT-1808 - Update directory components to add "no-validate" no cache middleware
+- TT-1783 - Remove FAB Urls and Refactor
+- TT-1812? - Fix error when saving with no profile
+- TT-1813 - Fix Telephone display in personal details
+- TT-1822 - Personal details 500 error
+- TT-1827 - fix Broken Fab Template - 500 error
+- No Ticket - Amend retrieve_profile to send sso_id instead of sso_session_id
+- TT-1702 - Add Google Analytics 360 settings for enrolment journey
+- TT-1845 - Show message for expired links
+- TT-1795 - Display error message to second user in registation journey
+- TT-1841 - Email not displayed on invite new admin
+- TT-1821 - Change `I can't find my business` link on company's house registration.
+- XOT-1120 - Take user back to the ingress url when registering
+- TT-1786 - Change 'start now' text on wizard
+- no ticket - Replace `DIRECTORY_CONSTANTS_URL_GREAT_INTERNATIONAL` with `DIRECTORY_CONSTANTS_URL_INTERNATIONAL`
+- TT-1903 - Removed Editor from change role in admin panel
+- TT-1910 - only display collaborators who haven't accepted in the list
+- No ticket - upgrade directory-sso-api-client to 6.2.0
+- TT-1911 - Remove access to edit business profile for member user
+
+
+### Fixed bugs:
+- TT-1728 - Not ask personal details to individual upgrading to business profile
+- No ticket - Remove obsolete settings
+- TT-1731 - Fix address error persistence issue when a valid postcode is entered on UI
+- TT-1709 - Account creation content change
+- No ticket - Handle user has no supplier on profile page
+- TT-1806 - do not prompt non companies house users to verify via companies house
+- TT-1830 - No longer prompt users with profiles to create a profile
+- TT-1824 - Links no longer empty on 500 and 404 page
+- TT-1831 - Fix mobile tab padding
+- TT-1795 - Fixing second user registration journey
+- No Ticket - Amend retrieve_profile to send sso_id instead of sso_session_id
+- TT-1827 - fix Broken Fab Template - 500 error
+- TT-1816 - Upgrade directory components to fix js in non-chrome
+- TT-1840 - Remove errant red line from case study wizard
+- TT-1852 - Allow non-companies house company to edit their business details
+- TT-1807 - Hide Publish button on admin
+- TT-1857 - Companies House fix request manual verification
+- TT-1856 - fix persistent is_enroled msg
+- TT-1857   - Companies House fix request manual verification
+- TT-1797 - correct page titles
+- TT-1819 - Fixing missing background image on tooltip on profile about page
+- TT-1899 - fix telephone display and correct case on personal details
+- TT-1789 - Wizard drops steps on changing business-type
+- TT-1904 - admin defaults to invite collaborators 
+- TT-1901 - show name in collaborators list 
+- TT-1914 - Reinstate missing terms tickbox
+- TT-1915 - Fix update profile error if user has no supplier
+- TT-1902 - Collaborator Invite UI bug fixes
+- TT-1946 - Remove 'downgrade\upgrade to editor' options in admin tools
+- TT-1962 - Fixing verification links in user journeys
+- TT-1942 - redirect to form_session.ingress_url for exops intent
+- TT-2038 - fix admin breadcrumbs
+
+## [2019.08.14_1](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14_1)
+[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.08.14...2019.08.14_1)
+
 ## Hotfix
 - TT-1853 - 404-guidence-page
+
+## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
+[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)
 
 ### Implemented enhancements
 - TT-990  - Update registration journey of individual user
@@ -24,9 +103,10 @@
 - TT-1560 - Hide individual account interstitial if intent is create a business profile
 
 ### Fixed bugs:
+
 - TT-1647 - Correcting long address not displayed correctly on business search page
-- No ticket - Upgrade vulnerable django version to django 1.11.22
 - TT-1645 - Fix progress indicator changing from long to short list in new session
+- No ticket - Upgraded django to 1.11.23 to fix vulnerabilityI
 
 ## [07-17-2019 ](https://github.com/uktrade/directory-ui-supplier/releases/tag/07-17-2019 )
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.05...07-17-2019)
@@ -49,7 +129,7 @@
     + FEATURE_EXPERTISE_FIELDS_ENABLED
     + FEATURE_NEW_ACCOUNT_JOURNEY_ENABLED
 - no ticket - Fall over if redis is not available
-- TT-1501 update isd-url view profile url 
+- TT-1501 update isd-url view profile url
 - TT-1321-industry-rewording
 
 ### Fixed bugs:

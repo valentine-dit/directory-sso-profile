@@ -1,10 +1,8 @@
 from unittest import mock
 
 from directory_components.forms import CharField, EmailField
-from requests.exceptions import HTTPError
 import pytest
 
-from core.tests.helpers import create_response
 from enrolment import forms, helpers
 
 
@@ -15,9 +13,7 @@ def mock_clean():
     patch.stop()
 
 
-@mock.patch.object(helpers.sso_api_client.user, 'create_user')
-def test_create_user_password_invalid_not_matching(mock_create_user):
-    mock_create_user.return_value = create_response(400)
+def test_create_user_password_invalid_not_matching():
     form = forms.UserAccount(
         data={
             'email': 'test@test.com',
@@ -28,75 +24,6 @@ def test_create_user_password_invalid_not_matching(mock_create_user):
 
     assert form.is_valid() is False
     assert "Passwords don't match" in form.errors['password_confirmed']
-
-
-@mock.patch.object(helpers.sso_api_client.user, 'create_user')
-def test_create_user_password_invalid(mock_create_user):
-    data = {'password': 'validation error'}
-    mock_create_user.return_value = create_response(400, data)
-
-    form = forms.UserAccount(
-        data={
-            'email': 'test@test.com',
-            'password': '12P',
-            'password_confirmed': '12P',
-            'terms_agreed': True,
-        }
-    )
-
-    assert form.is_valid() is False
-    assert "Invalid Password" in form.errors['password']
-
-
-@mock.patch.object(helpers.sso_api_client.user, 'create_user')
-def test_create_user_password_existing_user(mock_create_user):
-    mock_create_user.return_value = create_response(400)
-
-    form = forms.UserAccount(
-        data={
-            'email': 'test@test.com',
-            'password': '12P',
-            'password_confirmed': '12P',
-            'terms_agreed': True,
-        }
-    )
-    assert form.is_valid() is True
-    assert not form.cleaned_data['user_details']
-
-
-@mock.patch.object(helpers.sso_api_client.user, 'create_user')
-def test_create_user_error(mock_create_user):
-
-    mock_create_user.return_value = create_response(401)
-    form = forms.UserAccount(
-        data={
-            'email': 'test@test.com',
-            'password': '12P',
-            'password_confirmed': '12P',
-            'terms_agreed': True,
-        }
-    )
-
-    with pytest.raises(HTTPError):
-        form.is_valid()
-
-
-@mock.patch.object(helpers.sso_api_client.user, 'create_user')
-def test_create_user(mock_create_user):
-    data = {'email': 'test@test.com', 'verification_code': '12345'}
-    mock_create_user.return_value = create_response(201, data)
-
-    form = forms.UserAccount(
-        data={
-            'email': 'test@test.com',
-            'password': 'ABCdefg12345',
-            'password_confirmed': 'ABCdefg12345',
-            'terms_agreed': True,
-        }
-    )
-
-    assert form.is_valid() is True
-    assert form.cleaned_data["user_details"] == data
 
 
 def test_verification_code_empty_email():
@@ -115,63 +42,36 @@ def test_verification_code_with_email():
     assert isinstance(form.fields['email'], CharField)
 
 
-@mock.patch.object(helpers, 'get_company_profile', return_value={
-    'company_status': 'active',
-})
-def test_companies_house_search_company_number_incomplete_data(client):
-    expected = 'Please contact support to register a Royal Charter Company.'
-    form = forms.CompaniesHouseSearch(
-        data={'company_name': 'Thing', 'company_number': 'RC232323'},
-        session=client.session
-    )
-
-    assert form.is_valid() is False
-    assert form.errors['company_name'] == [expected]
-
-
 def test_companies_house_search_company_number_empty(client):
-    form = forms.CompaniesHouseSearch(
-        data={'company_name': 'Thing'},
-        session=client.session
-    )
+    form = forms.CompaniesHouseCompanySearch(data={'company_name': 'Thing'})
 
     assert form.is_valid() is False
     assert form.errors['company_name'] == [form.MESSAGE_COMPANY_NOT_FOUND]
 
 
 def test_companies_house_search_company_name_empty(client):
-    form = forms.CompaniesHouseSearch(
-        data={},
-        session=client.session
-    )
+    form = forms.CompaniesHouseCompanySearch(data={})
 
     assert form.is_valid() is False
     assert form.errors['company_name'] == ['This field is required.']
 
 
-@mock.patch.object(helpers, 'get_company_profile', return_value={
-    'company_status': 'dissolved',
-})
-def test_companies_house_search_company_dissolved(client):
-    form = forms.CompaniesHouseSearch(
-        data={'company_name': 'Thing', 'company_number': '23232323'},
-        session=client.session
-    )
-
-    assert form.is_valid() is False
-    assert form.errors['company_name'] == [form.MESSAGE_COMPANY_NOT_ACTIVE]
-
-
-@mock.patch.object(helpers, 'get_company_profile', return_value={
-    'company_status': 'active',
-})
-def test_companies_house_search_company_active(client):
-    form = forms.CompaniesHouseSearch(
-        data={'company_name': 'Thing', 'company_number': '23232323'},
-        session=client.session
-    )
-
-    assert form.is_valid() is True
+@pytest.mark.parametrize('status,expected', (
+    ('active', True),
+    ('dissolved', False),
+    ('liquidation', False),
+    ('receivership', False),
+    ('administration', False),
+    ('voluntary-arrangement', True),
+    ('converted-closed', False),
+    ('insolvency-proceedings', False),
+))
+def test_companies_house_search_company_status(client, status, expected):
+    with mock.patch.object(helpers, 'get_companies_house_profile', return_value={'company_status': status}):
+        form = forms.CompaniesHouseCompanySearch(data={'company_name': 'Thing', 'company_number': '23232323'})
+        assert form.is_valid() is expected
+        if expected is False:
+            assert form.errors['company_name'] == [form.MESSAGE_COMPANY_NOT_ACTIVE]
 
 
 @pytest.mark.parametrize('address,expected', (

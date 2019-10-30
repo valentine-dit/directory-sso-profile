@@ -1,39 +1,29 @@
+@import 'partials/colours';
+
 
 .information-breakout {
-  background-image: url(/static/images/EiG_Profile_welcome_pointed_hand_grey.png);
   background-position: 20px 20px;
   background-repeat: no-repeat;
-  border: #979797 solid 1px;
-  color: #4a4a4a;
+  border: $mid-grey solid 1px;
+  color: $grey;
   letter-spacing: -0.2px;
   min-height: 90px;
   padding: 20px 20px 20px 80px;
 }
 
 .sso-profile-tab-container {
-  margin-top: 30px;
-  background-color: #F0F3F2;
 
-  .grid-row {
-    margin: 0;
+  ul {
+    display: flex;
+    flex-flow: wrap;
+    li {
+      a {
+        font-weight: bold;
+        color: $grey;
+        text-decoration: none;
+      }
+    }
   }
-}
-
-.sso-profile-tab-container ul {
-  padding-left: 0;
-}
-
-.sso-profile-tab-container li.active {
-  background-color: white;
-  border-top: 5px solid #E41F13;
-}
-
-.sso-profile-tab-container li a {
-  display: block;
-  font-weight: bold;
-  color: #363636;
-  padding: 20px;
-  text-decoration: none;
 }
 
 .sso-profile-toolbar-labels-container {

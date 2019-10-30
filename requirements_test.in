@@ -1,10 +1,11 @@
 -r requirements.txt
 
-pytest
+pytest>=4.4.0<5.0.0
 pytest-cov
-pytest-django
+pytest-django>=3.5.1<4.0.0
 pytest-sugar
 flake8
 pytest-catchlog
 codecov
 freezegun
+pytest-xdist

@@ -1,7 +1,6 @@
 {% extends 'directory_components/base.html' %}
 
 {% load static from staticfiles %}
-{% load render_form from directory_components %}
 
 {% block content %}
     <section class="container">
@@ -18,10 +17,10 @@
                         {% if wizard.form.forms %}
                             {{ wizard.form.management_form }}
                             {% for form in wizard.form.forms %}
-                                 {% render_form form %}
+                                 {{ form }}
                             {% endfor %}
                         {% else %}
-                            {% render_form form %}
+                            {{ form }}
                         {% endif %}
                         {% block below_form %}{% endblock %}
                         {% if wizard.steps.step1 != wizard.steps.count %}
@@ -33,14 +32,14 @@
                     </div>
                 </form>
             </div>
+            {% if step_labels %}
             <div class="column-one-third padding-top-30 overline-flag-red" id="progress-column">
-                {% if step_labels %}
                     <span>Part of:</span>
                     <a class="link heading-medium margin-0" href="{% url 'enrolment-start' %}">
                         {{ user_journey_verb|capfirst }}
                     </a>
                     {% include 'enrolment/progress.html' %}
-                {% endif %}
             </div>
+            {% endif %}
     </section>
 {% endblock %}

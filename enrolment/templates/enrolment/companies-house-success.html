@@ -4,7 +4,7 @@
 {% load breadcrumbs message_box_with_icon from directory_components %}
 
 {% block content %}
-  <section class="container">
+  <section class="container" id="breadcrumbs">
       {% breadcrumbs 'Create a great.gov.uk account' %}
          <a href="{{ services_urls.great_domestic }}">Great.gov.uk</a>
       {% endbreadcrumbs %}
@@ -14,8 +14,14 @@
           </div>
       </div>
   </section>
-  <section class="container">
+  <section class="container" id="next-container">
     <h2 class="heading-medium margin-0">Next steps</h2>
-      <p>You can now <a href="{% url 'find-a-buyer' %}">publish your business profile</a> to promote your business to overseas buyers</p>
+      <p>You can now</p>
+      <ul class="list list-bullet">
+        <li><a href="{% url 'business-profile' %}" id="next-fab">publish your business profile</a> to promote your business to overseas buyers</li>
+        <li><a href="{{ services_urls.exopps }}" id="next-exopps">find export opportunities</a> from our list of current sales leads</li>
+        <li><a href="{{ services_urls.soo }}" id="next-soo">sell online overseas</a> by finding the right market for your goods</li>
+        <li><a href="{{ services_urls.events }}" id="next-events">find events and visits</a> that can help promote your business</li>
+      </ul>
   </section>
 {% endblock %}

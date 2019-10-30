@@ -1,6 +1,5 @@
 @import 'partials/base';
 @import 'partials/general';
-@import 'partials/buttons';
 @import 'partials/errors';
 @import 'partials/responsive';
 @import 'partials/colours';
@@ -172,8 +171,10 @@
 
 #content {
   form {
-    margin-top: 45px;
-    margin-bottom: 45px;
+    &:not(.no-default-margin) {
+      margin-top: 45px;
+      margin-bottom: 45px;
+    }
     .button {
       margin-top: 45px;
     }
@@ -441,4 +442,11 @@
 
 .background-denim-blue {
   background-color: $denim;
+}
+
+.selected-link {
+    border-left: 5px solid $active-blue;
+    margin-left: -15px;
+    padding-left: 10px;
+    padding-bottom: 10px;
 }

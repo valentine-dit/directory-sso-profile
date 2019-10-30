@@ -12,6 +12,17 @@
 {% endblock %}
 
 
+{% block below_form %}
+    {% if is_enrolled %}
+        <h2 class="heading-medium">Good news, a Business Profile already exists for this company</h2>
+        {% url 'enrolment-companies-house' step='company-search' as company_search_url %}
+  	<p>Save and continue to become a member of the profile. When you do, we'll notify the administrators.</p>
+        <p>Something wrong? <a href="{{ contact_us_url }}">Contact us.</a></p>
+    {% endif %}
+{% endblock %}
+
+
+
 {% block body_js %}
     {{ block.super }}
     {% if not form.address.initial %}

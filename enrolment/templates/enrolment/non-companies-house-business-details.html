@@ -19,6 +19,7 @@
         var address = document.getElementById('id_search-address');
         var addressContainer = document.getElementById('id_search-address-container');
         var addressHelp = addressContainer.getElementsByClassName('form-hint')[0];
+        var errorMessageContainers = addressContainer.getElementsByClassName('error-message');
 
         addressContainer.style.display = 'none';
 
@@ -70,6 +71,12 @@
               value = $eventTarget.attr("data-value");
               instance._private.$field.val(value);
               address.value = value.replace(/,( )?/g, '\n');
+              if (address.value) {
+              	for(var i = 0; i < errorMessageContainers.length; i++) {
+              	  errorMessageContainers[i].style.display = 'none';
+              	}
+              	addressContainer.classList.remove('form-group-error');
+              }
             } else {
             }
           });

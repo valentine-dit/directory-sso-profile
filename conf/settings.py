@@ -17,12 +17,12 @@ import environ
 
 
 env = environ.Env()
-env.read_env()
+for env_file in env.list('ENV_FILES', default=[]):
+    env.read_env(f'conf/env/{env_file}')
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.dirname(PROJECT_ROOT)
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -65,8 +65,8 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'core.middleware.PrefixUrlMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'directory_sso_api_client.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'directory_components.middleware.NoCacheMiddlware',
@@ -140,7 +140,10 @@ MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 STATIC_HOST = env.str('STATIC_HOST', '')
 STATIC_URL = STATIC_HOST + '/static/'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = env.str(
+    'STATICFILES_STORAGE',
+    'whitenoise.storage.CompressedManifestStaticFilesStorage'
+)
 
 
 # Public storage for uploaded logos and case study images
@@ -148,7 +151,6 @@ STORAGE_CLASS_NAME = env.str('STORAGE_CLASS_NAME', 'default')
 
 if STORAGE_CLASS_NAME == 'local-storage':
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    LOCAL_STORAGE_DOMAIN = env.str('LOCAL_STORAGE_DOMAIN')
 elif STORAGE_CLASS_NAME == 'default':
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     AWS_ACCESS_KEY_ID = env.str('AWS_ACCESS_KEY_ID')
@@ -257,7 +259,6 @@ SSO_PROXY_PASSWORD_RESET_URL = env.str('SSO_PROXY_PASSWORD_RESET_URL')
 SSO_PROXY_REDIRECT_FIELD_NAME = env.str('SSO_PROXY_REDIRECT_FIELD_NAME')
 SSO_SESSION_COOKIE = env.str('SSO_SESSION_COOKIE')
 SSO_PROFILE_URL = env.str('SSO_PROFILE_URL')
-SSO_PROXY_API_OAUTH2_BASE_URL = env.str('SSO_PROXY_API_OAUTH2_BASE_URL')
 
 SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', True)
 USE_X_FORWARDED_HOST = True
@@ -288,14 +289,12 @@ DIRECTORY_CONSTANTS_URL_FIND_A_BUYER = env.str(
 DIRECTORY_CONSTANTS_URL_GREAT_DOMESTIC = env.str(
     'DIRECTORY_CONSTANTS_URL_GREAT_DOMESTIC', ''
 )
-DIRECTORY_CONSTANTS_URL_GREAT_INTERNATIONAL = env.str(
-    'DIRECTORY_CONSTANTS_URL_GREAT_INTERNATIONAL', ''
+DIRECTORY_CONSTANTS_URL_INTERNATIONAL = env.str(
+    'DIRECTORY_CONSTANTS_URL_INTERNATIONAL', ''
 )
 DIRECTORY_CONSTANTS_URL_INVESTMENT_SUPPORT_DIRECTORY = env.str(
     'DIRECTORY_CONSTANTS_URL_INVESTMENT_SUPPORT_DIRECTORY', ''
 )
-
-PRIVACY_COOKIE_DOMAIN = env.str('PRIVACY_COOKIE_DOMAIN')
 
 # Sentry
 RAVEN_CONFIG = {
@@ -312,6 +311,7 @@ CSRF_COOKIE_SECURE = True
 GOOGLE_TAG_MANAGER_ID = env.str('GOOGLE_TAG_MANAGER_ID')
 GOOGLE_TAG_MANAGER_ENV = env.str('GOOGLE_TAG_MANAGER_ENV', '')
 UTM_COOKIE_DOMAIN = env.str('UTM_COOKIE_DOMAIN')
+GA360_BUSINESS_UNIT = 'SSOProfile'
 
 
 EXPORTING_OPPORTUNITIES_API_BASIC_AUTH_USERNAME = env.str(
@@ -339,17 +339,13 @@ FAB_ADD_USER_URL = env.str('FAB_ADD_USER_URL')
 FAB_REMOVE_USER_URL = env.str('FAB_REMOVE_USER_URL')
 FAB_TRANSFER_ACCOUNT_URL = env.str('FAB_TRANSFER_ACCOUNT_URL')
 
-FEATURE_URL_PREFIX_ENABLED = True,
-URL_PREFIX_DOMAIN = env.str('URL_PREFIX_DOMAIN', '')
-
 # feature flags
 FEATURE_FLAGS = {
-    'ENROLMENT_SELECT_BUSINESS_ON': env.bool(
-        'FEATURE_ENROLMENT_SELECT_BUSINESS_ENABLED', True
-    ),
+    'ENROLMENT_SELECT_BUSINESS_ON': env.bool('FEATURE_ENROLMENT_SELECT_BUSINESS_ENABLED', True),
+    'REQUEST_VERIFICATION_ON': env.bool('FEATURE_REQUEST_VERIFICATION_ENABLED', False),
+    'NEW_PROFILE_ADMIN_ON': env.bool('FEATURE_NEW_PROFILE_ADMIN_ENABLED', False),
     'COUNTRY_SELECTOR_ON': False,
-    # used by directory-components
-    'MAINTENANCE_MODE_ON': env.bool('FEATURE_MAINTENANCE_MODE_ENABLED', False),
+    'MAINTENANCE_MODE_ON': env.bool('FEATURE_MAINTENANCE_MODE_ENABLED', False),  # used by directory-components
 }
 
 # Healthcheck
@@ -402,7 +398,7 @@ DIRECTORY_FORMS_API_DEFAULT_TIMEOUT = env.int(
 # gov.uk notify
 CONFIRM_VERIFICATION_CODE_TEMPLATE_ID = env.str(
     'CONFIRM_VERIFICATION_CODE_TEMPLATE_ID',
-    'aa4bb8dc-0e54-43d1-bcc7-a8b29d2ecba6'
+    'a1eb4b0c-9bab-44d3-ac2f-7585bf7da24c'
 )
 
 GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID = env.str(
@@ -412,6 +408,11 @@ GOV_NOTIFY_ALREADY_REGISTERED_TEMPLATE_ID = env.str(
 GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID = env.str(
     'GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID',
     '02b0223f-2674-4b0b-bdcc-df21dabbc743'
+)
+
+GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID = env.str(
+    'GOV_NOTIFY_NEW_MEMBER_REGISTERED_TEMPLATE_ID',
+    '439a8415-52d8-4975-b230-15cd34305bb5'
 )
 
 # directory api
@@ -442,9 +443,18 @@ VALIDATOR_MAX_CASE_STUDY_IMAGE_SIZE_BYTES = env.int(
 VALIDATOR_MAX_CASE_STUDY_VIDEO_SIZE_BYTES = env.int(
     'VALIDATOR_MAX_CASE_STUDY_VIDEO_SIZE_BYTES', 20 * 1024 * 1024
 )
-VALIDATOR_ALLOWED_IMAGE_FORMATS = ('PNG', 'JPG', 'JPEG')
-
 
 AUTH_USER_MODEL = 'sso.SSOUser'
 
-AUTHENTICATION_BACKENDS = ['sso.backends.SSOUserBackend']
+AUTHENTICATION_BACKENDS = ['directory_sso_api_client.backends.SSOUserBackend']
+
+
+# Directory Components
+if env.bool('FEATURE_SETTINGS_JANITOR_ENABLED', False):
+    INSTALLED_APPS.append('directory_components.janitor')
+    DIRECTORY_COMPONENTS_VAULT_DOMAIN = env.str('DIRECTORY_COMPONENTS_VAULT_DOMAIN')
+    DIRECTORY_COMPONENTS_VAULT_ROOT_PATH = env.str('DIRECTORY_COMPONENTS_VAULT_ROOT_PATH')
+    DIRECTORY_COMPONENTS_VAULT_PROJECT = env.str('DIRECTORY_COMPONENTS_VAULT_PROJECT')
+
+PRIVACY_COOKIE_DOMAIN = env.str('PRIVACY_COOKIE_DOMAIN')
+URL_PREFIX_DOMAIN = env.str('URL_PREFIX_DOMAIN', '')
