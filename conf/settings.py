@@ -458,3 +458,6 @@ if env.bool('FEATURE_SETTINGS_JANITOR_ENABLED', False):
 
 PRIVACY_COOKIE_DOMAIN = env.str('PRIVACY_COOKIE_DOMAIN')
 URL_PREFIX_DOMAIN = env.str('URL_PREFIX_DOMAIN', '')
+
+# message framework
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
