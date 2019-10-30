@@ -74,6 +74,11 @@ body.js-enabled {
   #id_verification-code-container {
     margin-bottom: 10px;
   }
+  #id_user-account-password-container{
+    .form-hint {
+        color: $grey;
+    }
+  }
 }
 
 
