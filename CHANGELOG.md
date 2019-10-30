@@ -77,6 +77,8 @@
 - TT-1817 - Use correct input types for number fields
 - TT-1819 - Fix padding on success box
 - TT-1947 - Fix pencil icons
+- TT-1855 - Handle companies starting with CE
+- no ticket - Set message storage backend
 
 ## [2019.08.14_1](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14_1)
 [Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.08.14...2019.08.14_1)
