@@ -39,6 +39,7 @@
 - No ticket - upgrade directory-sso-api-client to 6.2.0
 - TT-1911 - Remove access to edit business profile for member user
 - TT-1828 - Increasing size of address preview field in registration journey
+- TT-1199 - Fixing accessibility issues
 
 
 ### Fixed bugs:
