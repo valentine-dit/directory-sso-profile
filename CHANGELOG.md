@@ -5,6 +5,7 @@
 ### Implemented enhancements
 - TT-1828 - Increasing size of address preview field in registration journey
 - TT-1199 - Fixing accessibility issues
+- TT-2025 - Update success page content
 
 ### Fixed bugs:
 - TT-1817 - Use correct input types for number fields
