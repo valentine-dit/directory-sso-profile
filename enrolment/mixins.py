@@ -16,8 +16,7 @@ import directory_components.mixins
 
 class RestartOnStepSkipped:
     def render(self, *args, **kwargs):
-        prev = self.steps.prev
-        if prev and not self.get_cleaned_data_for_step(prev):
+        if self.steps.prev and not self.get_cleaned_data_for_step(self.steps.prev):
             return redirect(reverse('enrolment-business-type'))
         return super().render(*args, **kwargs)
 
@@ -32,7 +31,7 @@ class GA360Mixin(directory_components.mixins.GA360Mixin, abc.ABC):
     @property
     @abc.abstractmethod
     def google_analytics_page_id():
-        return ''
+        raise NotImplementedError
 
     def dispatch(self, *args, **kwargs):
         self.set_ga360_payload(
