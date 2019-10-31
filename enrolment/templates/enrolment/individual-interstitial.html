@@ -22,8 +22,11 @@
                   <li><a class="link" href="{{ services_urls.soo }}">sell online overseas</a></li>
                   <li><a class="link" href="{{ services_urls.events }}">find events and visits</a></li>
                 </ul>
-                <a class="link margin-top-15" href="{% url 'business-profile-personal-details' %}">Update your details</a>
-                <a class="link margin-top-15" href="{{ services_urls.great_domestic }}">Go back to great.gov.uk home</a>
+
+                <ul class="margin-top-30">
+                  <li><a class="link margin-top-15" href="{% url 'business-profile-personal-details' %}">Update your details</a></li>
+                  <li><a class="link" href="{{ services_urls.great_domestic }}">Go back to great.gov.uk home</a></li>
+                </ul>
             {% else %}
                 <p class="margin-bottom-30">Only UK business representatives can {{ user_journey_verb }}. You can still create a great.gov.uk account, which will let you:</p>
                 <ul class="margin-top-30">
