@@ -9,7 +9,7 @@ from django.utils.safestring import mark_safe
 from django.http.request import QueryDict
 
 from core.forms import TERMS_LABEL
-from enrolment import constants, fields, helpers
+from enrolment import constants, helpers
 from enrolment.widgets import PostcodeInput, RadioSelect
 
 
@@ -137,10 +137,12 @@ class UserAccountVerification(forms.Form):
     MESSAGE_INVALID_CODE = 'Invalid code'
     # email field can be overridden in __init__ to allow user to enter email
     email = forms.CharField(label='', widget=HiddenInput, disabled=True)
-    code = fields.DecimalField(
+
+    code = forms.CharField(
         label='Confirmation Code',
-        max_digits=5,
-        decimal_places=0,
+        max_length=5,
+        min_length=5,
+        widget=TextInput(attrs={'type': 'number'}),
         error_messages={'required': MESSAGE_INVALID_CODE}
     )
 

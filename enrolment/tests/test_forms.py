@@ -42,6 +42,17 @@ def test_verification_code_with_email():
     assert isinstance(form.fields['email'], CharField)
 
 
+def test_verification_code_valid_numbers():
+    form = forms.UserAccountVerification(
+        data={
+            'email': 'test@test.com',
+            'code': '02345',
+        }
+    )
+    assert form.is_valid()
+    assert form.cleaned_data['code'] == '02345'
+
+
 def test_companies_house_search_company_number_empty(client):
     form = forms.CompaniesHouseCompanySearch(data={'company_name': 'Thing'})
 
