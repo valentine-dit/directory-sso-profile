@@ -111,6 +111,12 @@ class BaseEnrolmentWizardView(
     NamedUrlSessionWizardView
 ):
 
+    def dispatch(self, request, *args, **kwargs):
+        is_authentication_required = self.kwargs['step'] not in [constants.USER_ACCOUNT, constants.VERIFICATION]
+        if is_authentication_required and request.user.is_anonymous:
+            return redirect(reverse('enrolment-start'))
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         if self.steps.current == constants.COMPANY_SEARCH:
@@ -144,10 +150,7 @@ class BaseEnrolmentWizardView(
         return form_kwargs
 
 
-class CompaniesHouseEnrolmentView(
-    mixins.CreateBusinessProfileMixin,
-    BaseEnrolmentWizardView
-):
+class CompaniesHouseEnrolmentView(mixins.CreateBusinessProfileMixin, BaseEnrolmentWizardView):
     google_analytics_page_id = 'CompaniesHouseEnrolment'
     progress_conf = helpers.ProgressIndicatorConf(
         step_counter_user={
@@ -219,8 +222,8 @@ class CompaniesHouseEnrolmentView(
     def get_form_initial(self, step):
         form_initial = super().get_form_initial(step)
         if step == constants.ADDRESS_SEARCH:
-            company = self.get_cleaned_data_for_step(constants.COMPANY_SEARCH)
-            form_initial['company_name'] = company['company_name']
+            company = self.get_cleaned_data_for_step(constants.COMPANY_SEARCH) or {}
+            form_initial['company_name'] = company.get('company_name')
         elif step == constants.BUSINESS_INFO:
             company_search_step_data = self.get_cleaned_data_for_step(constants.COMPANY_SEARCH)
             company_data = helpers.get_companies_house_profile(company_search_step_data['company_number'])
@@ -280,10 +283,7 @@ class CompaniesHouseEnrolmentView(
             return super().done(form_list, form_dict=form_dict, **kwargs)
 
 
-class NonCompaniesHouseEnrolmentView(
-    mixins.CreateBusinessProfileMixin,
-    BaseEnrolmentWizardView
-):
+class NonCompaniesHouseEnrolmentView(mixins.CreateBusinessProfileMixin, BaseEnrolmentWizardView):
     google_analytics_page_id = 'NonCompaniesHouseEnrolment'
     steps_list_labels = [
         constants.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
@@ -431,7 +431,7 @@ class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
     templates = {
         constants.USER_ACCOUNT: 'enrolment/individual-user-account.html',
         constants.VERIFICATION: 'enrolment/user-account-verification.html',
-        constants.PERSONAL_INFO: 'enrolment/individual-personal-details.html',
+        constants.PERSONAL_INFO: 'enrolment/collaborator-personal-details.html',
         constants.FINISHED: 'enrolment/individual-success.html',
         constants.INVITE_EXPIRED: 'enrolment/individual-collaborator-invite-expired.html'
     }

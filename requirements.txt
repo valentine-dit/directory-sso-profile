@@ -14,7 +14,7 @@ contextlib2==0.6.0        # via raven
 directory-api-client==20.0.0
 directory-ch-client==2.1.0
 directory-client-core==6.1.0  # via directory-api-client, directory-ch-client, directory-forms-api-client, directory-sso-api-client
-directory-components==35.0.1
+directory-components==35.3.1
 directory-constants==20.6.0  # via directory-components
 directory-forms-api-client==5.0.0
 directory-healthcheck==1.0.1
@@ -51,3 +51,6 @@ soupsieve==1.9.4          # via beautifulsoup4
 urllib3==1.24.3
 w3lib==1.21.0             # via directory-client-core
 whitenoise==3.1
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools==41.4.0        # via jsonschema

@@ -635,10 +635,10 @@ def test_companies_house_enrolment_expose_company(
     }
 
 
-def test_companies_house_enrolment_redirect_to_start(client):
-    url = reverse(
-        'enrolment-companies-house', kwargs={'step': constants.COMPANY_SEARCH}
-    )
+def test_companies_house_enrolment_redirect_to_start(client, user):
+    client.force_login(user)
+
+    url = reverse('enrolment-companies-house', kwargs={'step': constants.ADDRESS_SEARCH})
     response = client.get(url)
 
     assert response.status_code == 302
@@ -965,9 +965,9 @@ def test_companies_house_enrolment_submit_end_to_end_company_has_account(
 @mock.patch('directory_forms_api_client.client.forms_api_client.submit_generic')
 @mock.patch('enrolment.views.helpers.create_company_member')
 @mock.patch('enrolment.views.helpers.get_is_enrolled')
-@mock.patch('sso.models.SSOUser.role')
+@mock.patch('profile.business_profile.helpers.get_supplier_profile')
 def test_companies_house_enrolment_submit_end_to_end_company_second_user(
-    mock_user_role, mock_get_is_enrolled, mock_add_collaborator,
+    mock_get_supplier_profile, mock_get_is_enrolled, mock_add_collaborator,
     mock_gov_notify, client, steps_data, submit_companies_house_step,
     mock_get_company_admins, mock_enrolment_send,
     mock_validate_company_number, user
@@ -975,7 +975,6 @@ def test_companies_house_enrolment_submit_end_to_end_company_second_user(
     mock_validate_company_number.return_value = create_response(status_code=400)
 
     mock_get_is_enrolled.return_value = True
-    mock_user_role.return_value = user_roles.MEMBER
 
     response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
@@ -983,6 +982,7 @@ def test_companies_house_enrolment_submit_end_to_end_company_second_user(
     response = submit_companies_house_step(steps_data[constants.VERIFICATION])
     assert response.status_code == 302
 
+    mock_get_supplier_profile.return_value = {'role': user_roles.MEMBER}
     client.force_login(user)
 
     response = submit_companies_house_step(steps_data[constants.COMPANY_SEARCH])
@@ -1002,8 +1002,11 @@ def test_companies_house_enrolment_submit_end_to_end_company_second_user(
     # Redirects to business profile for 2nd company `member` user
     assert response.status_code == 200
 
-    for message in response.context['messages']:
-        assert str(message) == 'You are now linked to the profile.'
+    messages = list(str(message) for message in response.context['messages'])
+    assert len(messages) == 1
+
+    for message in messages:
+        assert message == 'You are now linked to the profile.'
 
     assert mock_add_collaborator.call_count == 1
     assert mock_add_collaborator.call_args == mock.call(
@@ -1569,10 +1572,18 @@ def test_non_companies_house_enrolment_expose_company(
     }
 
 
-def test_non_companies_house_enrolment_redirect_to_start(client):
-    url = reverse(
-        'enrolment-sole-trader', kwargs={'step': constants.ADDRESS_SEARCH}
-    )
+def test_anonymouse_user_redirected(client):
+    url = reverse('enrolment-sole-trader', kwargs={'step': constants.PERSONAL_INFO})
+    response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.url == reverse('enrolment-start')
+
+
+def test_non_companies_house_enrolment_redirect_to_start(client, user):
+    client.force_login(user)
+
+    url = reverse('enrolment-sole-trader', kwargs={'step': constants.PERSONAL_INFO})
     response = client.get(url)
 
     assert response.status_code == 302
@@ -1996,17 +2007,6 @@ def test_individual_enrolment_steps(
 
     response = submit_individual_step(steps_data[constants.PERSONAL_INFO])
     assert response.status_code == 302
-
-
-def test_individual_enrolment_redirect_to_start(client):
-    url = reverse(
-        'enrolment-individual', kwargs={'step': constants.PERSONAL_INFO}
-    )
-
-    response = client.get(url)
-
-    assert response.status_code == 302
-    assert response.url == reverse('enrolment-business-type')
 
 
 def test_individual_enrolment_submit_end_to_end(

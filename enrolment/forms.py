@@ -4,13 +4,14 @@ from captcha.fields import ReCaptchaField
 from directory_components import forms
 from directory_constants import choices
 
-from django.forms import HiddenInput, PasswordInput, Textarea, ValidationError
+from django.forms import HiddenInput, PasswordInput, Textarea, TextInput, ValidationError
 from django.utils.safestring import mark_safe
 from django.http.request import QueryDict
 
 from core.forms import TERMS_LABEL
 from enrolment import constants, helpers
 from enrolment.widgets import PostcodeInput, RadioSelect
+
 
 INDUSTRY_CHOICES = (
     (('', 'Please select'),) + choices.INDUSTRIES + (('OTHER', 'Other'),)
@@ -136,10 +137,12 @@ class UserAccountVerification(forms.Form):
     MESSAGE_INVALID_CODE = 'Invalid code'
     # email field can be overridden in __init__ to allow user to enter email
     email = forms.CharField(label='', widget=HiddenInput, disabled=True)
+
     code = forms.CharField(
         label='Confirmation Code',
-        min_length=5,
         max_length=5,
+        min_length=5,
+        widget=TextInput(attrs={'type': 'number'}),
         error_messages={'required': MESSAGE_INVALID_CODE}
     )
 
@@ -147,6 +150,9 @@ class UserAccountVerification(forms.Form):
         super().__init__(*args, **kwargs)
         if self.initial.get('email') is None:
             self.fields['email'] = forms.EmailField(label='Your email address')
+
+    def clean_code(self):
+        return str(self.cleaned_data['code'])
 
 
 class CompaniesHouseCompanySearch(forms.Form):
@@ -180,7 +186,7 @@ class CompaniesHouseAddressSearch(CleanAddressMixin, forms.Form):
     )
     address = forms.CharField(
         help_text='Type your business address',
-        widget=Textarea(attrs={'rows': 4, 'id': 'id_address'}),  # template js relies on this ID
+        widget=Textarea(attrs={'rows': 6, 'id': 'id_address'}),  # template js relies on this ID
         required=False,
     )
 
@@ -283,7 +289,8 @@ class IndividualPersonalDetails(forms.Form):
     job_title = forms.CharField()
     phone_number = forms.CharField(
         label='Phone number (optional)',
-        required=False
+        required=False,
+        widget=TextInput(attrs={'type': 'tel'})
     )
 
     def __init__(self, ask_terms_agreed=False, *args, **kwargs):
@@ -313,7 +320,7 @@ class NonCompaniesHouseSearch(CleanAddressMixin, forms.Form):
     )
     address = forms.CharField(
         help_text='Type your business address',
-        widget=Textarea(attrs={'rows': 4, 'id': 'id_address'}),  # template js relies on this ID
+        widget=Textarea(attrs={'rows': 6, 'id': 'id_address'}),  # template js relies on this ID
         required=False,
     )
     sectors = forms.ChoiceField(
