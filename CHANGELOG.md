@@ -3,6 +3,23 @@
 ## Pre-release
 
 ### Implemented enhancements
+- TT-1828 - Increasing size of address preview field in registration journey
+- TT-1199 - Fixing accessibility issues
+- TT-2025 - Update success page content
+
+### Fixed bugs:
+- TT-1817 - Use correct input types for number fields
+- TT-1819 - Fix padding on success box
+- TT-1947 - Fix pencil icons
+- TT-1855 - Handle companies starting with CE
+- no ticket - Set message storage backend
+- TT-2092 - Do not show "we will contact you" if already verified
+- TT-2095 - Non-admin collaborator view
+
+## [2019.10.30](https://github.com/uktrade/directory-sso-profile/releases/tag/2019.10.30)
+[Full Changelog](https://github.com/uktrade/directory-sso-profile/compare/2019.08.14_1...2019.10.30)
+
+### Implemented enhancements
 - GTRANSFORM-364 - text changes on page titles
 - GTRANSFORM-364 - add descriptive page titles to profile journey templates
 - TT-1725 - Send email to company admin when a new user is added to company profile
@@ -38,9 +55,6 @@
 - TT-1910 - only display collaborators who haven't accepted in the list
 - No ticket - upgrade directory-sso-api-client to 6.2.0
 - TT-1911 - Remove access to edit business profile for member user
-- TT-1828 - Increasing size of address preview field in registration journey
-- TT-1199 - Fixing accessibility issues
-
 
 ### Fixed bugs:
 - TT-1728 - Not ask personal details to individual upgrading to business profile
@@ -75,20 +89,15 @@
 - TT-1962 - Fixing verification links in user journeys
 - TT-1942 - redirect to form_session.ingress_url for exops intent
 - TT-2038 - fix admin breadcrumbs
-- TT-1817 - Use correct input types for number fields
-- TT-1819 - Fix padding on success box
-- TT-1947 - Fix pencil icons
-- TT-1855 - Handle companies starting with CE
-- no ticket - Set message storage backend
 
-## [2019.08.14_1](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14_1)
-[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.08.14...2019.08.14_1)
+## [2019.08.14_1](https://github.com/uktrade/directory-sso-profile/releases/tag/2019.08.14_1)
+[Full Changelog](https://github.com/uktrade/directory-sso-profile/compare/2019.08.14...2019.08.14_1)
 
 ## Hotfix
 - TT-1853 - 404-guidence-page
 
-## [2019.08.14](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.08.14)
-[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.25_2...2019.08.14)
+## [2019.08.14](https://github.com/uktrade/directory-sso-profile/releases/tag/2019.08.14)
+[Full Changelog](https://github.com/uktrade/directory-sso-profile/compare/2019.06.25_2...2019.08.14)
 
 ### Implemented enhancements
 - TT-990  - Update registration journey of individual user
@@ -115,16 +124,16 @@
 - TT-1645 - Fix progress indicator changing from long to short list in new session
 - No ticket - Upgraded django to 1.11.23 to fix vulnerabilityI
 
-## [07-17-2019 ](https://github.com/uktrade/directory-ui-supplier/releases/tag/07-17-2019 )
-[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.06.05...07-17-2019)
+## [07-17-2019 ](https://github.com/uktrade/directory-sso-profile/releases/tag/07-17-2019 )
+[Full Changelog](https://github.com/uktrade/directory-sso-profile/compare/2019.06.05...07-17-2019)
 
 ### Implemented enhancements
 
 - TT-1607 - Verification Code allow email
 
-## [2019.06.15](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.06.05)
+## [2019.06.15](https://github.com/uktrade/directory-sso-profile/releases/tag/2019.06.05)
 
-[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.05.16...2019.06.05)
+[Full Changelog](https://github.com/uktrade/directory-sso-profile/compare/2019.05.16...2019.06.05)
 
 ### Implemented enhancements
 - [TT-1392] Fixed UI Bugs on ISD profile page
@@ -142,9 +151,9 @@
 ### Fixed bugs:
 - Upgrade django rest framework to fix security vulnerability
 
-## [2019.05.16](https://github.com/uktrade/directory-ui-supplier/releases/tag/2019.05.16)
+## [2019.05.16](https://github.com/uktrade/directory-sso-profile/releases/tag/2019.05.16)
 
-[Full Changelog](https://github.com/uktrade/directory-ui-supplier/compare/2019.04.08...2019.05.16)
+[Full Changelog](https://github.com/uktrade/directory-sso-profile/compare/2019.04.08...2019.05.16)
 
 ### Implemented enhancements
 - Move form choices to [Constants][directory-constants].

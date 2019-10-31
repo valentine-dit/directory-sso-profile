@@ -31,13 +31,9 @@
                 <td class="border-white padding-top-15 padding-bottom-10 numeric">
                     <a href="{% url 'business-profile-admin-disconnect' %}" class="link">Remove profile from my account</a>
                 </td>
-            {% else %}
+            {% elif request.user.is_company_admin %}
                 <td class="border-white padding-top-15 padding-bottom-10 numeric">
-                  {% if request.user.is_company_admin %}
                     <a href="{% url 'business-profile-admin-collaborator-edit' sso_id=collaborator.sso_id %}" class="link">Edit</a>
-                  {% else %}
-                    <span>N/A</span>
-                  {% endif %}
                 </td>
             {% endif %}
           </tr>
