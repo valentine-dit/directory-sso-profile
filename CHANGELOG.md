@@ -15,8 +15,9 @@
 - no ticket - Set message storage backend
 - TT-2092 - Do not show "we will contact you" if already verified
 - TT-2095 - Non-admin collaborator view
-- TT-1727 - Not prompt collaborators to change business type
 - TT-2089 - fix-leading-0-verification-code
+- TT-1727 - Not prompt collaborators to change business type
+- TT-2096 - Fix layout problem on enrolment of individual that already has sso profile
 
 ## [2019.10.30](https://github.com/uktrade/directory-sso-profile/releases/tag/2019.10.30)
 [Full Changelog](https://github.com/uktrade/directory-sso-profile/compare/2019.08.14_1...2019.10.30)
