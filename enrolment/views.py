@@ -431,7 +431,7 @@ class CollaboratorEnrolmentView(BaseEnrolmentWizardView):
     templates = {
         constants.USER_ACCOUNT: 'enrolment/individual-user-account.html',
         constants.VERIFICATION: 'enrolment/user-account-verification.html',
-        constants.PERSONAL_INFO: 'enrolment/individual-personal-details.html',
+        constants.PERSONAL_INFO: 'enrolment/collaborator-personal-details.html',
         constants.FINISHED: 'enrolment/individual-success.html',
         constants.INVITE_EXPIRED: 'enrolment/individual-collaborator-invite-expired.html'
     }
