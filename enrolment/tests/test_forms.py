@@ -67,18 +67,19 @@ def test_companies_house_search_company_name_empty(client):
     assert form.errors['company_name'] == ['This field is required.']
 
 
-@pytest.mark.parametrize('status,expected', (
-    ('active', True),
-    ('dissolved', False),
-    ('liquidation', False),
-    ('receivership', False),
-    ('administration', False),
-    ('voluntary-arrangement', True),
-    ('converted-closed', False),
-    ('insolvency-proceedings', False),
+@pytest.mark.parametrize('data,expected', (
+    ({'company_status': 'active'}, True),
+    ({'company_status': 'voluntary-arrangement'}, True),
+    ({}, True),
+    ({'company_status': 'dissolved'}, False),
+    ({'company_status': 'liquidation'}, False),
+    ({'company_status': 'receivership'}, False),
+    ({'company_status': 'administration'}, False),
+    ({'company_status': 'converted-closed'}, False),
+    ({'company_status': 'insolvency-proceedings'}, False),
 ))
-def test_companies_house_search_company_status(client, status, expected):
-    with mock.patch.object(helpers, 'get_companies_house_profile', return_value={'company_status': status}):
+def test_companies_house_search_company_status(client, data, expected):
+    with mock.patch.object(helpers, 'get_companies_house_profile', return_value=data):
         form = forms.CompaniesHouseCompanySearch(data={'company_name': 'Thing', 'company_number': '23232323'})
         assert form.is_valid() is expected
         if expected is False:
