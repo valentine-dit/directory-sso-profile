@@ -6,6 +6,7 @@
 - TT-1828 - Increasing size of address preview field in registration journey
 - TT-1199 - Fixing accessibility issues
 - TT-2025 - Update success page content
+- TT-1724 - Allow member user to disconnect themselves from the company profile
 
 ### Fixed bugs:
 - TT-1817 - Use correct input types for number fields

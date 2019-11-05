@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+
+{% block head_css %}
+    {{ block.super }}
+    <link href="{% static 'css/company-profile.css' %}" media="all" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+	<div class="container margin-top-30 margin-bottom-30">
+		<div class="grid-row">
+			<div class="column-two-thirds">
+				<h2 class="heading-large margin-top-15">Remove {{business_name}} from your account</h2>
+				<p>Please confirm you would like to remove business profile from your account. You will be able to select a new business.</p>
+				<form class="margin-top-0" method="post" enctype="multipart/form-data">
+						{{ form }}
+						<button class="button">Remove business profile</button>
+				</form>
+				<a href="{% url 'business-profile' %}">Back</a>
+			</div>
+		</div>
+	</div>
+
+{% endblock %}
+
+{% block feedback_reporter %}
+    <section class="error-reporting">
+        <div class="container">
+            <a id="error-reporting-section-contact-us" href="{{ services_urls.feedback }}" target="_blank">Is there anything wrong with this page?</a>
+        </div>
+    </section>
+{% endblock %}

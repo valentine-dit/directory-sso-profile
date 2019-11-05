@@ -419,6 +419,24 @@ class AdminDisconnectFormView(SuccessMessageMixin, FormView):
         return super().get_context_data(is_sole_admin=is_sole_admin, **kwargs)
 
 
+class MemberDisconnectFormView(SuccessMessageMixin, FormView):
+    template_name = 'business_profile/member-disconnect.html'
+    form_class = forms.NoOperationForm
+    success_message = 'Business profile removed from account.'
+    success_url = reverse_lazy('business-profile')
+
+    def form_valid(self, form):
+        try:
+            helpers.disconnect_from_company(self.request.user.session_id)
+        except HTTPError as error:
+            if error.response.status_code == 400:
+                form.add_error(field=None, error=error.response.json())
+                return self.form_invalid(form)
+            else:
+                raise error
+        return super().form_valid(form)
+
+
 class AdminInviteNewAdminFormView(SuccessMessageMixin, FormView):
     template_name = 'business_profile/admin-invite-admin.html'
     form_class = forms.AdminInviteNewAdminForm

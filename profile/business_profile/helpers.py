@@ -73,6 +73,18 @@ def retrieve_collaborator(sso_session_id, collaborator_sso_id):
             return collaborator
 
 
+# def update_collaborator_company(sso_session_id, sso_id, company_id, company_email):
+#     data = {
+#         'sso_id': sso_id,
+#         'company': company_id,
+#         'company_email': company_email
+#     }
+#     response = api_client.company.collaborator_connect(sso_session_id=sso_session_id,
+#                                                        data=data)
+#     response.raise_for_status()
+#     assert response.status_code == 200
+
+
 def remove_collaborator(sso_session_id, sso_id):
     response = api_client.company.collaborator_disconnect(sso_session_id=sso_session_id, sso_id=sso_id)
     response.raise_for_status()

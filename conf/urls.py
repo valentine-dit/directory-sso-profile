@@ -315,6 +315,11 @@ urlpatterns = [
         name='business-profile-request-to-verify'
     ),
     url(
+        r'^business-profile/member/disconnect/$',
+        company_required(profile.business_profile.views.MemberDisconnectFormView.as_view()),
+        name='business-profile-member-disconnect'
+    ),
+    url(
         r'^personal-profile/',
         include(urls_personal_profile, namespace='personal-profile')
     ),
