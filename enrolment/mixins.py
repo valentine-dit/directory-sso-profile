@@ -1,5 +1,6 @@
 import abc
 from urllib.parse import unquote
+
 from requests.exceptions import HTTPError
 
 from django.conf import settings
@@ -327,7 +328,7 @@ class CreateBusinessProfileMixin:
             del self.request.session[constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT]
             return redirect(self.form_session.ingress_url)
         else:
-            return TemplateResponse(self.request, self.templates[constants.FINISHED])
+            return TemplateResponse(self.request, self.templates[constants.FINISHED], self.get_finished_context_data())
 
 
 class ReadUserIntentMixin:

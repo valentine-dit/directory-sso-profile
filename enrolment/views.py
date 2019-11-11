@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from directory_constants import urls, user_roles
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
@@ -14,6 +16,7 @@ import core.forms
 import core.mixins
 from enrolment import constants, forms, helpers, mixins
 from directory_forms_api_client.helpers import FormSessionMixin
+
 
 URL_NON_COMPANIES_HOUSE_ENROLMENT = reverse_lazy(
     'enrolment-sole-trader', kwargs={'step': constants.USER_ACCOUNT}
@@ -119,19 +122,26 @@ class BaseEnrolmentWizardView(
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        contact_us_url = urls.domestic.CONTACT_US / 'domestic'
         if self.steps.current == constants.COMPANY_SEARCH:
-            context['contact_us_url'] = (urls.domestic.CONTACT_US / 'domestic')
+            context['contact_us_url'] = contact_us_url
         elif self.steps.current == constants.BUSINESS_INFO:
             previous_data = self.get_cleaned_data_for_step(constants.COMPANY_SEARCH)
             if previous_data:
                 context['is_enrolled'] = helpers.get_is_enrolled(previous_data['company_number'])
-                context['contact_us_url'] = (urls.domestic.CONTACT_US / 'domestic')
-        if self.steps.current == constants.PERSONAL_INFO:
+                context['contact_us_url'] = contact_us_url
+        elif self.steps.current == constants.PERSONAL_INFO:
             context['company'] = self.get_cleaned_data_for_step(constants.BUSINESS_INFO)
         elif self.steps.current == constants.VERIFICATION:
-            context['verification_missing_url'] = (
-                urls.domestic.CONTACT_US / 'triage/great-account/verification-missing/'
-            )
+            url = urls.domestic.CONTACT_US / 'triage/great-account/verification-missing/'
+            context['verification_missing_url'] = url
+        return context
+
+    def get_finished_context_data(self):
+        context = {}
+        parsed_url = urlparse(self.form_session.ingress_url)
+        if parsed_url.netloc == self.request.get_host():
+            context['ingress_url'] = self.form_session.ingress_url
         return context
 
     def get_template_names(self):
@@ -400,7 +410,7 @@ class IndividualUserEnrolmentView(BaseEnrolmentWizardView):
         return [self.templates[self.steps.current]]
 
     def done(self, *args, **kwargs):
-        return TemplateResponse(self.request, self.templates[constants.FINISHED])
+        return TemplateResponse(self.request, self.templates[constants.FINISHED], self.get_finished_context_data())
 
 
 class CollaboratorEnrolmentView(BaseEnrolmentWizardView):

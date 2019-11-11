@@ -548,9 +548,7 @@ def test_companies_house_enrolment_already_has_profile(
 
     response = client.get(response.url)
     assert response.status_code == 200
-    assert response.template_name == (
-        views.CompaniesHouseEnrolmentView.templates[constants.FINISHED]
-    )
+    assert response.template_name == views.CompaniesHouseEnrolmentView.templates[constants.FINISHED]
 
 
 @mock.patch('enrolment.helpers.get_is_enrolled')
@@ -652,6 +650,16 @@ def test_companies_house_enrolment_submit_end_to_end(
     user,
 ):
     session_client_referrer_factory(urls.domestic.FIND_A_BUYER)
+    ingress_url = 'http://testserver/foo/'
+
+    # given the ingress url is set
+    response = client.get(
+        reverse('enrolment-companies-house', kwargs={'step': constants.USER_ACCOUNT}),
+        HTTP_REFERER=ingress_url,
+        HTTP_HOST='testserver'
+    )
+    assert response.status_code == 200
+
     response = submit_companies_house_step(steps_data[constants.USER_ACCOUNT])
     assert response.status_code == 302
 
@@ -678,9 +686,9 @@ def test_companies_house_enrolment_submit_end_to_end(
     response = client.get(response.url)
 
     assert response.status_code == 200
-    assert response.template_name == (
-        views.CompaniesHouseEnrolmentView.templates[constants.FINISHED]
-    )
+    assert response.template_name == views.CompaniesHouseEnrolmentView.templates[constants.FINISHED]
+    assert response.context_data['ingress_url'] == ingress_url
+
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
         'sso_id': 1,
@@ -697,7 +705,6 @@ def test_companies_house_enrolment_submit_end_to_end(
         'job_title': 'Exampler',
         'phone_number': '1232342',
         'company_type': 'COMPANIES_HOUSE',
-
     })
 
 
@@ -737,9 +744,7 @@ def test_companies_house_enrolment_submit_end_to_end_logged_in(
     response = client.get(response.url)
 
     assert response.status_code == 200
-    assert response.template_name == (
-        views.CompaniesHouseEnrolmentView.templates[constants.FINISHED]
-    )
+    assert response.template_name == views.CompaniesHouseEnrolmentView.templates[constants.FINISHED]
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
         'address_line_1': '555 fake street',
@@ -1594,6 +1599,15 @@ def test_non_companies_house_enrolment_submit_end_to_end_logged_in(
     client, submit_non_companies_house_step, steps_data,
     mock_enrolment_send, user
 ):
+    ingress_url = 'http://testserver/foo/'
+
+    # given the ingress url is set
+    response = client.get(
+        reverse('enrolment-sole-trader', kwargs={'step': constants.USER_ACCOUNT}),
+        HTTP_REFERER=ingress_url,
+        HTTP_HOST='testserver'
+    )
+
     client.force_login(user)
     url = reverse('enrolment-sole-trader', kwargs={'step': constants.USER_ACCOUNT})
     response = client.get(url)
@@ -1616,9 +1630,8 @@ def test_non_companies_house_enrolment_submit_end_to_end_logged_in(
     response = client.get(response.url)
 
     assert response.status_code == 200
-    assert response.template_name == (
-        views.NonCompaniesHouseEnrolmentView.templates[constants.FINISHED]
-    )
+    assert response.template_name == views.NonCompaniesHouseEnrolmentView.templates[constants.FINISHED]
+    assert response.context_data['ingress_url'] == ingress_url
     assert mock_enrolment_send.call_count == 1
     assert mock_enrolment_send.call_args == mock.call({
         'sso_id': 1,
@@ -1656,9 +1669,7 @@ def test_non_companies_house_enrolment_has_user_profile(
 
     response = client.get(response.url)
     assert response.status_code == 200
-    assert response.template_name == (
-        views.NonCompaniesHouseEnrolmentView.templates[constants.FINISHED]
-    )
+    assert response.template_name == views.NonCompaniesHouseEnrolmentView.templates[constants.FINISHED]
 
 
 def test_non_companies_house_enrolment_suppress_success(
