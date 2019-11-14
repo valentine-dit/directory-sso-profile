@@ -49,37 +49,8 @@ def test_verification_code_valid_numbers():
             'code': '02345',
         }
     )
-
-    assert form.is_valid() is True
-    assert form.cleaned_data["user_details"] == data
-
-
-def test_verification_code_empty_email():
-
-    form = forms.UserAccountVerification()
-    assert type(form.fields['email']) is fields.EmailField
-
-
-def test_verification_code_with_email():
-
-    form = forms.UserAccountVerification(
-        initial={'email': 'test@test.com'}
-    )
-    assert type(form.fields['email']) is fields.CharField
-
-
-@mock.patch.object(helpers, 'get_company_profile', return_value={
-    'company_status': 'active',
-})
-def test_companies_house_search_company_number_incomplete_data(client):
-    expected = 'Please contact support to register a Royal Charter Company.'
-    form = forms.CompaniesHouseSearch(
-        data={'company_name': 'Thing', 'company_number': 'RC232323'},
-        session=client.session
-    )
-
-    assert form.is_valid() is False
-    assert form.errors['company_name'] == [expected]
+    assert form.is_valid()
+    assert form.cleaned_data['code'] == '02345'
 
 
 def test_companies_house_search_company_number_empty(client):
