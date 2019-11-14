@@ -243,13 +243,19 @@ class CompaniesHouseEnrolmentView(mixins.CreateBusinessProfileMixin, BaseEnrolme
             form_initial['sic'] = company.nature_of_business
             form_initial['date_of_creation'] = company.date_of_creation
             if self.address_search_condition():
-                address_step_data = self.get_cleaned_data_for_step(constants.ADDRESS_SEARCH)
-                form_initial['address'] = address_step_data['address']
-                form_initial['postal_code'] = address_step_data['postal_code']
+                address_step_data = self.get_cleaned_data_for_step(constants.ADDRESS_SEARCH) or {}
+                form_initial['address'] = address_step_data.get('address')
+                form_initial['postal_code'] = address_step_data.get('postal_code')
             else:
                 form_initial['address'] = company.address
                 form_initial['postal_code'] = company.postcode
         return form_initial
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        if self.steps.current == constants.ADDRESS_SEARCH:
+            context['is_in_companies_house'] = True
+        return context
 
     def serialize_form_list(self, form_list):
         return {

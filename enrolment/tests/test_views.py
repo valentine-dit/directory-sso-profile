@@ -797,6 +797,9 @@ def test_companies_house_enrolment_submit_end_to_end_no_address(
 
     assert response.status_code == 302
 
+    response = client.get(response.url)
+    assert response.context_data['is_in_companies_house'] is True
+
     response = submit_companies_house_step(
         data={
             'company_name': 'Example corp',
