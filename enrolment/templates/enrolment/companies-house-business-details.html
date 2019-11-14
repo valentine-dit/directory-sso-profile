@@ -3,9 +3,7 @@
 {% load static from static %}
 
 {% block above_form %}
-    {% if features.ENROLMENT_SELECT_BUSINESS_ON %}
-      {% include 'enrolment/information_box_companies_type.html' with is_in_companies_house=True %}
-    {% endif %}
+    {% include 'enrolment/information_box_companies_type.html' with is_in_companies_house=True %}
     <div id="form-step-body-text">
         <h1 class="heading-xlarge margin-top-60">Enter your business details</h1>
     </div>

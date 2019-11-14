@@ -31,13 +31,11 @@
                 <section class="margin-bottom-30">
                     <h6 class="bold-small margin-bottom-15">Collaborator management</h6>
                     <ul>
-                      {% if request.user.is_company_admin %}
-                        {% with name='business-profile-admin-invite-collaborator' %}
-                            <li class="margin-bottom-15{% if request.resolver_match.url_name == name %} bold-small selected-link{% endif %}">
-                                <a href="{% url name %}" class="link">Invite collaborators</a>
-                            </li>
-                        {% endwith %}
-                      {% endif %}
+                      {% with name='business-profile-admin-invite-collaborator' %}
+                          <li class="margin-bottom-15{% if request.resolver_match.url_name == name %} bold-small selected-link{% endif %}">
+                              <a href="{% url name %}" class="link">Invite collaborators</a>
+                          </li>
+                      {% endwith %}
                       {% with name='business-profile-admin-tools' %}
                           <li class="{% if request.resolver_match.url_name == name %}bold-small selected-link{% endif %}">
                               <a href="{% url name %}" class="link">Collaborators</a>

@@ -1092,21 +1092,6 @@ def test_verification_missing_url(
            ] == verification_missing_url
 
 
-def test_disable_select_company(client, settings):
-    settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = False
-
-    url = reverse('enrolment-business-type')
-    response = client.get(url)
-
-    assert response.status_code == 302
-    assert response.url == reverse(
-        'enrolment-companies-house', kwargs={'step': 'user-account'}
-    )
-
-    response = client.get(response.url)
-    assert response.status_code == 200
-
-
 def test_user_has_company_redirect_on_start(
     client, mock_user_has_company, user
 ):
@@ -1894,9 +1879,8 @@ def test_claim_preverified_failure(
     assert response.template_name == 'enrolment/failure-pre-verified.html'
 
 
-@pytest.mark.parametrize('is_anon,is_feature_enabled,expected', (
+@pytest.mark.parametrize('is_anon,expected', (
     (
-        True,
         True,
         [
             constants.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
@@ -1906,35 +1890,14 @@ def test_claim_preverified_failure(
         ]
     ),
     (
-        True,
         False,
-        [
-            constants.PROGRESS_STEP_LABEL_USER_ACCOUNT,
-            constants.PROGRESS_STEP_LABEL_VERIFICATION,
-            constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ]
-    ),
-    (
-        False,
-        True,
         [
             constants.PROGRESS_STEP_LABEL_BUSINESS_TYPE,
             constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
         ],
     ),
-    (
-        False,
-        False,
-        [
-            constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ]
-    ),
 ))
-def test_steps_list_mixin(
-    is_anon, is_feature_enabled, expected, rf, settings, user
-):
-    settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = is_feature_enabled
-
+def test_steps_list_mixin(is_anon, expected, rf, settings, user):
     class TestView(mixins.StepsListMixin, TemplateView):
         template_name = 'directory_components/base.html'
 
@@ -1953,34 +1916,8 @@ def test_steps_list_mixin(
     assert response.context_data['step_labels'] == expected
 
 
-def test_steps_list_mixin_no_business_type(rf, settings):
-    settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = False
-
-    class TestView(mixins.StepsListMixin, TemplateView):
-        template_name = 'directory_components/base.html'
-
-        steps_list_labels = [
-            constants.PROGRESS_STEP_LABEL_USER_ACCOUNT,
-            constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
-        ]
-
-    request = rf.get('/')
-    request.user = AnonymousUser()
-    view = TestView.as_view()
-
-    response = view(request)
-    assert response.context_data['step_labels'] == [
-        constants.PROGRESS_STEP_LABEL_USER_ACCOUNT,
-        constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
-    ]
-
-
 @pytest.mark.parametrize('is_anon', (True, False))
-@pytest.mark.parametrize('is_enabled,expected', ((True, 2), (False, 1)))
-def test_wizard_progress_indicator_mixin(
-    is_anon, is_enabled, expected, rf, settings, client, user
-):
-    settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON'] = is_enabled
+def test_wizard_progress_indicator_mixin(is_anon, rf, settings, client, user):
 
     class TestView(mixins.ProgressIndicatorMixin, NamedUrlSessionWizardView):
         def get_template_names(self):
@@ -2004,7 +1941,7 @@ def test_wizard_progress_indicator_mixin(
     )
     response = view(request, step=constants.USER_ACCOUNT)
 
-    assert response.context_data['step_number'] == expected
+    assert response.context_data['step_number'] == 2
 
 
 def test_individual_enrolment_steps(
