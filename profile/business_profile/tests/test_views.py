@@ -13,7 +13,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.forms.forms import NON_FIELD_ERRORS
 
-from core.tests.helpers import create_response, reload_urlconf, submit_step_factory
+from core.tests.helpers import create_response, submit_step_factory
 from profile.business_profile import constants, forms, helpers, views
 from directory_constants import urls
 
@@ -203,21 +203,7 @@ def case_study_data():
     }
 
 
-def test_find_a_buyer_exposes_context(client, settings, user):
-    client.force_login(user)
-    response = client.get(reverse('business-profile'))
-    context = response.context_data
-
-    assert context['fab_tab_classes'] == 'active'
-    assert context['FAB_EDIT_COMPANY_LOGO_URL'] == (
-        settings.FAB_EDIT_COMPANY_LOGO_URL
-    )
-    assert context['FAB_EDIT_PROFILE_URL'] == settings.FAB_EDIT_PROFILE_URL
-    assert context['FAB_ADD_CASE_STUDY_URL'] == settings.FAB_ADD_CASE_STUDY_URL
-    assert context['FAB_REGISTER_URL'] == settings.FAB_REGISTER_URL
-
-
-def test_find_a_buyer_unauthenticated_enrolment(client, settings):
+def test_find_a_buyer_unauthenticated_enrolment(client):
     profile_url = reverse('business-profile')
     enrolment_url = reverse('enrolment-start')
     response = client.get(profile_url)
@@ -477,47 +463,6 @@ def test_case_study_edit_found(
     assert response.status_code == 200
 
 
-def test_admin_tools(settings, client, company_profile_data, user):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
-    reload_urlconf()
-
-    client.force_login(user)
-
-    company = helpers.CompanyParser(company_profile_data)
-
-    url = reverse('business-profile-admin-tools')
-
-    response = client.get(url)
-
-    assert response.status_code == 200
-    assert response.context_data['FAB_ADD_USER_URL'] == (
-        settings.FAB_ADD_USER_URL
-    )
-    assert response.context_data['FAB_REMOVE_USER_URL'] == (
-        settings.FAB_REMOVE_USER_URL
-    )
-    assert response.context_data['FAB_TRANSFER_ACCOUNT_URL'] == (
-        settings.FAB_TRANSFER_ACCOUNT_URL
-    )
-    assert response.context_data['has_collaborators'] is True
-    assert response.context_data['company'] == company.serialize_for_template()
-
-
-def test_admin_tools_no_collaborators(settings, client, mock_collaborator_list, user):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
-    reload_urlconf()
-
-    client.force_login(user)
-
-    mock_collaborator_list.return_value = create_response([])
-
-    url = reverse('business-profile-admin-tools')
-    response = client.get(url)
-
-    assert response.status_code == 200
-    assert response.context_data['has_collaborators'] is False
-
-
 def test_business_details_sole_trader(
     settings, mock_retrieve_company, client, user
 ):
@@ -571,7 +516,6 @@ def test_business_details_companies_house(
 ))
 def test_add_expertise_routing(settings, choice, expected_url, client, user):
     client.force_login(user)
-    settings.FEATURE_FLAGS['EXPERTISE_FIELDS_ON'] = True
 
     url = reverse('business-profile-expertise-routing')
 
@@ -792,9 +736,6 @@ def test_personal_details(client, mock_create_user_profile, user):
 
 @mock.patch.object(api_client.company, 'verify_identity_request')
 def test_request_identity_verification(mock_verify_identity_request, client, user, settings):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     mock_verify_identity_request.return_value = create_response()
 
     client.force_login(user)
@@ -826,24 +767,7 @@ def test_request_identity_verification_already_sent(mock_verify_identity_request
     assert mock_verify_identity_request.call_count == 0
 
 
-@mock.patch.object(api_client.company, 'verify_identity_request')
-def test_request_identity_verification_feature_off(mock_verify_identity_request, client, user, settings):
-    settings.FEATURE_FLAGS['REQUEST_VERIFICATION_ON'] = False
-    user.company.data['is_identity_check_message_sent'] = False
-    client.force_login(user)
-
-    url = reverse('business-profile-request-to-verify')
-
-    response = client.post(url)
-    assert response.status_code == 302
-    assert response.url == reverse('business-profile')
-    assert mock_verify_identity_request.call_count == 0
-
-
 def test_collaborator_list(mock_collaborator_list, client, user, settings):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
     mock_collaborator_list.return_value = create_response([])
 
@@ -854,23 +778,9 @@ def test_collaborator_list(mock_collaborator_list, client, user, settings):
     assert response.context_data['collaborators'] == []
 
 
-def test_edit_collaborator_feature_off(client, settings):
-    url = reverse('business-profile-admin-collaborator-edit', kwargs={'sso_id': '1234'})
-
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
-    reload_urlconf()
-
-    response = client.get(url)
-    assert response.status_code == 404
-
-
 @pytest.mark.parametrize('role', (user_roles.EDITOR, user_roles.MEMBER))
-def test_edit_collaborator_not_admin(
-    mock_retrieve_supplier, mock_collaborator_list, client, user, settings, role
-):
+def test_edit_collaborator_not_admin(mock_retrieve_supplier, mock_collaborator_list, client, user, role):
     mock_retrieve_supplier.return_value = create_response({'is_company_owner': False, 'role': role})
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
     client.force_login(user)
 
     url = reverse('business-profile-admin-collaborator-edit', kwargs={'sso_id': 1234})
@@ -881,10 +791,7 @@ def test_edit_collaborator_not_admin(
     assert mock_collaborator_list.call_count == 0
 
 
-def test_edit_collaborator_edit_not_found(client, user, settings):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
+def test_edit_collaborator_edit_not_found(client, user):
     client.force_login(user)
 
     url = reverse('business-profile-admin-collaborator-edit', kwargs={'sso_id': 43})
@@ -893,10 +800,7 @@ def test_edit_collaborator_edit_not_found(client, user, settings):
     assert response.status_code == 404
 
 
-def test_edit_collaborator_edit_self(client, user, settings):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
+def test_edit_collaborator_edit_self(client, user):
     client.force_login(user)
 
     url = reverse('business-profile-admin-collaborator-edit', kwargs={'sso_id': user.id})
@@ -906,10 +810,7 @@ def test_edit_collaborator_edit_self(client, user, settings):
     assert response.url == reverse('business-profile-admin-tools')
 
 
-def test_edit_collaborator_retrieve(client, user, settings):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
+def test_edit_collaborator_retrieve(client, user):
     client.force_login(user)
 
     url = reverse('business-profile-admin-collaborator-edit', kwargs={'sso_id': 1234})
@@ -919,14 +820,11 @@ def test_edit_collaborator_retrieve(client, user, settings):
 
 
 @pytest.mark.parametrize('action', (forms.CHANGE_COLLABORATOR_TO_MEMBER, forms.CHANGE_COLLABORATOR_TO_ADMIN))
-def test_edit_collaborator_change_editor_to_other(mock_collaborator_list, client, user, settings, action):
+def test_edit_collaborator_change_editor_to_other(mock_collaborator_list, client, user, action):
     mock_collaborator_list.return_value = create_response([
         {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
         {'sso_id': 1234, 'role': user_roles.EDITOR, 'company_email': 'jim@example.com'}
     ])
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
 
     url = reverse('business-profile-admin-collaborator-edit', kwargs={'sso_id': 1234})
@@ -937,14 +835,11 @@ def test_edit_collaborator_change_editor_to_other(mock_collaborator_list, client
 
 
 @pytest.mark.parametrize('action', [forms.CHANGE_COLLABORATOR_TO_ADMIN])
-def test_edit_collaborator_change_member_to_other(mock_collaborator_list, client, user, settings, action):
+def test_edit_collaborator_change_member_to_other(mock_collaborator_list, client, user, action):
     mock_collaborator_list.return_value = create_response([
         {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
         {'sso_id': 1234, 'role': user_roles.MEMBER, 'company_email': 'jim@example.com'}
     ])
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
 
     url = reverse('business-profile-admin-collaborator-edit', kwargs={'sso_id': 1234})
@@ -955,14 +850,11 @@ def test_edit_collaborator_change_member_to_other(mock_collaborator_list, client
 
 
 @pytest.mark.parametrize('action', [forms.CHANGE_COLLABORATOR_TO_MEMBER])
-def test_edit_collaborator_change_admin_to_other(mock_collaborator_list, client, user, settings, action):
+def test_edit_collaborator_change_admin_to_other(mock_collaborator_list, client, user, action):
     mock_collaborator_list.return_value = create_response([
         {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
         {'sso_id': 1234, 'role': user_roles.ADMIN, 'company_email': 'jim@example.com'}
     ])
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
 
     url = reverse('business-profile-admin-collaborator-edit', kwargs={'sso_id': 1234})
@@ -973,10 +865,7 @@ def test_edit_collaborator_change_admin_to_other(mock_collaborator_list, client,
 
 
 @mock.patch.object(api_client.company, 'collaborator_disconnect')
-def test_edit_collaborator_edit_remove_collaborator(mock_collaborator_disconnect, client, user, settings):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
+def test_edit_collaborator_edit_remove_collaborator(mock_collaborator_disconnect, client, user):
     client.force_login(user)
 
     mock_collaborator_disconnect.return_value = create_response()
@@ -991,12 +880,9 @@ def test_edit_collaborator_edit_remove_collaborator(mock_collaborator_disconnect
 
 
 @mock.patch.object(api_client.supplier, 'disconnect_from_company')
-def test_admin_disconnect_remote_validation_error(mock_disconnect_from_company, client, user, settings):
+def test_admin_disconnect_remote_validation_error(mock_disconnect_from_company, client, user):
     errors = ['Something went wrong']
     mock_disconnect_from_company.return_value = create_response(errors, status_code=400)
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
 
     url = reverse('business-profile-admin-disconnect')
@@ -1008,11 +894,8 @@ def test_admin_disconnect_remote_validation_error(mock_disconnect_from_company, 
 
 
 @mock.patch.object(api_client.supplier, 'disconnect_from_company')
-def test_admin_disconnect_remote_error(mock_disconnect_from_company, client, user, settings):
+def test_admin_disconnect_remote_error(mock_disconnect_from_company, client, user):
     mock_disconnect_from_company.return_value = create_response(status_code=500)
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
 
     url = reverse('business-profile-admin-disconnect')
@@ -1021,11 +904,8 @@ def test_admin_disconnect_remote_error(mock_disconnect_from_company, client, use
 
 
 @mock.patch.object(api_client.supplier, 'disconnect_from_company')
-def test_admin_disconnect(mock_disconnect_from_company, client, user, settings):
+def test_admin_disconnect(mock_disconnect_from_company, client, user):
     mock_disconnect_from_company.return_value = create_response()
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
 
     url = reverse('business-profile-admin-disconnect')
@@ -1038,16 +918,12 @@ def test_admin_disconnect(mock_disconnect_from_company, client, user, settings):
 
 
 @pytest.mark.parametrize('count,expected', ((1, True), (2, False),))
-def test_admin_disconnect_is_sole_collaborator(mock_collaborator_list, count, expected, client, user, settings):
+def test_admin_disconnect_is_sole_collaborator(mock_collaborator_list, count, expected, client, user):
     collaborators = [
         {'sso_id': user.id, 'role': user_roles.ADMIN, 'company_email': user.email},
         {'sso_id': 1234, 'role': user_roles.ADMIN, 'company_email': 'jim@example.com'}
     ]
     mock_collaborator_list.return_value = create_response(collaborators[:count])
-
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
 
     url = reverse('business-profile-admin-disconnect')
@@ -1069,12 +945,9 @@ def test_products_services_form_incorrect_value(client, user):
 
 
 @mock.patch.object(api_client.company, 'collaborator_invite_create')
-def test_admin_invite_administrator_remote_validation_error(mock_collaborator_invite_create, client, user, settings):
+def test_admin_invite_administrator_remote_validation_error(mock_collaborator_invite_create, client, user):
     errors = ['Something went wrong']
     mock_collaborator_invite_create.return_value = create_response({'collaborator_email': errors}, status_code=400)
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
 
     url = reverse('business-profile-admin-invite-administrator')
@@ -1086,11 +959,8 @@ def test_admin_invite_administrator_remote_validation_error(mock_collaborator_in
 
 
 @mock.patch.object(api_client.company, 'collaborator_invite_create')
-def test_admin_invite_administrator_remote_error(mock_collaborator_invite_create, client, user, settings):
+def test_admin_invite_administrator_remote_error(mock_collaborator_invite_create, client, user):
     mock_collaborator_invite_create.return_value = create_response(status_code=500)
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
 
     url = reverse('business-profile-admin-invite-administrator')
@@ -1099,11 +969,8 @@ def test_admin_invite_administrator_remote_error(mock_collaborator_invite_create
 
 
 @mock.patch.object(api_client.company, 'collaborator_invite_create')
-def test_admin_invite_administrator_new_collaborator(mock_collaborator_invite_create, client, user, settings):
+def test_admin_invite_administrator_new_collaborator(mock_collaborator_invite_create, client, user):
     mock_collaborator_invite_create.return_value = create_response(status_code=201)
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
 
     url = reverse('business-profile-admin-invite-administrator')
@@ -1118,9 +985,6 @@ def test_admin_invite_administrator_new_collaborator(mock_collaborator_invite_cr
 
 
 def test_admin_invite_administrator_change_role(mock_collaborator_role_update, client, user, settings):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     client.force_login(user)
 
     url = reverse('business-profile-admin-invite-administrator')
@@ -1139,55 +1003,14 @@ def test_admin_invite_administrator_change_role(mock_collaborator_role_update, c
     reverse('business-profile-admin-invite-collaborator'),
     reverse('business-profile-admin-collaborator-edit', kwargs={'sso_id': '123'})
 ))
-def test_admin_not_admin_role(mock_retrieve_supplier, client, user, settings, url):
+def test_admin_not_admin_role(mock_retrieve_supplier, client, user, url):
     mock_retrieve_supplier.return_value = create_response({'is_company_owner': False, 'role': user_roles.EDITOR})
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
     client.force_login(user)
 
     response = client.get(url)
 
     assert response.status_code == 302
     assert response.url.startswith(reverse('business-profile'))
-
-
-@pytest.mark.parametrize('url', (
-    reverse('business-profile-admin-tools'),
-    reverse('business-profile-admin-disconnect'),
-))
-def test_admin_no_company(mock_retrieve_company, client, user, settings, url):
-    mock_retrieve_company.return_value = create_response(status_code=404)
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-    client.force_login(user)
-
-    response = client.get(url)
-
-    assert response.status_code == 302
-    assert response.url.startswith(reverse('business-profile'))
-
-
-@pytest.mark.parametrize('url', (
-    reverse('business-profile-admin-invite-administrator'),
-    reverse('business-profile-admin-invite-collaborator'),
-    reverse('business-profile-admin-collaborator-edit', kwargs={'sso_id': '123'}),
-    reverse('business-profile-admin-disconnect'),
-))
-def test_admin_feature_off(client, settings, url):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
-    reload_urlconf()
-
-    response = client.get(url)
-    assert response.status_code == 404
-
-
-def test_admin_tools_feature_off(client, settings):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = False
-    reload_urlconf()
-
-    url = reverse('business-profile-admin-tools')
-    response = client.get(url)
-    assert response.status_code == 302
 
 
 @pytest.mark.parametrize('url', (
@@ -1198,9 +1021,6 @@ def test_admin_tools_feature_off(client, settings):
     reverse('business-profile-admin-disconnect'),
 ))
 def test_admin_anon_user(client, settings, url):
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
-
     response = client.get(url)
 
     assert response.status_code == 302
@@ -1208,10 +1028,8 @@ def test_admin_anon_user(client, settings, url):
 
 
 @mock.patch.object(api_client.company, 'collaborator_invite_create')
-def test_admin_invite_collaborator(mock_collaborator_invite_create, settings, client, user):
+def test_admin_invite_collaborator(mock_collaborator_invite_create, client, user):
     mock_collaborator_invite_create.return_value = create_response(status_code=201)
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
     client.force_login(user)
 
     url = reverse('business-profile-admin-invite-collaborator')
@@ -1227,11 +1045,9 @@ def test_admin_invite_collaborator(mock_collaborator_invite_create, settings, cl
 
 
 @mock.patch.object(api_client.company, 'collaborator_invite_create')
-def test_admin_invite_collaborator_remote_validation_error(mock_collaborator_invite_create, settings, client, user):
+def test_admin_invite_collaborator_remote_validation_error(mock_collaborator_invite_create, client, user):
     errors = {'collaborator_email': ['woe']}
     mock_collaborator_invite_create.return_value = create_response(errors, status_code=400)
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
 
     client.force_login(user)
 
@@ -1244,10 +1060,8 @@ def test_admin_invite_collaborator_remote_validation_error(mock_collaborator_inv
 
 
 @mock.patch.object(api_client.company, 'collaborator_invite_create')
-def test_admin_invite_collaborator_not_admin_remote_error(mock_collaborator_invite_create, settings, client, user):
+def test_admin_invite_collaborator_not_admin_remote_error(mock_collaborator_invite_create, client, user):
     mock_collaborator_invite_create.return_value = create_response(status_code=500)
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
 
     client.force_login(user)
 
@@ -1257,10 +1071,8 @@ def test_admin_invite_collaborator_not_admin_remote_error(mock_collaborator_invi
 
 
 @mock.patch.object(api_client.company, 'collaborator_invite_delete')
-def test_admin_collaborator_invite_delete(mock_collaborator_invite_delete, client, user, settings):
+def test_admin_collaborator_invite_delete(mock_collaborator_invite_delete, client, user):
     mock_collaborator_invite_delete.return_value = create_response()
-    settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON'] = True
-    reload_urlconf()
 
     client.force_login(user)
 
@@ -1270,9 +1082,7 @@ def test_admin_collaborator_invite_delete(mock_collaborator_invite_delete, clien
     assert response.status_code == 302
     assert response.url == reverse('business-profile-admin-invite-collaborator')
     assert mock_collaborator_invite_delete.call_count == 1
-    assert mock_collaborator_invite_delete.call_args == mock.call(
-        sso_session_id=user.session_id, invite_key='1234'
-    )
+    assert mock_collaborator_invite_delete.call_args == mock.call(sso_session_id=user.session_id, invite_key='1234')
 
 
 def test_business_profile_member_redirect(client, user, mock_retrieve_supplier, company_profile_data):
@@ -1288,8 +1098,9 @@ def test_business_profile_member_redirect(client, user, mock_retrieve_supplier, 
     assert context['contact_us_url'] == (urls.domestic.CONTACT_US / 'domestic')
     assert context['export_opportunities_apply_url'] == urls.domestic.EXPORT_OPPORTUNITIES
     assert context['is_profile_published'] == company_profile_data['is_published_find_a_supplier']
-    assert context['FAB_BUSINESS_PROFILE_URL'] == (urls.international.TRADE_FAS / 'suppliers' /
-                                                   company_profile_data['number'] / company_profile_data['slug'])
+    assert context['FAB_BUSINESS_PROFILE_URL'] == (
+        urls.international.TRADE_FAS / 'suppliers' / company_profile_data['number'] / company_profile_data['slug']
+    )
 
 
 def test_fab_redirect(client, user):

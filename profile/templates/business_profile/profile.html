@@ -50,7 +50,7 @@
     {% if not company.email_address or not company.description or not company.is_verified or not company.is_published %}
     <div class="width-half">
         <h3 class="heading-medium">Next steps</h3>
-        {% if not company.is_verified and features.REQUEST_VERIFICATION_ON and company.is_identity_check_message_sent %}
+        {% if not company.is_verified and company.is_identity_check_message_sent %}
             <p>We will be in contact shortly and have sent you a confirmation email to {{ request.user.email }}</p>
         {% else %}
             <p>Your business profile hasn't been published yet. Fill in the last few details to complete and publish.</p>
@@ -83,7 +83,7 @@
                 <div class="column-one-third alerts-button-container">
                     <a class="button button-ghost-white" href="{{ services_urls.fab }}verify/">Confirm your identity</a>
                 </div>
-            {% elif features.REQUEST_VERIFICATION_ON and not company.is_identity_check_message_sent %}
+            {% elif not company.is_identity_check_message_sent %}
                 <div class="column-two-thirds flag-red-text">
                     <h2 class="heading-medium margin-0">Profile ready to be verified</h2>
                     <p>Your business profile is ready to be verified</p>

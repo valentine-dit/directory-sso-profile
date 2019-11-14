@@ -84,9 +84,6 @@ class StepsListMixin(abc.ABC):
             self.remove_label(labels=labels, label=constants.PROGRESS_STEP_LABEL_VERIFICATION)
             if self.request.user.has_user_profile:
                 self.remove_label(labels=labels, label=constants.PROGRESS_STEP_LABEL_PERSONAL_INFO)
-
-        if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
-            self.remove_label(labels=labels, label=constants.PROGRESS_STEP_LABEL_BUSINESS_TYPE)
         return labels
 
     def remove_label(self, labels, label):
@@ -135,9 +132,6 @@ class ProgressIndicatorMixin:
             counter = self.progress_conf.step_counter_anon
         else:
             counter = self.progress_conf.step_counter_user
-        # accounts for the first step being removed in StepsListMixin
-        if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
-            counter = {key: value-1 for key, value in counter.items()}
         return counter
 
     def get_context_data(self, *args, **kwargs):

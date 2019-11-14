@@ -148,42 +148,6 @@ def test_notify_already_registered(mock_submit):
     assert mock_submit.call_args == mock.call(expected)
 
 
-@mock.patch(
-    'directory_forms_api_client.client.forms_api_client.submit_generic'
-)
-@mock.patch.object(helpers.api_client.company, 'collaborator_request_create')
-def test_collaborator_request_create(mock_collaborator_request_create, mock_submit):
-    mock_collaborator_request_create.return_value = create_response(
-        status_code=201, json_body={'company_email': 'company@example.com'}
-    )
-
-    helpers.collaborator_request_create(
-        company_number='12334',
-        email='test@example.com',
-        name='Foo Bar',
-        form_url='/the/form/',
-    )
-
-    assert mock_submit.call_args == mock.call({
-        'data': {
-            'name': 'Foo Bar',
-            'email': 'test@example.com',
-            'collaborator_create_url': settings.FAB_ADD_USER_URL,
-            'report_abuse_url': urls.domestic.FEEDBACK,
-        },
-        'meta': {
-            'action_name': 'gov-notify-email',
-            'form_url': '/the/form/',
-            'sender': {},
-            'spam_control': {},
-            'template_id': (
-                settings.GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID
-            ),
-            'email_address': 'company@example.com'
-        }
-    })
-
-
 @mock.patch.object(helpers.api_client.company, 'collaborator_list')
 def test_get_company_admin_ok(mock_get_collaborator_list):
 

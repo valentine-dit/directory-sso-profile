@@ -13,14 +13,7 @@ EXPORTING_OPPORTUNITIES_API_BASE_URL=https://opportunities.export.staging.uktrad
 EXPORTING_OPPORTUNITIES_API_SECRET=debug
 EXPORTING_OPPORTUNITIES_SEARCH_URL=https://opportunities.export.great.gov.uk/opportunities
 FAB_ADD_CASE_STUDY_URL=http://buyer.trade.great:8001/company/case-study/edit/
-FAB_ADD_USER_URL=http://buyer.trade.great:8001/account/add-collaborator/
-FAB_EDIT_COMPANY_LOGO_URL=http://buyer.trade.great:8001/company-profile/edit/logo
 FAB_EDIT_PROFILE_URL=http://buyer.trade.great:8001/company-profile
-FAB_REGISTER_URL=http://buyer.trade.great:8001
-FAB_REMOVE_USER_URL=http://buyer.trade.great:8001/account/remove-collaborator/
-FAB_TRANSFER_ACCOUNT_URL=http://buyer.trade.great:8001/account/transfer/
-FEATURE_NEW_PROFILE_ADMIN_ENABLED=true
-FEATURE_REQUEST_VERIFICATION_ENABLED=true
 GOOGLE_TAG_MANAGER_ENV=&gtm_auth=kH9XolShYWhOJg8TA9bW_A&gtm_preview=env-32&gtm_cookies_win=x
 GOOGLE_TAG_MANAGER_ID=GTM-TC46J8K
 HEALTH_CHECK_TOKEN=debug

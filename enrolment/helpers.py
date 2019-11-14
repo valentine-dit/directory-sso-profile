@@ -142,26 +142,6 @@ def regenerate_verification_code(email):
     return response.json()
 
 
-def collaborator_request_create(company_number, email, name, form_url):
-    response = api_client.company.collaborator_request_create(
-        company_number=company_number,
-        collaborator_email=email,
-    )
-    response.raise_for_status()
-    action = actions.GovNotifyEmailAction(
-        email_address=response.json()['company_email'],
-        template_id=settings.GOV_NOTIFY_REQUEST_COLLABORATION_TEMPLATE_ID,
-        form_url=form_url,
-    )
-    response = action.save({
-        'name': name,
-        'email': email,
-        'collaborator_create_url': settings.FAB_ADD_USER_URL,
-        'report_abuse_url': urls.domestic.FEEDBACK,
-    })
-    response.raise_for_status()
-
-
 def get_company_admins(sso_session_id):
     response = api_client.company.collaborator_list(sso_session_id=sso_session_id)
     response.raise_for_status()

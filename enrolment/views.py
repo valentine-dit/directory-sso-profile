@@ -4,7 +4,6 @@ from directory_constants import urls, user_roles
 from formtools.wizard.views import NamedUrlSessionWizardView
 from requests.exceptions import HTTPError
 
-from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -75,11 +74,6 @@ class BusinessTypeRoutingView(
         constants.PROGRESS_STEP_LABEL_BUSINESS_DETAILS,
         constants.PROGRESS_STEP_LABEL_PERSONAL_INFO,
     ]
-
-    def dispatch(self, *args, **kwargs):
-        if not settings.FEATURE_FLAGS['ENROLMENT_SELECT_BUSINESS_ON']:
-            return redirect(URL_COMPANIES_HOUSE_ENROLMENT)
-        return super().dispatch(*args, **kwargs)
 
     def form_valid(self, form):
         choice = form.cleaned_data['choice']
