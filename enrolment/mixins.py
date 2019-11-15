@@ -315,7 +315,7 @@ class CreateBusinessProfileMixin:
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
         if self.request.session.get(constants.SESSION_KEY_BUSINESS_PROFILE_INTENT):
-            messages.success(self.request, 'Account created'):
+            messages.success(self.request, 'Account created')
             del self.request.session[constants.SESSION_KEY_BUSINESS_PROFILE_INTENT]
             return redirect('business-profile')
         elif self.request.session.get(constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT) or \
