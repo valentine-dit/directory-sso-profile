@@ -7,6 +7,7 @@
 - TT-1199 - Fixing accessibility issues
 - TT-2025 - Update success page content
 - No ticket - Removed old feature flagged items
+- XOT-1214 - Add generic enrolment exit-intent string to return users whence they came
 
 ### Fixed bugs:
 - TT-1817 - Use correct input types for number fields

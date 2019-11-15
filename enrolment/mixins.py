@@ -315,11 +315,13 @@ class CreateBusinessProfileMixin:
         data = self.serialize_form_list(form_list)
         self.create_company_profile(data)
         if self.request.session.get(constants.SESSION_KEY_BUSINESS_PROFILE_INTENT):
-            messages.success(self.request, 'Account created')
+            messages.success(self.request, 'Account created'):
             del self.request.session[constants.SESSION_KEY_BUSINESS_PROFILE_INTENT]
             return redirect('business-profile')
-        elif self.request.session.get(constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT):
+        elif self.request.session.get(constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT) or \
+             self.request.session.get(constants.SESSION_KEY_RETURN_AFTER_COMPLETION):
             del self.request.session[constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT]
+            del self.request.session[constants.SESSION_KEY_RETURN_AFTER_COMPLETION]
             return redirect(self.form_session.ingress_url)
         else:
             return TemplateResponse(self.request, self.templates[constants.FINISHED], self.get_finished_context_data())
@@ -386,8 +388,10 @@ class WriteUserIntentMixin:
             # business profile is a step towards that goal. The business
             # profile is a means to and end, not the desired end.
             self.request.session[constants.SESSION_KEY_BUSINESS_PROFILE_INTENT] = True
-        elif self.has_intent_in_querystring('export-opportunity-intent'):
-            # user has clicked a button to apply for export opportunity
+        elif self.has_intent_in_querystring('export-opportunity-intent') or \
+            self.has_intent_in_querystring('return-after-completion'):
             # after they have create an account they will be directed back
+            # to where they came from
             self.request.session[constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT] = True
+            self.request.session[constants.SESSION_KEY_RETURN_AFTER_COMPLETION] = True
         return super().dispatch(*args, **kwargs)
