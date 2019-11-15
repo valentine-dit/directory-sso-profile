@@ -319,7 +319,7 @@ class CreateBusinessProfileMixin:
             del self.request.session[constants.SESSION_KEY_BUSINESS_PROFILE_INTENT]
             return redirect('business-profile')
         elif self.request.session.get(constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT) or \
-             self.request.session.get(constants.SESSION_KEY_RETURN_AFTER_COMPLETION):
+                self.request.session.get(constants.SESSION_KEY_RETURN_AFTER_COMPLETION):
             del self.request.session[constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT]
             del self.request.session[constants.SESSION_KEY_RETURN_AFTER_COMPLETION]
             return redirect(self.form_session.ingress_url)
@@ -389,7 +389,7 @@ class WriteUserIntentMixin:
             # profile is a means to and end, not the desired end.
             self.request.session[constants.SESSION_KEY_BUSINESS_PROFILE_INTENT] = True
         elif self.has_intent_in_querystring('export-opportunity-intent') or \
-            self.has_intent_in_querystring('return-after-completion'):
+                self.has_intent_in_querystring('return-after-completion'):
             # after they have create an account they will be directed back
             # to where they came from
             self.request.session[constants.SESSION_KEY_EXPORT_OPPORTUNITY_INTENT] = True
