@@ -873,6 +873,7 @@ def test_edit_collaborator_edit_remove_collaborator(mock_collaborator_disconnect
     mock_collaborator_disconnect.return_value = create_response()
 
     url = reverse('business-profile-admin-collaborator-edit', kwargs={'sso_id': 1234})
+
     response = client.post(url, data={'action': forms.REMOVE_COLLABORATOR})
 
     assert response.status_code == 302
@@ -1109,6 +1110,32 @@ def test_admin_collaborator_invite_accept(mock_collaborator_role_update, mock_co
     assert mock_collaborator_role_update.call_args == mock.call(
         sso_session_id=user.session_id, sso_id='45', role=user_roles.ADMIN
     )
+
+
+@mock.patch.object(api_client.company, 'collaborator_invite_create')
+def test_member_send_admin_request(mock_collaborator_invite_create, client, user):
+    mock_collaborator_invite_create.return_value = create_response()
+
+    client.force_login(user)
+
+    response = client.post(reverse('send-admin-invite'))
+
+    assert response.status_code == 302
+    assert response.url == reverse('business-profile')
+
+    assert mock_collaborator_invite_create.call_count == 1
+    data = {'collaborator_email': user.email, 'role': user_roles.ADMIN}
+    assert mock_collaborator_invite_create.call_args == mock.call(sso_session_id=user.session_id, data=data)
+
+
+@mock.patch.object(api_client.company, 'collaborator_invite_create')
+def test_member_send_admin_request_error(mock_collaborator_invite_create, client, user):
+    mock_collaborator_invite_create.return_value = create_response(status_code=500)
+    client.force_login(user)
+
+    url = reverse('send-admin-invite')
+    with pytest.raises(HTTPError):
+        client.post(url)
 
 
 def test_business_profile_member_redirect(client, user, mock_retrieve_supplier, company_profile_data):
