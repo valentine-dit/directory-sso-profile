@@ -772,8 +772,7 @@ def test_request_identity_verification_already_sent(mock_verify_identity_request
 def test_collaborator_list(mock_collaborator_list, client, user, settings):
     client.force_login(user)
     mock_collaborator_list.return_value = create_response([])
-    import pdb
-    pdb.set_trace()
+    
     url = reverse('business-profile-admin-tools')
     response = client.get(url)
 
