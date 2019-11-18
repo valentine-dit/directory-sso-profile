@@ -772,7 +772,7 @@ def test_request_identity_verification_already_sent(mock_verify_identity_request
 def test_collaborator_list(mock_collaborator_list, client, user, settings):
     client.force_login(user)
     mock_collaborator_list.return_value = create_response([])
-    
+
     url = reverse('business-profile-admin-tools')
     response = client.get(url)
 
@@ -1078,13 +1078,37 @@ def test_admin_collaborator_invite_delete(mock_collaborator_invite_delete, clien
 
     client.force_login(user)
 
-    url = reverse('business-profile-collaboration-invite-delete')
+    url = reverse('business-profile-collaboration-invite-manage')
     response = client.post(url, {'invite_key': '1234', 'action': 'delete'})
 
     assert response.status_code == 302
     assert response.url == reverse('business-profile-admin-invite-collaborator')
     assert mock_collaborator_invite_delete.call_count == 1
     assert mock_collaborator_invite_delete.call_args == mock.call(sso_session_id=user.session_id, invite_key='1234')
+
+
+@mock.patch.object(api_client.company, 'collaborator_invite_delete')
+@mock.patch.object(api_client.company, 'collaborator_role_update')
+def test_admin_collaborator_invite_accept(mock_collaborator_role_update, mock_collaborator_invite_delete, client, user):
+    mock_collaborator_invite_delete.return_value = create_response()
+    mock_collaborator_role_update.return_value = create_response()
+    admin_tools_url = reverse('business-profile-admin-tools')
+    client.force_login(user)
+
+    url = reverse('business-profile-collaboration-invite-manage')
+    response = client.post(
+        url, {'invite_key': '1234', 'requestor_sso_id': '45', 'action': 'accept'}, HTTP_REFERER=admin_tools_url
+    )
+
+    assert response.status_code == 302
+    assert response.url == admin_tools_url
+    assert mock_collaborator_invite_delete.call_count == 1
+    assert mock_collaborator_invite_delete.call_args == mock.call(sso_session_id=user.session_id, invite_key='1234')
+
+    assert mock_collaborator_role_update.call_count == 1
+    assert mock_collaborator_role_update.call_args == mock.call(
+        sso_session_id=user.session_id, sso_id='45', role=user_roles.ADMIN
+    )
 
 
 def test_business_profile_member_redirect(client, user, mock_retrieve_supplier, company_profile_data):

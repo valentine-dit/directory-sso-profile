@@ -231,9 +231,9 @@ urlpatterns = [
         name='business-profile-admin-invite-collaborator'
     ),
     url(
-        r'^business-profile/admin/invite/delete/$',
-        company_admin_required(profile.business_profile.views.AdminInviteCollaboratorDeleteFormView.as_view()),
-        name='business-profile-collaboration-invite-delete'
+        r'^business-profile/admin/invite/manage/$',
+        company_admin_required(profile.business_profile.views.AdminInviteCollaboratorManageForm.as_view()),
+        name='business-profile-collaboration-invite-manage'
     ),
     url(
         r'^business-profile/social-links/$',

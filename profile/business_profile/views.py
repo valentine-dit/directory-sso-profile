@@ -504,8 +504,8 @@ class AdminInviteCollaboratorFormView(SuccessMessageMixin, FormView):
         return super().form_valid(form)
 
 
-class AdminInviteCollaboratorDeleteFormView(SuccessMessageMixin, FormView):
-    form_class = forms.AdminInviteCollaboratorDeleteForm
+class AdminInviteCollaboratorManageForm(SuccessMessageMixin, FormView):
+    form_class = forms.AdminInviteCollaboratorManageForm
     success_message = ('Invitation successfully deleted')
     success_url = reverse_lazy('business-profile-admin-invite-collaborator')
 

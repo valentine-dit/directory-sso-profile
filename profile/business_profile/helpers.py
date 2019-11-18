@@ -79,7 +79,7 @@ def remove_collaborator(sso_session_id, sso_id):
     assert response.status_code == 200
 
 
-def disconnect_from_company(sso_session_id):
+def disconnect_fromcollaborator_role_update_company(sso_session_id):
     response = api_client.supplier.disconnect_from_company(sso_session_id)
     response.raise_for_status()
     assert response.status_code == 200
