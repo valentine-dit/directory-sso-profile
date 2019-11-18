@@ -129,6 +129,8 @@ def mock_collaborator_invite_list(user):
             'collaborator_email': 'jim@example.com',
             'company': 1,
             'requestor': 2,
+            'requestor_email': 'requestor@testme.com',
+            'requestor_sso_id': 3,
             'accepted': False,
             'role': user_roles.EDITOR,
         }
@@ -770,7 +772,8 @@ def test_request_identity_verification_already_sent(mock_verify_identity_request
 def test_collaborator_list(mock_collaborator_list, client, user, settings):
     client.force_login(user)
     mock_collaborator_list.return_value = create_response([])
-
+    import pdb
+    pdb.set_trace()
     url = reverse('business-profile-admin-tools')
     response = client.get(url)
 
@@ -1077,7 +1080,7 @@ def test_admin_collaborator_invite_delete(mock_collaborator_invite_delete, clien
     client.force_login(user)
 
     url = reverse('business-profile-collaboration-invite-delete')
-    response = client.post(url, {'invite_key': '1234'})
+    response = client.post(url, {'invite_key': '1234', 'action': 'delete'})
 
     assert response.status_code == 302
     assert response.url == reverse('business-profile-admin-invite-collaborator')

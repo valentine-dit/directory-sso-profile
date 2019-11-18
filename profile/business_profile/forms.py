@@ -609,3 +609,5 @@ class AdminInviteCollaboratorForm(forms.Form):
 
 class AdminInviteCollaboratorDeleteForm(forms.Form):
     invite_key = forms.CharField()
+    action = forms.CharField()
+    requestor_sso_id = forms.CharField(required=False)

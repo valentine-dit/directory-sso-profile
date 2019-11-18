@@ -204,7 +204,12 @@ urlpatterns = [
         company_required(profile.business_profile.views.MemberDisconnectFromCompany.as_view()),
         name='disconnect-account'
     ),
-
+    url(
+        r'^business-profile/send-invite/$',
+        company_required(
+            profile.business_profile.views.MemberSendAdminRequest.as_view()),
+        name='send-admin-invite'
+    ),
     url(
         r'^business-profile/admin/collaborator/(?P<sso_id>[0-9]+)/$',
         company_admin_required(profile.business_profile.views.AdminCollaboratorEditFormView.as_view()),

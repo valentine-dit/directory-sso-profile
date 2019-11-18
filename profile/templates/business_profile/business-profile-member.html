@@ -49,7 +49,31 @@
                 Selected the wrong company? <a href="{% url 'disconnect-account' %}">Change or remove the busienss from your profile</a> if you've selected the wrong business.
             </p>
         </div>
+
+		{% if has_admin_request %}
+		<div class="margin-top-30 margin-bottom-30">
+			<h1 class="heading-large">Your request is awaiting approval</h1>
+			<p>
+				We'll let you know when you've been given approval.
+			</p>
+			<p>
+				You can resend request or if your having problems please <a href="{{ contact_us_url }}">Contact us</a>.
+			</p>
+		</div>
+		{% else %}
+		<div class="margin-top-30 margin-bottom-30">
+			<h1 class="heading-large">You can request to become administrator for the business profile</h1>
+			<p>
+				You can send a request to the business profile adminstors, so they can give you permission to add or change information about the business. We'll let you know when they do.
+			</p>
+			<form action="{% url 'send-admin-invite' %}" method="post" enctype="multipart/form-data">
+				{{ form }}
+				<button class="button">Request</button>
+			</form>
+		</div>
+	{% endif %}
     </div>
+
 
 {% endblock %}
 

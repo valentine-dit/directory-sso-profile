@@ -16,6 +16,7 @@ import core.mixins
 import core.forms
 from profile.business_profile import forms, helpers
 from directory_constants import urls
+from urllib.parse import urlparse
 
 BASIC = 'details'
 MEDIA = 'images'
@@ -67,6 +68,10 @@ class BusinessProfileView(TemplateView):
                 'export_opportunities_apply_url': urls.domestic.EXPORT_OPPORTUNITIES,
                 'is_profile_published': company['is_published_find_a_supplier'] if company else False,
                 'FAB_BUSINESS_PROFILE_URL': business_profile_url,
+                'has_admin_request': helpers.has_editor_admin_request(
+                    self.request.user.session_id,
+                    self.request.user.id
+                ),
             })
         return context
 
@@ -304,7 +309,11 @@ class AdminCollaboratorsListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         collaborators = helpers.collaborator_list(self.request.user.session_id)
-        return super().get_context_data(collaborators=collaborators, **kwargs)
+        collaborator_invites = helpers.collaborator_invite_list(self.request.user.session_id)
+        editor_invites = [
+            c for c in collaborator_invites if not c['accepted'] and c['collaborator_email'] == c['requestor_email']
+        ]
+        return super().get_context_data(collaborators=collaborators, **kwargs, editor_invites=editor_invites,)
 
 
 class MemberDisconnectFromCompany(DisconnectFromCompanyMixin, SuccessMessageMixin, FormView):
@@ -313,6 +322,32 @@ class MemberDisconnectFromCompany(DisconnectFromCompanyMixin, SuccessMessageMixi
     def get_context_data(self, **kwargs):
         company = self.request.user.company.serialize_for_form()
         return super().get_context_data(company=company, **kwargs)
+
+
+class MemberSendAdminRequest(SuccessMessageMixin, FormView):
+    template_name = 'business_profile/business-profile-member.html'
+    form_class = forms.NoOperationForm
+    success_message = 'Your request to join has been sent.'
+    success_url = reverse_lazy('business-profile')
+
+    def get_context_data(self, **kwargs):
+        company = self.request.user.company.serialize_for_form()
+        return super().get_context_data(company=company, **kwargs)
+
+    def form_valid(self, form):
+        try:
+            helpers.collaborator_invite_create(
+                sso_session_id=self.request.user.session_id,
+                collaborator_email=self.request.user.email,
+                role=user_roles.ADMIN,
+            )
+        except HTTPError as error:
+            if error.response.status_code == 400:
+                form.add_error(field=None, error=error.response.json())
+                return self.form_invalid(form)
+            else:
+                raise
+        return super().form_valid(form)
 
 
 class AdminCollaboratorEditFormView(SuccessMessageMixin, FormView):
@@ -445,7 +480,9 @@ class AdminInviteCollaboratorFormView(SuccessMessageMixin, FormView):
 
     def get_context_data(self, **kwargs):
         collaborator_invites = helpers.collaborator_invite_list(self.request.user.session_id)
-        collaborator_invites_not_accepted = [c for c in collaborator_invites if not c['accepted']]
+        collaborator_invites_not_accepted = [
+            c for c in collaborator_invites if not c['accepted'] and c['collaborator_email'] != c['requestor_email']
+        ]
         return super().get_context_data(
             collaborator_invites=collaborator_invites_not_accepted,
             **kwargs,
@@ -473,11 +510,26 @@ class AdminInviteCollaboratorDeleteFormView(SuccessMessageMixin, FormView):
     success_url = reverse_lazy('business-profile-admin-invite-collaborator')
 
     def form_valid(self, form):
-        helpers.collaborator_invite_delete(
-            sso_session_id=self.request.user.session_id,
-            invite_key=form.cleaned_data['invite_key'],
-        )
+        if form.cleaned_data['action'] == 'delete':
+            helpers.collaborator_invite_delete(
+                sso_session_id=self.request.user.session_id,
+                invite_key=form.cleaned_data['invite_key'],
+            )
+        else:
+            helpers.editor_admin_request_accept(
+                sso_session_id=self.request.user.session_id,
+                sso_id=form.cleaned_data['requestor_sso_id'],
+                invite_key=form.cleaned_data['invite_key'],
+            )
+            self.success_message = ('Collaborator added')
         return super().form_valid(form)
+
+    def dispatch(self, *args, **kwargs):
+        from_url = urlparse(self.request.META.get('HTTP_REFERER')).path
+        success_url_editor_requests = reverse_lazy('business-profile-admin-tools')
+        if from_url == success_url_editor_requests:
+            self.success_url = success_url_editor_requests
+        return super().dispatch(*args, **kwargs)
 
 
 class ProductsServicesRoutingFormView(FormView):

@@ -110,3 +110,14 @@ def collaborator_invite_delete(sso_session_id, invite_key):
 def collaborator_role_update(sso_session_id, sso_id, role):
     response = api_client.company.collaborator_role_update(sso_session_id=sso_session_id, sso_id=sso_id, role=role)
     response.raise_for_status()
+
+
+def editor_admin_request_accept(sso_session_id, sso_id, invite_key):
+    # We delete the existing invite and upgrade the role to admin
+    collaborator_invite_delete(sso_session_id, invite_key)
+    collaborator_role_update(sso_session_id, sso_id, user_roles.ADMIN)
+
+
+def has_editor_admin_request(sso_session_id, sso_id):
+    invites = collaborator_invite_list(sso_session_id)
+    return [invite['requestor_sso_id'] for invite in invites].count(sso_id) == 1
