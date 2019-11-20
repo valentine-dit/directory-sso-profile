@@ -1,6 +1,6 @@
 from unittest.mock import patch, Mock
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from core.tests.helpers import create_response
 from profile.exops import views

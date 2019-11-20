@@ -7,6 +7,7 @@
 - TT-1199 - Fixing accessibility issues
 - TT-2025 - Update success page content
 - No ticket - Removed old feature flagged items
+- No ticket - upgrade django
 
 ### Fixed bugs:
 - TT-1817 - Use correct input types for number fields
@@ -22,6 +23,9 @@
 - TT-1708 - link user to ingress url on success page
 - TT-2095 - Added "remove from business profile" feature for non-admins
 - TT-1855 - Fix incorrect company type label on enrolment
+- TT-1132 - Improve contrast of breadcrumbs and feedback link
+- TT-1132 - Upgrade directory components to fix accessibility bug
+- no ticket - upgrade pillow
 
 ## [2019.11.20](https://github.com/uktrade/directory-sso-profile/releases/tag/2019.11.20)
 [Full Changelog](https://github.com/uktrade/directory-sso-profile/compare/2019.10.30...2019.11.20)

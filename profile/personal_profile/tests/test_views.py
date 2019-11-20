@@ -1,6 +1,6 @@
 from unittest import mock
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 
 def test_personal_profile_edit_existing_profile(client, mock_update_user_profile, user_with_profile):

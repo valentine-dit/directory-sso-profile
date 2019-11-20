@@ -76,11 +76,11 @@ urls_personal_profile = [
 urlpatterns = [
     url(
         r'^api/',
-        include(api_urls, namespace='api', app_name='api')
+        include((api_urls, 'api'), namespace='api')
     ),
     url(
         r'^healthcheck/',
-        include(healthcheck_urls, namespace='healthcheck', app_name='healthcheck')
+        include((healthcheck_urls, 'healthcheck'), namespace='healthcheck')
     ),
     url(
         r'^$',
@@ -340,7 +340,7 @@ urlpatterns = [
     ),
     url(
         r'^personal-profile/',
-        include(urls_personal_profile, namespace='personal-profile')
+        include((urls_personal_profile, 'personal-profile'), namespace='personal-profile')
     ),
     url(
         r'^find-a-buyer/(?P<path>[\w\-/]*)/$',
