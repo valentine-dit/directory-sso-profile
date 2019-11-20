@@ -22,7 +22,7 @@ directory-constants==20.6.0
 directory-forms-api-client==5.0.0
 directory-healthcheck==1.1.1
 directory-sso-api-client==6.2.0
-directory-validators==5.2.0
+directory-validators==6.0.0
 django-environ==0.4.5
 django-formtools==2.1
 django-health-check==3.8.0
@@ -47,8 +47,7 @@ monotonic==1.5
 more-itertools==7.2.0     # via pytest, zipp
 olefile==0.44
 packaging==19.2           # via pytest, pytest-sugar
-phonenumberslite==7.7.4
-pillow==4.2.1
+pillow==6.2.1
 pluggy==0.13.0            # via pytest
 py==1.8.0                 # via pytest, pytest-catchlog
 pycodestyle==2.5.0        # via flake8

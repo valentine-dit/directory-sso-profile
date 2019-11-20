@@ -1,8 +1,9 @@
 from directory_constants import choices, expertise, user_roles
 from directory_components import forms
 from directory_components.helpers import tokenize_keywords
-import directory_validators.company
-import directory_validators.enrolment
+import directory_validators.url
+import directory_validators.string
+import directory_validators.file
 
 from django.conf import settings
 from django.forms import ImageField, SelectMultiple, Textarea, ValidationError
@@ -27,27 +28,21 @@ class SocialLinksForm(forms.Form):
         help_text=HELP_URLS,
         max_length=255,
         required=False,
-        validators=[
-            directory_validators.company.case_study_social_link_facebook
-        ],
+        validators=[directory_validators.url.is_facebook],
     )
     twitter_url = forms.URLField(
         label='URL for your Twitter company profile (optional):',
         help_text=HELP_URLS,
         max_length=255,
         required=False,
-        validators=[
-            directory_validators.company.case_study_social_link_twitter
-        ],
+        validators=[directory_validators.url.is_twitter],
     )
     linkedin_url = forms.URLField(
         label='URL for your LinkedIn company profile (optional):',
         help_text=HELP_URLS,
         max_length=255,
         required=False,
-        validators=[
-            directory_validators.company.case_study_social_link_linkedin
-        ],
+        validators=[directory_validators.url.is_linkedin],
     )
 
 
@@ -61,20 +56,14 @@ class DescriptionForm(forms.Form):
         help_text='This will appear on your profile homepage.',
         max_length=250,
         widget=Textarea(attrs={'rows': 5}),
-        validators=[
-            validators.does_not_contain_email,
-            directory_validators.company.no_html,
-        ],
+        validators=[validators.does_not_contain_email, directory_validators.string.no_html],
     )
     description = forms.CharField(
         label='Add more detailed information about your business.',
         help_text='Maximum 2,000 characters.',
         max_length=2000,
         widget=Textarea(attrs={'rows': 5}),
-        validators=[
-            validators.does_not_contain_email,
-            directory_validators.company.no_html,
-        ],
+        validators=[validators.does_not_contain_email, directory_validators.string.no_html],
     )
 
 
@@ -90,7 +79,7 @@ class CaseStudyBasicInfoForm(forms.Form):
     title = forms.CharField(
         label='Title of your case study or project',
         max_length=60,
-        validators=[directory_validators.company.no_html],
+        validators=[directory_validators.string.no_html],
     )
     short_summary = forms.CharField(
         label='Summary of your case study or project',
@@ -99,10 +88,7 @@ class CaseStudyBasicInfoForm(forms.Form):
             ' appear on your main business profile page.'
         ),
         max_length=200,
-        validators=[
-            validators.does_not_contain_email,
-            directory_validators.company.no_html,
-        ],
+        validators=[validators.does_not_contain_email, directory_validators.string.no_html],
         widget=Textarea,
     )
     description = forms.CharField(
@@ -112,10 +98,7 @@ class CaseStudyBasicInfoForm(forms.Form):
             'You have up to 1,000 characters to use.'
         ),
         max_length=1000,
-        validators=[
-            validators.does_not_contain_email,
-            directory_validators.company.no_html,
-        ],
+        validators=[validators.does_not_contain_email, directory_validators.string.no_html],
         widget=Textarea,
     )
     sector = forms.ChoiceField(
@@ -141,9 +124,9 @@ class CaseStudyBasicInfoForm(forms.Form):
         max_length=1000,
         widget=Textarea,
         validators=[
-            directory_validators.company.keywords_word_limit,
-            directory_validators.company.keywords_special_characters,
-            directory_validators.company.no_html,
+            directory_validators.string.word_limit(10),
+            directory_validators.string.no_special_characters,
+            directory_validators.string.no_html,
         ]
     )
 
@@ -213,10 +196,7 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
     ]
 
     image_one = ImageField(
-        validators=[
-            directory_validators.company.case_study_image_filesize,
-            directory_validators.company.image_format,
-        ],
+        validators=[directory_validators.file.case_study_image_filesize, directory_validators.file.image_format],
     )
     image_one_caption = forms.CharField(
         label=(
@@ -225,14 +205,11 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
         help_text='Maximum 120 characters',
         max_length=120,
         widget=Textarea,
-        validators=[directory_validators.company.no_html],
+        validators=[directory_validators.string.no_html],
     )
     image_two = ImageField(
         required=False,
-        validators=[
-            directory_validators.company.case_study_image_filesize,
-            directory_validators.company.image_format,
-        ]
+        validators=[directory_validators.file.case_study_image_filesize, directory_validators.file.image_format]
     )
     image_two_caption = forms.CharField(
         label=(
@@ -243,14 +220,11 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
         max_length=120,
         widget=Textarea,
         required=False,
-        validators=[directory_validators.company.no_html],
+        validators=[directory_validators.string.no_html],
     )
     image_three = ImageField(
         required=False,
-        validators=[
-            directory_validators.company.case_study_image_filesize,
-            directory_validators.company.image_format,
-        ]
+        validators=[directory_validators.file.case_study_image_filesize, directory_validators.file.image_format]
     )
     image_three_caption = forms.CharField(
         label=(
@@ -261,7 +235,7 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
         max_length=120,
         widget=Textarea,
         required=False,
-        validators=[directory_validators.company.no_html],
+        validators=[directory_validators.string.no_html],
     )
     testimonial = forms.CharField(
         label='Testimonial or block quote (optional)',
@@ -272,7 +246,7 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
         max_length=1000,
         required=False,
         widget=Textarea,
-        validators=[directory_validators.company.no_html],
+        validators=[directory_validators.string.no_html],
     )
     testimonial_name = forms.CharField(
         label='Full name of the source of the testimonial (optional)',
@@ -282,19 +256,19 @@ class CaseStudyRichMediaForm(DynamicHelptextFieldsMixin, forms.Form):
         ),
         max_length=255,
         required=False,
-        validators=[directory_validators.company.no_html],
+        validators=[directory_validators.string.no_html],
     )
     testimonial_job_title = forms.CharField(
         label='Job title of the source (optional)',
         max_length=255,
         required=False,
-        validators=[directory_validators.company.no_html],
+        validators=[directory_validators.string.no_html],
     )
     testimonial_company = forms.CharField(
         label="Company name of the source (optional)",
         max_length=255,
         required=False,
-        validators=[directory_validators.company.no_html],
+        validators=[directory_validators.string.no_html],
     )
 
 
@@ -307,10 +281,7 @@ class LogoForm(forms.Form):
             )
         ),
         required=True,
-        validators=[
-            directory_validators.enrolment.logo_filesize,
-            directory_validators.company.image_format,
-        ]
+        validators=[directory_validators.file.logo_filesize, directory_validators.file.image_format]
     )
 
 
@@ -502,10 +473,7 @@ class ExpertiseProductsServicesForm(forms.Form):
 
     expertise_products_services = forms.CharField(
         label='Choose your products or services',
-        validators=[
-            directory_validators.company.keywords_word_limit,
-            directory_validators.company.no_html,
-        ],
+        validators=[directory_validators.string.word_limit(10), directory_validators.string.no_html],
         widget=Textarea(attrs={'placeholder': 'Please select'}),
         max_length=1000,
         required=False,
@@ -525,10 +493,7 @@ class ExpertiseProductsServicesOtherForm(forms.Form):
     expertise_products_services = forms.CharField(
         label='Enter keywords that describe your products or services',
         help_text='Keywords should be separated by commas',
-        validators=[
-            directory_validators.company.keywords_word_limit,
-            directory_validators.company.no_html,
-        ],
+        validators=[directory_validators.string.word_limit(10), directory_validators.string.no_html],
         widget=Textarea,
         required=False,
         max_length=1000

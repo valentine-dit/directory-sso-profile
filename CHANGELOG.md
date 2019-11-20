@@ -25,6 +25,13 @@
 - TT-1855 - Fix incorrect company type label on enrolment
 - TT-1132 - Improve contrast of breadcrumbs and feedback link
 - TT-1132 - Upgrade directory components to fix accessibility bug
+- no ticket - upgrade pillow
+
+## [2019.11.20](https://github.com/uktrade/directory-sso-profile/releases/tag/2019.11.20)
+[Full Changelog](https://github.com/uktrade/directory-sso-profile/compare/2019.10.30...2019.11.20)
+
+## Hotfix
+- TT-2176 - Fix password form remembering old bad password
 
 ## [2019.10.30](https://github.com/uktrade/directory-sso-profile/releases/tag/2019.10.30)
 [Full Changelog](https://github.com/uktrade/directory-sso-profile/compare/2019.08.14_1...2019.10.30)
@@ -177,3 +184,4 @@
 - TT-1415 - Allow products and services to be cleared
 [directory-constants]: https://github.com/uktrade/directory-constants
 - TT-1417 - Populate "Other" products and services with keywords
+
