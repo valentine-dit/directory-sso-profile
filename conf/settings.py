@@ -60,7 +60,7 @@ INSTALLED_APPS = [
 ]
 
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'directory_components.middleware.MaintenanceModeMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -361,6 +361,8 @@ RECAPTCHA_PUBLIC_KEY = env.str('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = env.str('RECAPTCHA_PRIVATE_KEY')
 # NOCAPTCHA = True turns on version 2 of recaptcha
 NOCAPTCHA = env.bool('NOCAPTCHA', True)
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+
 
 # Companies House Search
 DIRECTORY_CH_SEARCH_CLIENT_BASE_URL = env.str(

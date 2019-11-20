@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 
 def test_selling_online_overseas_exposes_context(client, user):

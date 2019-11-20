@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw
 from requests.exceptions import HTTPError
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.forms.forms import NON_FIELD_ERRORS
 
 from core.tests.helpers import create_response, submit_step_factory
@@ -195,7 +195,7 @@ def case_study_data():
                 content=create_test_image('png').read(),
                 content_type='image/png',
             ),
-            'image_three': None,
+            'image_three': '',
             'image_one_caption': 'nice image',
             'image_two_caption': 'thing',
             'image_three_caption': 'thing',
