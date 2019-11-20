@@ -1170,6 +1170,38 @@ def test_create_user_enrolment_bad_password(
     assert response.context_data['form'].errors == {'password': ['something is wrong']}
 
 
+@pytest.mark.parametrize(
+    'company_type,form_url_name',
+    zip(company_types, ['enrolment-companies-house', 'enrolment-sole-trader'])
+)
+def test_create_user_enrolment_bad_then_good_password(
+    company_type, form_url_name, steps_data, mock_create_user, submit_step_builder, client
+):
+    mock_create_user.return_value = create_response(json_body={'password': ['something is wrong']}, status_code=400)
+
+    submit_step = submit_step_builder(company_type)
+
+    response = submit_step(steps_data[constants.USER_ACCOUNT])
+
+    assert response.status_code == 302
+
+    response = client.get(response.url)
+    assert response.context_data['form'].errors == {'password': ['something is wrong']}
+
+    mock_create_user.return_value = create_response({
+        'email': 'test@test.com',
+        'verification_code': '123456',
+    })
+
+    response = submit_step(
+        data=steps_data[constants.USER_ACCOUNT],
+        step_name=constants.USER_ACCOUNT,
+    )
+
+    assert response.status_code == 302
+    assert constants.USER_ACCOUNT not in response.url
+
+
 @pytest.mark.parametrize('company_type', company_types)
 @freeze_time('2012-01-14 12:00:02')
 def test_user_verification_passes_cookies(
