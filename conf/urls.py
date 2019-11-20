@@ -1,7 +1,6 @@
 import directory_healthcheck.views
 
 from django.contrib.auth.decorators import user_passes_test
-from django.conf import settings
 from django.conf.urls import include, url
 from django.urls import reverse_lazy
 from django.views.generic import RedirectView
@@ -17,29 +16,18 @@ from directory_constants import urls
 
 
 def no_company_required(function):
-    inner = user_passes_test(
-        lambda user: not bool(getattr(user, 'company', None)),
-        reverse_lazy('business-profile'),
-        None
-    )
+    url = reverse_lazy('business-profile')
+    inner = user_passes_test(lambda user: not bool(getattr(user, 'company', None)), url, None)
     return inner(function)
 
 
 def company_required(function):
-    inner = user_passes_test(
-        lambda user: bool(user.company),
-        reverse_lazy('business-profile'),
-        None,
-    )
+    inner = user_passes_test(lambda user: bool(user.company), reverse_lazy('business-profile'), None)
     return login_required(inner(function))
 
 
 def company_admin_required(function):
-    inner = user_passes_test(
-        lambda user: user.is_company_admin,
-        reverse_lazy('business-profile'),
-        None,
-    )
+    inner = user_passes_test(lambda user: user.is_company_admin, reverse_lazy('business-profile'), None)
     return login_required(inner(function))
 
 
@@ -207,6 +195,42 @@ urlpatterns = [
         name='business-profile'
     ),
     url(
+        r'^business-profile/admin/$',
+        company_admin_required(profile.business_profile.views.AdminCollaboratorsListView.as_view()),
+        name='business-profile-admin-tools'
+    ),
+    url(
+        r'^business-profile/disconnect/$',
+        company_required(profile.business_profile.views.MemberDisconnectFromCompany.as_view()),
+        name='disconnect-account'
+    ),
+
+    url(
+        r'^business-profile/admin/collaborator/(?P<sso_id>[0-9]+)/$',
+        company_admin_required(profile.business_profile.views.AdminCollaboratorEditFormView.as_view()),
+        name='business-profile-admin-collaborator-edit'
+    ),
+    url(
+        r'^business-profile/admin/disconnect/$',
+        company_admin_required(profile.business_profile.views.AdminDisconnectFormView.as_view()),
+        name='business-profile-admin-disconnect'
+    ),
+    url(
+        r'^business-profile/admin/transfer/$',
+        company_admin_required(profile.business_profile.views.AdminInviteNewAdminFormView.as_view()),
+        name='business-profile-admin-invite-administrator'
+    ),
+    url(
+        r'^business-profile/admin/invite/$',
+        company_admin_required(profile.business_profile.views.AdminInviteCollaboratorFormView.as_view()),
+        name='business-profile-admin-invite-collaborator'
+    ),
+    url(
+        r'^business-profile/admin/invite/delete/$',
+        company_admin_required(profile.business_profile.views.AdminInviteCollaboratorDeleteFormView.as_view()),
+        name='business-profile-collaboration-invite-delete'
+    ),
+    url(
         r'^business-profile/social-links/$',
         company_required(profile.business_profile.views.SocialLinksFormView.as_view()),
         name='business-profile-social'
@@ -332,48 +356,6 @@ urlpatterns = [
     ),
 ]
 
-
-if settings.FEATURE_FLAGS['NEW_PROFILE_ADMIN_ON']:
-    urlpatterns += [
-        url(
-            r'^business-profile/admin/$',
-            company_required(profile.business_profile.views.AdminCollaboratorsListView.as_view()),
-            name='business-profile-admin-tools'
-        ),
-        url(
-            r'^business-profile/admin/collaborator/(?P<sso_id>[0-9]+)/$',
-            company_admin_required(profile.business_profile.views.AdminCollaboratorEditFormView.as_view()),
-            name='business-profile-admin-collaborator-edit'
-        ),
-        url(
-            r'^business-profile/admin/disconnect/$',
-            company_required(profile.business_profile.views.AdminDisconnectFormView.as_view()),
-            name='business-profile-admin-disconnect'
-        ),
-        url(
-            r'^business-profile/admin/transfer/$',
-            company_admin_required(profile.business_profile.views.AdminInviteNewAdminFormView.as_view()),
-            name='business-profile-admin-invite-administrator'
-        ),
-        url(
-            r'^business-profile/admin/invite/$',
-            company_admin_required(profile.business_profile.views.AdminInviteCollaboratorFormView.as_view()),
-            name='business-profile-admin-invite-collaborator'
-        ),
-        url(
-            r'^business-profile/admin/invite/delete/$',
-            company_admin_required(profile.business_profile.views.AdminInviteCollaboratorDeleteFormView.as_view()),
-            name='business-profile-collaboration-invite-delete'
-        ),
-    ]
-else:
-    urlpatterns += [
-        url(
-            r'^business-profile/admin/$',
-            company_required(profile.business_profile.views.AdminToolsView.as_view()),
-            name='business-profile-admin-tools'
-        ),
-    ]
 
 urlpatterns = [
     url(

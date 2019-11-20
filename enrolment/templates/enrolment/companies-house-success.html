@@ -15,13 +15,17 @@
       </div>
   </section>
   <section class="container" id="next-container">
-    <h2 class="heading-medium margin-0">Next steps</h2>
-      <p>You can now</p>
-      <ul class="list list-bullet">
-        <li><a href="{% url 'business-profile' %}" id="next-fab">publish your business profile</a> to promote your business to overseas buyers</li>
-        <li><a href="{{ services_urls.exopps }}" id="next-exopps">find export opportunities</a> from our list of current sales leads</li>
-        <li><a href="{{ services_urls.soo }}" id="next-soo">sell online overseas</a> by finding the right market for your goods</li>
-        <li><a href="{{ services_urls.events }}" id="next-events">find events and visits</a> that can help promote your business</li>
-      </ul>
+    <h2 class="heading-medium margin-0">What you can do next</h2>
+    <p>Now you are registered you can:</p>
+    <ul class="list list-bullet">
+      <li><a href="{% url 'business-profile' %}" id="next-fab">publish your company profile</a> so overseas buyers can find you and together you can build new business relationships</li>
+      <li><a href="{{ services_urls.exopps }}" id="next-exopps">explore export opportunities provided by DIT</a> to find out what goods and services are in demand and how you can make the most of the market</li>
+      <li><a href="{{ services_urls.soo }}" id="next-events">find the right digital marketplace for your products</a> so you can sell online overseas and reach the best markets for your business whenever they are</li>
+    </ul>
+    {% if ingress_url %}
+      <p>Continue to <a href="{{ ingress_url }}">great.gov.uk</a></p>
+    {% else %}
+      <p>Return to the <a href="{% url 'index' %}">home page</p>
+    {% endif %}
   </section>
 {% endblock %}
